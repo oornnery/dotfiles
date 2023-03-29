@@ -7,38 +7,38 @@ line_left="==========>"
 
 # Update keys
 echo $line_left "Atualizando chaves"
-#sudo pacman-key --init && sudo pacman-key --populate && sudo pacman -Sy archlinux-keyring python3 python-pipx neofetch
+sudo pacman-key --init && sudo pacman-key --populate && sudo pacman -Sy archlinux-keyring
 
 # Install packages
 echo $line_left "Instalando alguns pacotes"
-#sudo pacman -S --needed base-devel
-#sudo pacman -S unzip htop git alacritty zsh wget lxappearance  nvim lutris
+sudo pacman -S --needed base-devel
+sudo pacman -S unzip htop git alacritty zsh wget lxappearance nvim lutris python3 python-pipx neofetch rofi polybar feh dusnt rxvt-unicode
 
 echo $line_left "Instalando display manager"
-#sudo pacman -S lightdm lightdm-gtk-greeter --needed
+sudo pacman -S lightdm lightdm-gtk-greeter --needed
 echo $line_left "Habilitando Lightdm"
-#sudo systemctl enable lightdm
+sudo systemctl enable lightdm
 # /etc/lightdm/lightdm-gtk-greeter.conf copy file
 
 echo $line_left "Instalando pacotes para o i3"
 #sudo pacman -S rofi polybar feh dusnt rxvt-unicode
 
 echo $line_left "Instalando Themas"
-#sudo pacman -S arc-gtk-theme papirus-icon-theme
+sudo pacman -S arc-gtk-theme papirus-icon-theme
 
 echo $line_left "Instalando fontes"
-#sudo pacman -S ttf-roboto-mono-nerd ttf-jetbrains-mono-nerd ttf-firacode-nerd 
+sudo pacman -S ttf-roboto-mono-nerd ttf-jetbrains-mono-nerd ttf-firacode-nerd 
 
 echo $line_left "Instalando Paru"
-#mkdir git && cd git && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si && cd
+mkdir git && cd git && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si && cd
 
 # Instalando pacotes do AUR/Paru
 
 paru -S microsoft-edge-dev-bin visual-studio-code-bin trilium-bin teamviewer
-# systemctl start teamviewerd.service
+systemctl start teamviewerd.service
 
 # Configurando ZSH
-# sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 
 # Lutris
 #sudo pacman -S --needed wine-staging giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls \
