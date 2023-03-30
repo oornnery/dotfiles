@@ -89,7 +89,7 @@ call_taks "Deseja instalar os pacotes essenciais?" install_essential_packages
 # # /etc/lightdm/lightdm-gtk-greeter.conf copy file
 
 # echo $line_left "Instalando pacotes para o i3"
-# #sudo pacman -S i3-wm lxappearance rofi polybar feh dusnt 
+# #sudo pacman -S i3-wm lxappearance rofi polybar feh dusnt redshift
 
 # echo $line_left "Instalando Themas"
 # sudo pacman -S arc-gtk-theme papirus-icon-theme
