@@ -27,6 +27,12 @@ call_taks() {
     fi
 }
 
+write() {
+    if [ "$1" = "title"]
+    then 
+        echo "\e[32m$data :: ===> $1.\e[0m\n"
+}
+
 update_key() {
     echo -e "\e[34m Atualizando chaves.\e[0m\n"
     sudo pacman-key --init --populate && sudo pacman -Sy archlinux-keyring
@@ -39,9 +45,19 @@ update_base_devel() {
 
 install_essential_packages() {
     echo -e "\e[34m$date :: ===> Instalando pacotes essenciais.\e[0m\n"
-    sudo pacman -S unzip htop git alacritty zsh wget nvim neofetch python3 python-pipx obsidian discord
+    sudo pacman -S unzip htop git alacritty zsh wget neovim neofetch python3 python-pipx obsidian discord
+
+    echo -e "\e[34m$date :: ===> Instalando OhMyZsh.\e[0m\n"
     sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
     
+    echo -e "\e[34m$date :: ===> Configurando ambiente Git.\e[0m\n"
+    echo -e "\e[32m$date :: ===> Informe seu nome:\e[0m\n"
+    read name
+    git config --global user.name "$name"
+    echo -e "\e[32m$date :: ===> Informe seu e-mail:\e[0m\n"
+    read email
+    git config --global user.email $email
+
     echo -e "\n\e[34m$date :: ===> Instalando AUR/Paru.\e[0m\n"
     mkdir git && cd git && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si && cd
 
@@ -61,6 +77,9 @@ call_taks "Deseja atualizar o pacote base-devel?" update_base_devel
 
 # Instalando pacotes essenciais.
 call_taks "Deseja instalar os pacotes essenciais?" install_essential_packages
+
+
+
 
 
 
