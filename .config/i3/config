@@ -1,6 +1,6 @@
 # ----------> Themes <----------
 # Set theme
-include $HOME/.config/i3/themes/everest
+include $HOME/.config/i3/themes/catpuccin-mocha
 
 
 
@@ -166,15 +166,16 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 
 # exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Shift+e exec "~/.config/rofi/scripts/powermenu.sh"
 
 # start dmenu (a program launcher)
 bindsym $mod+d exec --no-startup-id rofi -show drun
 
 # Show open window
-bindsym $alt+tab exec --no-startup-id rofi -show window
+bindsym $mod+Tab exec --no-startup-id rofi -show window
 
-
+# Show rofi bluetooth
+bindsym $mod+b exec --no-startup-id rofi-bluetooth
 
 # ----------> Start as system <----------
 # Start XDG, Dex, xss-lock, i3lock, nm-applet
@@ -188,25 +189,36 @@ exec --no-startup-id nm-applet
 exec --no-startup-id sh $HOME/.config/scripts/set-vga-primary.sh
 
 # Set wallpaper
-exec --no-startup-id feh --bg-fill $HOME/Imagens/wallpaper/Mount-everest-peak-nepal-images.jpg
+#exec --no-startup-id feh --bg-fill $HOME/Wallpapers/wp2839596.jpg
+exec_always feh --bg-fill --randomize ~/Images/Wallpaper/*
+
 
 # Polybar
-exec_always --no-startup-id $HOME/.config/polybar/launch.sh --grayblocks
+exec_always --no-startup-id $HOME/.config/polybar/two-launch.sh
 
 # Redshift
-exec --no-startup-id redshift -l manual
+exec --no-startup-id redshift -l -P manual
 
 # Ajusted resolution
 exec --no-startup-id python3 $HOME/.config/scripts/update-resolution.py
 
+# Start picom
+
+# Start blueman 
+#exec --no-startup-id blueman
+
+# 
+
+### Autostart
+exec_always autotiling-rs
 
 # ----------> Configuring borders and gaps <----------
 
 # Borders
-for_window [class=".*"] border pixel 2 
+for_window [class=".*"] border pixel 2
 smart_borders on
 smart_gaps on
 
 # Gaps
-gaps inner 5
-gaps outer 5
+gaps inner 6
+gaps outer 2
