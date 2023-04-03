@@ -1,6 +1,6 @@
 # ----------> Themes <----------
 # Set theme
-include $HOME/.config/i3/themes/catpuccin-mocha
+include $HOME/.config/i3/themes/everest
 
 
 

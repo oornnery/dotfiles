@@ -16,7 +16,7 @@ options="$option0\n$option1\n$option2\n$option3\n$option4\n$option5\n$option6\n$
 chosen="$(echo -e "$options" | rofi -lines 8 -dmenu -p "Power Menu:")"
 case $chosen in
     $option0)
-        i3lock;;
+        i3lock -i ~/Images/Wallpaper/46710-3840x2160-desktop-4k-rick-and-morty-wallpaper-photo.jpg;;
     $option1)
         i3-msg exit;;
     $option2)
