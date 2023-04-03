@@ -15,28 +15,6 @@ font pango:Roboto Mono Nerd 11
 
 
 
-# ----------> Manager Workspaces <----------
-
-# Define names for default workspaces for which we configure key bindings later on.
-# We use variables to avoid repeating the names in multiple places.
-set $ws1 "1"
-set $ws2 "2"
-set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-set $ws9 "9"
-set $ws10 "10"
-
-# ----------> Manager window <----------
-for_window [class="Lutris"] floating enable
-for_window [class="Wine"] floating enable
-for_window [title="League of Legends.*"] floating enable
-
-
-
 # ----------> System Bindkeys <----------
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -102,6 +80,37 @@ bindsym $mod+a focus parent
 # focus the child container
 #bindsym $mod+d focus child
 
+# ----------> Manager Workspaces <----------
+
+# Define names for default workspaces for which we configure key bindings later on.
+# We use variables to avoid repeating the names in multiple places.
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+
+# Set monitor
+set $lm LVDS1
+set $rm VGA1
+
+workspace $ws1 output $lm
+workspace $ws2 output $rm
+workspace $ws3 output $lm
+workspace $ws4 output $rm
+workspace $ws5 output $lm
+workspace $ws6 output $rm
+workspace $ws7 output $lm
+workspace $ws8 output $rm
+workspace $ws9 output $lm
+workspace $ws10 output $rm
+
+
 # switch to workspace
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2
@@ -150,7 +159,19 @@ mode "resize" {
         bindsym Escape mode "default"
         bindsym $mod+r mode "default"
 }
+
 bindsym $mod+r mode "resize"
+
+
+
+# ----------> Manager window <----------
+for_window [class="League of Legends*"] floating enable
+
+
+
+# ----------> Move windows <----------
+#for_window [class""]
+
 
 # ----------> Person Bindkeys <----------
 # start a terminal
@@ -165,6 +186,8 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
+# ----------> Bindkeys Rofi <----------
+
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "~/.config/rofi/scripts/powermenu.sh"
 
@@ -176,6 +199,9 @@ bindsym $mod+Tab exec --no-startup-id rofi -show window
 
 # Show rofi bluetooth
 bindsym $mod+b exec --no-startup-id rofi-bluetooth
+
+# Show rofi screenshot
+bindsym $mod+Shift+s exec --no-startup-id "~/.config/rofi/scripts/screenshot.sh"
 
 # ----------> Start as system <----------
 # Start XDG, Dex, xss-lock, i3lock, nm-applet
@@ -201,6 +227,7 @@ exec --no-startup-id redshift -l -P manual
 
 # Ajusted resolution
 exec --no-startup-id python3 $HOME/.config/scripts/update-resolution.py
+exec --no-startup-id $HOME/.config/scripts/extender_monitor.sh
 
 # Start picom
 
