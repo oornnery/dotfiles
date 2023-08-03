@@ -12,31 +12,25 @@ logging.basicConfig(
     ]
 )
 
-
 def __make_diretory__(path):
-    try:
-        logging.info(f"Trying to creating directory: {path}")
-        Path(path).mkdir(parents=True, exist_ok=True)
-    except Exception as e:
-        logging.error(e)
-    else:
-        logging.info(f"Successfully to created directory: {path}")
+    Path(path).mkdir(parents=True, exist_ok=True)
+
     
 
 
 def directory(path, directories: list[str]) -> list[str]:
     """
-    Create a directory.
-    
+    Create directories at the specified path.
+
     Parameters
     ----------
     path : str
         Path to the directory.
     directories : list[str]
-        List of directories.
+        List of directories to create.
     
     Use
-    -------
+    ---
     directory("~/.config", [
         
         "dir1",
@@ -46,12 +40,15 @@ def directory(path, directories: list[str]) -> list[str]:
         ]
     )
     """
-    if not isinstance(directories, list):
-        raise TypeError("directories must be a list of str")
     
-    for directory in directories:
-        __make_diretory__(Path(path).joinpath(directory))
-
+    try:
+        logging.info(f"Trying to creating directory: {path}")
+        for directory in directories:
+            __make_diretory__(Path(path).joinpath(directory))
+    except Exception as e:
+        logging.error(e)
+    else:
+        logging.info(f"Successfully to created directory: {path}")
 
 if __name__ == "__main__":
     directory(".", [
@@ -69,4 +66,5 @@ if __name__ == "__main__":
         "dir2"
         ]
     )
+    
     
