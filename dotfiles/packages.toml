@@ -1,0 +1,60 @@
+
+[arch] # pacman -Syyu
+
+[arch.system]
+pacman = ["openssh", "wget", "xdg-user-dirs", "firefox", "unzip", "htop", "git", "wget", "neovim", "neofetch", "obsidian", "discord", "power-profiles-daemon", "alacritty", "pavucontrol"]
+aur = [""]
+audio_pacman = ["pulseaudio", "alsa-utils", "alsa-plugins", "pavucontrol"]
+network_pacman = ["networkmanager", "network-manager-applet", "dhcpcd", "iw"]
+bluetooth_pacman = ["bluez", "bluez-utils", "blueman"]
+bluetooth_aur = ["broadcom-bt-firmware", "pulseaudio-bluetooth"]
+systemd = ["bluetooth.service"]
+
+[arch.fonts]
+pacman = []
+aur = ["ttf-roboto-mono-nerd", "ttf-jetbrains-mono-nerd", "ttf-firacode-nerd"]
+
+[arch.themes]
+pacman = ["arc-gtk-theme", "arc-icon-theme", "papirus-icon-theme", "papirus-folders"]
+aur = [""]
+
+[arch.i3] # pacman -Syyu
+xorg = ["xorg-server", "xorg-xinit", "xorg-apps", "mesa"]
+intel = ["xf86-video-intel"]
+nvidia = ["nvidia", "nvidia-utils", "nvidia-settings"]
+amd = ["xf86-video-amdgpu"]
+pacman = ["i3-wm","i3status", "i3blocks", "dmenu", "rofi", "polybar", "picom", "feh", "dunst", "redshift", "lxappearance", "xfce4-settings", "power-profiles-daemon", "lightdm", "lightdm-gtk-greeter", "lightdm-gtk-greeter-settings", "arandr", "alsa-utils", "alacritty"]
+aur = ["autotiling-rs-git"]
+
+[arch.games] 
+pacman = ["lutris"]
+aur = ["heroic-games-launcher-bin", "teamviewer"]
+
+[arch.development]
+pacman = ["github-cli", "python3", "python-pipx", "docker"]
+aur = ["kabmat", "microsoft-edge-dev-bin", "visual-studio-code-bin", "astrovim"]
+systemd = ["docker.service"]
+
+[arch.multimedia]
+pacman = ["vlc", "mpv"]
+aur = ["spotify-adblock-git", "spotify-tui-bin"]
+
+[arch.opcionais]
+pacman = ["zsh", "alacritty"]
+aur = ["microsoft-edge-bin", "teamviewer", "spotify"]
+zsh_aur = ["zsh", "zsh-autosuggestions", "zsh-syntax-highlighting", "zsh-completions", "zsh-history-substring-search", "zsh-theme-powerlevel10k", "zsh-vi-mode", "zsh-git-prompt", "zsh-autop"]
+
+[productivity]
+productivity_pacman = []
+productivity_aur = ["dstask", "kabmat", "notesh", "fuzzynote", "pomo", "taskbook"]
+productivity_pipx = ["shell-genie"]
+
+
+[zsh]
+zsh_pacman = []
+zsh_aur = []
+zsh_plugins = []
+
+[rofi]
+rofi_pacman = []
+rofi_aur = ["rofi-notion"]
