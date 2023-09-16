@@ -30,3 +30,4 @@ cp -r ~/.config dotfiles/backup/$user
 
 # Copiando arquivos de configuração 
 cp -r ./dotfiles/.config ~/.config
+cp ./dotfiles/.zshrc ~/
