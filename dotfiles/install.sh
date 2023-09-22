@@ -5,6 +5,7 @@
 # Set variable
 line_left="===>"
 data=$(date +"%T")
+file_package="dotfiles/packages/base"
 
 
 # Funções
@@ -27,8 +28,31 @@ call_taks() {
     fi
 }
 
-write() {
-    if [ "$1" = "title"]
-    then 
-        echo "\e[32m$data :: ===> $1.\e[0m\n"
+# List to store packages
+package_list=""
+
+# Install packages
+install_packages() {
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^[[:space:]]*$ || "$line" == \#* ]]; then
+            continue
+        else
+            echo "Processing line: $line"
+            # Add your package installation logic here
+            package_list+=" $line"
+        fi
+    done < "$file_package"
+
+    # Install the collected packages
+    if [ -n "$package_list" ]; then
+        echo "Installing packages: $package_list"
+        sudo pacman -Sy $package_list
+    else
+        echo "No packages to install."
+    fi
 }
+
+
+install_packages
+
+
