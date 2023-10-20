@@ -1,4 +1,4 @@
-# System
+
 base
 base-devel
 sudo
@@ -18,7 +18,7 @@ glances
 
 
 
-# Firmware
+
 linux
 linux-firmware
 linux-headers
@@ -28,28 +28,23 @@ wget
 texinfo
 
 
-# multi-media
+-media
 
 gst-libav
-gst-plugin-pipewire
 gst-plugins-bad
 gst-plugins-ugly
 libdvdcss
-pipewire
 
-# Audio
+
 sof-firmware
-wireplumber
-pipewire-alsa
-pipewire-jack
 
-# mesa
+
 mesa
 lib32-mesa
 mesa-utils
 lib32-mesa-utils
 
-# Vulkan
+
 vulkan-intel
 lib32-vulkan-intel
 vulkan-mesa-layers
@@ -57,28 +52,19 @@ lib32-vulkan-mesa-layers
 vulkan-virtio
 lib32-vulkan-virtio
 
-# Input and Video
 xf86-video-intel
 xf86-input-libinput
 xf86-input-synaptics
 xf86-input-vmmouse
 
-# devices usb
 usb_modeswitch
 usbutils
 
-# Graphics
-xorg
-xorg-xdpyinfo
-xorg-server
-xorg-xinit
-xorg-xinput
-xorg-xkill
-xorg-xrandr
 
 
 
-# Bluetooth
+
+
 broadcom-wl-dkms
 b43-fwcutter
 bluez
@@ -88,7 +74,7 @@ bluez-plugins
 bluez-tools
 bluez-utils
 
-# Network
+
 netctl
 dhclient
 dnsmasq
@@ -105,7 +91,7 @@ xl2tpd
 openssh
 firewalld
 
-# Tools
+
 man-db
 man-pages
 unzip
@@ -115,14 +101,14 @@ duf
 neofetch
 git
 
-# Fonts
 
 
-# Development
+
+
 xterm
 
 
-# ZSH
+
 zsh-syntax-highlighting
 zsh-autosuggestions
 zsh-autosuggestions 
@@ -131,10 +117,10 @@ zsh-history-substring-search
 powerline
 
 
-# BASH
+
 bash-completion
 
-# Development
+
 python
 python-pip
 python-pipx
