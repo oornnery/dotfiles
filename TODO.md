@@ -1,101 +1,47 @@
 # TODO
 
-## Scripts
+### Scripts
+    - Bluetooth
+    - Arandr
+    - Menu
 
-- [ ] modulo main
-- [ ] Instalador de pacotes (Recebe uma lista de pacotes)
-- [ ] pacote Base
-- [ ] pacote Fontes
-- [ ] pacote Configurações
-- [ ] pacote I3
-- [ ] pacote Sway
-- [ ] pacote qtile
-- [ ] pacote AwesomeWM
-- [ ] pacote Desenvolvimento
-- [ ] pacote Outros
+### Install packages
+    - base
+    - utils
+    - dev
+    - games
+    - devices
+    - others
+    - qtile
+    - sway
+    - i3wm
+    - zsh
 
-## Configurações (.config)
+### backup and export
+    - ~/.config/alacritty
+    - ~/.config/dunst
+    - ~/.config/htop
+    - ~/.config/i3
+    - ~/.config/i3blocks
+    - ~/.config/neofetch
+    - ~/.config/polybar
+    - ~/.config/qtile
+    - ~/.config/redshift
+    - ~/.config/rofi
+    - ~/.config/sway
+    - ~/.config/swaylock
+    - ~/.config/thunar
+    - ~/.config/waybar
+    - ~/.config/wofi
+    - ~/.oh-my-zsh/*
+    - ~/.screenlayout/*
+    - ~/.scripts/*
+    - ~/.wallpaper/*
+    - ~/.zsh/*
+    - ~/.zsh/plugins
+    - ~/.lightdm/*
+    - ~/.bashrc
+    - ~/.p10k.zsh
+    - ~/.vimrc
+    - ~/.zshrc
 
-- [ ] Organizar arvore de diretorios.
-
-```bash
-...
-```
-
-### I3Wm
-
-- [ ] Estruturar dir tree
-
-```bash
-...
-```
-
-- [ ] Temas
-- [ ] Keys
-- [ ] Workspace
-- [ ] Layout
-- [ ] Bars
-
-### Sway
-
-- [ ] Estruturar dir tree
-
-```bash
-...
-```
-
-- [ ] Temas
-- [ ] Keys
-- [ ] Workspace
-- [ ] Layout
-- [ ] Bars
-
-### qtile
-
-- [ ] Estruturar dir tree
-
-```bash
-...
-```
-
-- [ ] Temas
-- [ ] Keys
-- [ ] Workspace
-- [ ] Layout
-- [ ] Bars
-
-### AwesomeWM
-
-- [ ] Estruturar dir tree
-
-```bash
-...
-```
-
-- [ ] Temas
-- [ ] Keys
-- [ ] Workspace
-- [ ] Layout
-- [ ] Bars
-
-### Dunst
-
-- [ ] Estruturar dir tree
-
-```bash
-...
-```
-
-- [ ] Temas
-- [ ] Scripts
-
-### Rofi/Wofi
-
-- [ ] Estruturar dir tree
-
-```bash
-...
-```
-
-- [ ] Temas
-- [ ] Scripts
