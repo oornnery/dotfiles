@@ -1,0 +1,80 @@
+# Base
+thunar
+zsh
+vivaldi
+wget2
+neofetch
+unzip
+power-profiles-daemon
+ufw
+
+# fontes
+ttf-fira-code
+ttf-hack-nerd
+
+
+
+# Outros
+anki
+marktext
+qutebrowser
+flatpak
+
+
+# games
+lutris
+
+# Dev
+git
+githunb-cli
+docker
+docker-compose
+
+# Tiling
+polkit-kde-agent # KDE polkit
+picom # Compositor
+dunst
+volumeicon
+pavucontrol
+feh
+
+
+# i3 / sway
+i3
+sway
+swaybg
+swayidle
+swaylock
+python-i3ipc # i3ipc controler
+
+# X11
+arandr
+
+# wayland
+wdisplays
+wofi
+waybar
+
+
+# qtile
+qtile
+python-psutil
+python-pyxdg
+
+### AUR
+
+# Tiling qtile
+qtile-extras
+
+
+# Games
+heroic-games-launcher
+
+# dev
+lvim
+
+# Bluetooth
+bluez
+bluez-utils
+bluez-lib
+blueberry
