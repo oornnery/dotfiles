@@ -1,80 +1,113 @@
-# Base
-thunar
+# pacotes base
 zsh
-vivaldi
-wget2
-neofetch
-unzip
-power-profiles-daemon
+vim
+neovim
+alacritty
+wget
+gwget
 ufw
-
+gufw
+iw
+git
+github-cli
+lsd
+# Tools
+power-profiles-daemon
+flatpak
+thunar
+unzip
+neofetch
+htop
+yadm
+yad
+nmap
+polkit
+polkit-kde-agent
+volumeicon
+pavucontrol
+cmatrix
+lolcat
+# Browser
+vivaldi
+qutebrowser
+firefox
 # fontes
 ttf-fira-code
 ttf-hack-nerd
-
-
-
-# Outros
-anki
+# Text
 marktext
-qutebrowser
-flatpak
-
-
-# games
-lutris
-
-# Dev
-git
-githunb-cli
+obsidian
+# image and video
+feh
+gimp
+kdenlive
+audacity
+mpv
+# Docker
 docker
 docker-compose
-
-# Tiling
-polkit-kde-agent # KDE polkit
-picom # Compositor
-dunst
-volumeicon
-pavucontrol
-feh
-
-
-# i3 / sway
-i3
+# Xorg
+xorg-xclipboard
+rofi
+picom
+# Wayland
+wofi
+waybar
+xclip
+wl-clipboard
+wf-recorder
+# hyprland
+hyprland
+hyprlang
+hyprpaper
+xdg-desktop-portal-hyprland
+# Sway
 sway
 swaybg
-swayidle
 swaylock
-python-i3ipc # i3ipc controler
-
+swayidle
+swayimg
+# Qtile
+qtile
+dunst
+picom
+# games
+lutris
 # X11
 arandr
-
 # wayland
 wdisplays
 wofi
 waybar
-
-
-# qtile
-qtile
+# Python
 python-psutil
 python-pyxdg
+python-iwlib
+python-pipx
+python-psutil
+python-i3ipc
 
 ### AUR
-
-# Tiling qtile
-qtile-extras
-
-
-# Games
-heroic-games-launcher
-
+paru
+# xorg
+autorandr
 # dev
 lvim
-
-# Bluetooth
-bluez
-bluez-utils
-bluez-lib
-blueberry
+# Wayland
+wifi4wofi
+# Sway
+swayfx
+swaync
+# Tiling qtile
+qtile-extras
+# Games
+heroic-games-launcher
+# Rofi / Wofi
+emoji
+calc
+pass
+power-menu
+screenshot
+wifi
+autorandr
+bluetooth
