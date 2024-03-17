@@ -1,0 +1,8 @@
+poetry
+rich-cli
+dolphie
+git+https://github.com/darrenburns/elia
+frogmouth
+tiptop
+# Others
+recoverpy
