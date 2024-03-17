@@ -1,0 +1,12 @@
+xorg
+xorg-server
+xorg-apps
+xorg-drivers
+xorg-xkill
+xorg-xinit
+xorg-xclipboard
+rofi
+picom
+dunst
+arandr
+
