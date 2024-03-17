@@ -132,8 +132,8 @@ esac
 # clear
 alias cls="clear"
 # ls -la
-alias lsa=ls -la
-
-alias code="flatpak run com.visualstudio.code"
+alias ls="lsd"
+alias lsa="lsd -la"
+alias lv="lvim"
 
 

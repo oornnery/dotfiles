@@ -1,16 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+banner() {
 
-packages_base=$(cat dotfiles/packages_.txt)
+    echo '#----------------------------------------------------------------------------------------------------------#'
+    echo '#  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄        ▄  ▄▄        ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄         ▄  #'
+    echo '# ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░▌      ▐░▌▐░░▌      ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌ #'
+    echo '# ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀█░▌▐░▌░▌     ▐░▌▐░▌░▌     ▐░▌▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░▌       ▐░▌ #'
+    echo '# ▐░▌       ▐░▌▐░▌       ▐░▌▐░▌       ▐░▌▐░▌▐░▌    ▐░▌▐░▌▐░▌    ▐░▌▐░▌          ▐░▌       ▐░▌▐░▌       ▐░▌ #'
+    echo '# ▐░▌       ▐░▌▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄█░▌▐░▌ ▐░▌   ▐░▌▐░▌ ▐░▌   ▐░▌▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄█░▌ #'
+    echo '# ▐░▌       ▐░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░▌  ▐░▌  ▐░▌▐░▌  ▐░▌  ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌ #'
+    echo '# ▐░▌       ▐░▌▐░▌       ▐░▌▐░█▀▀▀▀█░█▀▀ ▐░▌   ▐░▌ ▐░▌▐░▌   ▐░▌ ▐░▌▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀█░█▀▀  ▀▀▀▀█░█▀▀▀▀  #'
+    echo '# ▐░▌       ▐░▌▐░▌       ▐░▌▐░▌     ▐░▌  ▐░▌    ▐░▌▐░▌▐░▌    ▐░▌▐░▌▐░▌          ▐░▌     ▐░▌       ▐░▌      #'
+    echo '# ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄█░▌▐░▌      ▐░▌ ▐░▌     ▐░▐░▌▐░▌     ▐░▐░▌▐░█▄▄▄▄▄▄▄▄▄ ▐░▌      ▐░▌      ▐░▌      #'
+    echo '# ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░▌      ▐░░▌▐░▌      ▐░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌     ▐░▌      #'
+    echo '#  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀  ▀        ▀▀  ▀        ▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀       ▀       #'
+    echo '#----------------------------------------------------------------------------------------------------------#'
+    echo  '# Github : oornnerynho #'
+    echo  '# Twitter: oornnerynho #'
+    echo  '# Reddit : oornnerynho #'
+    echo ''
+    echo ''
+}
+
+move_file(path) {
+    
+}
+
+packages_base=$(cat pkg-files/base)
 packages_dev=$(cat dotfiles/packages_dev.txt)
 packages_extras=$(cat dotfiles/packages_extras.txt)
 packages_scripts=$(cat dotfiles/packages_scripts.txt)
 user=$(whoami)
 
+echo "
+=================================
+=         Setup Pacman          =
+=================================
+
+"
+
+sudo rm /etc/pacman.conf
+sudo cp .config/pacman.conf /etc/pacman.conf
+
+
 # Fazer backup
 # Copiar arquivos de configuração
 cp $HOME/.bashrc $HOME/.bashrc.bak
-cp $HOME/.bash_history $HOME/.bash_history.bak
 cp $HOME/.zshrc $HOME/.zshrc.bak
 cp $HOME/.zsh_history $HOME/.zsh_history.bak
 cp $HOME/.p10k.zsh $HOME/.p10k.zsh.bak
