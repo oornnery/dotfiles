@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "dotfiles"
+version = "0.1.0"
+description = "My dotfiles scripts"
+authors = ["Fabio Souza <fabiohcsouza@outlook.com.br>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+rich = "^13.7.1"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

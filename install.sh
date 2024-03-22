@@ -22,9 +22,25 @@ banner() {
     echo ''
 }
 
-move_file(path) {
+move_file() {
     
 }
+
+install_package() {
+    local path=$1
+
+    # Verifique se o arquivo existe
+    if [ ! -f "$path" ]; then
+        echo "file $path not found!"
+        return 1
+    fi
+
+    while IFS= read -r package; do
+        sudo pacman -S "$path"
+    done
+}
+
+
 
 packages_base=$(cat pkg-files/base)
 packages_dev=$(cat dotfiles/packages_dev.txt)
