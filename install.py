@@ -396,15 +396,16 @@ with Installer(mountpoint, disk_config, disk_encryption=disk_encryption, kernels
 
 	run_custom_user_commands(custom_commands, installation)
 	
-	archinstall
-
 	# install packages using pipx
 	for p in pipx_packages:
 		installation.run_command(f"pipx install {p}")
-	installation.set_mirrors(mirror_config)
 
+	installation.genfstab()
 	# Optionally, install a profile of choice.
 	# In this case, we install a minimal profile that is empty
+
+
+	debug(f"Disk states after installing: {disk.disk_layouts()}")
 
 
 
