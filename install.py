@@ -1,24 +1,6 @@
 import argparse
 from pathlib import Path
 
-from archinstall import (
-    Installer,
-    GfxDriver,
-    GfxPackage,
-    SysInfo,
-    disk,
-    models,
-    locale,
-    mirrors,
-    networking,
-    profile,
-    info,
-    debug,
-    run_custom_user_commands
-)
-
-from scripts.profile import MyCustomProfile
-
 parser = argparse.ArgumentParser(description='Arch install script')
 
 # Adicione os argumentos necessários
@@ -35,6 +17,25 @@ var_device_path = args.device_path
 var_username = args.username
 var_password = args.password
 var_pass_crypt = args.pass_crypt
+
+from archinstall import (
+    Installer,
+    GfxDriver,
+    SysInfo,
+    disk,
+    models,
+    locale,
+    mirrors,
+    networking,
+    profile,
+    info,
+    debug,
+    run_custom_user_commands
+)
+from archinstall.lib.hardware import GfxPackage
+
+from scripts.profile import MyCustomProfile
+
 
 # Log various information about hardware before starting the installation. This might assist in troubleshooting
 debug(f"Hardware model detected: {SysInfo.sys_vendor()} {SysInfo.product_name()}; UEFI mode: {SysInfo.has_uefi()}")
