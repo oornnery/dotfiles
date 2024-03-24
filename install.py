@@ -30,11 +30,11 @@ from archinstall import (
     profile,
     info,
     debug,
-    run_custom_user_commands
+    run_custom_user_commands,
+    default_profiles
 )
 from archinstall.lib.hardware import GfxPackage
 
-from scripts.profile import MyCustomProfile
 
 
 # Log various information about hardware before starting the installation. This might assist in troubleshooting
@@ -178,10 +178,17 @@ gfx_driver = GfxDriver.AmdOpenSource
 users = [
     models.User(var_username, var_password, True),
 ]
-
+# Default no profile
+# 'vim',
+# 'openssh',
+# 'htop',
+# 'wget',
+# 'iwd',
+# 'wireless_tools',
+# 'wpa_supplicant',
+# 'smartmontools',
+# 'xdg-utils'
 base_packages = [
-    "plasma-meta", "konsole", "kwrite", "dolphin", "ark", "plasma-wayland-session", "egl-wayland",
-    "hyprland", "dunst", "dolphin", "wofi", "xdg-desktop-portal-hyprland", "qt5-wayland", "qt6-wayland",
 	"yad", #A fork of Zenity with many improvements
    	"binutils", #A set of programs to assemble and manipulate binary and object files
 	"usbutils", #USB device related utilities
@@ -192,36 +199,22 @@ base_packages = [
 	"bison", # The GNU general-purpose parser generator
 	"pkgconf", #Package compiler and linker metadata toolkit
 	"which", #A utility to show the full path of commands
-	"ethtool", #Utility for controlling network drivers and hardware	
-	"wpa_supplicant", #A utility providing key negotiation for WPA wireless networks
-	"iw", #nl80211 based CLI configuration utility for wireless devices
- 	"iwd", #Internet Wireless Daemon
 	"networkmanager", #Network connection manager and user applications
-	"network-manager-applet", #Applet for managing network connections
-	"networkmanager-docs", #Network connection manager and user applications (API documentation)
-	"networkmanager-openconnect", #NetworkManager VPN plugin for OpenConnect
+	"networkmanager-docs",
+  	"networkmanager-openconnect", #NetworkManager VPN plugin for OpenConnect
 	"networkmanager-openvpn", #NetworkManager VPN plugin for OpenVPN
-	"openssh", #Premier connectivity tool for remote login with the SSH protocol
-	"dhclient", #A DHCP client
 	"traceroute", #A tool for displaying the route packets take to network host
-	"ntp", #Network Time Protocol reference implementation
 	"bluez", #Daemons for the bluetooth protocol stack
+	"bluez-tools", #Development and debugging utilities for the bluetooth protocol stack
 	"bluez-utils", #Development and debugging utilities for the bluetooth protocol stack
- 	"alsa-plugins", #Additional ALSA plugins
-	"alsa-utils", #An alternative implementation of Linux sound support
-	"pulseaudio", #A featureful, general-purpose sound server
-	"pulseaudio-alsa", #ALSA Configuration for PulseAudio
-	"pulseaudio-bluetooth", #Bluetooth support for PulseAudio
-    "pamixer", #Pulseaudio command-line mixer
-	"ffmpeg", #Complete solution to record, convert and stream audio and video
+	"bluez-cups",
+ 	"ffmpeg", #Complete solution to record, convert and stream audio and video
 	"ffmpegthumbnailer", #Lightweight video thumbnailer that can be used by file managers
+	"ffmpegthumbs", #Lightweight video thumbnailer that can be used by file managers
    	"playerctl", #MPRIS command-line controller and library for Spotify, MPD, and others
     "noise-suppression-for-voice", #Noise suppression for voice
     "man-db", #A utility
 	"man-pages", #Linux man pages
-	"bridge-utils", #Utilities for configuring the Linux Ethernet bridge
-	"btrfs-progs", #Btrfs filesystem utilities
-	"cups", #The CUPS Printing System
 	"dialog", #A tool to display dialog boxes from shell scripts
 	"brightnessctl", #A tool to read and control device brightness
  	# Games
@@ -258,8 +251,9 @@ base_packages = [
  	"distrobox", #A simple and lightweight development environment for Linux
 	"libvirt", #API for controlling virtualization
 	"virt-manager", #Desktop user interface for managing virtual machines
+	"virt-install", #Desktop user interface for managing virtual machines
+	"virt-firmware", #Desktop user interface for managing virtual machines
 	"virt-viewer", #A lightweight interface for interacting with the graphical display of virtualized guest OS
-	"qemu", #A generic and open source machine emulator and virtualizer
     # Multimedia
 	"vlc", #Multimedia player for various audio and video formats
 	"mpv", #A free, open source, and cross-platform media player
@@ -268,7 +262,6 @@ base_packages = [
 	"blender", #A fully integrated 3D graphics creation suite
 	"viewnior", #A simple, fast and elegant image viewer program	
 	"gimp", #GNU Image Manipulation Program
-	"simplescreenrecorder", #A feature-rich screen recorder that supports X11 and OpenGL
 	"feh", #A fast and light image viewer
 	"celluloid", #Simple GTK+ frontend for mpv
 	"kdenlive", #A non-linear video editor for GNU/Linux
@@ -276,7 +269,6 @@ base_packages = [
 	"libreoffice-fresh", #LibreOffice Fresh is the stable version with the most recent features
 	"libreoffice-fresh-pt-br", #LibreOffice Fresh Brazilian Portuguese language pack
  	# Editors
-	"marktext", #A simple and elegant markdown editor
 	"code", #Visual Studio Code is a code editor redefined and optimized for building and debugging modern web and cloud applications
 	"obsidian", #A powerful knowledge base that works on top of a local folder of plain text Markdown files
  	# Internet
@@ -316,13 +308,10 @@ base_packages = [
 	"neofetch", #A fast, highly customizable system info script
 ]
 services = [
-	"NetworkManager",
 	"bluetooth",
 	"docker",
 	"libvirtd",
-	"ntp",
 	"ssh",
- 	"iwd",
 ]
 custom_commands = [
 	"cd /home/devel; git clone https://aur.archlinux.org/paru.git",
@@ -341,13 +330,13 @@ pipx_packages = [
 	"toolong",
 	"gitignore",
 ]
-my_profile = MyCustomProfile(
-	name="MyCustomProfile",
-	enabled=True,
-	packages=base_packages,
-	services=services
-	
+my_profile = default_profiles.desktop.DesktopProfile(
+	current_selection=[
+		default_profiles.desktops.kde.KdeProfile(),
+		default_profiles.desktops.hyprland.HyprlandProfile(),
+	]
 )
+
 profile_config = profile.ProfileConfiguration(
     profile=my_profile,
     gfx_driver=gfx_driver,
