@@ -357,8 +357,7 @@ with Installer(mountpoint, disk_config, disk_encryption=disk_encryption, kernels
 			# generate encryption key files for the mounted luks devices
 			installation.generate_key_files()
 	
-	installation.set_mirrors(mirror_config)
-	
+	# installation.set_mirrors(mirror_config)
 	
 	installation.minimal_installation(
 		testing=enable_testing,
@@ -366,7 +365,7 @@ with Installer(mountpoint, disk_config, disk_encryption=disk_encryption, kernels
      	hostname=hostname,
 		locale_config=locale_config,
     )
-	installation.set_mirrors(mirror_config)
+	# installation.set_mirrors(mirror_config)
 	
 	if swap:
 		installation.setup_swap('zram')
