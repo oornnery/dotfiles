@@ -18,7 +18,7 @@ class MyCustomProfile(Profile):
 		packages: List[str] = [],
 		services: List[str] = []
 	):
-		packages.extend(*KdeProfile.packages, *HyprlandProfile.packages)
+		packages.append(*KdeProfile.packages, *HyprlandProfile.packages)
 		super().__init__(
 			name,
 			ProfileType.CustomType,
