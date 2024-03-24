@@ -7,8 +7,8 @@ echo "
 
 "
 
-# sudo rm /etc/pacman.conf
-# sudo cp .config/pacman.conf /etc/pacman.conf
+sudo rm /etc/pacman.conf
+sudo cp dotfiles/.config/pacman.conf /etc/pacman.conf
 
 
 echo "
@@ -19,6 +19,16 @@ echo "
 "
 
 sudo pacman -Syyu --noconfirm
+
+
+echo "
+=================================
+=     Install base packages     =
+=================================
+
+"
+# $(grep -v '^#' pkg-files/base)
+# sudo pacman -S $(grep -v '^#' pkg-files/base)
 
 echo "
 =================================

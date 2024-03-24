@@ -1,11 +1,12 @@
-mesa
 base-devel
+git
+mesa
+dosfstools
 linux-headers
 libx11
 libxft
 libxinerama
 binutils
-dosfstools
 usbutils
 xdg-user-dirs
 autoconf
