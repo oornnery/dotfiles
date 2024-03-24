@@ -357,7 +357,7 @@ with Installer(mountpoint, disk_config, disk_encryption=disk_encryption, kernels
 			# generate encryption key files for the mounted luks devices
 			installation.generate_key_files()
 	
-	installation.set_mirrors(mirror_config)
+	installation.set_mirrors(mirror_config, on_target=True)
 	
 	installation.minimal_installation(
 		testing=enable_testing,
