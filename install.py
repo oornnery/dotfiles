@@ -32,7 +32,7 @@ from archinstall import (
     debug,
     run_custom_user_commands,
 )
-from archinstall.lib.hardware import GfxPackage
+from archinstall.default_profiles.profile import GreeterType
 from archinstall.default_profiles.desktop import DesktopProfile
 from archinstall.default_profiles.desktops.hyprland import HyprlandProfile
 from archinstall.default_profiles.desktops.kde import KdeProfile
@@ -174,7 +174,6 @@ network_config = models.NetworkConfiguration(
 audio_config = models.AudioConfiguration(
 	audio=models.Audio.Pulseaudio
 )
-gfx_packages = GfxPackage.Xf86VideoAmdgpu
 gfx_driver = GfxDriver.AmdOpenSource
 users = [
     models.User(var_username, var_password, True),
@@ -342,7 +341,7 @@ my_profile = DesktopProfile(
 profile_config = profile.ProfileConfiguration(
     profile=my_profile,
     gfx_driver=gfx_driver,
-    gfx_packages=gfx_packages,
+    greeter=GreeterType.Sddm,
 )
 
 
