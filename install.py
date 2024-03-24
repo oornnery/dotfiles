@@ -1,17 +1,23 @@
 import argparse
 from pathlib import Path
 
-from archinstall import Installer
-from archinstall import profile
-from archinstall.default_profiles.minimal import MinimalProfile
-from archinstall.default_profiles.desktops.kde import KdeProfile
-from archinstall.default_profiles.desktops.hyprland import HyprlandProfile
-from archinstall.default_profiles.desktops.qtile import QtileProfile
-from archinstall import disk
-from archinstall import models
-from archinstall.lib.locale import LocaleConfiguration
-from archinstall.lib.models import Bootloader
-from archinstall.lib.mirrors import MirrorConfiguration
+from archinstall import (
+    Installer,
+    GfxDriver,
+    GfxPackage,
+    SysInfo,
+    disk,
+    models,
+    locale,
+    mirrors,
+    networking,
+    profile,
+    info,
+    debug,
+    run_custom_user_commands
+)
+
+from scripts.profile import MyCustomProfile
 
 parser = argparse.ArgumentParser(description='Arch install script')
 
@@ -30,9 +36,18 @@ var_username = args.username
 var_password = args.password
 var_pass_crypt = args.pass_crypt
 
+# Log various information about hardware before starting the installation. This might assist in troubleshooting
+debug(f"Hardware model detected: {SysInfo.sys_vendor()} {SysInfo.product_name()}; UEFI mode: {SysInfo.has_uefi()}")
+debug(f"Processor model detected: {SysInfo.cpu_model()}")
+debug(f"Memory statistics: {SysInfo.mem_available()} available out of {SysInfo.mem_total()} total installed")
+debug(f"Virtualization detected: {SysInfo.virtualization()}; is VM: {SysInfo.is_vm()}")
+debug(f"Graphics devices detected: {SysInfo._graphics_devices().keys()}")
+
+# For support reasons, we'll log the disk layout pre installation to match against post-installation layout
+debug(f"Disk states before installing: {disk.disk_layouts()}")
 
 # we're creating a new ext4 filesystem installation
-fs_type = disk.FilesystemType('btrfs')
+filesystem_type = disk.FilesystemType.Btrfs
 device_path = Path(var_device_path or '/dev/nvme0n1')
 
 # get the physical disk device
@@ -44,58 +59,62 @@ if not device:
 # create a new modification for the specific device
 device_modification = disk.DeviceModification(device, wipe=True)
 
+# sector size of the device
+sector_size = device.device_info.sector_size
 
-# create a new boot partition
+# check if we're using GPT or MBR
+using_gpt = SysInfo.has_uefi()
+boot_partition_flags = [disk.PartitionFlag.Boot]
+# configuration to GPT partition table
+if using_gpt:
+	start = disk.Size(1, disk.Unit.MiB, sector_size)
+	size = disk.Size(1024, disk.Unit.MiB, sector_size)
+	boot_partition_flags.append(disk.PartitionFlag.ESP)
+else:
+	start = disk.Size(3, disk.Unit.MiB, sector_size)
+	size = disk.Size(203, disk.Unit.MiB, sector_size)
+
+# boot partition
 boot_partition = disk.PartitionModification(
 	status=disk.ModificationStatus.Create,
 	type=disk.PartitionType.Primary,
-	start=disk.Size(1, disk.Unit.MiB, device.device_info.sector_size),
-	length=disk.Size(1024, disk.Unit.MiB, device.device_info.sector_size),
-	fs_type=disk.FilesystemType.Fat32,
+	start=start,
+	length=size,
 	mountpoint=Path('/boot'),
-	flags=[disk.PartitionFlag.Boot, disk.PartitionFlag.ESP],
+	fs_type=disk.FilesystemType.Fat32,
+	flags=boot_partition_flags
 )
 device_modification.add_partition(boot_partition)
 
-start_root = boot_partition.length
-length_root = device.device_info.total_size - start_root
 
-# create a new root partition
+align_buffer = disk.Size(1, disk.Unit.MiB, sector_size)
+
+# root partition with subvolumes
+root_start = boot_partition.start + boot_partition.length
+root_length = device.device_info.total_size - root_start
+
+
+# create a default structure for the root partition
+# Using Btrfs with subvolumes for @home, @log, @pkg and @.snapshots
+# https://btrfs.wiki.kernel.org/index.php/FAQ
+# https://unix.stackexchange.com/questions/246976/btrfs-subvolume-uuid-clash
+# https://github.com/classy-giraffe/easy-arch/blob/main/easy-arch.sh
+subvolumes = [
+	disk.SubvolumeModification(Path('@'), Path('/')),
+	disk.SubvolumeModification(Path('@home'), Path('/home')),
+	disk.SubvolumeModification(Path('@log'), Path('/var/log')),
+	disk.SubvolumeModification(Path('@pkg'), Path('/var/cache/pacman/pkg')),
+	disk.SubvolumeModification(Path('@.snapshots'), Path('/.snapshots'))
+]
 root_partition = disk.PartitionModification(
 	status=disk.ModificationStatus.Create,
-	type=disk.PartitionType.Primary,	
-	start=start_root,
-	length=length_root,
-	fs_type=fs_type,
-	mountpoint=Path('/'),
-	mount_options=["compress=zstd"],
-	btrfs_subvols=[
-		disk.device_model.SubvolumeModification(
-			name='@home',
-			mountpoint=Path('/home'),
-			compress=False,
-			nodatacow=False,
-		),
-		disk.device_model.SubvolumeModification(
-			name='@log',
-			mountpoint=Path('/var/log'),
-			compress=False,
-			nodatacow=False,
-		),
-		disk.device_model.SubvolumeModification(
-			name='@pkg',
-			mountpoint=Path('/var/cache/pacman/pkg'),
-			compress=False,
-			nodatacow=False,
-		),
-		disk.device_model.SubvolumeModification(
-			name='@.snapshots',
-			mountpoint=Path('/.snapshots'),
-			compress=False,
-			nodatacow=False,
-		),
-	]
-	
+	type=disk.PartitionType.Primary,
+	start=root_start,
+	length=root_length,
+	mountpoint=None,
+	fs_type=filesystem_type,
+	mount_options=['compress=zstd'],
+ 	btrfs_subvols=subvolumes,
 )
 
 device_modification.add_partition(root_partition)
@@ -121,11 +140,44 @@ fs_handler = disk.FilesystemHandler(disk_config, disk_encryption)
 fs_handler.perform_filesystem_operations(show_countdown=False)
 
 mountpoint = Path('/tmp')
-locale_config = LocaleConfiguration(
+bootloader = models.Bootloader.Systemd
+kernels = [
+	"linux",
+	"linux-hardened",
+	"linux-lts"
+]
+enable_testing = False
+enable_multilib = True
+swap = False
+hostname = "archlinux"
+locale_config = locale.LocaleConfiguration(
 	kb_layout="us",
 	sys_enc="UTF-8",
 	sys_lang="en_US"
 )
+timezone = 'America/Sao_Paulo'
+mirror_config = mirrors.MirrorConfiguration(mirror_regions={
+		"Brazil": [
+			"https://mirror.ufscar.br/archlinux/$repo/os/$arch",
+			"http://mirror.ufscar.br/archlinux/$repo/os/$arch",
+			"http://mirror.ufam.edu.br/archlinux/$repo/os/$arch",
+			"http://linorg.usp.br/archlinux/$repo/os/$arch",
+			"http://archlinux.c3sl.ufpr.br/$repo/os/$arch"
+		]
+    }
+)
+network_config = models.NetworkConfiguration(
+	type=models.NicType.NM
+)
+audio_config = models.AudioConfiguration(
+	audio=models.Audio.Pulseaudio
+)
+gfx_packages = GfxPackage.Xf86VideoAmdgpu
+gfx_driver = GfxDriver.AmdOpenSource
+users = [
+    models.User(var_username, var_password, True),
+]
+
 base_packages = [
 	"yad", #A fork of Zenity with many improvements
    	"binutils", #A set of programs to assemble and manipulate binary and object files
@@ -260,18 +312,6 @@ base_packages = [
 	"mc", #Midnight Commander is a text-based file manager
 	"neofetch", #A fast, highly customizable system info script
 ]
-bootloader = Bootloader.Systemd	
-timezone = 'America/Sao_Paulo'
-mirror_config = MirrorConfiguration(mirror_regions={
-		"Brazil": [
-			"https://mirror.ufscar.br/archlinux/$repo/os/$arch",
-			"http://mirror.ufscar.br/archlinux/$repo/os/$arch",
-			"http://mirror.ufam.edu.br/archlinux/$repo/os/$arch",
-			"http://linorg.usp.br/archlinux/$repo/os/$arch",
-			"http://archlinux.c3sl.ufpr.br/$repo/os/$arch"
-		]
-    }
-)
 services = [
 	"NetworkManager",
 	"bluetooth",
@@ -281,7 +321,7 @@ services = [
 	"ssh",
  	"iwd",
 ]
-custom_command = [
+custom_commands = [
 	"cd /home/devel; git clone https://aur.archlinux.org/paru.git",
 	"chown -R devel:devel /home/devel/paru",
 	"usermod -aG docker devel",
@@ -298,49 +338,80 @@ pipx_packages = [
 	"toolong",
 	"gitignore",
 ]
+my_profile = MyCustomProfile(
+	name="MyCustomProfile",
+	enabled=True,
+	packages=base_packages,
+	services=services
+	
+)
+profile_config = profile.ProfileConfiguration(
+    profile=my_profile,
+    gfx_driver=gfx_driver,
+    gfx_packages=gfx_packages,
+)
 
 
-with Installer(
-	mountpoint,
-	disk_config,
-	disk_encryption=disk_encryption,
-	kernels=[
-        "linux",
-        "linux-hardened",
-        "linux-lts"
-    ]
-) as installation:
-	installation.mount_ordered_layout()
+with Installer(mountpoint, disk_config, disk_encryption=disk_encryption, kernels=kernels) as installation:
+	# Mount all the drives to the desired mountpoint
+	if disk_config.config_type != disk.DiskLayoutType.Pre_mount:
+		installation.mount_ordered_layout()
+
+	installation.sanity_check()
+
+	if disk_config.config_type != disk.DiskLayoutType.Pre_mount:
+		if disk_encryption and disk_encryption.encryption_type != disk.EncryptionType.NoEncryption:
+			# generate encryption key files for the mounted luks devices
+			installation.generate_key_files()
+	
+	installation.set_mirrors(mirror_config)
+	
 	installation.minimal_installation(
-		multilib=True,
-     	hostname='archlinux',
+		testing=enable_testing,
+		multilib=enable_multilib,
+     	hostname=hostname,
 		locale_config=locale_config,
     )
-	installation.pacman.run(['--noconfirm', '-S'] + base_packages)
+	
+	if swap:
+		installation.setup_swap('zram')
 	# self.pacman.strap('iwd')
 	# self.enable_service('iwd')
+	
+	if bootloader == models.Bootloader.Grub and SysInfo.has_uefi():
+		installation.add_additional_packages("grub")
 	installation.add_bootloader(bootloader)
+
+	installation.copy_iso_network_config(enable_services=True)
+	
+	network_config.install_network_config(installation, profile_config)
+	
+	installation.create_users(users)
+
+	audio_config.install_audio_config(installation)
+	
+	installation.add_additional_packages(base_packages)
+
 	installation.set_timezone(timezone)
-	installation.set_keyboard_language(locale_config)
+	
+	# configure ntp
+	installation.activate_time_synchronization()
+
+	profile.profile_handler.install_profile_config(installation, profile_config)
+
 	installation.enable_service(services)
-	for c in custom_command:
-		installation.run_command(c)
+
+	run_custom_user_commands(custom_commands, installation)
+	
+	archinstall
+
 	# install packages using pipx
 	for p in pipx_packages:
 		installation.run_command(f"pipx install {p}")
-	installation.copy_iso_network_config(enable_services=True)
 	installation.set_mirrors(mirror_config)
 
-# Optionally, install a profile of choice.
-# In this case, we install a minimal profile that is empty
-profile_config = profile.ProfileConfiguration(MinimalProfile())
-kde_profile = profile.ProfileConfiguration(KdeProfile())
-hyprland_profile = profile.ProfileConfiguration(HyprlandProfile())
-profile.profile_handler.install_profile_config(installation, profile_config)
-profile.profile_handler.install_profile_config(installation, kde_profile)
-profile.profile_handler.install_profile_config(installation, hyprland_profile)
+	# Optionally, install a profile of choice.
+	# In this case, we install a minimal profile that is empty
 
 
-user = models.User(var_username, var_password, True)
-installation.create_users(user)
 
