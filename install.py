@@ -180,6 +180,8 @@ users = [
 ]
 
 base_packages = [
+    "plasma-meta", "konsole", "kwrite", "dolphin", "ark", "plasma-wayland-session", "egl-wayland",
+    "hyprland", "dunst", "dolphin", "wofi", "xdg-desktop-portal-hyprland", "qt5-wayland", "qt6-wayland",
 	"yad", #A fork of Zenity with many improvements
    	"binutils", #A set of programs to assemble and manipulate binary and object files
 	"usbutils", #USB device related utilities

@@ -18,7 +18,7 @@ class MyCustomProfile(Profile):
 		packages: List[str] = [],
 		services: List[str] = []
 	):
-		packages.append(*KdeProfile.packages, *HyprlandProfile.packages)
+		# packages.append(*KdeProfile.packages, *HyprlandProfile.packages)
 		super().__init__(
 			name,
 			ProfileType.CustomType,
@@ -31,7 +31,6 @@ class MyCustomProfile(Profile):
 		self.custom_enabled = enabled
 		self.default_greeter_type = GreeterType.Sddm
 		
-
 	def json(self) -> Dict[str, Any]:
 		return {
 			'name': self.name,
