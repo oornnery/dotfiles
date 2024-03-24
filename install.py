@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 from archinstall import Installer
@@ -12,9 +13,27 @@ from archinstall.lib.locale import LocaleConfiguration
 from archinstall.lib.models import Bootloader
 from archinstall.lib.mirrors import MirrorConfiguration
 
+parser = argparse.ArgumentParser(description='Arch install script')
+
+# Adicione os argumentos necessários
+parser.add_argument('--device_path', '-dp', required=True, help='Path the device to install Arch Linux')
+parser.add_argument('--username', '-u', required=True, help='Username login')
+parser.add_argument('--password', '-p', required=True, help='Password login')
+parser.add_argument('--pass_crypt', '-pc', required=True, help='Password to encrypt the disk')
+
+# Parse os argumentos da linha de comando
+args = parser.parse_args()
+
+# Defina as variáveis com os argumentos
+var_device_path = args.device_path
+var_username = args.username
+var_password = args.password
+var_pass_crypt = args.pass_crypt
+
+
 # we're creating a new ext4 filesystem installation
 fs_type = disk.FilesystemType('btrfs')
-device_path = Path('/dev/nvme0n1')
+device_path = Path(var_device_path or '/dev/nvme0n1')
 
 # get the physical disk device
 device = disk.device_handler.get_device(device_path)
@@ -88,7 +107,7 @@ disk_config = disk.DiskLayoutConfiguration(
 
 # disk encryption configuration (Optional)
 disk_encryption = disk.DiskEncryption(
-	encryption_password="",
+	encryption_password=var_pass_crypt,
 	encryption_type=disk.EncryptionType.Luks,
 	partitions=[root_partition],
 	hsm_device=None
@@ -150,8 +169,6 @@ base_packages = [
 	"cups", #The CUPS Printing System
 	"dialog", #A tool to display dialog boxes from shell scripts
 	"brightnessctl", #A tool to read and control device brightness
-]
-additional_packages = [
  	# Games
 	"lutris", #Open Gaming Platform
 	"steam", #Digital distribution platform for video games
@@ -262,6 +279,7 @@ services = [
 	"libvirtd",
 	"ntp",
 	"ssh",
+ 	"iwd",
 ]
 custom_command = [
 	"cd /home/devel; git clone https://aur.archlinux.org/paru.git",
@@ -286,7 +304,6 @@ with Installer(
 	mountpoint,
 	disk_config,
 	disk_encryption=disk_encryption,
-	base_packages=base_packages,
 	kernels=[
         "linux",
         "linux-hardened",
@@ -299,7 +316,9 @@ with Installer(
      	hostname='archlinux',
 		locale_config=locale_config,
     )
-	installation.add_additional_packages(additional_packages)
+	installation.pacman.run(['--noconfirm', '-S'] + base_packages)
+	# self.pacman.strap('iwd')
+	# self.enable_service('iwd')
 	installation.add_bootloader(bootloader)
 	installation.set_timezone(timezone)
 	installation.set_keyboard_language(locale_config)
@@ -322,5 +341,6 @@ profile.profile_handler.install_profile_config(installation, kde_profile)
 profile.profile_handler.install_profile_config(installation, hyprland_profile)
 
 
-user = models.User('username', 'password', True)
+user = models.User(var_username, var_password, True)
 installation.create_users(user)
+
