@@ -31,10 +31,11 @@ from archinstall import (
     info,
     debug,
     run_custom_user_commands,
-    default_profiles
 )
 from archinstall.lib.hardware import GfxPackage
-
+from archinstall.default_profiles.desktop import DesktopProfile
+from archinstall.default_profiles.desktops.hyprland import HyprlandProfile
+from archinstall.default_profiles.desktops.kde import KdeProfile
 
 
 # Log various information about hardware before starting the installation. This might assist in troubleshooting
@@ -330,10 +331,11 @@ pipx_packages = [
 	"toolong",
 	"gitignore",
 ]
-my_profile = default_profiles.desktop.DesktopProfile(
+
+my_profile = DesktopProfile(
 	current_selection=[
-		default_profiles.desktops.kde.KdeProfile(),
-		default_profiles.desktops.hyprland.HyprlandProfile(),
+		KdeProfile(),
+		HyprlandProfile(),
 	]
 )
 
