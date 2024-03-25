@@ -4,11 +4,11 @@
     ],
     "archinstall-language": "English",
     "audio_config": {
-        "audio": "pipewire"
+        "audio": "pulseaudio"
     },
     "bootloader": "Systemd-boot",
     "config_version": "2.7.1",
-    "debug": false,
+    "debug": true,
     "disk_config": {
         "config_type": "default_layout",
         "device_modifications": [
@@ -17,26 +17,11 @@
                 "partitions": [
                     {   
                         "boot": true,
-                        "dev_path": null,
+                        "flags": ["Boot"],
                         "fs_type": "fat32",
-                        "mount_options": [],
                         "mountpoint": "/boot",
-                        "size": {
-                            "sector_size": {
-                                "unit": "B",
-                                "value": 512
-                            },
-                            "unit": "MiB",
-                            "value": 512
-                        },
-                        "start": {
-                            "sector_size": {
-                                "unit": "B",
-                                "value": 512
-                            },
-                            "unit": "MiB",
-                            "value": 1
-                        },
+                        "size": "1024MB",
+                        "start": "5MB",
                         "status": "create",
                         "type": "primary"
                     },
@@ -73,30 +58,12 @@
                                 "nodatacow": false
                             }
                         ],
-                        "dev_path": null,
-                        "flags": [],
                         "fs_type": "btrfs",
                         "mount_options": [
                             "compress=zstd"
                         ],
-                        "mountpoint": null,
-                        "obj_id": "81b3853e-75e9-41af-8b55-c99bfa84f147",
-                        "size": {
-                            "sector_size": {
-                                "unit": "B",
-                                "value": 512
-                            },
-                            "unit": "B",
-                            "value": 511571222528
-                        },
-                        "start": {
-                            "sector_size": {
-                                "unit": "B",
-                                "value": 512
-                            },
-                            "unit": "B",
-                            "value": 537919488
-                        },
+                        "size": "1029MB",
+                        "start": "100%",
                         "status": "create",
                         "type": "primary"
                     }
@@ -107,189 +74,54 @@
     },
     "disk_encryption": {
         "encryption_type": "luks",
-        "partitions": [
-            "81b3853e-75e9-41af-8b55-c99bfa84f147"
-        ]
+        "partitions": []
     },
     "hostname": "archlinux",
     "kernels": [
         "linux",
-        "linux-hardened",
         "linux-lts"
     ],
     "locale_config": {
-        "kb_layout": "us abnt2",
+        "kb_layout": "br-abnt2",
         "sys_enc": "UTF-8",
         "sys_lang": "en_US"
     },
     "mirror_config": {
         "custom_mirrors": [],
-        "mirror_regions": {
-            "Brazil": [
-                "https://mirror.ufscar.br/archlinux/$repo/os/$arch",
-                "http://mirror.ufscar.br/archlinux/$repo/os/$arch",
-                "http://mirror.ufam.edu.br/archlinux/$repo/os/$arch",
-                "http://linorg.usp.br/archlinux/$repo/os/$arch",
-                "http://archlinux.c3sl.ufpr.br/$repo/os/$arch"
-            ]
-        }
+        "mirror_regions": "Worldwide"
     },
     "network_config": {
-        "type": "iso"
+        "type": "nm"
     },
     "no_pkg_lookups": false,
     "ntp": true,
     "offline": false,
+    "parallel downloads": 10,
     "packages": [
-        "yad",
-        "binutils",
-        "usbutils",
-        "xdg-user-dirs", 
-        "autoconf",
-        "automake",	
-        "gcc",
-        "bison",
-        "pkgconf",
-        "which",
-        "ethtool",	
-        "wpa_supplicant",
-        "iw",
-        "iwd", 
-        "networkmanager",
-        "network-manager-applet",
-        "networkmanager-docs",
-        "networkmanager-openconnect",
-        "networkmanager-openvpn",
-        "openssh",
-        "dhclient",
-        "traceroute",
-        "ntp",
-        "bluez",
-        "bluez-utils",
-        "alsa-plugins",
-        "alsa-utils",
-        "pulseaudio",
-        "pulseaudio-alsa",
-        "pulseaudio-bluetooth",
-        "pamixer",
-        "ffmpeg",
-        "ffmpegthumbnailer",
-        "playerctl",
-        "noise-suppression-for-voice",
-        "man-db",
-        "man-pages",
-        "bridge-utils",
-        "btrfs-progs",
-        "cups",
-        "dialog",
-        "brightnessctl",
-        "lutris",
-        "steam",
-        "wine",
-        "winetricks",
-        "gamemode",	
-        "xdg-desktop-portal-hyprland",
-        "hyprlang",
-        "hyprlock",
-        "hypridle",
-        "hyprcursor",
-        "hyprpaper",
-        "waybar",
-        "wofi",
-        "pavucontrol",
-        "dunst",
-        "arandr",
-        "lxrandr",
-        "lxappearance",
-        "jdk-openjdk",
-        "python-pipx",
-        "nodejs",
-        "yarn",
-        "npm",
-        "rust",
-        "cargo",
-        "docker",
-        "docker-compose",
-        "distrobox",
-        "libvirt",
-        "virt-manager",
-        "virt-viewer",
-        "qemu",
-        "vlc",
-        "mpv",
-        "obs-studio",
-        "audacity",
-        "blender",
-        "viewnior",	
-        "gimp",
-        "simplescreenrecorder",
-        "feh",
-        "celluloid",
-        "kdenlive",
-        "libreoffice-fresh",
-        "libreoffice-fresh-pt-br",
-        "marktext",
-        "code",
-        "obsidian",
-        "firefox",
-        "vivaldi",
-        "vivaldi-ffmpeg-codecs",
-        "qutebrowser",
-        "ttf-dejavu",
-        "ttf-fira-code", 
-        "ttf-hack-nerd", 
-        "cmatrix",
-        "alacritty",
-        "neovim",
-        "wget",
-        "gwget",
-        "git",
-        "github-cli",
-        "ufw",
-        "gufw",
-        "htop",
-        "btop",
-        "lsd",
-        "bat",
-        "lolcat",
-        "fd",
-        "ripgrep",
-        "zsh",
-        "zsh-autosuggestions",
-        "zsh-completions",
-        "zsh-syntax-highlighting",
-        "starship",
-        "yadm",
-        "gparted",
-        "mc",
-        "neofetch"
+        
     ],
     "services": [
-        "NetworkManager",
-        "bluetooth",
-        "docker",
-        "libvirtd",
-        "ntp",
-        "ssh"
+        
     ],
-    "parallel downloads": 10,
+    "custom-commands": [
+        "cd /home/devel; git clone https://aur.archlinux.org/paru.git",
+        "chown -R devel:devel /home/devel/paru",
+        "usermod -aG docker devel",
+        "chsh -s $(which zsh)"
+    ],
     "profile_config": {
-        "gfx_driver": "AMD / ATI (open-source)",
+        "gfx_driver": "All open-source (default)",
         "greeter": "sddm",
         "profile": {
             "custom_settings": {
+                "Kde": {},
                 "Hyprland": {
-                    "seat_access": "polkit"
-                },
-                "Qtile": {},
-                "Sway": {
                     "seat_access": "polkit"
                 }
             },
             "details": [
-                "Hyprland",
-                "Qtile",
-                "Sway"
+                "Kde",
+                "Hyprland"
             ],
             "main": "Desktop"
         }
@@ -298,14 +130,8 @@
     "silent": false,
     "skip_ntp": false,
     "skip_version_check": false,
-    "swap": false,
+    "swap": true,
     "timezone": "America/Sao_Paulo",
     "uki": false,
-    "version": "2.7.1",
-    "custom-commands": [
-        "cd /home/devel; git clone https://aur.archlinux.org/paru.git",
-        "chown -R devel:devel /home/devel/paru",
-        "usermod -aG docker devel",
-        "usermod -aG libvirt devel"
-    ]
+    "version": "2.7.1"
 }
