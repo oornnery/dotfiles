@@ -22,6 +22,7 @@
                         "fs_type": "fat32",
                         "mount_options": [],
                         "mountpoint": "/boot",
+                        "obj_id": null,
                         "size": {
                             "sector_size": {
                                 "unit": "B",
@@ -76,6 +77,8 @@
                         ],
                         "dev_path": null,
                         "fs_type": "btrfs",
+                        "obj_id": null,
+                        "mountpoint": null,
                         "mount_options": [
                             "compress=zstd"
                         ],
