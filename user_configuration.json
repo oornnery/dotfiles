@@ -21,12 +21,18 @@
                         "fs_type": "fat32",
                         "mountpoint": "/boot",
                         "size": {
-                            "sector_size": null,
+                            "sector_size": {
+                                "unit": "B",
+                                "value": 512
+                            },
                             "unit": "MiB",
                             "value": 1024
                         },
                         "start": {
-                            "sector_size": null,
+                            "sector_size": {
+                                "unit": "B",
+                                "value": 512
+                            },
                             "unit": "MiB",
                             "value": 5
                         },
@@ -71,12 +77,18 @@
                             "compress=zstd"
                         ],
                         "size": {
-                            "sector_size": null,
+                            "sector_size": {
+                                "unit": "B",
+                                "value": 512
+                            },
                             "unit": "Percent",
                             "value": 100
                         },
                         "start": {
-                            "sector_size": null,
+                            "sector_size": {
+                                "unit": "B",
+                                "value": 512
+                            },
                             "unit": "MiB",
                             "value": 1029
                         },
