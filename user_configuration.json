@@ -20,8 +20,16 @@
                         "flags": ["Boot"],
                         "fs_type": "fat32",
                         "mountpoint": "/boot",
-                        "size": "1024MB",
-                        "start": "5MB",
+                        "size": {
+                            "sector_size": null,
+                            "unit": "MiB",
+                            "value": 1024
+                        },
+                        "start": {
+                            "sector_size": null,
+                            "unit": "MiB",
+                            "value": 5
+                        },
                         "status": "create",
                         "type": "primary"
                     },
@@ -62,8 +70,16 @@
                         "mount_options": [
                             "compress=zstd"
                         ],
-                        "size": "1029MB",
-                        "start": "100%",
+                        "size": {
+                            "sector_size": null,
+                            "unit": "Percent",
+                            "value": 100
+                        },
+                        "start": {
+                            "sector_size": null,
+                            "unit": "MiB",
+                            "value": 1029
+                        },
                         "status": "create",
                         "type": "primary"
                     }
@@ -97,12 +113,8 @@
     "ntp": true,
     "offline": false,
     "parallel downloads": 10,
-    "packages": [
-        
-    ],
-    "services": [
-        
-    ],
+    "packages": ["docker", "git", "wget", "zsh"],
+    "services": ["docker"],
     "custom-commands": [
         "cd /home/devel; git clone https://aur.archlinux.org/paru.git",
         "chown -R devel:devel /home/devel/paru",
@@ -110,7 +122,7 @@
         "chsh -s $(which zsh)"
     ],
     "profile_config": {
-        "gfx_driver": "All open-source (default)",
+        "gfx_driver": "All open-source",
         "greeter": "sddm",
         "profile": {
             "custom_settings": {
