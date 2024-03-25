@@ -13,10 +13,11 @@
         "config_type": "default_layout",
         "device_modifications": [
             {
-                "device": "/dev/nvme0n1",
+                "device": "/dev/vda",
                 "partitions": [
                     {   
                         "boot": true,
+                        "dev_path": null,
                         "flags": ["Boot"],
                         "fs_type": "fat32",
                         "mount_options": [],
@@ -73,6 +74,7 @@
                                 "nodatacow": false
                             }
                         ],
+                        "dev_path": null,
                         "fs_type": "btrfs",
                         "mount_options": [
                             "compress=zstd"
