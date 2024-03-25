@@ -19,6 +19,7 @@
                         "boot": true,
                         "flags": ["Boot"],
                         "fs_type": "fat32",
+                        "mount_options": [],
                         "mountpoint": "/boot",
                         "size": {
                             "sector_size": {
