@@ -122,7 +122,15 @@
     },
     "mirror_config": {
         "custom_mirrors": [],
-        "mirror_regions": "Worldwide"
+        "mirror_regions": {
+            "Brazil": [
+                "https://mirror.ufscar.br/archlinux/$repo/os/$arch",
+                "http://mirror.ufscar.br/archlinux/$repo/os/$arch",
+                "http://mirror.ufam.edu.br/archlinux/$repo/os/$arch",
+                "http://linorg.usp.br/archlinux/$repo/os/$arch",
+                "http://archlinux.c3sl.ufpr.br/$repo/os/$arch"
+            ]
+        }
     },
     "network_config": {
         "type": "nm"
