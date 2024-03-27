@@ -1,24 +1,52 @@
-import argparse
+import subprocess
+import logging
+import dataclasses
 
-parser = argparse.ArgumentParser(description='Arch install script')
 
-# Adicione os argumentos necessários
-parser.add_argument('--device_path', '-dp', required=True, help='Path the device to install Arch Linux')
-parser.add_argument('--username', '-u', required=True, help='Username login')
-parser.add_argument('--password', '-p', required=True, help='Password login')
-parser.add_argument('--pass_crypt', '-pc', required=True, help='Password to encrypt the disk')
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Parse os argumentos da linha de comando
-args = parser.parse_args()
 
-# Defina as variáveis com os argumentos
-var_device_path = args.device_path
-var_username = args.username
-var_password = args.password
-var_pass_crypt = args.pass_crypt
+def run_command(command: str):
+    """Run a command in the shell"""
+    try:
+        process = subprocess.Popen(
+            command.split(' '), 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            universal_newlines=True
+            )
+        
+        for stdout_line in iter(process.stdout.readline, ''):
+            logging.info(stdout_line.strip())
+            yield stdout_line.strip()
+        
+        for stderr_line in iter(process.stderr.readline, ''):
+            logging.error(stderr_line.strip())
+            yield stderr_line.strip()
+        
+        process.stdout.close()
+        process.stderr.close()
+        
+        return_code = process.wait()
+        
+        if return_code != 0:
+            logging.error(f"Script execution failed with return code {return_code}")
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        print(f"An error occurred: {str(e)}")
+    finally:
+        logging.info("Script execution completed")
 
-# Imprima as variáveis
-print('Device path:', var_device_path)
-print('Username:', var_username)
-print('Password:', var_password)
-print('Password crypt:', var_pass_crypt)
+
+def install_package(packages: list[str], package_manager: str = 'pacman', flags: list[str] = ['--needed',]):
+    """Install or remove packages using pacman"""
+    command = f"pacman -S {' '.join(packages)}"
+    run_command(command)
+
+def 
+
+
+# Exemplo de uso
+for l in execute_script("ping 8.8.8.8"):
+    print(l)
