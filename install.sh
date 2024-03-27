@@ -22,84 +22,55 @@ banner() {
     echo ''
 }
 
-move_file() {
-    
-}
-
 install_package() {
-    local path=$1
-
-    # Verifique se o arquivo existe
-    if [ ! -f "$path" ]; then
-        echo "file $path not found!"
+    echo "Install packages $1"
+    # Check if pacman is installed
+    if ! command -v pacman &> /dev/null; then
+        echo "Pacman not found!"
         return 1
     fi
-
-    while IFS= read -r package; do
-        sudo pacman -S "$path"
-    done
+    # install package
+    sudo pacman -S --needed "$1"
+    # Check if package is installed.
+    if [ $? -ne 0 ]; then
+        echo "Package not installed $?"
+        return 1
+    fi
+    # Package installed
+    echo "Package is installed $1"
 }
 
+active_shell() {
+    echo "Set shell $1"
+    # Check if shell is installed
+    if ! command -v "$1" > /dev/null; then
+        echo "Shell $1 is not installed"
+        return 1
+    fi
+    # Set shell
+    chsh -s $(which "$1")
+    # Check out program
+    if [ $? -ne 0 ]; then
+        echo "Error: $?"
+        return 1
+    fi
+    # validates that the shell has been configured
+    if ! [[ $SHELL == *"$1" ]]; then
+        echo "Shell has not been configured. Default shell $SHELL"
+        return
+    fi
+}
 
+echo "Set keyboard"
 
-packages_base=$(cat pkg-files/base)
-packages_dev=$(cat dotfiles/packages_dev.txt)
-packages_extras=$(cat dotfiles/packages_extras.txt)
-packages_scripts=$(cat dotfiles/packages_scripts.txt)
-user=$(whoami)
+key_maps=$(localectl list-keymaps)
+echo "Key Maps:"
+echo "---"
+echo "$key_maps"
+echo "---"
+read key_map
+loadkeys list-keymaps
 
-echo "
-=================================
-=         Setup Pacman          =
-=================================
+echo "Set font"
 
-"
-
-sudo rm /etc/pacman.conf
-sudo cp .config/pacman.conf /etc/pacman.conf
-
-
-# Fazer backup
-# Copiar arquivos de configuração
-cp $HOME/.bashrc $HOME/.bashrc.bak
-cp $HOME/.zshrc $HOME/.zshrc.bak
-cp $HOME/.zsh_history $HOME/.zsh_history.bak
-cp $HOME/.p10k.zsh $HOME/.p10k.zsh.bak
-cp $HOME/.vimrc $HOME/.vimrc.bak
-
-# Compiar diretorio de configuração
-cp -r $HOME/.config $HOME/.config.bak
-cp -r $HOME/.oh-my-zsh $HOME/.oh-my-zsh.bak
-cp -r $HOME/.wallpaper $HOME/.wallpaper.bak
-cp -r $HOME/.scripts $HOME/.scripts.bak
-cp -r $HOME/.screenlayout $HOME/.screenlayout.bak
-
-
-# Instalar pacotes
-# Copiar arquivos
-# Atualizar
-
-
-
-# Atualizando sistema
-pacman -Syyu
-
-# Instalando pacotes base
-pacman -S < $packages_base --needed --noconfirm
-
-# Instalando pacotes de desenvolvimento
-pacman -S < $packages_dev --needed --noconfirm
-
-# Instalando pacotes extras
-pacman -S < $packages_extras --needed --noconfirm
-
-
-# Fazendo backup dos arquivos de configuração 
-
-mkdir -p dotfiles/backup/$user
-
-cp -r ~/.config dotfiles/backup/$user
-
-# Copiando arquivos de configuração 
-cp -r ./dotfiles/.config ~/.config
-cp ./dotfiles/.zshrc ~/
+fonts = $(sudo pacman -Ss)
