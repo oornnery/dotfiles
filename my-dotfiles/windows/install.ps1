@@ -246,3 +246,4 @@ if ($config.wsl -or $config.wsl.enabled) {
 Write-Host "Clearing temp files"
 Remove-Item -Path "$env:TEMP\*" -Recurse -Force
 Write-Host "Done" 
+oh-my-posh font install Hack
