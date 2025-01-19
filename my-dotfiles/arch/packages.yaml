@@ -1,0 +1,83 @@
+base:
+  - unzip
+  - wget
+  - curl
+  - git
+  - github-cli
+  - openssh
+  - vagrant
+  - python
+  - python-pipx
+  - nodejs
+  - dino
+  - zig
+  - lua
+  - rust
+  # - cargo
+  - go
+  - ollama
+  - zsh
+  - starship
+  - neovim
+  - audacity
+  - gimp
+  - inkscape
+  - vlc
+  - qbittorrent
+  - telegram-desktop
+  # - wireguard-tools
+  # - libreoffice
+  # - virtualbox
+  - gnome-boxes
+  - docker
+  - docker-compose
+  - vivaldi
+  - obs-studio
+  - obsidian
+  - notion
+  - discord
+
+
+
+devel:
+  -
+
+wm_x11:
+  -
+
+wm_wayland:
+  -
+
+games:
+  -
+
+games_aur:
+  - curseforge
+  - minecraft-launcher
+  - heroic-games-launcher
+
+aur:
+  - siyuan
+  - marktext
+  - anki
+
+pipx:
+  - poetry
+  - httpx-cli
+  - uv
+  - uvx
+  - ansible
+  - ansible-lint
+  - molecule
+  - yamllint
+  - pre-commit
+  - ruff
+  - isort
+  - flake8
+  - mypy
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - pytest-mock
+  - pytest-asyncio
+  - pytest-asyncio-network-simulator
