@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "uvx",
+      "args": ["mcp-server-filesystem", "--root", "."],
+      "description": "Local filesystem access for file operations"
+    },
+    "github": {
+      "command": "uvx", 
+      "args": ["mcp-server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
+      "description": "GitHub repository access and operations"
+    },
+    "postgres": {
+      "command": "uvx",
+      "args": ["mcp-server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": ""
+      },
+      "description": "PostgreSQL database operations"
+    },
+    "sqlite": {
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "./databases"],
+      "description": "SQLite database operations"
+    },
+    "memory": {
+      "command": "uvx", 
+      "args": ["mcp-server-memory"],
+      "description": "Persistent memory and context storage"
+    },
+    "brave-search": {
+      "command": "uvx",
+      "args": ["mcp-server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": ""
+      },
+      "description": "Web search capabilities via Brave Search API"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "."],
+      "description": "Git repository operations and history"
+    },
+    "shell": {
+      "command": "uvx",
+      "args": ["mcp-server-shell"],
+      "description": "Shell command execution"
+    },
+    "python": {
+      "command": "uvx",
+      "args": ["mcp-server-python"],
+      "description": "Python code execution and environment management"
+    }
+  }
+}

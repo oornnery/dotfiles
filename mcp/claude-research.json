@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "uvx",
+      "args": ["mcp-server-filesystem", "--root", "~/Documents"],
+      "description": "Access to Documents folder for research and notes"
+    },
+    "web-search": {
+      "command": "uvx",
+      "args": ["mcp-server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": ""
+      },
+      "description": "Web search for research and fact-checking"
+    },
+    "memory": {
+      "command": "uvx", 
+      "args": ["mcp-server-memory"],
+      "description": "Remember important information across conversations"
+    },
+    "time": {
+      "command": "uvx",
+      "args": ["mcp-server-time"],
+      "description": "Time and calendar operations"
+    },
+    "obsidian": {
+      "command": "uvx",
+      "args": ["mcp-server-obsidian", "--vault-path", "~/Documents/Notes"],
+      "description": "Access to Obsidian notes and knowledge base"
+    },
+    "youtube-transcript": {
+      "command": "uvx",
+      "args": ["mcp-server-youtube-transcript"],
+      "description": "Extract transcripts from YouTube videos"
+    },
+    "sequential-thinking": {
+      "command": "uvx",
+      "args": ["mcp-server-sequential-thinking"],
+      "description": "Enhanced reasoning and problem-solving capabilities"
+    }
+  }
+}
