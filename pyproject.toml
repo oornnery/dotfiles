@@ -1,17 +1,7 @@
-[tool.poetry]
+[project]
 name = "dotfiles"
 version = "0.1.0"
-description = "My dotfiles scripts"
-authors = ["Fabio Souza <fabiohcsouza@outlook.com.br>"]
+description = "Add your description here"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.11"
-rich = "^13.7.1"
-dotdrop = "^1.14.2"
-
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.12"
+dependencies = []
