@@ -1,185 +1,37 @@
 return {
-  "nvim-lua/plenary.nvim",
-
+  { "sitiom/nvim-numbertoggle" },
+  { "mluders/comfy-line-numbers.nvim" },
+  { "folke/twilight.nvim" },
   {
-    "nvchad/base46",
-    build = function()
-      require("base46").load_all_highlights()
-    end,
-  },
-
-  {
-    "nvchad/ui",
-    lazy = false,
-    config = function()
-      require "nvchad"
-    end,
-  },
-
-  "nvzone/volt",
-  "nvzone/menu",
-  { "nvzone/minty",                  cmd = { "Huefy", "Shades" } },
-
-  {
-    "nvim-tree/nvim-web-devicons",
-    opts = function()
-      dofile(vim.g.base46_cache .. "devicons")
-      return { override = require "nvchad.icons.devicons" }
-    end,
-  },
-
-  {
-    "lukas-reineke/indent-blankline.nvim",
-    event = "User FilePost",
-    opts = {
-      indent = { char = "│", highlight = "IblChar" },
-      scope = { char = "│", highlight = "IblScopeChar" },
-    },
-    config = function(_, opts)
-      dofile(vim.g.base46_cache .. "blankline")
-
-      local hooks = require "ibl.hooks"
-      hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_space_indent_level)
-      require("ibl").setup(opts)
-
-      dofile(vim.g.base46_cache .. "blankline")
-    end,
-  },
-
-  -- file managing , picker etc
-  {
-    "nvim-tree/nvim-tree.lua",
-    cmd = { "NvimTreeToggle", "NvimTreeFocus" },
-    opts = function()
-      return require "nvchad.configs.nvimtree"
-    end,
-  },
-
-  {
-    "folke/which-key.nvim",
-    keys = { "<leader>", "<c-w>", '"', "'", "`", "c", "v", "g" },
-    cmd = "WhichKey",
-    opts = function()
-      dofile(vim.g.base46_cache .. "whichkey")
-      return {}
-    end,
-  },
-
-  -- formatting!
-  {
-    "stevearc/conform.nvim",
-    opts = {
-      formatters_by_ft = { lua = { "stylua" } },
-    },
-  },
-
-  -- git stuff
-  {
-    "lewis6991/gitsigns.nvim",
-    event = "User FilePost",
-    opts = function()
-      return require "nvchad.configs.gitsigns"
-    end,
-  },
-
-  -- lsp stuff
-  {
-    "mason-org/mason.nvim",
-    cmd = { "Mason", "MasonInstall", "MasonUpdate" },
-    opts = function()
-      return require "nvchad.configs.mason"
-    end,
-  },
-
-  {
-    "neovim/nvim-lspconfig",
-    event = "User FilePost",
-    config = function()
-      require("nvchad.configs.lspconfig").defaults()
-    end,
-  },
-
-  -- load luasnips + cmp related in insert mode only
-  {
-    "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = {
-      {
-        -- snippet plugin
-        "L3MON4D3/LuaSnip",
-        dependencies = "rafamadriz/friendly-snippets",
-        opts = { history = true, updateevents = "TextChanged,TextChangedI" },
-        config = function(_, opts)
-          require("luasnip").config.set_config(opts)
-          require "nvchad.configs.luasnip"
-        end,
-      },
-
-      -- autopairing of (){}[] etc
-      {
-        "windwp/nvim-autopairs",
-        opts = {
-          fast_wrap = {},
-          disable_filetype = { "TelescopePrompt", "vim" },
-        },
-        config = function(_, opts)
-          require("nvim-autopairs").setup(opts)
-
-          -- setup cmp for autopairs
-          local cmp_autopairs = require "nvim-autopairs.completion.cmp"
-          require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())
-        end,
-      },
-
-      -- cmp sources plugins
-      {
-        "saadparwaiz1/cmp_luasnip",
-        "hrsh7th/cmp-nvim-lua",
-        "hrsh7th/cmp-nvim-lsp",
-        "hrsh7th/cmp-buffer",
-        "https://codeberg.org/FelipeLema/cmp-async-path.git"
-      }
-    },
-    opts = function()
-      return require "nvchad.configs.cmp"
-    end,
-  },
-
-  {
-    "nvim-telescope/telescope.nvim",
+    "code-biscuits/nvim-biscuits",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
-    cmd = "Telescope",
-    opts = function()
-      return require "nvchad.configs.telescope"
-    end,
   },
-
+  { "axieax/urlview.nvim" },
+  { "jbyuki/venn.nvim" },
   {
-    "nvim-treesitter/nvim-treesitter",
-    event = { "BufReadPost", "BufNewFile" },
-    cmd = { "TSInstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
-    build = ":TSUpdate",
-    opts = function()
-      return require "nvchad.configs.treesitter"
-    end,
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
-    end,
+    "nguyenvukhang/nvim-toggler",
+    keys = {
+      {
+        "<leader>tg",
+        function()
+          require("nvim-toggler").toggle()
+        end,
+        mode = { "n", "v" },
+        desc = "Toggle values",
+      },
+    },
   },
-
-  -- test new blink
-  { import = "nvchad.blink.lazyspec" },
-
-  -- Smear cursor for Neovim
+  { "akinsho/bufferline.nvim", version = "*", dependencies = "nvim-tree/nvim-web-devicons" },
   {
     "sphamba/smear-cursor.nvim",
-    opts = {
-      cursor_color = "#ff8800",
-      stiffness = 0.3,
-      trailing_stiffness = 0.1,
-      trailing_exponent = 5,
-      hide_target_hack = true,
-      gamma = 1,
+    opts = { -- Default  Range
+      stiffness = 0.8, -- 0.6      [0, 1]
+      trailing_stiffness = 0.6, -- 0.45     [0, 1]
+      stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
+      trailing_stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
+      damping = 0.95, -- 0.85     [0, 1]
+      damping_insert_mode = 0.95, -- 0.9      [0, 1]
+      distance_stop_animating = 0.5, -- 0.1      > 0
     },
   },
 }
