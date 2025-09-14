@@ -5,8 +5,15 @@ return {
     opts = function(_, opts)
       opts.servers = opts.servers or {}
       opts.servers.ruff = {}
-      opts.servers.ty = {}
+      -- opts.servers.ty = {}
     end,
+    -- config = function()
+    -- -- Outras configs ...
+    --   if vim.lsp and vim.lsp.config then
+    --     vim.lsp.config('ty', { settings = { ty = {} } })
+    --     vim.lsp.enable('ty')
+    --   end
+    -- end,
   },
 
   -- Linting: ruff como linter principal
