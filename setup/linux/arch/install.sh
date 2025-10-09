@@ -173,6 +173,18 @@ setup_shell(){
   '
   # # Install ZSH Zap
   # zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
+  # Install plugins
+# https://github.com/hlissner/zsh-autopair
+# https://github.com/zap-zsh/supercharge
+# https://github.com/zap-zsh/vim
+# https://github.com/zap-zsh/completions
+# https://github.com/zap-zsh/sudo
+# https://github.com/Aloxaf/fzf-tab
+# https://github.com/wintermi/zsh-lsd
+# https://github.com/tm4Bit/fzf-zellij
+# https://github.com/zsh-users/zsh-autosuggestions
+# https://github.com/zsh-users/zsh-syntax-highlighting
+# https://github.com/zsh-users/zsh-completions
 }
 
 setup_vim(){

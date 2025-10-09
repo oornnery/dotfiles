@@ -1,1 +1,0 @@
-sudo pacman -S poetry uv ruff
