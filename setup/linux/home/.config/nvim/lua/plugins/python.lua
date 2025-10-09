@@ -82,7 +82,12 @@ return {
   {
     "linux-cultist/venv-selector.nvim",
     cmd = "VenvSelect",
-    opts = {},
+    opts = {
+      enable_default_searches = true, -- busca automática e prioriza .venv local
+      enable_cached_venvs = true, -- cache para cada projeto
+      cached_venv_automatic_activation = true, -- ativa automaticamente o venv do projeto
+      require_lsp_activation = false, -- não depende do LSP estar ativo para ativar venv
+    },
     keys = { { "<leader>cv", "<cmd>VenvSelect<cr>", desc = "Select VirtualEnv" } },
   },
 
@@ -97,10 +102,10 @@ return {
           scratch_repl = true,
           repl_definition = { python = { command = { "python3" } } },
           repl_open_cmd = require("iron.view").right("40%"),
-        }
+        },
       })
     end,
-    keys = { { "<leader>i", "<cmd>IronRepl<CR>", desc = "Abrir REPL Python" }, },
+    keys = { { "<leader>i", "<cmd>IronRepl<CR>", desc = "Abrir REPL Python" } },
   },
 
   -- Gerador automático de docstrings (opcional)
@@ -109,8 +114,20 @@ return {
     ft = "python",
     opts = { snippet_engine = "luasnip" },
     keys = {
-      { "<leader>nf", function() require("neogen").generate({ type = "func" }) end, desc = "Gerar docstring função" },
-      { "<leader>nc", function() require("neogen").generate({ type = "class" }) end, desc = "Gerar docstring classe" },
+      {
+        "<leader>nf",
+        function()
+          require("neogen").generate({ type = "func" })
+        end,
+        desc = "Gerar docstring função",
+      },
+      {
+        "<leader>nc",
+        function()
+          require("neogen").generate({ type = "class" })
+        end,
+        desc = "Gerar docstring classe",
+      },
     },
   },
 
@@ -128,7 +145,7 @@ return {
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-emoji", -- auto complete emojis (opcional/fun)
       "saadparwaiz1/cmp_luasnip", -- integration with luasnip for snippets
-    }
+    },
   },
 
   -- Finder ultra poderoso para tudo
@@ -148,9 +165,9 @@ return {
     },
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find Files" },
-      { "<leader>fg", "<cmd>Telescope live_grep<cr>",  desc = "Grep (Live)" },
-      { "<leader>fb", "<cmd>Telescope buffers<cr>",    desc = "Buffers" },
-      { "<leader>fs", "<cmd>Telescope symbols<cr>",    desc = "Symbols" },
+      { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Grep (Live)" },
+      { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
+      { "<leader>fs", "<cmd>Telescope symbols<cr>", desc = "Symbols" },
     },
   },
 
