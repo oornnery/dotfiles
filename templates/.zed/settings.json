@@ -23,7 +23,7 @@
   ],
   "languages": {
     "Python": {
-      "language_servers": ["ty", "ruff"],
+      "language_servers": ["ty", "ruff", "basedpyright"],
       "format_on_save": "on",
       "formatter": [
         { "code_action": "source.fixAll.ruff" },
@@ -34,6 +34,11 @@
   },
 
   "lsp": {
+    "basedpyright": {
+      "settings": {
+        "analysis": { "typeCheckingMode": "off" }
+      }
+    },
     "ruff": {
       "initialization_options": {
         "settings": {
@@ -45,13 +50,14 @@
     "ty": {
       "settings": {
         "diagnosticMode": "workspace",
-        "disableLanguageServices": false,
+        "disableLanguageServices": true,
         "inlayHints": {
           "variableTypes": true,
           "callArgumentNames": true
         },
         "experimental": {
-          "autoImport": true
+          "autoImport": true,
+          "rename": true
         }
       }
     }
@@ -59,8 +65,8 @@
   "agent": {
     "always_allow_tool_actions": true,
     "default_model": {
-      "provider": "anthropic",
-      "model": "claude-4-5-sonnet"
+      "provider": "copilot_chat",
+      "model": "claude-sonnet-4.5"
     },
     "inline_assistant_model": {
       "provider": "openai",
@@ -106,5 +112,30 @@
   },
   "features": {
     "edit_prediction_provider": "copilot"
+  },
+  "auto_install_extensions": {
+    "pylsp": true,
+    "python-snippets": true,
+    "python-requirements": true,
+    "python-refactoring": true,
+    "basedpyright": true,
+    "ruff": true,
+    "ty": true,
+    "toml": true,
+    "sql": true,
+    "lua": true,
+    "html": true,
+    "dockerfile": true,
+    "docker-compose": true,
+    "git-firefly": true,
+    "markdown-oxide": true,
+    "mcp-server-sequential-thinking": true,
+    "mcp-server-github": true,
+    "mcp-server-context7": true,
+    "catppuccin": true,
+    "graphql": true,
+    "prisma": true,
+    "biome": true,
+    "ini": true
   }
 }
