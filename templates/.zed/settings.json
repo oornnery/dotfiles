@@ -69,22 +69,18 @@
       "model": "claude-sonnet-4.5"
     },
     "inline_assistant_model": {
-      "provider": "openai",
+      "provider": "copilot_chat",
       "model": "gpt-5-mini"
     },
     "commit_message_model": {
-      "provider": "openai",
+      "provider": "copilot_chat",
       "model": "gpt-5-mini"
     },
     "thread_summary_model": {
-      "provider": "google",
+      "provider": "copilot_chat",
       "model": "gemini-2.5-pro"
     },
-    "model_parameters": [
-      { "provider": "anthropic", "temperature": 0.0 },
-      { "provider": "openai", "temperature": 0.0 },
-      { "provider": "google", "temperature": 0.0 }
-    ],
+    "model_parameters": [{ "provider": "copilot_chat", "temperature": 0.0 }],
     "default_view": "text_thread",
     "use_modifier_to_send": true,
     "single_file_review": true,
@@ -94,10 +90,12 @@
   },
   "confirm_quit": true,
   "telemetry": {
-    "diagnostics": true,
-    "metrics": true
+    "diagnostics": false,
+    "metrics": false
   },
   "base_keymap": "VSCode",
+  "vim_mode": false,
+  "relative_line_numbers": true,
   "minimap": {
     "show": "auto"
   },
@@ -112,6 +110,29 @@
   },
   "features": {
     "edit_prediction_provider": "copilot"
+  },
+  "terminal": {
+    "blinking": "on",
+    "env": {},
+    "detect_venv": {
+      "on": {
+        "directories": [".env", "env", ".venv", "venv"],
+        "activate_script": "default"
+      }
+    }
+  },
+  "edit_predictions": {
+    // A list of globs representing files that edit predictions should be disabled for.
+    // There's a sensible default list of globs already included.
+    // Any addition to this list will be merged with the default list.
+    "disabled_globs": [
+      "**/.env*",
+      "**/*.pem",
+      "**/*.key",
+      "**/*.cert",
+      "**/*.crt",
+      "**/secrets.yml"
+    ]
   },
   "auto_install_extensions": {
     "pylsp": true,
