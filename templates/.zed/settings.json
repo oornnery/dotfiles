@@ -24,7 +24,12 @@
   "languages": {
     "Python": {
       "language_servers": ["ty", "ruff"],
-      "format_on_save": "on"
+      "format_on_save": "on",
+      "formatter": [
+        { "code_action": "source.fixAll.ruff" },
+        { "code_action": "source.organizeImports.ruff" },
+        { "language_server": { "name": "ruff" } }
+      ]
     }
   },
 
@@ -32,22 +37,21 @@
     "ruff": {
       "initialization_options": {
         "settings": {
-          "lineLength": 100,
+          "lineLength": 80,
           "lint": { "extendSelect": ["I"] }
         }
       }
     },
     "ty": {
-      "initialization_options": {
-        "settings": {
-          "ty": {
-            "diagnosticMode": "workspace",
-            "disableLanguageServices": false,
-            "inlayHints": {
-              "variableTypes": true,
-              "callArgumentNames": true
-            }
-          }
+      "settings": {
+        "diagnosticMode": "workspace",
+        "disableLanguageServices": false,
+        "inlayHints": {
+          "variableTypes": true,
+          "callArgumentNames": true
+        },
+        "experimental": {
+          "autoImport": true
         }
       }
     }
@@ -73,7 +77,7 @@
     "model_parameters": [
       { "provider": "anthropic", "temperature": 0.0 },
       { "provider": "openai", "temperature": 0.0 },
-      { "provider": "google", "temperature": 0.3 }
+      { "provider": "google", "temperature": 0.0 }
     ],
     "default_view": "text_thread",
     "use_modifier_to_send": true,
