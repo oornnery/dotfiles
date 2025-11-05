@@ -1,0 +1,79 @@
+{
+    "export_version": 3,
+    "packages": [
+        {
+            "Id": "Mojang.MinecraftLauncher",
+            "Name": "Minecraft Launcher",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "EpicGames.EpicGamesLauncher",
+            "Name": "Epic Games Launcher",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "ElectronicArts.EADesktop",
+            "Name": "EA Desktop",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Valve.Steam",
+            "Name": "Steam",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Blitz.Blitz",
+            "Name": "Blitz",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Overwolf.CurseForge",
+            "Name": "CurseForge",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Discord.Discord",
+            "Name": "Discord",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Ryochan7.DS4Windows",
+            "Name": "DS4Windows",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "RiotGames.LeagueOfLegends",
+            "Name": "League of Legends",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "RiotGames.LeagueOfLegends.PBE",
+            "Name": "League of Legends PBE",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "qBittorrent.qBittorrent",
+            "Name": "qBittorrent",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "OBSProject.OBSStudio",
+            "Name": "OBS Studio",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        }
+    ],
+    "incompatible_packages_info": "Incompatible packages cannot be installed from UniGetUI, either because they came from a local source (for example Local PC) or because the package manager was unavailable. Nevertheless, they have been listed here for logging purposes.",
+    "incompatible_packages": []
+}

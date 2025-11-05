@@ -1,0 +1,73 @@
+{
+    "export_version": 3,
+    "packages": [
+        {
+            "Id": "Notion.Notion",
+            "Name": "Notion",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Notion.NotionCalendar",
+            "Name": "Notion Calendar",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "B3log.SiYuan",
+            "Name": "SiYuan",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Anki.Anki",
+            "Name": "Anki",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Obsidian.Obsidian",
+            "Name": "Obsidian",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "MarkText.MarkText",
+            "Name": "MarkText",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "TheDocumentFoundation.LibreOffice",
+            "Name": "LibreOffice",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "VideoLAN.VLC",
+            "Name": "VLC",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Audacity.Audacity",
+            "Name": "Audacity",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "GIMP.GIMP",
+            "Name": "GIMP",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "calibre.calibre",
+            "Name": "Calibre",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        }
+    ],
+    "incompatible_packages_info": "Incompatible packages cannot be installed from UniGetUI, either because they came from a local source (for example Local PC) or because the package manager was unavailable. Nevertheless, they have been listed here for logging purposes.",
+    "incompatible_packages": []
+}

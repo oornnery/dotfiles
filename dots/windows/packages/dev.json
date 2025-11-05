@@ -1,0 +1,187 @@
+{
+    "export_version": 3,
+    "packages": [
+        {
+            "Id": "MartiCliment.UniGetUI",
+            "Name": "UniGetUI",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "flick9000.WinScript",
+            "Name": "WinScript",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "9PM860492SZD",
+            "Name": "Microsoft PC Manager",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "9P8LTPGCBZXD",
+            "Name": "Wintoys",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.WindowsTerminal",
+            "Name": "Windows Terminal",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.PowerShell",
+            "Name": "PowerShell",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "JanDeDobbeleer.OhMyPosh",
+            "Name": "Oh My Posh",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.PowerToys",
+            "Name": "PowerToys",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "MSYS2.MSYS2",
+            "Name": "MSYS2",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "BurntSushi.ripgrep.MSVC",
+            "Name": "ripgrep",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Git.Git",
+            "Name": "Git",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.WSL",
+            "Name": "Windows Subsystem for Linux",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "usbipd",
+            "Name": "usbipd-win",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Oracle.VirtualBox",
+            "Name": "VirtualBox",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Docker.DockerDesktop",
+            "Name": "Docker Desktop",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "GitHub.cli",
+            "Name": "GitHub CLI",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Neovim.Neovim",
+            "Name": "Neovim",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "ZedIndustries.Zed",
+            "Name": "Zed",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Python.Python.3.14",
+            "Name": "Python 3.14",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "astral-sh.uv",
+            "Name": "uv",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Rustlang.Rustup",
+            "Name": "Rustup",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "GoLang.Go",
+            "Name": "Go Programming Language",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "OpenJS.NodeJS",
+            "Name": "Node.js",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Oven-sh.Bun",
+            "Name": "Bun",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "WiresharkFoundation.Wireshark",
+            "Name": "Wireshark",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Ollama.Ollama",
+            "Name": "Ollama",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "ElementLabs.LMStudio",
+            "Name": "LM Studio",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Comfy.ComfyUI-Desktop",
+            "Name": "ComfyUI Desktop",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "OnOff.Onlook",
+            "Name": "Onlook",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Perplexity.Comet",
+            "Name": "Perplexity Comet",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        }
+    ],
+    "incompatible_packages_info": "Incompatible packages cannot be installed from UniGetUI, either because they came from a local source (for example Local PC) or because the package manager was unavailable. Nevertheless, they have been listed here for logging purposes.",
+    "incompatible_packages": []
+}
