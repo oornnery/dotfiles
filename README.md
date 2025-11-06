@@ -56,3 +56,35 @@ Coleção dos meus dotfiles, scripts de provisionamento e anotações para mante
 - Mapear e gerar symlinks automaticamente para cada ambiente.
 - Criar interface TUI (provavelmente com Python + Textual) para escolher perfis de setup.
 - Documentar checklist pós-instalação por distro.
+
+### Backlog por ambiente
+
+- **Arch Linux**
+  - [ ] Unificar as listas de pacotes (`setup_shell_tools`, `setup_dev`, etc.) com `dots/linux/pkg-files/` para servir de fonte única reutilizável nas outras distros.
+  - [ ] Completar `setup_vim` com bootstrap do LazyVim e symlinks para `dots/linux/home/` garantindo mesma experiência que nos demais ambientes.
+  - [ ] Automatizar a instalação dos plugins Zsh listados em `setup_shell`, evitando passos manuais.
+  - [ ] Expor `setup_tiling_wm` e demais módulos como flags/parâmetros para ativação opcional (desktop, jogos, IA, virtualização).
+  - [ ] Revisar `setup_docker` para usar o usuário real (`$AUR_USER`) ao adicionar ao grupo `docker` e replicar esse fluxo nas demais plataformas.
+- **Debian / Ubuntu**
+  - [ ] Refatorar `dots/linux/debian/install.sh` para consumir `packages.yaml` e manter paridade com os perfis de `pkg-files`.
+  - [ ] Incluir o mesmo kit CLI do Arch (eza, fd, ripgrep, bat, fzf, lazygit) mapeando pacotes equivalentes no apt.
+  - [ ] Automatizar Docker/Compose, grupos (`docker`) e serviços auxiliares como no `install.sh` do Arch.
+  - [ ] Provisionar stack de virtualização (VirtualBox, libvirt/qemu) e módulos opcionais (jogos, desktop apps, fontes Nerd) com toggles semelhantes.
+  - [ ] Incorporar instalação e manutenção de Oh My Zsh + plugins, replicando fluxo do Arch.
+- **NixOS**
+  - [ ] Adicionar à `environment.systemPackages` o mesmo conjunto de ferramentas CLI/dev (eza, fzf, ripgrep, bat, lazygit, uv, linguagens) para equiparação.
+  - [ ] Declarar módulos para Docker/Compose, virtualização (libvirtd/qemu) e IA alinhados com os scripts de Arch/Debian.
+  - [ ] Configurar fontes Nerd (`fonts.packages`) e temas Wayland/X11 para manter a experiência visual.
+  - [ ] Criar perfis declarativos para Hyprland/i3 além do Plasma, espelhando os fluxos de desktop do restante do repo.
+  - [ ] Extrair pacotes do usuário `oornnery` para módulos específicos (dev, desktop, jogos) e permitir reuso entre hosts.
+- **Windows**
+  - [ ] Versionar um `dots/windows/config.yml` de exemplo usado por `install.ps1`, descrevendo firewall, rede e WSL.
+  - [ ] Integrar a lista `packages/*.json` ao fluxo do `install.ps1` (winget/Chocolatey) para instalar o mesmo toolkit CLI/dev.
+  - [ ] Automatizar as customizações do `TODO.md` (taskbar, developer mode, hotkeys) dentro do script principal.
+  - [ ] Provisionar Nerd Fonts, temas de terminal e Oh My Posh alinhados com as configurações de Linux/macOS.
+  - [ ] Documentar o passo de sincronizar os dotfiles (Windows Terminal, PowerShell profile) após a execução do script.
+- **WSL**
+  - [ ] Definir distribuição padrão (ex.: Debian) e script `wsl-setup.sh` que reutilize `dots/linux/debian/` para bootstrap automático.
+  - [ ] Automatizar a cópia/symlink dos dotfiles para `$HOME` dentro do WSL, reaproveitando `home/utils`.
+  - [ ] Configurar integração com Docker Desktop/USBIPD e compartilhamento de SSH/GPG com o host Windows.
+  - [ ] Documentar fluxo de atualização (`maintenance.sh`) adaptado para WSL.

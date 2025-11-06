@@ -1,4 +1,0 @@
-Terminal-Icons
-PS-Menu
-Graphical
-BurntToast # https://github.com/Windos/BurntToast

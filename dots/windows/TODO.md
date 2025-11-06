@@ -174,3 +174,5 @@ Remover pacotes
 ## Git
 
 - [] Configurar git
+
+https://github.com/pyenv-win/pyenv-win
