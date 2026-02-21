@@ -4,6 +4,47 @@ set -euo pipefail
 
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+BASE_PACKAGES=(
+    build-essential
+    ninja-build
+    cmake
+    make
+    gettext
+    curl
+    wget
+    git
+    gh
+    htop
+    btop
+    tree
+    python3
+    python3-pip
+    vim
+    tmux
+    zsh
+    fzf
+    ripgrep
+    fd-find
+    unzip
+    eza
+    bat
+    stow
+    nodejs
+    npm
+    golang
+    rustc
+    fastfetch
+)
+
+OH_MY_ZSH_PLUGINS=(
+    "zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions"
+    "zsh-syntax-highlighting|https://github.com/zsh-users/zsh-syntax-highlighting.git"
+    "fzf-tab|https://github.com/Aloxaf/fzf-tab"
+    "zsh-completions|https://github.com/zsh-users/zsh-completions"
+)
+
+STOW_MODULES=(tmux zsh bash nvim)
+
 if [[ -t 1 ]]; then
     C_RESET="\033[0m"
     C_BOLD="\033[1m"
@@ -40,6 +81,10 @@ log_warn() {
     echo -e "${C_YELLOW}↷${C_RESET} $1"
 }
 
+has_command() {
+    command -v "$1" >/dev/null 2>&1
+}
+
 ask_yes_no() {
     local prompt="$1"
     local answer
@@ -60,6 +105,16 @@ run_step() {
     fi
 }
 
+install_packages() {
+    if has_command nala; then
+        log_info "Using nala package manager..."
+        sudo nala install -y "$@"
+    else
+        log_warn "Nala not found; falling back to apt..."
+        sudo apt install -y "$@"
+    fi
+}
+
 update_system() {
     log_info "Updating package lists..."
     sudo apt update && sudo apt upgrade -y
@@ -74,44 +129,7 @@ install_nala() {
 
 install_base_packages() {
     log_info "Installing base packages..."
-    if command -v nala >/dev/null 2>&1; then
-        sudo nala install -y \
-            build-essential \
-            ninja-build \
-            cmake \
-            make \
-            gettext \
-            curl \
-            wget \
-            git \
-            gh \
-            htop \
-            btop \
-            tree \
-            python3 \
-            python3-pip \
-            vim \
-            tmux \
-            zsh \
-            fzf \
-            ripgrep \
-            fd-find \
-            unzip \
-            eza \
-            bat \
-            stow \
-            nodejs \
-            npm \
-            golang \
-            rustc \
-            fastfetch
-    else
-        log_warn "Nala not found; falling back to apt..."
-        sudo apt install -y \
-            build-essential ninja-build cmake make gettext curl wget git gh htop btop tree \
-            python3 python3-pip vim tmux zsh fzf ripgrep fd-find unzip eza bat stow \
-            nodejs npm golang rustc fastfetch
-    fi
+    install_packages "${BASE_PACKAGES[@]}"
     log_ok "Base package step done."
 }
 
@@ -144,9 +162,9 @@ install_oh_my_zsh() {
 }
 
 clone_or_update_plugin() {
-    local repo_url="$1"
-    local plugin_name="$2"
-    local plugin_dir="$ZSH_CUSTOM_DIR/plugins/$plugin_name"
+    local plugin_name="$1"
+    local repo_url="$2"
+    local plugin_dir="$3/$plugin_name"
 
     if [ -d "$plugin_dir/.git" ]; then
         log_info "Updating $plugin_name..."
@@ -159,13 +177,17 @@ clone_or_update_plugin() {
 
 install_oh_my_zsh_plugins() {
     log_info "Installing Oh My Zsh plugins..."
-    ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-    mkdir -p "$ZSH_CUSTOM_DIR/plugins"
+    local zsh_custom_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    local plugins_dir="$zsh_custom_dir/plugins"
+    local plugin_entry plugin_name repo_url
 
-    clone_or_update_plugin "https://github.com/zsh-users/zsh-autosuggestions" "zsh-autosuggestions"
-    clone_or_update_plugin "https://github.com/zsh-users/zsh-syntax-highlighting.git" "zsh-syntax-highlighting"
-    clone_or_update_plugin "https://github.com/Aloxaf/fzf-tab" "fzf-tab"
-    clone_or_update_plugin "https://github.com/zsh-users/zsh-completions" "zsh-completions"
+    mkdir -p "$plugins_dir"
+
+    for plugin_entry in "${OH_MY_ZSH_PLUGINS[@]}"; do
+        plugin_name="${plugin_entry%%|*}"
+        repo_url="${plugin_entry#*|}"
+        clone_or_update_plugin "$plugin_name" "$repo_url" "$plugins_dir"
+    done
 
     log_ok "Oh My Zsh plugins step done."
 }
@@ -227,26 +249,29 @@ ask_install() {
 
 run_stow_session() {
     log_info "Settings dotfiles with stow..."
-    ask_install "tmux"
-    ask_install "zsh"
-    ask_install "bash"
-    ask_install "nvim"
+    local module
+    for module in "${STOW_MODULES[@]}"; do
+        ask_install "$module"
+    done
     log_ok "Stow session finished."
 }
 
-log_section "=== Debian bootstrap (interactive sessions) ==="
+run_bootstrap_sessions() {
+    run_step "Run system update/upgrade?" "Skipping system update/upgrade." update_system
+    run_step "Install/ensure Nala?" "Skipping Nala installation." install_nala
+    run_step "Install base packages (dev tools, shell tools, runtimes)?" "Skipping base package installation." install_base_packages
+    run_step "Install uv?" "Skipping uv installation." install_uv
+    run_step "Install pnpm?" "Skipping pnpm installation." install_pnpm
+    run_step "Install bun?" "Skipping bun installation." install_bun
+    run_step "Install/ensure Oh My Zsh?" "Skipping Oh My Zsh installation." install_oh_my_zsh
+    run_step "Install/update Oh My Zsh plugins?" "Skipping Oh My Zsh plugins." install_oh_my_zsh_plugins
+    run_step "Build and install Neovim from source?" "Skipping Neovim source install." install_neovim_from_source
+    run_step "Configure Git global user/email and optional GitHub CLI login?" "Skipping Git/GitHub configuration." configure_git
+    run_step "Run dotfiles stow session?" "Skipping dotfiles stow session." run_stow_session
+}
 
-run_step "Run system update/upgrade?" "Skipping system update/upgrade." update_system
-run_step "Install/ensure Nala?" "Skipping Nala installation." install_nala
-run_step "Install base packages (dev tools, shell tools, runtimes)?" "Skipping base package installation." install_base_packages
-run_step "Install uv?" "Skipping uv installation." install_uv
-run_step "Install pnpm?" "Skipping pnpm installation." install_pnpm
-run_step "Install bun?" "Skipping bun installation." install_bun
-run_step "Install/ensure Oh My Zsh?" "Skipping Oh My Zsh installation." install_oh_my_zsh
-run_step "Install/update Oh My Zsh plugins?" "Skipping Oh My Zsh plugins." install_oh_my_zsh_plugins
-run_step "Build and install Neovim from source?" "Skipping Neovim source install." install_neovim_from_source
-run_step "Configure Git global user/email and optional GitHub CLI login?" "Skipping Git/GitHub configuration." configure_git
-run_step "Run dotfiles stow session?" "Skipping dotfiles stow session." run_stow_session
+log_section "=== Debian bootstrap (interactive sessions) ==="
+run_bootstrap_sessions
 
 log_section "Bootstrap finished."
 
