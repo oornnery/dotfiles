@@ -3,12 +3,14 @@
 This folder runs the LiteLLM proxy service.
 
 ## What is here
+
 - `docker-compose.yml`: LiteLLM service definition.
 - `.env`: required runtime configuration (image/container/port and app variables).
 - `.env-example`: example env file.
 - `litellm-config.yaml`: LiteLLM configuration.
 
 ## Requirements
+
 - Docker + Docker Compose installed.
 - The `database` stack must be running first.
 - The `monitoring` stack is optional, but recommended.
@@ -17,22 +19,27 @@ This folder runs the LiteLLM proxy service.
   - `monitoring-network`
 
 ## Start
+
 Create local env file first:
+
 ```bash
 cp .env-example .env
 ```
 
 Then start:
+
 ```bash
 docker compose up -d
 ```
 
 ## Stop
+
 ```bash
 docker compose down
 ```
 
 ## Notes
+
 - LiteLLM reads DB connection from:
   - `LITELLM_DB_USER`
   - `LITELLM_DB_PASSWORD`

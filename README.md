@@ -20,7 +20,7 @@ Personal terminal and editor setup for Debian, managed with GNU Stow.
 - `nvim/` → Neovim configuration (LazyVim-based)
 - `docs/` → Tool-specific cheatsheets and usage examples
 - `scripts/debian.sh` → Debian bootstrap script
-- `tmux/` → `.tmux.conf` 
+- `tmux/` → `.tmux.conf`
 - `hyprland/` → Hyprland config
 - `on-prem/` → local self-hosted stack (PostgreSQL, LiteLLM, Prometheus, Grafana)
 
@@ -87,24 +87,24 @@ stow -D -v -t ~ zsh
 
 ## What I use (stack)
 
-| Category             | Tool                                                | Usage                                  |
-| -------------------- | --------------------------------------------------- | -------------------------------------- |
-| Shell                | [zsh](https://www.zsh.org/) + [Oh My Zsh](https://ohmyz.sh/) | Main shell and terminal productivity   |
-| Shell fallback       | [bash](https://www.gnu.org/software/bash/)          | Compatibility and scripting            |
-| Editor               | [Neovim](https://neovim.io/) + [LazyVim](https://www.lazyvim.org/) | Development and text editing           |
-| Multiplexer          | [tmux](https://github.com/tmux/tmux)                | Terminal sessions and splits           |
-| Terminal UI          | [fastfetch](https://github.com/fastfetch-cli/fastfetch) | System summary on terminal startup     |
-| File navigation      | [eza](https://github.com/eza-community/eza) + tree  | Modern directory listing               |
-| File viewing         | [bat](https://github.com/sharkdp/bat) (`batcat`)    | `cat` with syntax highlighting         |
-| Search               | [fzf](https://github.com/junegunn/fzf) + [ripgrep](https://github.com/BurntSushi/ripgrep) + [fd](https://github.com/sharkdp/fd) | Fuzzy search, text search, file search |
-| VCS                  | [git](https://git-scm.com/) + [gh](https://cli.github.com/) | Version control and GitHub CLI         |
-| OS packages          | [nala](https://gitlab.com/volian/nala) + [apt](https://wiki.debian.org/Apt) | Debian package install and updates     |
-| Dotfiles             | [stow](https://www.gnu.org/software/stow/)          | Symlink-based dotfile management       |
-| JavaScript runtime   | [node](https://nodejs.org/) + [npm](https://www.npmjs.com/) + [pnpm](https://pnpm.io/) + [bun](https://bun.sh/) | JS/TS projects                         |
-| Python               | [python3](https://www.python.org/) + [pip](https://pip.pypa.io/) + [uv](https://docs.astral.sh/uv/) | Scripts and Python environments        |
-| Python quality/tools | [ruff](https://docs.astral.sh/ruff/) + [ty](https://docs.astral.sh/ty/) | Lint/format and type checking          |
-| Markdown tooling     | [rumdl](https://rumdl.dev/)                         | Markdown linting and formatting        |
-| Other languages      | [golang](https://go.dev/) + [rustc](https://www.rust-lang.org/) | Go and Rust development                |
+| Category             | Tool                                                                                                                                                           | Usage                                  |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| Shell                | [zsh](https://www.zsh.org/) + [Oh My Zsh](https://ohmyz.sh/)                                                                                                   | Main shell and terminal productivity   |
+| Shell fallback       | [bash](https://www.gnu.org/software/bash/)                                                                                                                     | Compatibility and scripting            |
+| Editor               | [Neovim](https://neovim.io/) + [LazyVim](https://www.lazyvim.org/)                                                                                             | Development and text editing           |
+| Multiplexer          | [tmux](https://github.com/tmux/tmux)                                                                                                                           | Terminal sessions and splits           |
+| Terminal UI          | [fastfetch](https://github.com/fastfetch-cli/fastfetch)                                                                                                        | System summary on terminal startup     |
+| File navigation      | [eza](https://github.com/eza-community/eza) + tree                                                                                                             | Modern directory listing               |
+| File viewing         | [bat](https://github.com/sharkdp/bat) (`batcat`)                                                                                                               | `cat` with syntax highlighting         |
+| Search               | [fzf](https://github.com/junegunn/fzf) + [ripgrep](https://github.com/BurntSushi/ripgrep) + [fd](https://github.com/sharkdp/fd)                                | Fuzzy search, text search, file search |
+| VCS                  | [git](https://git-scm.com/) + [gh](https://cli.github.com/)                                                                                                    | Version control and GitHub CLI         |
+| OS packages          | [nala](https://gitlab.com/volian/nala) + [apt](https://wiki.debian.org/Apt)                                                                                    | Debian package install and updates     |
+| Dotfiles             | [stow](https://www.gnu.org/software/stow/)                                                                                                                     | Symlink-based dotfile management       |
+| JavaScript runtime   | [node](https://nodejs.org/) + [npm](https://www.npmjs.com/) + [pnpm](https://pnpm.io/) + [bun](https://bun.sh/)                                                | JS/TS projects                         |
+| Python               | [python3](https://www.python.org/) + [pip](https://pip.pypa.io/) + [uv](https://docs.astral.sh/uv/)                                                            | Scripts and Python environments        |
+| Python quality/tools | [ruff](https://docs.astral.sh/ruff/) + [ty](https://docs.astral.sh/ty/)                                                                                        | Lint/format and type checking          |
+| Markdown tooling     | [rumdl](https://rumdl.dev/)                                                                                                                                    | Markdown linting and formatting        |
+| Other languages      | [golang](https://go.dev/) + [rustc](https://www.rust-lang.org/)                                                                                                | Go and Rust development                |
 | Build tools          | [make](https://www.gnu.org/software/make/) + [cmake](https://cmake.org/) + [ninja](https://ninja-build.org/) + [gcc](https://gcc.gnu.org/) (`build-essential`) | Compilation and tooling                |
 
 ## Cheatsheet
