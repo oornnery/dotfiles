@@ -2,6 +2,17 @@
 
 Personal terminal and editor setup for Debian, managed with GNU Stow.
 
+## Table of contents
+
+- [What is included](#what-is-included)
+- [Quick install](#quick-install)
+- [On-Prem stack](#on-prem-stack)
+- [Stow usage (manual)](#stow-usage-manual)
+- [Neovim](#neovim)
+- [What I use (stack)](#what-i-use-stack)
+- [Cheatsheet](#cheatsheet)
+- [Notes](#notes)
+
 ## What is included
 
 - `bash/` → `.bashrc`
@@ -11,6 +22,7 @@ Personal terminal and editor setup for Debian, managed with GNU Stow.
 - `scripts/debian.sh` → Debian bootstrap script
 - `tmux/` → `.tmux.conf` 
 - `hyprland/` → Hyprland config
+- `on-prem/` → local self-hosted stack (PostgreSQL, LiteLLM, Prometheus, Grafana)
 
 ## Quick install
 
@@ -28,6 +40,26 @@ bash scripts/debian.sh
 ```
 
 This script installs base packages (build tools, git, zsh, tmux, fzf, ripgrep, fd, eza, bat, node, go, rust, etc), installs Neovim, and sets up dotfiles with `stow`.
+
+## On-Prem stack
+
+The repository also includes a local observability + LLM stack under `on-prem/`:
+
+- `database/` → PostgreSQL
+- `litellm/` → LiteLLM proxy
+- `monitoring/` → Prometheus + Grafana
+
+Central guide:
+
+- `on-prem/README.md`
+
+Quick start:
+
+```bash
+cd on-prem/database && cp -n .env-example .env && docker compose up -d
+cd ../litellm && cp -n .env-example .env && docker compose up -d
+cd ../monitoring && cp -n .env-example .env && docker compose up -d
+```
 
 ## Stow usage (manual)
 

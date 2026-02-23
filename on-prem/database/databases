@@ -1,0 +1,5 @@
+# One entry per line: db_name:db_user:db_pass
+# You can reference .env vars using $VAR or ${VAR}.
+# Example:
+litellm:${LITELLM_DB_USER}:${LITELLM_DB_PASSWORD}
+# analytics:${ANALYTICS_DB_USER}:${ANALYTICS_DB_PASSWORD}

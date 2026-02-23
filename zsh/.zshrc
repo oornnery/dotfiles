@@ -148,16 +148,8 @@ alias install="sudo nala install"
 alias reload="exec zsh"
 alias edit="nvim ~/.zshrc"
 
-# =============================================================================
-# ESTÉTICA E WSL
-# =============================================================================
-
-# Mostra o fastfetch limpo sempre que abrir o terminal
-fastfetch
-
-
 # pnpm
-export PNPM_HOME="/home/oornnery/.local/share/pnpm"
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -165,8 +157,17 @@ esac
 # pnpm end
 
 # bun completions
-[ -s "/home/oornnery/.bun/_bun" ] && source "/home/oornnery/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+# =============================================================================
+# ESTÉTICA E WSL
+# =============================================================================
+
+# Mostra o fastfetch limpo sempre que abrir o terminal
+fastfetch
+
