@@ -200,13 +200,13 @@ install_neovim_from_source() {
     else
         git clone https://github.com/neovim/neovim /tmp/neovim
     fi
-    cd /tmp/neovim
+    cd /tmp/neovim || exit 1
     git fetch origin stable
     git checkout -B stable origin/stable
     git reset --hard origin/stable
     make CMAKE_BUILD_TYPE=Release
     sudo make install
-    cd "$DOTFILES_ROOT"
+    cd "$DOTFILES_ROOT" || exit 1
     rm -rf /tmp/neovim
     log_ok "Neovim install step done."
 }
@@ -274,4 +274,3 @@ log_section "=== Debian bootstrap (interactive sessions) ==="
 run_bootstrap_sessions
 
 log_section "Bootstrap finished."
-
