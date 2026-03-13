@@ -1,0 +1,47 @@
+{
+  "recommendations": [
+    // Python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.debugpy",
+    "ms-python.vscode-python-envs",
+    "charliermarsh.ruff",
+    "fastapilabs.fastapi-vscode",
+    "kevinrose.vsc-python-indent",
+    "njqdev.vscode-python-typehint",
+
+    // Web / Frontend
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.live-server",
+    "solidjs-community.solid-snippets",
+
+    // Templates / Markup
+    "jpscaletti.jinja-jx",
+    "noxiz.jinja-snippets",
+    "wholroyd.jinja",
+    "rvben.rumdl",
+
+    // Shells / Scripting
+    "ms-vscode.powershell",
+    "jnoortheen.xonsh",
+
+    // Git / DevOps
+    "eamodio.gitlens",
+    "github.vscode-github-actions",
+
+    // AI assistants
+    "anthropic.claude-code",
+    "github.copilot-chat",
+    "openai.chatgpt",
+    "ms-windows-ai-studio.microsoft-ai-tools-pack",
+    "ms-windows-ai-studio.windows-ai-studio",
+
+    // Utilities / UI
+    "ms-toolsai.datawrangler",
+    "usernamehw.errorlens",
+    "naumovs.color-highlight",
+    "enkia.tokyo-night"
+  ]
+}

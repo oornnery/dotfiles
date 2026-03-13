@@ -1,0 +1,198 @@
+{
+    // =========================
+    // THEME & UI
+    // =========================
+    "workbench.colorTheme": "Tokyo Night",
+
+    // =========================
+    // EDITOR EXPERIENCE
+    // =========================
+
+    "editor.fontLigatures": true,
+    "editor.smoothScrolling": true,
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.minimap.enabled": false,
+    "editor.stickyScroll.enabled": true,
+    "editor.renderWhitespace": "boundary",
+    "editor.guides.bracketPairs": true,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.indentation": true,
+    "editor.guides.highlightActiveIndentation": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.wordWrap": "on",
+    "editor.lineHeight": 1.6,
+    "editor.cursorBlinking": "smooth",
+
+    // Format files automatically
+    "editor.formatOnSave": true,
+
+    // Python Ruff fixes
+    "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "always",
+        "source.organizeImports.ruff": "always"
+    },
+
+    // =========================
+    // NAVIGATION
+    // =========================
+
+    "breadcrumbs.enabled": true,
+    "outline.showVariables": true,
+    "explorer.compactFolders": false,
+    "workbench.tree.indent": 14,
+    "workbench.editor.enablePreview": false,
+    "workbench.startupEditor": "none",
+
+    // =========================
+    // SEARCH PERFORMANCE
+    // =========================
+
+    "search.exclude": {
+        "**/.git": true,
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/.ruff_cache": true,
+        "**/.rumdl_cache": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/build": true
+    },
+
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/.venv/**": true,
+        "**/__pycache__/**": true,
+        "**/.pytest_cache/**": true,
+        "**/.ruff_cache/**": true,
+        "**/node_modules/**": true
+    },
+
+    // =========================
+    // GIT
+    // =========================
+
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+
+    // =========================
+    // TERMINAL
+    // =========================
+
+    "terminal.integrated.enablePersistentSessions": true,
+    "terminal.integrated.cursorStyle": "line",
+
+    // =========================
+    // MARKDOWN
+    // =========================
+
+    "[markdown]": {
+        "editor.defaultFormatter": "rvben.rumdl"
+    },
+
+    "markdown.preview.breaks": true,
+    "markdown.preview.typographer": true,
+    "markdown.preview.scrollPreviewWithEditor": true,
+
+    // =========================
+    // PYTHON
+    // =========================
+
+    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.indexing": true,
+    "python.analysis.useLibraryCodeForTypes": true,
+
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.callArgumentNames": "all",
+
+    "python.analysis.completeFunctionParens": true,
+
+    "python.analysis.exclude": [
+        "**/.venv/**",
+        "**/__pycache__/**",
+        "**/.pytest_cache/**"
+    ],
+
+    "ruff.nativeServer": "on",
+
+    // =========================
+    // TYPESCRIPT / JAVASCRIPT
+    // =========================
+
+    "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+    "js/ts.suggest.autoImports": true,
+    "js/ts.preferences.importModuleSpecifier": "non-relative",
+
+    // =========================
+    // LANGUAGE FORMATTERS
+    // =========================
+
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+
+    "[css]": {
+        "editor.defaultFormatter": "vscode.css-language-features"
+    },
+
+    // =========================
+    // TAILWIND
+    // =========================
+
+    "tailwindCSS.includeLanguages": {
+        "typescript": "javascript",
+        "typescriptreact": "javascript"
+    },
+
+    "tailwindCSS.emmetCompletions": true,
+
+    // =========================
+    // EMMET
+    // =========================
+
+    "emmet.includeLanguages": {
+        "typescriptreact": "html",
+        "javascript": "javascriptreact"
+    },
+
+    // =========================
+    // AI ASSISTANTS
+    // =========================
+
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "github.copilot.editor.enableAutoCompletions": true,
+    "github.copilot.chat.localeOverride": "en",
+
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": true,
+        "markdown": true,
+        "scminput": false
+    },
+
+    "chat.useAgentSkills": true,
+
+    "chat.tools.urls.autoApprove": {
+        "https://jx.scaletti.dev": true
+    },
+
+    "claudeCode.selectedModel": "opus",
+    "claudeCode.preferredLocation": "panel",
+
+    "chat.viewSessions.orientation": "stacked"
+}
