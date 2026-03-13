@@ -1,11 +1,12 @@
 # Dotfiles
 
-Personal terminal and editor setup for Debian, managed with GNU Stow.
+Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Stow on Linux.
 
 ## Table of contents
 
 - [What is included](#what-is-included)
 - [Quick install](#quick-install)
+- [Windows and WSL](#windows-and-wsl)
 - [Stow usage (manual)](#stow-usage-manual)
 - [Neovim](#neovim)
 - [What I use (stack)](#what-i-use-stack)
@@ -17,9 +18,12 @@ Personal terminal and editor setup for Debian, managed with GNU Stow.
 - `bash/` → `.bashrc`
 - `zsh/` → `.zshrc` (Oh My Zsh + plugins)
 - `nvim/` → Neovim configuration (LazyVim-based)
+- `editor/` → VS Code and Zed settings for the Windows setup
 - `docs/` → Tool-specific cheatsheets and usage examples
 - `scripts/debian.sh` → Debian bootstrap script
+- `scripts/win.ps1` → Windows bootstrap/install script via `winget`
 - `tmux/` → `.tmux.conf`
+- `wsl/` → WSL configuration such as `.wslconfig`
 - `hyprland/` → Hyprland config
 
 ## Quick install
@@ -38,6 +42,28 @@ bash scripts/debian.sh
 ```
 
 This script installs base packages (build tools, git, zsh, tmux, fzf, ripgrep, fd, eza, bat, node, go, rust, etc), installs Neovim, and sets up dotfiles with `stow`.
+
+## Windows and WSL
+
+The repository now also includes Windows-oriented setup files:
+
+- `editor/README.md` documents the shared VS Code and Zed setup, required tools, and frontend defaults.
+- `editor/Code/.vscode/` contains workspace recommendations and settings for VS Code.
+- `editor/Zed/.zed/settings.json` contains the Zed profile used in this setup.
+- `scripts/win.ps1` installs the base Windows apps and developer tools with `winget`.
+- `wsl/.wslconfig` contains the local WSL2 resource profile.
+
+Typical flow:
+
+```powershell
+pwsh -File .\scripts\win.ps1
+```
+
+Then review the editor docs:
+
+```text
+editor/README.md
+```
 
 ## Stow usage (manual)
 
@@ -70,6 +96,7 @@ stow -D -v -t ~ zsh
 | Shell                | [zsh](https://www.zsh.org/) + [Oh My Zsh](https://ohmyz.sh/)                                                                                                   | Main shell and terminal productivity   |
 | Shell fallback       | [bash](https://www.gnu.org/software/bash/)                                                                                                                     | Compatibility and scripting            |
 | Editor               | [Neovim](https://neovim.io/) + [LazyVim](https://www.lazyvim.org/)                                                                                             | Development and text editing           |
+| GUI editors          | [VS Code](https://code.visualstudio.com/) + [Zed](https://zed.dev/)                                                                                             | Windows editor setup                   |
 | Multiplexer          | [tmux](https://github.com/tmux/tmux)                                                                                                                           | Terminal sessions and splits           |
 | Terminal UI          | [fastfetch](https://github.com/fastfetch-cli/fastfetch)                                                                                                        | System summary on terminal startup     |
 | File navigation      | [eza](https://github.com/eza-community/eza) + tree                                                                                                             | Modern directory listing               |
@@ -78,6 +105,7 @@ stow -D -v -t ~ zsh
 | VCS                  | [git](https://git-scm.com/) + [gh](https://cli.github.com/)                                                                                                    | Version control and GitHub CLI         |
 | OS packages          | [nala](https://gitlab.com/volian/nala) + [apt](https://wiki.debian.org/Apt)                                                                                    | Debian package install and updates     |
 | Dotfiles             | [stow](https://www.gnu.org/software/stow/)                                                                                                                     | Symlink-based dotfile management       |
+| Windows packages     | [winget](https://learn.microsoft.com/windows/package-manager/winget/)                                                                                          | Windows bootstrap and app installs     |
 | JavaScript runtime   | [node](https://nodejs.org/) + [npm](https://www.npmjs.com/) + [pnpm](https://pnpm.io/) + [bun](https://bun.sh/)                                                | JS/TS projects                         |
 | Python               | [python3](https://www.python.org/) + [pip](https://pip.pypa.io/) + [uv](https://docs.astral.sh/uv/)                                                            | Scripts and Python environments        |
 | Python quality/tools | [ruff](https://docs.astral.sh/ruff/) + [ty](https://docs.astral.sh/ty/)                                                                                        | Lint/format and type checking          |
@@ -123,4 +151,6 @@ stow -D -v -t ~ zsh
 ## Notes
 
 - The `scripts/debian.sh` script asks for confirmation before applying each module with `stow`.
+- The Windows side is intentionally separate from the Linux `stow` flow and is documented under `editor/` plus `scripts/win.ps1`.
+- `wsl/.wslconfig` is machine-level configuration and should be adapted to the RAM/CPU available on the host.
 - If a destination file already exists (for example `~/.zshrc`), back it up first to avoid conflicts.
