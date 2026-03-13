@@ -11,7 +11,7 @@
     "editor.fontLigatures": true,
     "editor.smoothScrolling": true,
     "editor.cursorSmoothCaretAnimation": "on",
-    "editor.minimap.enabled": false,
+    "editor.minimap.enabled": true,
     "editor.stickyScroll.enabled": true,
     "editor.renderWhitespace": "boundary",
     "editor.guides.bracketPairs": true,
