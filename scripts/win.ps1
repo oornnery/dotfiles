@@ -1,67 +1,56 @@
-winget install `
-    # Essential
-    --id 7zip.7zip `
-    --id VideoLAN.VLC `
-    --id TheDocumentFoundation.LibreOffice `
-    --id Google.GoogleDrive `
-    --id Notion.Notion `
+winget install MartiCliment.UniGetUI flick9000.WinScript astral-sh.uv Git.Git GitHub.cli Microsoft.PowerShell
 
-    # System tools
-    --id flick9000.WinScript `
-    --id MartiCliment.UniGetUI `
-    --id 9P8LTPGCBZXD ` # Wintoys
-    --id 9PM860492SZD ` # PC Manager
+uv python install
+uv python update-shell
 
-    # Browser
-    --id Zen-Team.Zen-Browser `
-    --id Brave.Brave `
+$userProfile = [Environment]::GetFolderPath("UserProfile")
+$oneDriveRoot = Join-Path $userProfile "OneDrive"
 
-    # MS tools
-    --id Microsoft.VCRedist.2013.x64 `
-    --id Microsoft.VCRedist.2013.x86 `
-    --id Microsoft.VCRedist.2015+.x64 `
-    --id Microsoft.VCRedist.2015+.x86 `
+function Set-KnownFolderPath {
+	param(
+		[Parameter(Mandatory = $true)][string]$Name,
+		[Parameter(Mandatory = $true)][string]$RelativePath
+	)
 
-    # Games
-    --id Ryochan7.DS4Windows `
-    --id Nefarius.HidHide `
-    --id ViGEm.ViGEmBus `
-    --id EpicGames.EpicGamesLauncher `
-    --id RockstarGames.Launcher `
-    --id Mojang.MinecraftLauncher `
-    --id ElectronicArts.EADesktop `
-    --id Blitz.Blitz `
-    --id Overwolf.CurseForge `
-    --id RiotGames.LeagueOfLegends.BR `
+	$target = Join-Path $userProfile $RelativePath
+	New-Item -ItemType Directory -Path $target -Force | Out-Null
 
-    # Dev tools
-    --id Microsoft.WSL `
-    --id Git.Git `
-    --id GitHub.cli `
-    --id Microsoft.PowerShell `
-    --id Microsoft.WindowsTerminal `
-    --id JanDeDobbeleer.OhMyPosh `
+	Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -Name $Name -Value "%USERPROFILE%\$RelativePath"
+	Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name $Name -Value $target
 
-    # Dev apps
-    --id GitHub.GitHubDesktop `
-    --id Microsoft.VisualStudioCode `
-    --id Microsoft.VisualStudioCode.CLI `
-    --id ZedIndustries.Zed `
+	return $target
+}
 
-    # Dev stack
-    --id Docker.DockerDesktop `
-    --id OpenJS.NodeJS.LTS `
-    --id astral-sh.uv `
-    --id SQLite.SQLite `
+$knownFolders = @(
+	@{ Name = "Desktop"; RelativePath = "Desktop" },
+	@{ Name = "Personal"; RelativePath = "Documents" },
+	@{ Name = "{374DE290-123F-4565-9164-39C4925E467B}"; RelativePath = "Downloads" },
+	@{ Name = "My Pictures"; RelativePath = "Pictures" },
+	@{ Name = "My Music"; RelativePath = "Music" },
+	@{ Name = "My Video"; RelativePath = "Videos" },
+	@{ Name = "Favorites"; RelativePath = "Favorites" },
+	@{ Name = "Links"; RelativePath = "Links" },
+	@{ Name = "Searches"; RelativePath = "Searches" },
+	@{ Name = "Contacts"; RelativePath = "Contacts" },
+	@{ Name = "{4C5C32FF-BB9D-43B0-BF5C-BAEC0C46B74A}"; RelativePath = "Saved Games" }
+)
 
-    # AI tools
-    --id OnOff.Onlook `
-    --id Anthropic.ClaudeCode `
-    --id Anthropic.Claude `
-    --id 9PLM9XGG6VKS ` # Codex
-    --id Perplexity.Comet `
-    --id ElementLabs.LMStudio `
-    --id Ollama.Ollama `
+foreach ($folder in $knownFolders) {
+	$current = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name $folder.Name -ErrorAction SilentlyContinue).$($folder.Name)
+	$target = Set-KnownFolderPath -Name $folder.Name -RelativePath $folder.RelativePath
 
+	if ($current -and $current -like "$oneDriveRoot*" -and ($current -ne $target)) {
+		if (Test-Path $current) {
+			Get-ChildItem -Path $current -Force -ErrorAction SilentlyContinue | ForEach-Object {
+				Move-Item -Path $_.FullName -Destination $target -Force -ErrorAction SilentlyContinue
+			}
+		}
+	}
+}
 
+New-Item -ItemType Directory -Path "$HOME/Documents/PowerShell" -Force | Out-Null
+Copy-Item "$HOME/dotfiles/windows/PowerShell/Microsoft.PowerShell_profile.ps1" "$HOME/Documents/PowerShell/Microsoft.PowerShell_profile.ps1" -Force
 
+# Apply folder location updates without reboot.
+Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+Start-Process explorer
