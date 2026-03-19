@@ -1,0 +1,24 @@
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+
+[user]
+	name = Fabio Souza
+  email = fabiohcsouza@outlook.com.br
+
+[alias]
+  st = status
+  co = checkout
+  br = branch
+  cm = commit
+  lg = log --oneline --graph --decorate
+
+[diff]
+  colorMoved = default
+
+[merge]
+  tool = nvim
