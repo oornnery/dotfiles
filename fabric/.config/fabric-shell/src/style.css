@@ -1,0 +1,365 @@
+:vars {
+    --bg: #11111b;
+    --bg2: #1e1e2e;
+    --fg: #cdd6f4;
+    --blue: #89b4fa;
+    --teal: #94e2d5;
+    --green: #a6e3a1;
+    --yellow: #f9e2af;
+    --red: #f38ba8;
+    --surface: alpha(var(--bg2), 0.88);
+    --surface2: alpha(var(--bg2), 0.65);
+    --border: alpha(var(--blue), 0.22);
+}
+
+* {
+    all: unset;
+    color: var(--fg);
+    font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", monospace;
+    font-size: 12px;
+    border-radius: 0;
+}
+
+#bar-inner {
+    min-height: 30px;
+    padding: 3px 8px;
+    border: solid 1px var(--border);
+    background-color: alpha(var(--bg), 0.74);
+    border-radius: 10px;
+}
+
+#launcher-button,
+#date-time,
+#active-window,
+#battery-widget,
+#memory-widget,
+#cpu-widget,
+#volume-widget,
+#brightness-widget,
+#keyboard-layout-widget,
+#wifi-widget,
+#bluetooth-widget,
+#workspaces {
+    background-color: var(--surface);
+    padding: 0 10px;
+    min-height: 28px;
+    border-radius: 8px;
+}
+
+#battery-widget,
+#memory-widget,
+#cpu-widget,
+#volume-widget,
+#brightness-widget,
+#keyboard-layout-widget,
+#wifi-widget,
+#bluetooth-widget {
+    padding: 0 6px;
+}
+
+#active-window {
+    min-width: 260px;
+    padding: 0 8px;
+}
+
+#active-window label {
+    font-weight: 600;
+    min-width: 220px;
+}
+
+#workspaces {
+    padding: 4px;
+}
+
+#workspaces>button {
+    background-color: var(--surface2);
+    padding: 0 8px;
+    min-width: 18px;
+    min-height: 24px;
+    border-radius: 7px;
+}
+
+#workspaces>button>label {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+#control-popup-slider,
+#control-popup-calendar,
+#control-popup-battery,
+#control-popup-memcpu,
+#control-popup-network {
+    background-color: alpha(var(--bg), 0.96);
+    border: solid 1px var(--border);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+#control-popup-slider {
+    min-width: 220px;
+}
+
+#control-popup-calendar {
+    min-width: 220px;
+}
+
+#control-popup-battery {
+    min-width: 0;
+    padding: 10px 10px 8px 10px;
+}
+
+#control-popup-memcpu {
+    min-width: 0;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+#memory-popup #control-popup-memcpu {
+    min-width: 280px;
+}
+
+#cpu-popup #control-popup-memcpu {
+    min-width: 340px;
+}
+
+#control-popup-network {
+    min-width: 520px;
+}
+
+#net-status,
+#net-action {
+    color: alpha(var(--fg), 0.9);
+}
+
+#net-entry {
+    background-color: var(--surface);
+    border: solid 1px alpha(var(--fg), 0.12);
+    border-radius: 4px;
+    padding: 6px 8px;
+}
+
+#net-toggle {
+    min-width: 44px;
+    min-height: 22px;
+}
+
+#net-toggle slider {
+    background-color: var(--fg);
+    border-radius: 4px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+#net-toggle:checked {
+    background-color: alpha(var(--blue), 0.35);
+    border-radius: 4px;
+}
+
+#net-list {
+    padding: 2px;
+}
+
+#net-row {
+    background-color: alpha(var(--bg2), 0.62);
+    border: solid 1px alpha(var(--fg), 0.08);
+    border-radius: 4px;
+    padding: 4px;
+}
+
+#net-row-label {
+    font-size: 11px;
+}
+
+#net-chip-btn,
+#net-chip-btn-danger {
+    background-color: var(--surface);
+    border: solid 1px alpha(var(--fg), 0.12);
+    border-radius: 4px;
+    padding: 2px 7px;
+}
+
+#net-chip-btn:hover {
+    background-color: alpha(var(--blue), 0.2);
+}
+
+#net-chip-btn-danger:hover {
+    background-color: alpha(var(--red), 0.2);
+}
+
+#net-empty {
+    color: alpha(var(--fg), 0.72);
+    padding: 6px 2px;
+}
+
+#control-popup-network button {
+    background-color: var(--surface);
+    border-radius: 4px;
+    padding: 3px 7px;
+}
+
+#control-popup-network button:hover {
+    background-color: alpha(var(--blue), 0.22);
+}
+
+#control-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+#control-slider {
+    min-width: 260px;
+}
+
+#control-subtitle {
+    color: alpha(var(--fg), 0.85);
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+#memcpu-summary {
+    color: alpha(var(--fg), 0.9);
+}
+
+#memcpu-table-header {
+    color: alpha(var(--fg), 0.72);
+    font-size: 11px;
+    padding: 2px 2px 4px 2px;
+    border-bottom: solid 1px alpha(var(--fg), 0.16);
+}
+
+#memcpu-proc-row {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    border-bottom: solid 1px alpha(var(--fg), 0.09);
+    padding: 3px 2px;
+    min-width: 220px;
+}
+
+#cpu-core-chip {
+    background-color: var(--surface);
+    border: solid 1px var(--border);
+    min-width: 68px;
+    min-height: 24px;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+#control-slider trough {
+    background-color: alpha(var(--fg), 0.18);
+    min-height: 6px;
+    border-radius: 4px;
+}
+
+#control-slider highlight {
+    background-color: var(--blue);
+    border-radius: 4px;
+}
+
+#control-slider slider {
+    background-color: var(--fg);
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 7px;
+}
+
+#control-popup-slider button,
+#control-popup-calendar button,
+#control-popup-battery button {
+    background-color: var(--surface);
+    border-radius: 7px;
+    padding: 4px 8px;
+}
+
+#control-popup-slider button:hover,
+#control-popup-calendar button:hover,
+#control-popup-battery button:hover {
+    background-color: alpha(var(--blue), 0.22);
+}
+
+#control-popup-battery button.active {
+    background-color: alpha(var(--blue), 0.32);
+    border: solid 1px alpha(var(--blue), 0.7);
+}
+
+#control-popup-network button.active {
+    background-color: alpha(var(--blue), 0.32);
+    border: solid 1px alpha(var(--blue), 0.7);
+}
+
+#battery-profile-status {
+    color: alpha(var(--fg), 0.9);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+#workspaces>button.active {
+    background-color: var(--blue);
+    padding: 0 18px;
+}
+
+#workspaces>button.urgent {
+    background-color: var(--red);
+}
+
+#workspaces>button.empty {
+    background-color: alpha(var(--fg), 0.15);
+}
+
+#launcher-button:hover,
+#workspaces>button:hover,
+#launcher-item:hover,
+#launcher-close:hover {
+    background-color: alpha(var(--blue), 0.22);
+}
+
+#date-time>label {
+    font-weight: 700;
+}
+
+#launcher-root {
+    background-color: alpha(var(--bg), 0.96);
+    border: solid 1px var(--border);
+    padding: 10px;
+    min-width: 560px;
+    min-height: 420px;
+    border-radius: 12px;
+}
+
+#launcher-header {
+    margin-bottom: 8px;
+}
+
+#launcher-search {
+    background-color: var(--surface);
+    padding: 8px 12px;
+    border-radius: 9px;
+}
+
+#launcher-close {
+    background-color: var(--surface);
+    min-width: 40px;
+    min-height: 40px;
+}
+
+#launcher-viewport {
+    padding: 4px;
+}
+
+#launcher-item {
+    background-color: var(--surface);
+    padding: 8px 10px;
+    margin: 2px 0;
+    border-radius: 9px;
+}
+
+#launcher-item-title {
+    font-weight: 700;
+}
+
+#launcher-item-subtitle {
+    color: alpha(var(--fg), 0.72);
+    font-size: 12px;
+}
