@@ -1,173 +1,183 @@
-# Força o carregamento dos completions extras
-autoload -U compinit && compinit
+# ~/.zshrc
+# This file is sourced for interactive shells.
+# Put aliases, completions, plugins, keybindings, prompt, and interactive UX here.
 
-# Integração do FZF (Garante que a busca visual funcione)
-source <(fzf --zsh)
+# -------------------------------
+# Oh My Zsh
+# -------------------------------
 
-# If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
-
-# Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time Oh My Zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+# If you later switch to starship, set ZSH_THEME="" and initialize starship below.
 ZSH_THEME="robbyrussell"
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
-# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
-
-# Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-# Lista de plugins a serem carregados pelo Oh My Zsh
+# Plugins:
+# - git: git aliases and helpers
+# - gh: GitHub CLI helpers
+# - sudo: double-ESC to prepend sudo in many setups
+# - z: fast directory jumping
+# - fzf-tab: better tab completion UI
+# - zsh-autosuggestions: fish-like command suggestions
+# - zsh-syntax-highlighting: command highlighting
+# - zsh-completions: extra completions
 plugins=(
-    # Plugins Nativos do Oh My Zsh
-    git           # Alias rápidos para o git (ex: gca, glg, gst)
-    gh            # Autocomplete para a GitHub CLI
-    z             # Navegação rápida por diretórios (jump)
-    sudo          # Aperte ESC duas vezes para colocar 'sudo' no início do comando
-    cp            # Barra de progresso ao usar o comando cp
-    command-not-found # Sugere pacotes quando um comando não existe
-    
-    # Plugins Customizados (que clonamos)
-    zsh-completions
-    zsh-autosuggestions
-    fzf-tab
-    
-    # IMPORTANTE: zsh-syntax-highlighting deve ser SEMPRE o ÚLTIMO plugin da lista!
-    zsh-syntax-highlighting
+  git
+  gh
+  sudo
+  z
+  zsh-completions
+  zsh-autosuggestions
+  fzf-tab
+  zsh-syntax-highlighting
 )
 
-source $ZSH/oh-my-zsh.sh
+source "$ZSH/oh-my-zsh.sh"
 
-source $HOME/.local/bin/env
+# -------------------------------
+# Completion and navigation
+# -------------------------------
 
-# User configuration
-
-export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
+# fzf shell integration
+# This enables keybindings and fuzzy completion features.
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
 fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch $(uname -m)"
+# Better completion styling
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --color=always $realpath'
+zstyle ':fzf-tab:complete:*' use-fzf-default-opts yes
 
-# Set personal aliases, overriding those provided by Oh My Zsh libs,
-# plugins, and themes. Aliases can be placed here, though Oh My Zsh
-# users are encouraged to define aliases within a top-level file in
-# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
-# - $ZSH_CUSTOM/aliases.zsh
-# - $ZSH_CUSTOM/macos.zsh
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+# -------------------------------
+# History
+# -------------------------------
 
-# =============================================================================
-# ALIASES MODERNOS (Substituindo ferramentas legadas pelas instaladas via nala)
-# =============================================================================
+# History file location
+HISTFILE="$HOME/.zhistory"
+HISTSIZE=10000
+SAVEHIST=10000
 
-# EZA - Substitui o LS
-alias ls="eza --color=always --icons=always"
-alias ll="eza -la --icons=always --git"
-alias tree="eza --tree --icons=always"
+# History behavior
+setopt APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt EXTENDED_HISTORY
 
-# BAT - Substitui o Cat (No debian o executável se chama batcat)
-alias cat="batcat"
-alias catp="batcat -p" # Cat sem os números de linha
+# -------------------------------
+# Shell behavior
+# -------------------------------
 
-# APT/NALA - Facilita a gestão de pacotes
-alias update="sudo nala update && sudo nala upgrade -y"
-alias install="sudo nala install"
+# Auto change into a directory by typing its name
+setopt AUTO_CD
 
-alias reload="exec zsh"
-alias edit="nvim ~/.zshrc"
+# Correct minor spelling mistakes in commands
+#setopt CORRECT
 
-# pnpm
-export PNPM_HOME="$HOME/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
+# Enable recursive globbing with **
+setopt EXTENDED_GLOB
 
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+# -------------------------------
+# Aliases
+# -------------------------------
 
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+# Safer core commands
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
 
+# Better listing with eza
+alias ls='eza --icons=always'
+alias ll='eza -la --icons=always --git'
+alias la='eza -la --icons=always'
+alias lt='eza --tree --icons=always'
 
-# =============================================================================
-# ESTÉTICA E WSL
-# =============================================================================
+# Better cat with bat
+alias cat='bat'
+alias catp='bat -p'
 
-# Mostra o fastfetch limpo sempre que abrir o terminal
-fastfetch
+# Nice-to-have CLI shortcuts
+alias grep='grep --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
 
+# Reload shell config quickly
+alias reload='exec zsh'
+
+# Quick editor shortcuts
+alias editz='nvim ~/.zshrc'
+alias edit-zenv='nvim ~/.zshenv'
+alias edit-zprofile='nvim ~/.zprofile'
+alias edit-zlogin='nvim ~/.zlogin'
+
+# Arch package management
+alias update='sudo pacman -Syu'
+alias install='sudo pacman -S'
+alias remove='sudo pacman -Rns'
+alias search='pacman -Ss'
+alias clean='sudo pacman -Sc'
+
+# Modern tooling
+alias py='python'
+alias v='nvim'
+alias g='git'
+alias lg='lazygit'
+
+# -------------------------------
+# Functions
+# -------------------------------
+
+# Create a directory and enter it
+mkcd() {
+  mkdir -p "$1" && cd "$1"
+}
+
+# Extract common archive types
+extract() {
+  if [[ -f "$1" ]]; then
+    case "$1" in
+      *.tar.bz2) tar xjf "$1" ;;
+      *.tar.gz)  tar xzf "$1" ;;
+      *.bz2)     bunzip2 "$1" ;;
+      *.rar)     unrar x "$1" ;;
+      *.gz)      gunzip "$1" ;;
+      *.tar)     tar xf "$1" ;;
+      *.tbz2)    tar xjf "$1" ;;
+      *.tgz)     tar xzf "$1" ;;
+      *.zip)     unzip "$1" ;;
+      *.7z)      7z x "$1" ;;
+      *) echo "Cannot extract: $1" ;;
+    esac
+  else
+    echo "File not found: $1"
+  fi
+}
+
+# -------------------------------
+# Prompt / UI extras
+# -------------------------------
+
+# Show fastfetch only once per login/session tree.
+# This avoids visual noise in every subshell.
+if [[ -o interactive ]] && [[ -z "${FASTFETCH_SHOWN:-}" ]]; then
+  export FASTFETCH_SHOWN=1
+  command -v fastfetch >/dev/null 2>&1 && fastfetch
+fi
+
+# -------------------------------
+# Optional tool initializations
+# -------------------------------
+
+# Enable zoxide later if you install it
+# eval "$(zoxide init zsh)"
+
+# Enable starship later if you switch from Oh My Zsh theme
+# eval "$(starship init zsh)"
+
+# Enable fnm later if you decide to use it instead of system node
+# eval "$(fnm env --use-on-cd)"
