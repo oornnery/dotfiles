@@ -21,7 +21,9 @@ Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Sto
 - `editor/` → VS Code and Zed settings for the Windows setup
 - `docs/` → Tool-specific cheatsheets and usage examples
 - `scripts/debian.sh` → Debian bootstrap script
-- `windows/scripts/win.ps1` → Windows bootstrap/install script via `winget`
+- `scripts/zsh.sh` → Oh My Zsh and plugin setup
+- `scripts/paru.sh` → Paru/AUR helper bootstrap for Arch
+- `scripts/arch-wsl.sh` → Arch Linux WSL bootstrap script
 - `tmux/` → `.tmux.conf`
 - `wsl/` → WSL configuration such as `.wslconfig`
 - `hyprland/` → Hyprland config
@@ -43,21 +45,20 @@ bash scripts/debian.sh
 
 This script installs base packages (build tools, git, zsh, tmux, fzf, ripgrep, fd, eza, bat, node, go, rust, etc), installs Neovim, and sets up dotfiles with `stow`.
 
+### 3) Other setup scripts
+
+- `bash scripts/zsh.sh` to install Oh My Zsh and the shell plugins used in this setup.
+- `bash scripts/paru.sh` to install `paru` on Arch Linux systems.
+- `bash scripts/arch-wsl.sh` to bootstrap an Arch Linux WSL environment.
+
 ## Windows and WSL
 
-The repository now also includes Windows-oriented setup files:
+The repository also includes Windows-oriented setup files:
 
 - `editor/README.md` documents the shared VS Code and Zed setup, required tools, and frontend defaults.
 - `editor/Code/.vscode/` contains workspace recommendations and settings for VS Code.
 - `editor/Zed/.zed/settings.json` contains the Zed profile used in this setup.
-- `windows/scripts/win.ps1` installs the base Windows apps and developer tools with `winget`.
 - `wsl/.wslconfig` contains the local WSL2 resource profile.
-
-Typical flow:
-
-```powershell
-pwsh -File .\scripts\win.ps1
-```
 
 Then review the editor docs:
 
@@ -151,6 +152,6 @@ stow -D -v -t ~ zsh
 ## Notes
 
 - The `scripts/debian.sh` script asks for confirmation before applying each module with `stow`.
-- The Windows side is intentionally separate from the Linux `stow` flow and is documented under `editor/` plus `windows/scripts/win.ps1`.
+- The Windows side is intentionally separate from the Linux `stow` flow and is documented under `editor/`.
 - `wsl/.wslconfig` is machine-level configuration and should be adapted to the RAM/CPU available on the host.
 - If a destination file already exists (for example `~/.zshrc`), back it up first to avoid conflicts.
