@@ -20,6 +20,7 @@ export XDG_STATE_HOME="$HOME/.local/state"
 path=(
   "$HOME/.local/bin"
   "$HOME/bin"
+  "$HOME/.local/npm/bin"
   $path
 )
 

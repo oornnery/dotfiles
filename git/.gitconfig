@@ -22,3 +22,5 @@
 
 [merge]
   tool = nvim
+[core]
+	quotepath = false

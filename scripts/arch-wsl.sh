@@ -30,7 +30,7 @@ pacman -S --needed \
   base-devel sudo git curl wget vim neovim bash zsh fastfetch jq tree htop \
   unzip zip tar gzip bzip2 xz openssl openssh ca-certificates \
   fzf fd ripgrep bat eza tmux stow btop lazygit lazydocker \
-  python python-pip uv ruff ty rust nim lua luarocks make cmake nodejs npm bun pnpm \
+  python python-pip uv ruff ty rust nim lua luarocks make cmake nodejs nvm npm bun pnpm \
   rumdl
 
 # Create user if needed

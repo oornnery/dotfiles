@@ -181,3 +181,5 @@ fi
 
 # Enable fnm later if you decide to use it instead of system node
 # eval "$(fnm env --use-on-cd)"
+
+source /usr/share/nvm/init-nvm.sh
