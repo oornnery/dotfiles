@@ -22,10 +22,11 @@ Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Sto
 - `docs/` → Tool-specific cheatsheets and usage examples
 - `scripts/debian.sh` → Debian bootstrap script
 - `scripts/zsh.sh` → Oh My Zsh and plugin setup
-- `scripts/paru.sh` → Paru/AUR helper bootstrap for Arch
-- `scripts/arch-wsl.sh` → Arch Linux WSL bootstrap script
+- `scripts/arch.sh` → Arch Linux bootstrap (native + WSL + VMs, hardware-aware: AMD/Intel/NVIDIA GPU, Vaio/Dell DMI quirks, VM guest tools)
 - `tmux/` → `.tmux.conf`
-- `wsl/` → WSL configuration such as `.wslconfig`
+- `wsl/` → WSL configuration (`.wslconfig`, `etc/wsl.conf` template for `arch.sh`)
+- `system/` → System config templates consumed by `scripts/arch.sh` (zram, NetworkManager iwd backend)
+- `git/` → `.gitconfig` (stowed; `arch.sh` detects and skips re-prompting)
 - `hyprland/` → Hyprland config
 
 ## Quick install
@@ -48,8 +49,7 @@ This script installs base packages (build tools, git, zsh, tmux, fzf, ripgrep, f
 ### 3) Other setup scripts
 
 - `bash scripts/zsh.sh` to install Oh My Zsh and the shell plugins used in this setup.
-- `bash scripts/paru.sh` to install `paru` on Arch Linux systems.
-- `bash scripts/arch-wsl.sh` to bootstrap an Arch Linux WSL environment.
+- `sudo bash scripts/arch.sh` to bootstrap an Arch Linux environment. Auto-detects WSL, VM (qemu/kvm/vbox/vmware/hyper-v), bare-metal laptop, CPU vendor (Intel/AMD), GPU vendor (AMD/Intel/NVIDIA), and DMI vendor (Vaio/Dell). Flags: `--unattended` (CI), `--dry-run` (show plan only). Env overrides: `USER_NAME`, `TIMEZONE`, `MIRROR_COUNTRY`, `GIT_NAME`, `GIT_EMAIL`, `LOG_FILE`. Run AFTER archinstall.
 
 ## Windows and WSL
 

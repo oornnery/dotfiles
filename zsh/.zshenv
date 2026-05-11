@@ -21,6 +21,8 @@ path=(
   "$HOME/.local/bin"
   "$HOME/bin"
   "$HOME/.local/npm/bin"
+  "$HOME/.cargo/bin"
+  "$HOME/go/bin"
   $path
 )
 

@@ -127,6 +127,7 @@ alias py='python'
 alias v='nvim'
 alias g='git'
 alias lg='lazygit'
+alias ld='lazydocker'
 
 # -------------------------------
 # Functions
@@ -173,13 +174,10 @@ fi
 # Optional tool initializations
 # -------------------------------
 
-# Enable zoxide later if you install it
-# eval "$(zoxide init zsh)"
-
-# Enable starship later if you switch from Oh My Zsh theme
-# eval "$(starship init zsh)"
-
-# Enable fnm later if you decide to use it instead of system node
-# eval "$(fnm env --use-on-cd)"
-
-source /usr/share/nvm/init-nvm.sh
+# Tool initializations (each gated by `command -v` so missing tools are no-ops).
+command -v zoxide   >/dev/null && eval "$(zoxide init zsh)"
+command -v fnm      >/dev/null && eval "$(fnm env --use-on-cd)"
+command -v atuin    >/dev/null && eval "$(atuin init zsh)"
+command -v mise     >/dev/null && eval "$(mise activate zsh)"
+command -v direnv   >/dev/null && eval "$(direnv hook zsh)"
+command -v starship >/dev/null && eval "$(starship init zsh)"
