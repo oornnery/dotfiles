@@ -41,8 +41,47 @@ but tailored to this hardware and workflow.
 - [Security](rest/03-security.md) — ufw + ufw-docker + LUKS notes
 - [FAQ](rest/04-faq.md)
 
+## Cheatsheets
+
+Per-tool quick references — paste-ready commands, no narrative.
+
+### Shell & terminal
+
+- [zsh](cheatsheets/zsh.md)
+- [bash](cheatsheets/bash.md)
+- [tmux](cheatsheets/tmux.md)
+- [fastfetch](cheatsheets/fastfetch.md)
+
+### File / text
+
+- [eza](cheatsheets/eza.md) — `ls`/tree replacement
+- [bat](cheatsheets/bat.md) — `cat` replacement
+- [fzf](cheatsheets/fzf.md) — fuzzy finder
+- [find](cheatsheets/find.md) — `find` + `fd`
+- [grep](cheatsheets/grep.md) — `grep` + `ripgrep`
+
+### Editor
+
+- [neovim](cheatsheets/neovim.md)
+
+### Version control
+
+- [git](cheatsheets/git.md) — git + GitHub CLI
+
+### Languages / runtimes
+
+- [python](cheatsheets/python.md) — python + pip + uv
+- [node](cheatsheets/node.md) — node + npm + pnpm + bun
+- [go](cheatsheets/go.md)
+- [rust](cheatsheets/rust.md)
+- [build-tools](cheatsheets/build-tools.md) — make + cmake
+
+### Packaging / system
+
+- [stow](cheatsheets/stow.md)
+- [apt](cheatsheets/apt.md) — apt + nala (for Debian/Ubuntu/WSL)
+
 ## See also
 
-- [docs/](../) — tool-specific cheatsheets (eza, fzf, bat, …)
 - [scripts/arch/arch.sh](../../scripts/arch/arch.sh) — interactive bootstrap launcher
 - [scripts/arch/arch.conf](../../scripts/arch/arch.conf) — environment overrides

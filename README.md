@@ -20,7 +20,7 @@ Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Sto
 - `zsh/` → `.zshrc` (Oh My Zsh + plugins)
 - `nvim/` → Neovim configuration (LazyVim-based)
 - `editor/` → VS Code and Zed settings for the Windows setup
-- `docs/` → Tool-specific cheatsheets and usage examples
+- `docs/manual/` → Full reference (basics, applications, configuration, cheatsheets)
 - `scripts/debian.sh` → Debian bootstrap script
 - `scripts/zsh.sh` → Oh My Zsh and plugin setup
 - `scripts/arch.sh` → Arch Linux bootstrap (native + WSL + VMs, hardware-aware: AMD/Intel/NVIDIA GPU, Vaio/Dell DMI quirks, VM guest tools)

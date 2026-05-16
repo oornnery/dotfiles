@@ -4,7 +4,7 @@
 `~/dotfiles/<package>/` into `~/`. Each top-level directory in this repo
 is a stow package.
 
-See also [docs/stow.md](../../stow.md) for the tool cheatsheet.
+See also [docs/stow.md](../cheatsheets/stow.md) for the tool cheatsheet.
 
 ## Current packages
 

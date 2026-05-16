@@ -33,14 +33,14 @@ Plus low-level helpers: `jq`, `yq`, `htmlq`, `xmlstarlet`, `whois`,
 
 ## Cheatsheets
 
-The [docs/](../../) folder has per-tool quick references that go deeper:
+Per-tool quick references in [`cheatsheets/`](../cheatsheets/):
 
-- [bat](../../bat.md)
-- [eza](../../eza.md)
-- [fzf](../../fzf.md)
-- [fastfetch](../../fastfetch.md)
-- [find](../../find.md) — `fd` cheatsheet
-- [grep](../../grep.md) — `rg` cheatsheet
-- [git](../../git.md)
-- [tmux](../../tmux.md)
-- [zsh](../../zsh.md)
+- [bat](../cheatsheets/bat.md)
+- [eza](../cheatsheets/eza.md)
+- [fzf](../cheatsheets/fzf.md)
+- [fastfetch](../cheatsheets/fastfetch.md)
+- [find](../cheatsheets/find.md) — `fd` cheatsheet
+- [grep](../cheatsheets/grep.md) — `rg` cheatsheet
+- [git](../cheatsheets/git.md)
+- [tmux](../cheatsheets/tmux.md)
+- [zsh](../cheatsheets/zsh.md)
