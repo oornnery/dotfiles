@@ -11,15 +11,9 @@ detect::system
 
 log::banner "Dev" "Shell (zsh + Oh My Zsh)"
 
-# Shell-environment essentials only. General CLI/TUI tools live in dev/tools.sh
-# (eza, bat, fzf, ripgrep, fd, starship, zoxide, atuin, mise, direnv, fastfetch, btop, …).
-PKGS=(
-    zsh tmux neovim
-)
-
-if [[ $IS_WSL -eq 0 && $IS_VM -eq 0 ]]; then
-    PKGS+=(ghostty alacritty)
-fi
+# Shell only. CLI/TUI tools live in dev/tools.sh, editors in dev/{vim,nvim}.sh,
+# terminals in dev/alacritty.sh and desktop/hyprland.sh.
+PKGS=(zsh)
 
 log::info "Installing shell packages"
 sudo pacman -S --needed --noconfirm "${PKGS[@]}"
