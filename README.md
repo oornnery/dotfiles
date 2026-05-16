@@ -4,6 +4,7 @@ Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Sto
 
 ## Table of contents
 
+- [Manual](docs/manual/README.md) — full reference, omarchy-style topics
 - [What is included](#what-is-included)
 - [Quick install](#quick-install)
 - [Windows and WSL](#windows-and-wsl)

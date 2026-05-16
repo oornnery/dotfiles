@@ -21,6 +21,7 @@ PKGS=(
     pacman-contrib pkgfile arch-audit git-delta expac
     kernel-modules-hook
     inxi usbutils
+    libnotify acpi
 )
 
 log::info "Installing base packages"

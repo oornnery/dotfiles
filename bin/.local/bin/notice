@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# notice — on-demand info notifications via mako/swaync.
+#
+# Usage: notice <topic>
+# Topics: date | weather | battery | network | system | volume | brightness
+#
+# Bound to Super+Ctrl+Alt+{T,W,B,N,S} in hyprland/bindings.conf.
+
+set -u
+
+WEATHER_CITY="${WEATHER_CITY:-Salvador}"
+
+_notify() {
+    local title="$1" body="$2" icon="${3:-dialog-information}"
+    notify-send -i "$icon" -t 6000 -a "notice" "$title" "$body"
+}
+
+case "${1:-help}" in
+    date)
+        body="$(LC_TIME=pt_BR.UTF-8 date '+%A, %d de %B %Y')\n$(date '+%H:%M:%S · semana %V')"
+        _notify "󰃭 $(date '+%H:%M')" "$body" "x-office-calendar"
+        ;;
+
+    weather)
+        if ! command -v curl >/dev/null; then
+            _notify "Weather" "curl not installed" "weather-severe"
+            exit 1
+        fi
+        out="$(curl -fsSL --max-time 5 "https://wttr.in/${WEATHER_CITY}?format=%l:+%C+%t+(feels+%f)+%w+%h" 2>/dev/null)"
+        if [[ -z "$out" ]]; then
+            _notify "Weather" "could not reach wttr.in" "weather-severe"
+        else
+            _notify "󰖙 ${WEATHER_CITY}" "$out" "weather-clear"
+        fi
+        ;;
+
+    battery)
+        if command -v acpi >/dev/null && acpi -b 2>/dev/null | grep -q .; then
+            body="$(acpi -b | sed 's/^Battery [0-9]*: //')"
+        elif [[ -d /sys/class/power_supply/BAT0 ]]; then
+            cap="$(cat /sys/class/power_supply/BAT0/capacity)"
+            status="$(cat /sys/class/power_supply/BAT0/status)"
+            body="$status, $cap%"
+        else
+            body="No battery detected"
+        fi
+        _notify "󰁹 Battery" "$body" "battery"
+        ;;
+
+    network)
+        if command -v nmcli >/dev/null; then
+            body="$(nmcli -t -f NAME,TYPE,DEVICE c show --active | awk -F: '{printf "%s — %s (%s)\n", $1, $2, $3}')"
+            [[ -z "$body" ]] && body="No active connection"
+        else
+            body="$(ip -4 -o addr show | awk '$2 != "lo" && $3 == "inet" {split($4,a,"/"); printf "%s: %s\n", $2, a[1]}')"
+        fi
+        _notify "󰖩 Network" "$body" "network-wireless"
+        ;;
+
+    system)
+        uptime_s="$(uptime -p | sed 's/up //')"
+        load="$(cut -d' ' -f1-3 /proc/loadavg)"
+        mem="$(free -h | awk '/^Mem:/ {printf "%s / %s\n", $3, $2}')"
+        _notify "󰍛 System" "Uptime: $uptime_s\nLoad: $load\nRAM: $mem" "utilities-system-monitor"
+        ;;
+
+    volume)
+        if command -v wpctl >/dev/null; then
+            vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2}')"
+            pct="$(awk -v v="$vol" 'BEGIN {printf "%d%%", v*100}')"
+            muted=""
+            wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && muted=" (muted)"
+            _notify "󰕾 Volume" "${pct}${muted}" "audio-volume-medium"
+        else
+            _notify "Volume" "wpctl not found" "audio-volume-muted"
+        fi
+        ;;
+
+    brightness)
+        if command -v brightnessctl >/dev/null; then
+            pct="$(brightnessctl -m | cut -d, -f4)"
+            _notify "󰃞 Brightness" "$pct" "display-brightness"
+        else
+            _notify "Brightness" "brightnessctl not found" "dialog-error"
+        fi
+        ;;
+
+    help|"")
+        cat <<EOF
+notice — on-demand info notifications
+
+Usage: notice <topic>
+
+Topics:
+  date       calendar + clock
+  weather    wttr.in (city: \$WEATHER_CITY, default: $WEATHER_CITY)
+  battery    charge % + status
+  network    active connections / IPs
+  system     uptime + load + RAM
+  volume     PipeWire default sink volume
+  brightness backlight %
+EOF
+        ;;
+
+    *)
+        _notify "notice: unknown topic" "Try: notice help" "dialog-error"
+        exit 1
+        ;;
+esac

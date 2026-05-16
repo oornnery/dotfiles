@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# hypr-scale — bump scaling factor of the focused Hyprland monitor.
+#
+# Usage:
+#   hypr-scale +0.1     # increase scaling on focused monitor
+#   hypr-scale -0.1     # decrease scaling
+#   hypr-scale =1.5     # set absolute scaling
+#
+# Bound in hyprland/bindings.conf:
+#   Super+/      → hypr-scale +0.1
+#   Super+Alt+/  → hypr-scale -0.1
+
+set -euo pipefail
+
+delta="${1:-}"
+if [[ -z "$delta" ]]; then
+    echo "Usage: hypr-scale {+0.1|-0.1|=1.5}" >&2
+    exit 1
+fi
+
+# Identify the focused monitor.
+mon="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
+cur="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .scale')"
+[[ -z "$mon" ]] && { echo "hypr-scale: no focused monitor" >&2; exit 1; }
+
+case "$delta" in
+    +*|-*)
+        new=$(awk -v c="$cur" -v d="$delta" 'BEGIN { printf "%.2f", c + d }')
+        ;;
+    =*)
+        new="${delta#=}"
+        ;;
+    *)
+        echo "hypr-scale: bad delta '$delta'" >&2
+        exit 1
+        ;;
+esac
+
+# Clamp to [0.8, 3.0].
+awk -v n="$new" 'BEGIN { if (n+0 < 0.8 || n+0 > 3.0) exit 1 }' \
+    || { echo "hypr-scale: $new out of range [0.8, 3.0]" >&2; exit 1; }
+
+hyprctl keyword monitor "$mon,preferred,auto,$new"
+notify-send -t 2000 -a hypr-scale "󰍹 $mon" "scale → $new"

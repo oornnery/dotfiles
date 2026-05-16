@@ -4,11 +4,12 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/detect.sh"
 
 USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
+NVIM_DISTRO="${NVIM_DISTRO:-mini}"   # mini | lazyvim
 
 require_root
 detect::system
 
-log::banner "System" "Stow dotfiles"
+log::banner "Dev" "Stow dotfiles"
 
 if ! id "$USER_NAME" >/dev/null 2>&1; then
     log::warn "User $USER_NAME doesn't exist; skipping stow"
@@ -30,7 +31,14 @@ fi
 
 log::info "Stowing dotfiles from $dotfiles_dir"
 
-packages=(bash zsh tmux nvim git editor fabric system)
+# Core packages — always tried (skipped silently if the dir is absent).
+packages=(bash zsh tmux git editor fabric system alacritty bin)
+
+# Neovim: mini.nvim (default) vs LazyVim — mutually exclusive (same target).
+case "$NVIM_DISTRO" in
+    lazyvim) packages+=(nvim-lazyvim) ;;
+    mini|*)  packages+=(nvim) ;;
+esac
 
 pacman -Qq hyprland >/dev/null 2>&1 && packages+=(hyprland)
 [[ $IS_WSL -eq 1 ]] && packages+=(wsl)

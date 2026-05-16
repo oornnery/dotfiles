@@ -25,27 +25,23 @@ declare -A MODULES_DESC=(
     [core/core-services]="Enable core systemd services + journald tuning"
     [core/keyring]="gnome-keyring + libsecret + PAM auto-unlock"
     [core/snapper]="snapper btrfs snapshots (snap-pac)"
-    [core/luks]="Migrate to systemd-cryptsetup TUI LUKS prompt"
-    [core/plymouth]="Boot splash"
     [core/networkmanager]="NetworkManager (+ iwd backend optional)"
     [core/bluetooth]="Bluetooth (bluez + bluetui)"
     [core/pipewire]="PipeWire audio stack (+ wiremix TUI)"
     [core/storage]="USB / removable media automount (udisks2 + udiskie)"
     [core/monitoring]="lm_sensors + smartmontools + nvme-cli"
     [core/amd-gpu]="AMD GPU drivers"
-    [core/nvidia-gpu]="NVIDIA drivers (nouveau + optional proprietary)"
-    [core/intel-gpu]="Intel GPU drivers"
     [core/power]="Power management (ppd | tlp | auto-cpufreq)"
     [core/zram]="zram swap"
     [core/notebook-vaio]="VAIO notebook tuning + iio-sensor-proxy + AMD pstate"
     [core/vm-guest]="VM guest tools (qemu/virtualbox/vmware/hyper-v)"
-    [core/printing]="CUPS printing"
     [core/ufw]="UFW firewall (+ ufw-docker)"
-    [core/hardening]="AppArmor + usbguard"
     [core/paru]="paru (AUR helper) + optional AUR_PKGS"
-    [core/chaotic-aur]="Chaotic-AUR repository"
     [core/flatpak]="Flatpak + Flathub remote"
     [core/wsl]="WSL /etc/wsl.conf setup"
+    [core/fingerprint]="Fingerprint reader (fprintd + PAM sudo/login)"
+    [core/windows-vm]="Windows 11 VM via Docker (dockur/windows)"
+    [core/firefoxpwa]="Firefox PWA backend (web-app launcher)"
 
     # desktop/
     [desktop/gdm]="GDM display manager"
@@ -72,12 +68,13 @@ declare -A MODULES_DESC=(
 # shellcheck disable=SC2034
 SECTION_core=(
     preflight pacman base-utils locale user core-services keyring
-    snapper plymouth luks
+    snapper
     networkmanager bluetooth pipewire storage monitoring
-    amd-gpu nvidia-gpu intel-gpu power zram notebook-vaio vm-guest printing
-    ufw hardening
-    paru chaotic-aur flatpak
+    amd-gpu power zram notebook-vaio vm-guest
+    ufw
+    paru flatpak
     wsl
+    fingerprint windows-vm firefoxpwa
 )
 # shellcheck disable=SC2034
 SECTION_desktop=(hyprland gdm greetd sddm ly gnome)

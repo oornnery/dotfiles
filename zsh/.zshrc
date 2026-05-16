@@ -94,7 +94,12 @@ alias rm='rm -i'
 alias ls='eza --icons=always'
 alias ll='eza -la --icons=always --git'
 alias la='eza -la --icons=always'
+alias lsa='eza -la --icons=always'
 alias lt='eza --tree --icons=always'
+alias lta='eza --tree -la --icons=always'
+
+# fzf with bat preview (omarchy-style)
+alias ff='fzf --preview "bat --style=numbers --color=always {} 2>/dev/null || cat {}"'
 
 # Better cat with bat
 alias cat='bat'
@@ -133,30 +138,12 @@ alias ld='lazydocker'
 # Functions
 # -------------------------------
 
+# Library: compress, decompress, iso2sd, format-drive, fip, dip, lip, rfwd
+[[ -f "$HOME/.zsh_functions" ]] && source "$HOME/.zsh_functions"
+
 # Create a directory and enter it
 mkcd() {
   mkdir -p "$1" && cd "$1"
-}
-
-# Extract common archive types
-extract() {
-  if [[ -f "$1" ]]; then
-    case "$1" in
-      *.tar.bz2) tar xjf "$1" ;;
-      *.tar.gz)  tar xzf "$1" ;;
-      *.bz2)     bunzip2 "$1" ;;
-      *.rar)     unrar x "$1" ;;
-      *.gz)      gunzip "$1" ;;
-      *.tar)     tar xf "$1" ;;
-      *.tbz2)    tar xjf "$1" ;;
-      *.tgz)     tar xzf "$1" ;;
-      *.zip)     unzip "$1" ;;
-      *.7z)      7z x "$1" ;;
-      *) echo "Cannot extract: $1" ;;
-    esac
-  else
-    echo "File not found: $1"
-  fi
 }
 
 # -------------------------------
