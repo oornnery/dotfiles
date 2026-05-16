@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
+# dev/stow.sh — stow all relevant dotfiles packages in one shot.
+#
+# Per-tool modules (dev/{bash,tmux,vim,nvim,alacritty,git,zsh}.sh) stow
+# their own packages too. This script is the catch-all for everything
+# that doesn't have a dedicated module (or when you just want one go).
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/detect.sh"
 
 USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
-NVIM_DISTRO="${NVIM_DISTRO:-mini}"   # mini | lazyvim
+NVIM_DISTRO="${NVIM_DISTRO:-mini}"
 
 require_root
 detect::system
 
-log::banner "Dev" "Stow dotfiles"
+log::banner "Dev" "Stow all dotfiles"
 
 if ! id "$USER_NAME" >/dev/null 2>&1; then
-    log::warn "User $USER_NAME doesn't exist; skipping stow"
-    exit 0
+    die "User $USER_NAME doesn't exist"
 fi
 
 if ! command -v stow >/dev/null 2>&1; then
@@ -21,36 +25,34 @@ if ! command -v stow >/dev/null 2>&1; then
     sudo pacman -S --needed --noconfirm stow
 fi
 
-user_home="$(getent passwd "$USER_NAME" | cut -d: -f6)"
-dotfiles_dir="$user_home/dotfiles"
+# Packages to stow. Order doesn't matter; stow_safe is idempotent.
+packages=(
+    bash zsh tmux vim
+    git editor fabric
+    alacritty
+    bin
+    hyprland waybar wofi mako
+)
 
-if [[ ! -d "$dotfiles_dir" ]]; then
-    log::warn "$dotfiles_dir not found — clone the dotfiles repo there first"
-    exit 0
-fi
-
-log::info "Stowing dotfiles from $dotfiles_dir"
-
-# Core packages — always tried (skipped silently if the dir is absent).
-packages=(bash zsh tmux vim git editor fabric alacritty bin waybar wofi mako)
-
-# Neovim: mini.nvim (default) vs LazyVim — mutually exclusive (same target).
+# Neovim: mini.nvim or LazyVim — mutually exclusive.
 case "$NVIM_DISTRO" in
     lazy|lazyvim) packages+=(nvim-lazy) ;;
     mini|*)       packages+=(nvim) ;;
 esac
 
-pacman -Qq hyprland >/dev/null 2>&1 && packages+=(hyprland)
 [[ $IS_WSL -eq 1 ]] && packages+=(wsl)
 
 for pkg in "${packages[@]}"; do
-    if [[ ! -d "$dotfiles_dir/$pkg" ]]; then
-        log::skip "Package '$pkg' not in repo"
-        continue
-    fi
-    log::info "Stowing '$pkg'"
-    sudo -u "$USER_NAME" stow -d "$dotfiles_dir" -t "$user_home" -R "$pkg" \
-        || log::warn "stow failed for '$pkg' (file conflict?)"
+    stow_safe "$pkg" || log::warn "Stow failed for: $pkg"
 done
+
+# Apply active theme on top (writes ~/.config/<app>/theme.* files).
+if [[ -n "${THEME:-}" ]] && command -v theme >/dev/null 2>&1; then
+    if [[ $EUID -eq 0 && "$USER_NAME" != "root" ]]; then
+        sudo -u "$USER_NAME" -H theme set "$THEME" || log::warn "theme set failed"
+    else
+        theme set "$THEME" || log::warn "theme set failed"
+    fi
+fi
 
 log::ok "Stow completed"

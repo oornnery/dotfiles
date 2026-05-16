@@ -52,12 +52,18 @@ declare -A MODULES_DESC=(
     [desktop/hyprland]="Hyprland + utilities + stow hyprland dotfiles"
 
     # dev/ — tools, shell, TUI, dotfiles workflow
-    [dev/tools]="Modern CLI / TUI tools (eza, bat, fzf, lazygit, gum, …)"
+    [dev/tools]="Modern CLI / TUI tools (eza, bat, fzf, lazygit, gum, neovim, tmux, …)"
     [dev/zsh]="zsh + Oh My Zsh + plugins + stow zsh dotfiles"
-    [dev/stow]="Symlink dotfiles via GNU stow"
+    [dev/bash]="bash + bash-completion + stow bash dotfiles"
+    [dev/tmux]="tmux + tpm + stow tmux dotfiles"
+    [dev/vim]="vim + vim-plug + plugins + stow vim dotfiles"
+    [dev/nvim]="neovim + stow nvim or nvim-lazy (per NVIM_DISTRO)"
+    [dev/alacritty]="alacritty (+ optional ghostty) + stow alacritty + seed theme"
+    [dev/git]="git + github-cli + git-delta + stow git config"
+    [dev/stow]="Stow all dotfiles packages in one shot"
     [dev/languages]="Language toolchains (python, rust, node, go, …)"
     [dev/docker]="Docker + Podman + lazydocker"
-    [dev/llms]="AI tools (Claude Code, Codex, Ollama, LM Studio)"
+    [dev/llms]="AI tools (Claude Code, Codex, Ollama, LM Studio, RTK, .agents)"
 
     # game/
     [game/gaming]="Steam + wine + gamemode + mangohud"
@@ -79,7 +85,12 @@ SECTION_core=(
 # shellcheck disable=SC2034
 SECTION_desktop=(hyprland gdm greetd sddm ly gnome)
 # shellcheck disable=SC2034
-SECTION_dev=(tools zsh stow languages docker llms)
+SECTION_dev=(
+    tools
+    zsh bash tmux vim nvim alacritty git
+    languages docker llms
+    stow
+)
 # shellcheck disable=SC2034
 SECTION_game=(gaming)
 

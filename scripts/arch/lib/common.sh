@@ -441,3 +441,55 @@ snapshot() {
     fi
     log::info "Snapshot: $path → $backup"
 }
+
+# stow_safe <package> [target] [dotfiles_dir]
+# Stows a package, backing up any conflicting real files first.
+# Auto-drops privilege to $SUDO_USER when called from a root script.
+# Idempotent: re-stowing replaces previous symlinks.
+stow_safe() {
+    local pkg="$1"
+    local user="${SUDO_USER:-${USER_NAME:-$USER}}"
+    local user_home
+    user_home="$(getent passwd "$user" | cut -d: -f6)"
+    local target="${2:-$user_home}"
+    local dotfiles_dir="${3:-${DOTFILES_DIR:-$user_home/dotfiles}}"
+
+    if [[ ! -d "$dotfiles_dir/$pkg" ]]; then
+        log::skip "Stow source missing: $pkg"
+        return 0
+    fi
+    if ! command -v stow >/dev/null 2>&1; then
+        log::warn "stow not installed — install with: pacman -S stow"
+        return 1
+    fi
+
+    # Run any command as the real user (drops priv when called from root).
+    _as_user_priv() {
+        if [[ $EUID -eq 0 && "$user" != "root" ]]; then
+            sudo -u "$user" -H "$@"
+        else
+            "$@"
+        fi
+    }
+
+    # Dry-run: parse stow's stderr for `existing target` warnings.
+    local conflict ts
+    while IFS= read -r conflict; do
+        [[ -z "$conflict" ]] && continue
+        conflict="$target/$conflict"
+        [[ -e "$conflict" && ! -L "$conflict" ]] || continue
+        ts="$(date +%Y%m%d%H%M%S)"
+        _as_user_priv mv "$conflict" "${conflict}.bak.${ts}"
+        log::info "Backed up: $conflict → ${conflict}.bak.${ts}"
+    done < <(
+        _as_user_priv stow -n -d "$dotfiles_dir" -t "$target" "$pkg" 2>&1 \
+            | sed -nE 's/.*existing target is (neither a link nor a directory|not owned by stow): //p'
+    )
+
+    if _as_user_priv stow -d "$dotfiles_dir" -t "$target" -R "$pkg"; then
+        log::ok "Stowed: $pkg"
+    else
+        log::warn "stow_safe: failed to stow '$pkg'"
+        return 1
+    fi
+}
