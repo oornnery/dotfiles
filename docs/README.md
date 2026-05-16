@@ -35,6 +35,7 @@ but tailored to this hardware and workflow.
 - [Dotfiles (Stow)](configuration/05-dotfiles.md) — workflow + new packages
 - [Common Tweaks](configuration/06-tweaks.md) — power, snapper, swap, etc.
 - [Theming](configuration/07-theming.md) — catppuccin-mocha / tokyo-night / catppuccin-latte
+- [System stow](configuration/08-system-stow.md) — managing `/etc/` files via stow
 
 ## The Rest
 
