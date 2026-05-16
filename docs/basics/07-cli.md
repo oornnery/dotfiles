@@ -51,16 +51,15 @@ The order matters. Defined in `arch.sh`:
 13. `core/amd-gpu`
 14. `core/notebook-vaio` — vendor tuning + iio-sensor-proxy
 15. `core/power`
-16. `core/zram`
-17. `core/snapper`
-18. `desktop/hyprland`
-19. `dev/zsh`
-20. `dev/stow`
-21. `dev/tools`
-22. `dev/languages`
-23. `dev/docker`
-24. `core/paru`
-25. `core/ufw`
+16. `core/snapper`
+17. `desktop/hyprland`
+18. `dev/zsh`
+19. `dev/stow`
+20. `dev/tools`
+21. `dev/languages`
+22. `dev/docker`
+23. `core/paru`
+24. `core/ufw`
 
 Opt-in (not in `all`): `core/fingerprint`, `core/windows-vm`,
 `core/firefoxpwa`, `core/vm-guest`, `core/flatpak`, `core/wsl`,

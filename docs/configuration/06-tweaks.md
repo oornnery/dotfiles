@@ -33,24 +33,6 @@ echo deep | sudo tee /sys/power/mem_sleep
 To make it permanent, edit the bootloader entry (systemd-boot in
 `/boot/loader/entries/*.conf`) and remove the param.
 
-## Zram
-
-[`core/zram.sh`](../../../scripts/arch/core/zram.sh) installs
-`zram-generator` and stows `system/etc/systemd/zram-generator.conf`:
-
-```ini
-[zram0]
-zram-size = ram / 2
-compression-algorithm = zstd
-```
-
-After reboot:
-
-```bash
-swapon --show     # should show /dev/zram0
-zramctl
-```
-
 ## Snapper
 
 [`core/snapper.sh`](../../../scripts/arch/core/snapper.sh) sets up:
