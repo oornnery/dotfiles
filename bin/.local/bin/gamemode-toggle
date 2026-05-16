@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# gamemode-toggle — kill animations/blur/idle while a game runs.
+#
+# Usage:
+#   gamemode-toggle           toggle on ↔ off
+#   gamemode-toggle on
+#   gamemode-toggle off
+#   gamemode-toggle status
+
+set -euo pipefail
+
+STATE="${XDG_RUNTIME_DIR:-/tmp}/gamemode.state"
+
+_on() {
+    hyprctl --batch '\
+        keyword animations:enabled 0 ;\
+        keyword decoration:blur:enabled 0 ;\
+        keyword decoration:shadow:enabled 0 ;\
+        keyword decoration:drop_shadow 0 ;\
+        keyword misc:vfr 0' >/dev/null
+    systemctl --user stop hypridle 2>/dev/null || true
+    touch "$STATE"
+    notify-send -a gamemode -i applications-games -t 2000 \
+        "Gamemode on" "Animations off, idle paused"
+}
+
+_off() {
+    hyprctl --batch '\
+        keyword animations:enabled 1 ;\
+        keyword decoration:blur:enabled 1 ;\
+        keyword decoration:shadow:enabled 1 ;\
+        keyword decoration:drop_shadow 1 ;\
+        keyword misc:vfr 1' >/dev/null
+    systemctl --user start hypridle 2>/dev/null || true
+    rm -f "$STATE"
+    notify-send -a gamemode -i applications-games -t 2000 \
+        "Gamemode off" "Normal mode restored"
+}
+
+case "${1:-toggle}" in
+    on)     _on ;;
+    off)    _off ;;
+    status)
+        [[ -f "$STATE" ]] && echo "on" || echo "off"
+        ;;
+    toggle|"")
+        if [[ -f "$STATE" ]]; then _off; else _on; fi
+        ;;
+    -h|--help|help) sed -n '2,9p' "$0" ;;
+    *) echo "gamemode-toggle: unknown command: $1" >&2; exit 1 ;;
+esac

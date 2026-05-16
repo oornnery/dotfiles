@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# night-mode — toggle hyprsunset (blue-light filter).
+
+set -euo pipefail
+
+TEMP="${NIGHT_MODE_TEMP:-3500}"   # kelvin
+
+if pgrep -x hyprsunset >/dev/null; then
+    pkill -x hyprsunset
+    notify-send -a night-mode -i weather-clear -t 2000 \
+        "Night mode off" "Color temperature reset"
+else
+    hyprsunset -t "$TEMP" &
+    disown
+    notify-send -a night-mode -i weather-clear-night -t 2000 \
+        "Night mode on" "${TEMP}K"
+fi

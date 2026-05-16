@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# brightness — backlight control via brightnessctl with mako progress notify.
+#
+# Usage:
+#   brightness raise              +5%
+#   brightness lower              -5%
+#   brightness set <0-100>
+#   brightness get                print 0-100
+
+set -euo pipefail
+
+STEP="${BRIGHTNESS_STEP:-5}"
+
+if ! command -v brightnessctl >/dev/null; then
+    notify-send -a brightness -i dialog-error "Brightness" "brightnessctl missing"
+    exit 1
+fi
+
+_pct() {
+    # brightnessctl -m → device,class,current,percent,max
+    brightnessctl -m | awk -F, '{gsub("%","",$4); print $4}'
+}
+
+_notify() {
+    local p="$1"
+    notify-send -a brightness -i display-brightness -t 1500 \
+        -h "string:x-canonical-private-synchronous:brightness" \
+        -h "int:value:$p" \
+        "Brightness" "${p}%"
+}
+
+case "${1:-get}" in
+    raise) brightnessctl set "${STEP}%+" >/dev/null; _notify "$(_pct)" ;;
+    lower) brightnessctl set "${STEP}%-" >/dev/null; _notify "$(_pct)" ;;
+    set)
+        [[ -z "${2:-}" ]] && { echo "Usage: brightness set <0-100>" >&2; exit 1; }
+        brightnessctl set "${2}%" >/dev/null
+        _notify "$(_pct)"
+        ;;
+    get|"") _pct ;;
+    -h|--help|help) sed -n '2,9p' "$0" ;;
+    *) echo "brightness: unknown command: $1" >&2; exit 1 ;;
+esac

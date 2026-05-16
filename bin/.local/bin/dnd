@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# dnd — toggle Do Not Disturb on mako.
+
+set -euo pipefail
+
+if ! command -v makoctl >/dev/null; then
+    notify-send -a dnd -i dialog-error "DND" "mako not running"
+    exit 1
+fi
+
+state="$(makoctl mode 2>/dev/null | head -1)"
+
+if [[ "$state" == "do-not-disturb" ]]; then
+    makoctl mode -r do-not-disturb
+    notify-send -a dnd -i preferences-desktop-notification -t 2000 \
+        "DND off" "Notifications visible"
+else
+    makoctl mode -a do-not-disturb
+    # The DND-on notification might itself be suppressed — fire it anyway.
+    notify-send -a dnd -i notification-disabled -t 2000 \
+        "DND on" "Notifications hidden"
+fi

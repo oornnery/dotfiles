@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# screenshot — unified Wayland screenshot wrapper (grim + slurp + satty).
+#
+# Usage:
+#   screenshot region [--copy]      capture region, annotate (satty), save
+#   screenshot full                 entire output → save + notify
+#   screenshot window               currently focused window → save
+#   screenshot active               same as window
+#   screenshot delay <seconds>      sleep N then full
+#
+# Output: ~/Pictures/screenshots/YYYYMMDD-HHMMSS.png
+# Clipboard: --copy variant pipes to wl-copy instead of saving.
+
+set -euo pipefail
+
+OUT_DIR="${SCREENSHOT_DIR:-$HOME/Pictures/screenshots}"
+mkdir -p "$OUT_DIR"
+
+_filename() {
+    printf '%s/%s.png' "$OUT_DIR" "$(date +%Y%m%d-%H%M%S)"
+}
+
+_notify() {
+    local file="$1"
+    notify-send -a screenshot -i "$file" -t 4000 \
+        "Screenshot" "Saved $(basename "$file")" \
+        --hint=string:image-path:"$file"
+}
+
+_focused_geo() {
+    hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'
+}
+
+cmd="${1:-region}"; shift || true
+
+case "$cmd" in
+    region)
+        file="$(_filename)"
+        if [[ "${1:-}" == "--copy" ]]; then
+            grim -g "$(slurp)" - | wl-copy
+            notify-send -a screenshot "Screenshot" "Region → clipboard"
+        else
+            grim -g "$(slurp)" - | satty --filename - --output-filename "$file"
+            _notify "$file"
+        fi
+        ;;
+    full)
+        file="$(_filename)"
+        grim "$file"
+        _notify "$file"
+        ;;
+    window|active)
+        file="$(_filename)"
+        grim -g "$(_focused_geo)" "$file"
+        _notify "$file"
+        ;;
+    delay)
+        secs="${1:-5}"
+        sleep "$secs"
+        file="$(_filename)"
+        grim "$file"
+        _notify "$file"
+        ;;
+    -h|--help|help)
+        sed -n '2,12p' "$0"
+        ;;
+    *)
+        echo "screenshot: unknown command: $cmd" >&2
+        exit 1
+        ;;
+esac
