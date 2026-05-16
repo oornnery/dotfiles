@@ -105,6 +105,36 @@ lip() {
         | awk '{split($4,a,"/"); print $2, a[1]}'
 }
 
+# ─── Tmux layouts ───────────────────────────────────────────────────────────
+
+# tdl [name]    Tmux Dev Layout — 3 panes: editor (60%) + shell + log (or attach
+#               to a session with the same name).
+tdl() {
+    local name="${1:-dev}"
+    if tmux has-session -t "$name" 2>/dev/null; then
+        tmux attach-session -t "$name"
+        return
+    fi
+    tmux new-session -d -s "$name" -c "$PWD"
+    tmux send-keys -t "$name:1" 'nvim' C-m
+    tmux split-window -t "$name:1" -h -p 40 -c "$PWD"
+    tmux split-window -t "$name:1.2" -v -p 50 -c "$PWD"
+    tmux select-pane -t "$name:1.1"
+    tmux attach-session -t "$name"
+}
+
+# tsl [n=2]     Tmux Split Layout — inside a tmux pane, create N equal vertical
+#               splits running $SHELL.
+tsl() {
+    [[ -z "${TMUX:-}" ]] && { echo "tsl: not inside tmux" >&2; return 1; }
+    local n="${1:-2}"
+    local i
+    for (( i = 1; i < n; i++ )); do
+        tmux split-window -h -c "$PWD"
+    done
+    tmux select-layout even-horizontal
+}
+
 # ─── SSH port forwarding ────────────────────────────────────────────────────
 
 # rfwd <local-port> <remote-host> [remote-port]

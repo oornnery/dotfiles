@@ -8,6 +8,9 @@ ENABLE_CLAUDE_CODE="${ENABLE_CLAUDE_CODE:-1}"
 ENABLE_CODEX="${ENABLE_CODEX:-1}"
 ENABLE_OLLAMA="${ENABLE_OLLAMA:-1}"
 ENABLE_LM_STUDIO="${ENABLE_LM_STUDIO:-0}"
+ENABLE_RTK="${ENABLE_RTK:-1}"
+ENABLE_AGENTS="${ENABLE_AGENTS:-1}"
+AGENTS_REPO="${AGENTS_REPO:-oornnery/.agents}"
 
 require_root
 
@@ -19,7 +22,7 @@ fi
 
 if [[ $ENABLE_CLAUDE_CODE -eq 1 ]]; then
     log::step "Claude Code (Anthropic CLI)"
-    if sudo -u "$USER_NAME" -H command -v claude >/dev/null 2>&1; then
+    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ claude >/dev/null 2>&1; then
         log::skip "claude already installed"
     else
         log::info "Installing via official installer"
@@ -30,7 +33,7 @@ fi
 
 if [[ $ENABLE_CODEX -eq 1 ]]; then
     log::step "OpenAI Codex CLI"
-    if sudo -u "$USER_NAME" -H command -v codex >/dev/null 2>&1; then
+    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ codex >/dev/null 2>&1; then
         log::skip "codex already installed"
     else
         if ! command -v npm >/dev/null 2>&1; then
@@ -71,6 +74,44 @@ if [[ $ENABLE_LM_STUDIO -eq 1 ]]; then
         log::info "Installing lmstudio via paru (AUR)"
         sudo -u "$USER_NAME" -H paru -S --needed --noconfirm lmstudio || \
             log::warn "AUR install failed — try 'lmstudio-appimage' manually"
+    fi
+fi
+
+if [[ $ENABLE_RTK -eq 1 ]]; then
+    log::step "RTK (prompt optimizer)"
+    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ rtk >/dev/null 2>&1; then
+        log::skip "rtk already installed"
+    else
+        log::info "Installing via official installer"
+        sudo -u "$USER_NAME" -H bash -c '
+            curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+        '
+        log::info "Initializing global config"
+        sudo -u "$USER_NAME" -H bash -c 'rtk init --global' || \
+            log::warn "rtk init --global failed (rerun manually after PATH refresh)"
+        log::ok "RTK installed (rerun 'rtk init --global' if PATH wasn't picked up)"
+    fi
+fi
+
+if [[ $ENABLE_AGENTS -eq 1 ]]; then
+    log::step "Custom agent skills (~/.agents)"
+    user_home="$(getent passwd "$USER_NAME" | cut -d: -f6)"
+    target="$user_home/.agents"
+
+    if [[ -d "$target/.git" ]]; then
+        log::info "Updating $target"
+        sudo -u "$USER_NAME" -H git -C "$target" pull --ff-only || \
+            log::warn "git pull failed (local changes? resolve manually)"
+    elif [[ -d "$target" ]]; then
+        log::warn "$target exists but is not a git repo — leaving alone"
+    else
+        if ! sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ gh >/dev/null 2>&1; then
+            log::info "Installing github-cli (gh) — needed to clone the agents repo"
+            sudo pacman -S --needed --noconfirm github-cli
+        fi
+        log::info "Cloning $AGENTS_REPO → $target"
+        sudo -u "$USER_NAME" -H gh repo clone "$AGENTS_REPO" "$target" || \
+            log::warn "gh clone failed — run 'gh auth login' then retry"
     fi
 fi
 

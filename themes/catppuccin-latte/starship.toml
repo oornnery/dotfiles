@@ -1,0 +1,74 @@
+# themes/catppuccin-latte/starship.toml — light theme
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$python\
+$nodejs\
+$rust\
+$golang\
+$docker_context\
+$cmd_duration\
+$line_break\
+$character"""
+
+add_newline = false
+
+[character]
+success_symbol = "[❯](bold #ea76cb)"
+error_symbol   = "[❯](bold #d20f39)"
+vimcmd_symbol  = "[❮](bold #40a02b)"
+
+[directory]
+style = "bold #179299"
+truncation_length = 3
+truncate_to_repo  = true
+
+[git_branch]
+symbol = " "
+style  = "bold #ea76cb"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style  = "bold #df8e1d"
+format = "[$all_status$ahead_behind]($style) "
+
+[cmd_duration]
+min_time = 2000
+format   = "[took $duration]($style) "
+style    = "#8c8fa1"
+
+[python]
+symbol = " "
+style  = "#df8e1d"
+
+[nodejs]
+symbol = " "
+style  = "#40a02b"
+
+[rust]
+symbol = " "
+style  = "#d20f39"
+
+[golang]
+symbol = " "
+style  = "#04a5e5"
+
+[docker_context]
+symbol = " "
+style  = "#1e66f5"
+only_with_files = true
+
+[hostname]
+disabled = true
+[username]
+disabled = true
+[time]
+disabled = true
+[battery]
+disabled = true
+[package]
+disabled = true
+[memory_usage]
+disabled = true

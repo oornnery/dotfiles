@@ -1,0 +1,89 @@
+# themes/catppuccin-mocha/starship.toml — color palette for starship.
+# This file is the COMPLETE starship config when this theme is active.
+# Switched by `theme set <name>`.
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$python\
+$nodejs\
+$rust\
+$golang\
+$docker_context\
+$cmd_duration\
+$line_break\
+$character"""
+
+add_newline = false
+
+[character]
+success_symbol = "[❯](bold #f5c2e7)"
+error_symbol   = "[❯](bold #f38ba8)"
+vimcmd_symbol  = "[❮](bold #a6e3a1)"
+
+[directory]
+style = "bold #94e2d5"
+truncation_length = 3
+truncate_to_repo  = true
+read_only         = " 󰌾"
+
+[git_branch]
+symbol = " "
+style  = "bold #f5c2e7"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style    = "bold #f9e2af"
+format   = "[$all_status$ahead_behind]($style) "
+modified = "✱"
+staged   = "✓"
+ahead    = "⇡${count}"
+behind   = "⇣${count}"
+diverged = "⇕"
+untracked = "?"
+
+[cmd_duration]
+min_time = 2000
+format   = "[took $duration]($style) "
+style    = "#7f849c"
+
+[python]
+symbol = " "
+format = "[$symbol(\\($virtualenv\\) )]($style)"
+style  = "#f9e2af"
+
+[nodejs]
+symbol = " "
+format = "[$symbol($version )]($style)"
+style  = "#a6e3a1"
+detect_files = ["package.json", ".nvmrc"]
+
+[rust]
+symbol = " "
+format = "[$symbol($version )]($style)"
+style  = "#f38ba8"
+
+[golang]
+symbol = " "
+format = "[$symbol($version )]($style)"
+style  = "#89dceb"
+
+[docker_context]
+symbol = " "
+format = "[$symbol$context]($style) "
+style  = "#89b4fa"
+only_with_files = true
+
+[hostname]
+disabled = true
+[username]
+disabled = true
+[time]
+disabled = true
+[battery]
+disabled = true
+[package]
+disabled = true
+[memory_usage]
+disabled = true

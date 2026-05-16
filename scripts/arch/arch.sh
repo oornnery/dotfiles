@@ -85,33 +85,45 @@ SECTION_game=(gaming)
 
 # Sensible "all" preset for the user's hardware (VAIO + AMD + btrfs + GNOME/Hyprland).
 # Skips luks (destrutivo), other display managers, and gaming.
-ALL_PRESET=(
-    core/preflight
-    core/pacman
-    core/base-utils
-    core/locale
-    core/user
-    core/core-services
-    core/keyring
-    core/networkmanager
-    core/bluetooth
-    core/pipewire
-    core/storage
-    core/monitoring
-    core/amd-gpu
-    core/notebook-vaio
-    core/power
-    core/zram
-    core/snapper
-    desktop/hyprland
-    dev/zsh
-    dev/stow
-    dev/tools
-    dev/languages
-    dev/docker
-    core/paru
-    core/ufw
-)
+# The "all" preset is composed at runtime from DESKTOPS + DISPLAY_MANAGER
+# (both come from arch.conf). Anything not driven by those vars is static.
+_compose_all_preset() {
+    local -a base=(
+        core/preflight
+        core/pacman
+        core/base-utils
+        core/locale
+        core/user
+        core/core-services
+        core/keyring
+        core/networkmanager
+        core/bluetooth
+        core/pipewire
+        core/storage
+        core/monitoring
+        core/amd-gpu
+        core/notebook-vaio
+        core/power
+        core/zram
+        core/snapper
+    )
+    local -a after=(
+        dev/zsh
+        dev/stow
+        dev/tools
+        dev/languages
+        dev/docker
+        core/paru
+        core/ufw
+    )
+    local -a desktops=()
+    for d in "${DESKTOPS[@]:-hyprland}"; do
+        desktops+=("desktop/$d")
+    done
+    local dm="${DISPLAY_MANAGER:-gdm}"
+    ALL_PRESET=("${base[@]}" "${desktops[@]}" "desktop/$dm" "${after[@]}")
+}
+_compose_all_preset
 
 # ─── Runners ────────────────────────────────────────────────────────────────
 

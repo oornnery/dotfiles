@@ -1,0 +1,74 @@
+# themes/tokyo-night/starship.toml
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$python\
+$nodejs\
+$rust\
+$golang\
+$docker_context\
+$cmd_duration\
+$line_break\
+$character"""
+
+add_newline = false
+
+[character]
+success_symbol = "[❯](bold #7aa2f7)"
+error_symbol   = "[❯](bold #f7768e)"
+vimcmd_symbol  = "[❮](bold #9ece6a)"
+
+[directory]
+style = "bold #7dcfff"
+truncation_length = 3
+truncate_to_repo  = true
+
+[git_branch]
+symbol = " "
+style  = "bold #bb9af7"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "bold #e0af68"
+format = "[$all_status$ahead_behind]($style) "
+
+[cmd_duration]
+min_time = 2000
+format   = "[took $duration]($style) "
+style    = "#565f89"
+
+[python]
+symbol = " "
+style  = "#e0af68"
+
+[nodejs]
+symbol = " "
+style  = "#9ece6a"
+
+[rust]
+symbol = " "
+style  = "#f7768e"
+
+[golang]
+symbol = " "
+style  = "#7dcfff"
+
+[docker_context]
+symbol = " "
+style  = "#7aa2f7"
+only_with_files = true
+
+[hostname]
+disabled = true
+[username]
+disabled = true
+[time]
+disabled = true
+[battery]
+disabled = true
+[package]
+disabled = true
+[memory_usage]
+disabled = true

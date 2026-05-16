@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# power-menu — fast wofi-based power menu (lock / suspend / reboot / shutdown).
+#
+# Bound in hyprland/bindings.conf:
+#   Super + Shift + P → power-menu       (this script — keyboard-driven, fast)
+#   Super + Shift + E → $logout = wlogout (GUI rich, icon-based)
+
+set -euo pipefail
+
+if ! command -v wofi >/dev/null; then
+    notify-send -a power-menu -i dialog-error "power-menu" "wofi not installed"
+    exit 1
+fi
+
+choice="$(printf '%s\n' \
+    "󰌾 Lock" \
+    "󰤄 Suspend" \
+    "󰍃 Logout" \
+    "󰜉 Reboot" \
+    "󰐥 Shutdown" \
+    | wofi --dmenu --prompt 'Power:' --width 280 --height 280 --hide-scroll
+)" || exit 0
+
+case "$choice" in
+    *Lock)       exec hyprlock ;;
+    *Suspend)    exec systemctl suspend ;;
+    *Logout)     exec hyprctl dispatch exit ;;
+    *Reboot)
+        if [[ "$(printf 'Cancel\nReboot' | wofi --dmenu --prompt 'Confirm reboot:')" == "Reboot" ]]; then
+            exec systemctl reboot
+        fi
+        ;;
+    *Shutdown)
+        if [[ "$(printf 'Cancel\nShutdown' | wofi --dmenu --prompt 'Confirm shutdown:')" == "Shutdown" ]]; then
+            exec systemctl poweroff
+        fi
+        ;;
+esac

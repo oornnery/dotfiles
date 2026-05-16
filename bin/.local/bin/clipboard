@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# clipboard — pick from cliphist via wofi (or rofi) and paste back.
+#
+# Bound in hyprland/bindings.conf:
+#   Super + V → clipboard
+#
+# Companion command: `clipboard wipe` clears the history.
+#
+# Environment:
+#   CLIPBOARD_PICKER=wofi   (default) or rofi
+
+set -euo pipefail
+
+PICKER="${CLIPBOARD_PICKER:-wofi}"
+
+case "${1:-pick}" in
+    pick)
+        if ! command -v cliphist >/dev/null; then
+            notify-send -a clipboard -i dialog-error "clipboard" "cliphist not installed"
+            exit 1
+        fi
+        case "$PICKER" in
+            wofi) menu="wofi --dmenu --prompt 'Clipboard:' --width 720" ;;
+            rofi) menu="rofi -dmenu -p Clipboard -theme-str 'window {width: 720px;}'" ;;
+            *)    echo "clipboard: unknown CLIPBOARD_PICKER=$PICKER" >&2; exit 1 ;;
+        esac
+        # cliphist | picker | cliphist decode | wl-copy — pipefail handles cancel.
+        cliphist list | eval "$menu" | cliphist decode | wl-copy
+        ;;
+    wipe)
+        cliphist wipe
+        notify-send -a clipboard -i edit-clear "clipboard" "history wiped"
+        ;;
+    -h|--help|help)
+        sed -n '2,11p' "$0"
+        ;;
+    *)
+        echo "clipboard: unknown command: $1" >&2
+        exit 1
+        ;;
+esac

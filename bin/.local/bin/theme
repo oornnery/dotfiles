@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# theme — switch the active visual theme across alacritty, waybar, wofi,
+#         mako and starship.
+#
+# Usage:
+#   theme list             list available themes
+#   theme get              show current theme
+#   theme set <name>       activate theme + reload daemons
+#   theme cycle            rotate through available themes
+#
+# Themes live in $DOTFILES_DIR/themes/<name>/ and contain:
+#   alacritty.toml   colors block (imported by alacritty.toml)
+#   waybar.css       @define-color block (imported by style.css)
+#   wofi.css         @define-color block (imported by style.css)
+#   mako.config      colors block (included by mako config)
+#   starship.toml    full starship config
+#
+# Adding a theme: copy one of the existing dirs, edit the colors, done.
+
+set -euo pipefail
+
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+THEMES_DIR="$DOTFILES_DIR/themes"
+STATE_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/active-theme"
+
+mkdir -p "$(dirname "$STATE_FILE")"
+
+_themes() {
+    [[ -d "$THEMES_DIR" ]] || return
+    find "$THEMES_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+}
+
+_current() {
+    [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" || echo "catppuccin-mocha"
+}
+
+_notify() {
+    command -v notify-send >/dev/null && \
+        notify-send -a theme -t 3000 -i preferences-desktop-theme "$@" || true
+}
+
+_apply() {
+    local name="$1"
+    local src="$THEMES_DIR/$name"
+    [[ -d "$src" ]] || { echo "theme: no such theme: $name" >&2; exit 1; }
+
+    # 1. Alacritty — write theme.toml that alacritty.toml imports.
+    if [[ -f "$src/alacritty.toml" ]]; then
+        install -D -m 644 "$src/alacritty.toml" "$HOME/.config/alacritty/theme.toml"
+    fi
+
+    # 2. Waybar — theme.css imported by style.css.
+    if [[ -f "$src/waybar.css" ]]; then
+        install -D -m 644 "$src/waybar.css" "$HOME/.config/waybar/theme.css"
+    fi
+
+    # 3. Wofi — theme.css imported by style.css.
+    if [[ -f "$src/wofi.css" ]]; then
+        install -D -m 644 "$src/wofi.css" "$HOME/.config/wofi/theme.css"
+    fi
+
+    # 4. Mako — theme.config included by mako config.
+    if [[ -f "$src/mako.config" ]]; then
+        install -D -m 644 "$src/mako.config" "$HOME/.config/mako/theme.config"
+    fi
+
+    # 5. Starship — drop-in full config.
+    if [[ -f "$src/starship.toml" ]]; then
+        install -D -m 644 "$src/starship.toml" "$HOME/.config/starship.toml"
+    fi
+
+    echo "$name" > "$STATE_FILE"
+
+    # Reload daemons.
+    command -v makoctl >/dev/null   && makoctl reload 2>/dev/null || true
+    pkill -SIGUSR2 waybar           2>/dev/null || true   # waybar config reload
+    # Alacritty has live_config_reload = true → picks up theme.toml on save.
+    # Starship reloads automatically on next prompt.
+
+    _notify "Theme" "→ $name"
+}
+
+case "${1:-help}" in
+    list)
+        cur="$(_current)"
+        while IFS= read -r t; do
+            if [[ "$t" == "$cur" ]]; then printf '* %s\n' "$t"
+            else                          printf '  %s\n' "$t"; fi
+        done < <(_themes)
+        ;;
+    get)
+        _current
+        ;;
+    set)
+        [[ -z "${2:-}" ]] && { echo "Usage: theme set <name>" >&2; exit 1; }
+        _apply "$2"
+        ;;
+    cycle)
+        mapfile -t themes < <(_themes)
+        cur="$(_current)"
+        for i in "${!themes[@]}"; do
+            if [[ "${themes[i]}" == "$cur" ]]; then
+                next="${themes[(i+1) % ${#themes[@]}]}"
+                _apply "$next"
+                exit 0
+            fi
+        done
+        # Current not found → apply the first.
+        _apply "${themes[0]}"
+        ;;
+    -h|--help|help)
+        sed -n '2,18p' "$0"
+        ;;
+    *)
+        echo "theme: unknown command: $1" >&2
+        exit 1
+        ;;
+esac

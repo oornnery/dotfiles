@@ -32,12 +32,12 @@ fi
 log::info "Stowing dotfiles from $dotfiles_dir"
 
 # Core packages — always tried (skipped silently if the dir is absent).
-packages=(bash zsh tmux git editor fabric system alacritty bin)
+packages=(bash zsh tmux vim git editor fabric alacritty bin waybar wofi mako)
 
 # Neovim: mini.nvim (default) vs LazyVim — mutually exclusive (same target).
 case "$NVIM_DISTRO" in
-    lazyvim) packages+=(nvim-lazyvim) ;;
-    mini|*)  packages+=(nvim) ;;
+    lazy|lazyvim) packages+=(nvim-lazy) ;;
+    mini|*)       packages+=(nvim) ;;
 esac
 
 pacman -Qq hyprland >/dev/null 2>&1 && packages+=(hyprland)

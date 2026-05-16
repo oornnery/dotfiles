@@ -1,0 +1,108 @@
+// ~/.config/waybar/config.jsonc — top bar.
+//
+// Single bar across the top, transparent background, Catppuccin Mocha
+// palette (matches alacritty / starship / tmux / hyprland borders).
+
+{
+    "layer": "top",
+    "position": "top",
+    "height": 28,
+    "spacing": 4,
+    "margin-top": 4,
+    "margin-left": 8,
+    "margin-right": 8,
+
+    "modules-left":   ["hyprland/workspaces", "hyprland/submap"],
+    "modules-center": ["clock"],
+    "modules-right":  ["tray", "network", "bluetooth", "pulseaudio", "backlight", "battery", "cpu", "memory", "power-profiles-daemon", "custom/power"],
+
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "on-click": "activate",
+        "format-icons": {
+            "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
+            "6": "6", "7": "7", "8": "8", "9": "9", "10": "10",
+            "active": "●", "default": "○"
+        }
+    },
+
+    "clock": {
+        "format": "{:%H:%M  ·  %a %d %b}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "month",
+            "format": {
+                "today": "<span color='#f5c2e7'><b>{}</b></span>"
+            }
+        }
+    },
+
+    "network": {
+        "format-wifi": "󰖩 {essid}",
+        "format-ethernet": "󰈀 {ifname}",
+        "format-disconnected": "󰖪",
+        "tooltip-format": "{ifname} via {gwaddr}\n{ipaddr}",
+        "on-click": "alacritty --class floating -e impala"
+    },
+
+    "bluetooth": {
+        "format": "󰂯",
+        "format-disabled": "󰂲",
+        "format-connected": "󰂱 {device_alias}",
+        "tooltip-format": "{controller_alias}\n{num_connections} connected",
+        "on-click": "alacritty --class floating -e bluetui"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰖁",
+        "format-icons": {
+            "headphone":  "󰋋",
+            "hands-free": "󰂑",
+            "headset":    "󰋎",
+            "phone":      "",
+            "portable":   "",
+            "car":        "",
+            "default":    ["󰕿", "󰖀", "󰕾"]
+        },
+        "on-click":  "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-click-right": "pavucontrol",
+        "scroll-step": 5
+    },
+
+    "backlight": {
+        "format": "󰃟 {percent}%",
+        "on-scroll-up":   "brightnessctl set +5%",
+        "on-scroll-down": "brightnessctl set 5%-"
+    },
+
+    "battery": {
+        "states": { "good": 80, "warning": 30, "critical": 15 },
+        "format":          "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged":  "󰚥 {capacity}%",
+        "format-icons":    ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+
+    "cpu":    { "format": "󰍛 {usage}%", "interval": 5 },
+    "memory": { "format": "󰾆 {used:0.1f}G", "interval": 10 },
+
+    "power-profiles-daemon": {
+        "format": "{icon}",
+        "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+        "format-icons": {
+            "default":     "󰂃",
+            "performance": "󱐋",
+            "balanced":    "󰁹",
+            "power-saver": "󰂃"
+        }
+    },
+
+    "tray": { "spacing": 8 },
+
+    "custom/power": {
+        "format":   "󰐥",
+        "on-click": "power-menu",
+        "tooltip":  false
+    }
+}

@@ -1,0 +1,70 @@
+/* ~/.config/wofi/style.css
+ *
+ * Palette from ~/.config/wofi/theme.css (switched by `theme set <name>`).
+ * Defines @bg, @bg-alt, @fg, @accent.
+ */
+
+@import "theme.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 13px;
+    border: none;
+    outline: none;
+}
+
+window {
+    background: alpha(@bg, 0.95);
+    border: 1px solid @accent;
+    border-radius: 12px;
+    color: @fg;
+}
+
+#outer-box {
+    margin: 8px;
+}
+
+#input {
+    margin: 4px 4px 8px 4px;
+    padding: 8px 12px;
+    background: @bg-alt;
+    color: @fg;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+#input:focus {
+    border-color: @accent;
+}
+
+#scroll {
+    margin-top: 4px;
+}
+
+#inner-box {
+    padding: 0;
+}
+
+#entry {
+    padding: 6px 12px;
+    margin: 2px 0;
+    border-radius: 6px;
+    color: @fg;
+}
+
+#entry:selected {
+    background: @accent;
+    color: @bg;
+}
+
+#entry image {
+    margin-right: 10px;
+}
+
+#text {
+    color: inherit;
+}
+
+#text:selected {
+    color: @bg;
+}

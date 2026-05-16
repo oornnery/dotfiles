@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# power-profile — switch / inspect power-profiles-daemon profile.
+#
+# Usage:
+#   power-profile               # show current profile + notify
+#   power-profile cycle         # rotate power-saver → balanced → performance
+#   power-profile set <mode>    # force a specific mode
+#
+# Bound in hyprland/bindings.conf:
+#   Super + Ctrl + Alt + P → power-profile cycle
+
+set -euo pipefail
+
+if ! command -v powerprofilesctl >/dev/null; then
+    notify-send -a power-profile -i dialog-error \
+        "power-profile" "powerprofilesctl not found — install power-profiles-daemon"
+    exit 1
+fi
+
+_icon_for() {
+    case "$1" in
+        power-saver) echo "battery-low" ;;
+        balanced)    echo "battery-good" ;;
+        performance) echo "battery-full-charging" ;;
+        *)           echo "dialog-information" ;;
+    esac
+}
+
+_emoji_for() {
+    case "$1" in
+        power-saver) echo "󰂃" ;;
+        balanced)    echo "󰁹" ;;
+        performance) echo "󱐋" ;;
+        *)           echo "?" ;;
+    esac
+}
+
+_show() {
+    local p; p="$(powerprofilesctl get)"
+    notify-send -a power-profile -i "$(_icon_for "$p")" -t 3000 \
+        "$(_emoji_for "$p") Power profile" "$p"
+}
+
+case "${1:-}" in
+    "")
+        _show
+        ;;
+    cycle)
+        cur="$(powerprofilesctl get)"
+        case "$cur" in
+            power-saver) next="balanced" ;;
+            balanced)    next="performance" ;;
+            performance) next="power-saver" ;;
+            *)           next="balanced" ;;
+        esac
+        powerprofilesctl set "$next"
+        notify-send -a power-profile -i "$(_icon_for "$next")" -t 3000 \
+            "$(_emoji_for "$next") Power profile" "$cur → $next"
+        ;;
+    set)
+        [[ -z "${2:-}" ]] && { echo "Usage: power-profile set <power-saver|balanced|performance>" >&2; exit 1; }
+        powerprofilesctl set "$2"
+        _show
+        ;;
+    list)
+        powerprofilesctl list
+        ;;
+    -h|--help|help)
+        sed -n '2,11p' "$0"
+        ;;
+    *)
+        echo "power-profile: unknown command: $1" >&2
+        exit 1
+        ;;
+esac

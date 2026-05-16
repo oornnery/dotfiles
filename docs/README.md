@@ -24,6 +24,7 @@ but tailored to this hardware and workflow.
 - [Web Apps](applications/06-web-apps.md) — firefoxpwa + `web-app` wrapper
 - [Gaming](applications/07-gaming.md) — Steam, wine, gamemode, mangohud
 - [Windows VM](applications/08-windows-vm.md) — dockur/windows on Docker
+- [bin/ scripts](applications/09-bin-scripts.md) — notice, web-app, hypr-scale, power-profile, power-menu, clipboard, theme
 
 ## Configuration
 
@@ -33,6 +34,7 @@ but tailored to this hardware and workflow.
 - [Fonts](configuration/04-fonts.md) — Nerd Font + Noto
 - [Dotfiles (Stow)](configuration/05-dotfiles.md) — workflow + new packages
 - [Common Tweaks](configuration/06-tweaks.md) — power, snapper, swap, etc.
+- [Theming](configuration/07-theming.md) — catppuccin-mocha / tokyo-night / catppuccin-latte
 
 ## The Rest
 
