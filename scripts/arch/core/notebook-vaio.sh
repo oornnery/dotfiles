@@ -9,7 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/bootloader.sh"
 require_root
 detect::system
 
-log::banner "Hardware" "Notebook setup"
+log::banner "Core" "Notebook setup (VAIO)"
 
 if [[ "$IS_WSL" -eq 1 || "$IS_VM" -eq 1 ]]; then
     log::skip "WSL/VM: skipping notebook-specific setup."
@@ -32,6 +32,7 @@ PKGS=(
     fwupd
     v4l-utils
     libinput
+    iio-sensor-proxy       # lid switch, acelerômetro, rotação automática
     power-profiles-daemon
 )
 

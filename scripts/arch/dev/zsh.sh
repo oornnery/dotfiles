@@ -9,13 +9,12 @@ DOTFILES_DIR="${DOTFILES_DIR:-/home/$USER_NAME/dotfiles}"
 require_root
 detect::system
 
-log::banner "System" "Shell (zsh + Oh My Zsh + tmux + neovim)"
+log::banner "Dev" "Shell (zsh + Oh My Zsh)"
 
+# Shell-environment essentials only. General CLI/TUI tools live in dev/tools.sh
+# (eza, bat, fzf, ripgrep, fd, starship, zoxide, atuin, mise, direnv, fastfetch, btop, …).
 PKGS=(
     zsh tmux neovim
-    fastfetch btop htop tree
-    starship zoxide atuin mise direnv
-    eza bat fzf ripgrep fd
 )
 
 if [[ $IS_WSL -eq 0 && $IS_VM -eq 0 ]]; then

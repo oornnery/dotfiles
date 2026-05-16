@@ -6,11 +6,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/detect.sh"
 require_root
 detect::system
 
-log::banner "System" "Base utilities + microcode + fonts"
+log::banner "Core" "Base utilities + microcode + fonts"
 
 PKGS=(
     base-devel
-    sudo git curl wget vim bash stow
+    sudo git curl wget vim bash
     unzip zip tar gzip bzip2 xz 7zip
     openssl openssh ca-certificates
     xdg-utils xdg-user-dirs
@@ -20,7 +20,7 @@ PKGS=(
     less man-db man-pages man-pages-pt_br
     pacman-contrib pkgfile arch-audit git-delta expac
     kernel-modules-hook
-    inxi
+    inxi usbutils
 )
 
 log::info "Installing base packages"

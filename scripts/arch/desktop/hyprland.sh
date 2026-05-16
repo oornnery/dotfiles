@@ -33,7 +33,6 @@ sudo pacman -S --needed --noconfirm \
     grim slurp satty swappy wlogout \
     wl-clipboard cliphist \
     woff2-font-awesome \
-    fastfetch btop \
     stow
 
 log::step "Stowing hyprland dotfiles"

@@ -9,7 +9,7 @@ TEMPLATES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../templates" && pwd)"
 require_root
 detect::system
 
-log::banner "Hardware" "NetworkManager"
+log::banner "Core" "NetworkManager"
 
 if [[ $IS_WSL -eq 1 ]]; then
     log::skip "WSL: networking is managed by Windows host"
@@ -18,7 +18,7 @@ fi
 
 log::info "Installing NetworkManager"
 sudo pacman -S --needed --noconfirm \
-    networkmanager network-manager-applet brightnessctl
+    networkmanager network-manager-applet
 
 sudo systemctl enable NetworkManager.service
 

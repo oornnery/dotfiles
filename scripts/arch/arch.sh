@@ -5,7 +5,7 @@
 #   ./arch.sh              → interactive menu (↑/↓ + space + enter)
 #   ./arch.sh all          → run the "all" curated preset
 #   ./arch.sh <section>    → run all modules in a section
-#   ./arch.sh <path>       → run a single module (e.g. system/zsh)
+#   ./arch.sh <path>       → run a single module (e.g. dev/zsh)
 #   ./arch.sh --help       → this help
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,31 +16,38 @@ source "$ROOT_DIR/lib/common.sh"
 # ─── Module catalog ─────────────────────────────────────────────────────────
 
 declare -A MODULES_DESC=(
-    [system/preflight]="Preflight checks + mirror refresh"
-    [system/pacman]="Configure pacman.conf (parallel, color, multilib)"
-    [system/base-utils]="Base packages + microcode + fonts"
-    [system/locale]="Locale, timezone, keymap, X11 layout"
-    [system/user]="Create user, wheel sudoers, linger, SSH key"
-    [system/core-services]="Enable core systemd services + journald tuning"
-    [system/zsh]="zsh + Oh My Zsh + plugins + stow zsh dotfiles"
-    [system/keyring]="gnome-keyring + libsecret + PAM auto-unlock"
-    [system/snapper]="snapper btrfs snapshots (snap-pac)"
-    [system/luks]="Migrate to systemd-cryptsetup TUI LUKS prompt"
-    [system/plymouth]="Boot splash"
-    [system/stow]="Symlink dotfiles via GNU stow"
+    # core/ — foundational system + hardware + security + package infra
+    [core/preflight]="Preflight checks + mirror refresh"
+    [core/pacman]="Configure pacman.conf (parallel, color, multilib)"
+    [core/base-utils]="Base packages + microcode + fonts"
+    [core/locale]="Locale, timezone, keymap, X11 layout"
+    [core/user]="Create user, wheel sudoers, linger, SSH key"
+    [core/core-services]="Enable core systemd services + journald tuning"
+    [core/keyring]="gnome-keyring + libsecret + PAM auto-unlock"
+    [core/snapper]="snapper btrfs snapshots (snap-pac)"
+    [core/luks]="Migrate to systemd-cryptsetup TUI LUKS prompt"
+    [core/plymouth]="Boot splash"
+    [core/networkmanager]="NetworkManager (+ iwd backend optional)"
+    [core/bluetooth]="Bluetooth (bluez + bluetui)"
+    [core/pipewire]="PipeWire audio stack (+ wiremix TUI)"
+    [core/storage]="USB / removable media automount (udisks2 + udiskie)"
+    [core/monitoring]="lm_sensors + smartmontools + nvme-cli"
+    [core/amd-gpu]="AMD GPU drivers"
+    [core/nvidia-gpu]="NVIDIA drivers (nouveau + optional proprietary)"
+    [core/intel-gpu]="Intel GPU drivers"
+    [core/power]="Power management (ppd | tlp | auto-cpufreq)"
+    [core/zram]="zram swap"
+    [core/notebook-vaio]="VAIO notebook tuning + iio-sensor-proxy + AMD pstate"
+    [core/vm-guest]="VM guest tools (qemu/virtualbox/vmware/hyper-v)"
+    [core/printing]="CUPS printing"
+    [core/ufw]="UFW firewall (+ ufw-docker)"
+    [core/hardening]="AppArmor + usbguard"
+    [core/paru]="paru (AUR helper) + optional AUR_PKGS"
+    [core/chaotic-aur]="Chaotic-AUR repository"
+    [core/flatpak]="Flatpak + Flathub remote"
+    [core/wsl]="WSL /etc/wsl.conf setup"
 
-    [hardware/networkmanager]="NetworkManager (+ iwd backend optional)"
-    [hardware/bluetooth]="Bluetooth (bluez + bluetui)"
-    [hardware/pipewire]="PipeWire audio stack (+ wiremix TUI)"
-    [hardware/amd-gpu]="AMD GPU drivers"
-    [hardware/nvidia-gpu]="NVIDIA drivers (nouveau + optional proprietary)"
-    [hardware/intel-gpu]="Intel GPU drivers"
-    [hardware/power]="Power management (ppd | tlp | auto-cpufreq)"
-    [hardware/zram]="zram swap"
-    [hardware/notebook-vaio]="VAIO notebook tuning + AMD pstate"
-    [hardware/vm-guest]="VM guest tools (qemu/virtualbox/vmware/hyper-v)"
-    [hardware/printing]="CUPS printing"
-
+    # desktop/
     [desktop/gdm]="GDM display manager"
     [desktop/greetd]="greetd + tuigreet display manager"
     [desktop/sddm]="SDDM display manager"
@@ -48,54 +55,65 @@ declare -A MODULES_DESC=(
     [desktop/gnome]="GNOME desktop"
     [desktop/hyprland]="Hyprland + utilities + stow hyprland dotfiles"
 
-    [dev/cli-tools]="Modern CLI replacements"
-    [dev/languages]="Language toolchains (python, rust, node, go, ...)"
+    # dev/ — tools, shell, TUI, dotfiles workflow
+    [dev/tools]="Modern CLI / TUI tools (eza, bat, fzf, lazygit, gum, …)"
+    [dev/zsh]="zsh + Oh My Zsh + plugins + stow zsh dotfiles"
+    [dev/stow]="Symlink dotfiles via GNU stow"
+    [dev/languages]="Language toolchains (python, rust, node, go, …)"
     [dev/docker]="Docker + Podman + lazydocker"
     [dev/llms]="AI tools (Claude Code, Codex, Ollama, LM Studio)"
 
-    [aur/paru]="paru (AUR helper) + optional AUR_PKGS"
-    [aur/chaotic-aur]="Chaotic-AUR repository"
-
-    [apps/flatpak]="Flatpak + Flathub remote"
-    [apps/gaming]="Steam + wine + gamemode + mangohud"
-
-    [security/ufw]="UFW firewall (+ ufw-docker)"
-    [security/hardening]="AppArmor + usbguard"
-
-    [wsl/base]="WSL /etc/wsl.conf setup"
+    # game/
+    [game/gaming]="Steam + wine + gamemode + mangohud"
 )
 
-SECTION_system=(preflight pacman base-utils locale user core-services zsh keyring snapper plymouth stow)
-SECTION_hardware=(networkmanager bluetooth pipewire amd-gpu nvidia-gpu intel-gpu power zram notebook-vaio vm-guest printing)
+# Section listings (module names without the section/ prefix).
+# Resolved via `local -n list="SECTION_$section"` (nameref) — shellcheck can't trace.
+# shellcheck disable=SC2034
+SECTION_core=(
+    preflight pacman base-utils locale user core-services keyring
+    snapper plymouth luks
+    networkmanager bluetooth pipewire storage monitoring
+    amd-gpu nvidia-gpu intel-gpu power zram notebook-vaio vm-guest printing
+    ufw hardening
+    paru chaotic-aur flatpak
+    wsl
+)
+# shellcheck disable=SC2034
 SECTION_desktop=(hyprland gdm greetd sddm ly gnome)
-SECTION_dev=(cli-tools languages docker llms)
-SECTION_aur=(paru chaotic-aur)
-SECTION_apps=(flatpak gaming)
-SECTION_security=(ufw hardening)
-SECTION_wsl=(base)
+# shellcheck disable=SC2034
+SECTION_dev=(tools zsh stow languages docker llms)
+# shellcheck disable=SC2034
+SECTION_game=(gaming)
 
-SECTIONS=(system hardware desktop dev aur apps security wsl)
-
+# Sensible "all" preset for the user's hardware (VAIO + AMD + btrfs + GNOME/Hyprland).
+# Skips luks (destrutivo), other display managers, and gaming.
 ALL_PRESET=(
-    system/preflight
-    system/pacman
-    system/base-utils
-    system/locale
-    system/user
-    system/core-services
-    system/zsh
-    system/keyring
-    hardware/networkmanager
-    hardware/bluetooth
-    hardware/pipewire
-    hardware/power
-    hardware/zram
+    core/preflight
+    core/pacman
+    core/base-utils
+    core/locale
+    core/user
+    core/core-services
+    core/keyring
+    core/networkmanager
+    core/bluetooth
+    core/pipewire
+    core/storage
+    core/monitoring
+    core/amd-gpu
+    core/notebook-vaio
+    core/power
+    core/zram
+    core/snapper
     desktop/hyprland
-    dev/cli-tools
+    dev/zsh
+    dev/stow
+    dev/tools
     dev/languages
     dev/docker
-    aur/paru
-    security/ufw
+    core/paru
+    core/ufw
 )
 
 # ─── Runners ────────────────────────────────────────────────────────────────
@@ -128,7 +146,7 @@ run_all() {
     log::ok "Bootstrap completed"
 }
 
-# ─── Interactive menu (uses rich-log ask::select / ask::multi) ──────────────
+# ─── Interactive menu ───────────────────────────────────────────────────────
 
 section_menu() {
     local section="$1"
@@ -146,16 +164,13 @@ section_menu() {
     local picks
     picks="$(ask::multi "Pick modules to run in [$section]" "${labels[@]}" || true)"
 
-    # Empty pick (cancel or nothing toggled) → return to main menu.
     [[ -z "$picks" ]] && return 0
-
-    # If "Back" was selected, return regardless of other picks.
-    if grep -q "Back to main menu" <<< "$picks"; then
-        return 0
-    fi
 
     while IFS= read -r line; do
         [[ -z "$line" ]] && continue
+        if [[ "$line" == *"Back to main menu"* ]]; then
+            return 0
+        fi
         if [[ "$line" == *"Run ALL in this section"* ]]; then
             run_section "$section"
             return 0
@@ -176,27 +191,19 @@ main_menu() {
         local choice
         choice="$(ask::select "What to run?" \
             "Run 'all' preset (recommended initial setup)" \
-            "system    — base, locale, user, zsh, keyring, snapper" \
-            "hardware  — net, bluetooth, audio, gpu, power, zram, vm-guest" \
-            "desktop   — hyprland, gnome, gdm/greetd/sddm/ly" \
-            "dev       — cli-tools, languages, docker, llms" \
-            "aur       — paru, chaotic-aur" \
-            "apps      — flatpak, gaming" \
-            "security  — ufw, hardening" \
-            "wsl       — wsl.conf" \
+            "core     — base, hw, security, AUR infra (28 modules)" \
+            "desktop  — gdm, greetd, sddm, ly, gnome, hyprland" \
+            "dev      — tools, zsh, stow, languages, docker, llms" \
+            "game     — gaming" \
             "Quit")"
 
         case "$choice" in
             "Run 'all' preset"*) run_all ;;
-            system*)   section_menu system ;;
-            hardware*) section_menu hardware ;;
-            desktop*)  section_menu desktop ;;
-            dev*)      section_menu dev ;;
-            aur*)      section_menu aur ;;
-            apps*)     section_menu apps ;;
-            security*) section_menu security ;;
-            wsl*)      section_menu wsl ;;
-            Quit|"")   log::info "Bye."; exit 0 ;;
+            core*)    section_menu core ;;
+            desktop*) section_menu desktop ;;
+            dev*)     section_menu dev ;;
+            game*)    section_menu game ;;
+            Quit|"")  log::info "Bye."; exit 0 ;;
         esac
     done
 }
@@ -210,7 +217,7 @@ case "${1:-menu}" in
     all)
         run_all
         ;;
-    system|hardware|desktop|dev|aur|apps|security|wsl)
+    core|desktop|dev|game)
         run_section "$1"
         ;;
     */*)
@@ -224,8 +231,8 @@ USAGE:
     ./arch.sh                 → interactive menu (↑/↓ + space + enter)
     ./arch.sh all             → run the curated "all" preset
     ./arch.sh <section>       → run all modules in a section
-                                (system | hardware | desktop | dev | aur | apps | security | wsl)
-    ./arch.sh <section>/<mod> → run a single module (e.g. system/zsh)
+                                (core | desktop | dev | game)
+    ./arch.sh <section>/<mod> → run a single module (e.g. dev/zsh)
     ./arch.sh -h              → this help
 
 CONFIG:
