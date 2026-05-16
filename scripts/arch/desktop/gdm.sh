@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# desktop/gdm.sh — GDM display manager + stow /etc/gdm/custom.conf.
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/detect.sh"
@@ -24,6 +25,8 @@ for unit in sddm.service ly.service greetd.service; do
     fi
 done
 
+stow_system gdm
+
 sudo systemctl enable gdm.service
 
-log::ok "GDM enabled"
+log::ok "GDM enabled — edit gdm/etc/gdm/custom.conf to tweak (WaylandEnable, autologin)"

@@ -493,3 +493,45 @@ stow_safe() {
         return 1
     fi
 }
+
+# stow_system <package> [dotfiles_dir]
+# Stows a package's tree onto / (system-wide). Used for /etc/* configs
+# managed through dotfiles (e.g. greetd, gdm). Always runs as root.
+# Conflict files are backed up with .bak.<timestamp>.
+stow_system() {
+    local pkg="$1"
+    local user="${SUDO_USER:-${USER_NAME:-$USER}}"
+    local user_home
+    user_home="$(getent passwd "$user" | cut -d: -f6)"
+    local dotfiles_dir="${2:-${DOTFILES_DIR:-$user_home/dotfiles}}"
+
+    if [[ ! -d "$dotfiles_dir/$pkg" ]]; then
+        log::skip "System stow source missing: $pkg"
+        return 0
+    fi
+    if ! command -v stow >/dev/null 2>&1; then
+        log::warn "stow not installed"
+        return 1
+    fi
+
+    # Backup conflicts under target /
+    local conflict ts
+    while IFS= read -r conflict; do
+        [[ -z "$conflict" ]] && continue
+        conflict="/$conflict"
+        [[ -e "$conflict" && ! -L "$conflict" ]] || continue
+        ts="$(date +%Y%m%d%H%M%S)"
+        sudo mv "$conflict" "${conflict}.bak.${ts}"
+        log::info "Backed up: $conflict → ${conflict}.bak.${ts}"
+    done < <(
+        stow -n -d "$dotfiles_dir" -t / "$pkg" 2>&1 \
+            | sed -nE 's/.*existing target is (neither a link nor a directory|not owned by stow): //p'
+    )
+
+    if sudo stow -d "$dotfiles_dir" -t / -R "$pkg"; then
+        log::ok "System stowed: $pkg → /"
+    else
+        log::warn "stow_system: failed for '$pkg'"
+        return 1
+    fi
+}

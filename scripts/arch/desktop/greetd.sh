@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
+# desktop/greetd.sh — greetd + tuigreet, configured via stow.
+#
+# Config lives at ~/dotfiles/greetd/etc/greetd/config.toml and is linked
+# to /etc/greetd/config.toml by `stow_system greetd`. Edit the file in
+# the repo and `sudo systemctl restart greetd` to apply.
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/detect.sh"
-
-DM_SESSION_CMD="${DM_SESSION_CMD:-Hyprland}"
-TEMPLATES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../templates" && pwd)"
 
 require_root
 detect::system
@@ -27,29 +29,8 @@ for unit in gdm.service sddm.service ly.service; do
     fi
 done
 
-sudo install -d -m 755 /etc/greetd
-
-src="$TEMPLATES_DIR/etc/greetd/config.toml"
-dest=/etc/greetd/config.toml
-
-if [[ -f "$src" ]]; then
-    [[ -f "$dest" ]] && snapshot "$dest"
-    sudo sed "s|__SESSION_CMD__|$DM_SESSION_CMD|g" "$src" | sudo install -m 644 /dev/stdin "$dest"
-    log::ok "Installed $dest"
-else
-    log::info "Writing greetd config (no template found)"
-    [[ -f "$dest" ]] && snapshot "$dest"
-    sudo tee "$dest" >/dev/null <<EOF
-[terminal]
-vt = 1
-
-[default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --cmd $DM_SESSION_CMD"
-user = "greeter"
-EOF
-    log::ok "Wrote $dest"
-fi
+stow_system greetd
 
 sudo systemctl enable greetd.service
 
-log::ok "greetd enabled (session: $DM_SESSION_CMD)"
+log::ok "greetd enabled — edit greetd/etc/greetd/config.toml to tweak"
