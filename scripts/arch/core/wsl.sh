@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
+# core/wsl.sh — WSL /etc/wsl.conf via stow.
+#
+# Config lives at ~/dotfiles/wsl/etc/wsl.conf and is linked to
+# /etc/wsl.conf by `stow_system wsl`. Edit the file directly in the
+# repo, then `wsl --shutdown` from PowerShell to reload.
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/detect.sh"
-
-USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
-TEMPLATES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../templates" && pwd)"
 
 require_root
 detect::system
@@ -16,32 +18,6 @@ if [[ $IS_WSL -eq 0 ]]; then
     exit 0
 fi
 
-src="$TEMPLATES_DIR/wsl/etc/wsl.conf"
-dest=/etc/wsl.conf
-
-if [[ -f "$src" ]]; then
-    [[ -f "$dest" ]] && snapshot "$dest"
-    sudo sed "s/__USER__/$USER_NAME/g" "$src" | sudo install -m 644 /dev/stdin "$dest"
-    log::ok "Installed $dest"
-else
-    log::info "Writing default /etc/wsl.conf (no template found)"
-    [[ -f "$dest" ]] && snapshot "$dest"
-    sudo tee "$dest" >/dev/null <<EOF
-[boot]
-systemd=true
-
-[user]
-default=$USER_NAME
-
-[interop]
-enabled=true
-appendWindowsPath=true
-
-[network]
-generateHosts=true
-generateResolvConf=true
-EOF
-    log::ok "Wrote $dest"
-fi
+stow_system wsl
 
 log::warn "From PowerShell: 'wsl --shutdown' then reopen Arch"
