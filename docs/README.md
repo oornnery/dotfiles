@@ -24,7 +24,7 @@ but tailored to this hardware and workflow.
 - [Web Apps](applications/06-web-apps.md) — firefoxpwa + `web-app` wrapper
 - [Gaming](applications/07-gaming.md) — Steam, wine, gamemode, mangohud
 - [Windows VM](applications/08-windows-vm.md) — dockur/windows on Docker
-- [bin/ scripts](applications/09-bin-scripts.md) — notice, web-app, hypr-scale, power-profile, power-menu, clipboard, theme
+- [bin/ scripts](applications/09-bin-scripts.md) — 24 helper scripts (screenshot, wallpaper, emoji, update, volume, magnify, theme, …)
 
 ## Configuration
 

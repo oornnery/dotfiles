@@ -92,20 +92,37 @@ See [Notices](06-notices.md).
 
 ## Display
 
-| Bind                | Action               |
-| ------------------- | -------------------- |
-| `Super + /`         | scale +0.1           |
-| `Super + Alt + /`   | scale -0.1           |
+| Bind                | Action                                            |
+| ------------------- | ------------------------------------------------- |
+| `Super + /`         | monitor scale +0.1 (`hypr-scale`)                 |
+| `Super + Alt + /`   | monitor scale -0.1                                |
+| `Super + =`         | magnify in (zoom +0.5x)                           |
+| `Super + -`         | magnify out                                       |
+| `Super + Shift + M` | magnify toggle (1.0 ↔ 1.5x)                       |
+
+## System toggles
+
+| Bind                       | Action                                       |
+| -------------------------- | -------------------------------------------- |
+| `Super + Ctrl + Alt + Y`   | `theme cycle` — alacritty/waybar/wofi/mako   |
+| `Super + Ctrl + Alt + P`   | `power-profile cycle` — power-saver/balanced/performance |
+| `Super + Ctrl + Alt + D`   | `dnd` — toggle mako Do-Not-Disturb           |
+| `Super + Ctrl + Alt + M`   | `night-mode` — toggle hyprsunset             |
+| `Super + Ctrl + Alt + R`   | `record` — toggle screen recording           |
+| `Super + Shift + O`        | `ocr` — region → tesseract → clipboard       |
+| `Super + Shift + Tab`      | `window-finder` — wofi list of windows       |
+| `Super + grave`            | `scratch` — quake-style scratchpad           |
 
 ## Multimedia
 
-Handled by `swayosd-client` for visual feedback:
+Handled by custom `bin/brightness` and `bin/volume` scripts with mako
+progress notifications (no swayosd-server).
 
-| Key              | Action                  |
-| ---------------- | ----------------------- |
-| `XF86AudioRaise` | volume +                |
-| `XF86AudioLower` | volume -                |
-| `XF86AudioMute`  | toggle mute             |
-| `XF86AudioMicMute` | toggle mic mute       |
-| `XF86MonBrightnessUp/Down` | brightness ±  |
-| `XF86AudioNext/Prev/Play/Pause` | playerctl |
+| Key                              | Action                  |
+| -------------------------------- | ----------------------- |
+| `XF86AudioRaiseVolume`           | `volume raise`          |
+| `XF86AudioLowerVolume`           | `volume lower`          |
+| `XF86AudioMute`                  | `volume mute-toggle`    |
+| `XF86AudioMicMute`               | `volume mic-mute-toggle`|
+| `XF86MonBrightnessUp/Down`       | `brightness raise/lower`|
+| `XF86AudioNext/Prev/Play/Pause`  | playerctl               |
