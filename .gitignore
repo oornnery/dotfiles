@@ -1,6 +1,13 @@
 .rumdl_cache/
 .env
 
+# Bootstrap runtime log (lib/common.sh appends here).
+arch.log
+scripts/arch/lib/arch.log
+
+# Claude Code local state
+.claude/
+
 .config/Code/*
 !.config/Code/User/
 .config/Code/User/*
