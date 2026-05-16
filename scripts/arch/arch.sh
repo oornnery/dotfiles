@@ -32,6 +32,7 @@ declare -A MODULES_DESC=(
     [core/monitoring]="lm_sensors + smartmontools + nvme-cli"
     [core/amd-gpu]="AMD GPU drivers"
     [core/power]="Power management (ppd | tlp | auto-cpufreq)"
+    [core/zram]="zram compressed swap (stow-managed)"
     [core/notebook-vaio]="VAIO notebook tuning + iio-sensor-proxy + AMD pstate"
     [core/vm-guest]="VM guest tools (qemu/virtualbox/vmware/hyper-v)"
     [core/ufw]="UFW firewall (+ ufw-docker)"
@@ -76,7 +77,7 @@ SECTION_core=(
     preflight pacman base-utils locale user core-services keyring
     snapper
     networkmanager bluetooth pipewire storage monitoring
-    amd-gpu power notebook-vaio vm-guest
+    amd-gpu power zram notebook-vaio vm-guest
     ufw
     paru flatpak
     wsl
@@ -115,6 +116,7 @@ _compose_all_preset() {
         core/amd-gpu
         core/notebook-vaio
         core/power
+        core/zram
         core/snapper
     )
     local -a after=(

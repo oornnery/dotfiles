@@ -33,6 +33,37 @@ echo deep | sudo tee /sys/power/mem_sleep
 To make it permanent, edit the bootloader entry (systemd-boot in
 `/boot/loader/entries/*.conf`) and remove the param.
 
+## Zram
+
+Compressed swap in RAM. Useful when running multiple VMs or CPU-offloaded
+LLM inference — workloads that pin a lot of RAM. With zstd compression
+(~3:1), a 32 GB zram device can hold ~96 GB of cold pages before the
+kernel actually runs out of room.
+
+Config (stow-managed):
+[`zram/etc/systemd/zram-generator.conf`](../../zram/etc/systemd/zram-generator.conf)
+
+```ini
+[zram0]
+zram-size = ram               # use 100% of total RAM
+compression-algorithm = zstd
+swap-priority = 100
+fs-type = swap
+```
+
+`core/zram.sh` runs `stow_system zram` to link this file to
+`/etc/systemd/zram-generator.conf`, then activates it without a reboot:
+
+```bash
+sudo systemctl restart systemd-zram-setup@zram0.service
+zramctl                                  # confirm /dev/zram0 is up
+swapon --show                            # zram listed with priority 100
+```
+
+To dial it back (reserve more uncompressed RAM for active processes):
+edit `zram/etc/systemd/zram-generator.conf` → change `zram-size = ram` to
+`ram / 2` → re-run the restart command.
+
 ## Snapper
 
 [`core/snapper.sh`](../../../scripts/arch/core/snapper.sh) sets up:
