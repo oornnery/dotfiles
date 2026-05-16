@@ -60,6 +60,7 @@ declare -A MODULES_DESC=(
     [dev/nvim]="neovim + stow nvim or nvim-lazy (per NVIM_DISTRO)"
     [dev/alacritty]="alacritty (+ optional ghostty) + stow alacritty + seed theme"
     [dev/git]="git + github-cli + git-delta + stow git config"
+    [dev/vscodium]="VSCodium + marketplace + features (AUR) + share settings with Code"
     [dev/stow]="Stow all dotfiles packages in one shot"
     [dev/languages]="Language toolchains (python, rust, node, go, …)"
     [dev/docker]="Docker + Podman + lazydocker"
@@ -87,7 +88,7 @@ SECTION_desktop=(hyprland gdm greetd sddm ly gnome)
 # shellcheck disable=SC2034
 SECTION_dev=(
     tools
-    zsh bash tmux vim nvim alacritty git
+    zsh bash tmux vim nvim alacritty git vscodium
     languages docker llms
     stow
 )
