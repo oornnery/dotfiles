@@ -34,6 +34,46 @@ Every script supports `--help`.
 | `brightness`     | brightnessctl wrapper + mako progress notification | `XF86MonBrightness*`  |
 | `volume`         | wpctl wrapper (sink+mic) + mako progress           | `XF86Audio*`          |
 | `magnify`        | Hyprland cursor:zoom_factor in/out/toggle/reset    | `Super+=`/`Super+-`/`Super+Shift+M` |
+| `sudo-askpass`   | `SUDO_ASKPASS` helper (gum / zenity / read fallback) | (called by sudo -A)  |
+| `sudo-tui`       | sudo wrapper with the gum prompt + faillock check    | (CLI)                 |
+
+## sudo-tui / sudo-askpass
+
+Replace the ugly default `[sudo] password for user:` prompt with a gum
+TUI. Avoids the `echo "$pwd" | sudo -S` pipe pattern that is fragile
+(PAM faillock counts each pipe-fed wrong-password as an attempt; backslashes
+in passwords get mangled by `echo`).
+
+```bash
+sudo-tui pacman -Syu          # uses gum for the password prompt
+```
+
+`zsh/.zshrc` ships an opt-in line that wires this up for the *plain*
+`sudo` too:
+
+```zsh
+if [[ -x "$HOME/.local/bin/sudo-askpass" ]]; then
+    export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass"
+    alias sudo='sudo -A'        # interactive shells only
+fi
+```
+
+The alias only expands in interactive zsh — scripts (.zshenv, shells
+called from cron) keep plain `sudo` semantics.
+
+### If sudo keeps rejecting your password
+
+PAM's `faillock` blocks the user for ~10 min after a few wrong attempts
+(including pipe-fed empty passwords from a previous broken script).
+`sudo-tui` detects this and prints a hint. To clear manually:
+
+```bash
+sudo faillock --user "$USER"            # show recent failures
+sudo faillock --user "$USER" --reset    # zero them
+```
+
+If you can't run sudo at all (locked out): switch to a TTY (`Ctrl+Alt+F2`),
+log in as root, and run the reset.
 
 ## screenshot
 

@@ -90,6 +90,13 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias rm='rm -i'
 
+# Sudo with a gum-based TUI password prompt (no fragile echo|sudo -S pipe).
+# Aliasing sudo only affects interactive shells — scripts keep plain sudo.
+if [[ -x "$HOME/.local/bin/sudo-askpass" ]]; then
+    export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass"
+    alias sudo='sudo -A'
+fi
+
 # Better listing with eza
 alias ls='eza --icons=always'
 alias ll='eza -la --icons=always --git'
