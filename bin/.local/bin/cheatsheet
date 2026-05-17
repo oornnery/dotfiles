@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# cheatsheet — wofi picker for keybind / command references.
+#
+# Live sources (parsed from your actual configs, always current):
+#   Hyprland binds      ← ~/.config/hypr/bindings.conf
+#   Tmux binds          ← ~/.tmux.conf
+#   Vim / Neovim binds  ← ~/.vimrc + ~/.config/nvim/plugin/20_keymaps.lua
+#   Zsh aliases         ← `alias`
+#   Shell functions     ← ~/.zsh_functions
+#
+# Static sources:
+#   docs/cheatsheets/*.md   ← every per-tool reference (eza, bat, fzf, …)
+#
+# Bound to Super+F1 in hyprland/bindings.conf.
+
+set -uo pipefail
+
+DOCS_DIR="${CHEATSHEET_DIR:-$HOME/dotfiles/docs/cheatsheets}"
+
+# Display arbitrary stdin in a floating alacritty paged by bat.
+_show_stdin() {
+    local title="$1" lang="${2:-md}"
+    local tmp; tmp="$(mktemp --suffix=".$lang")"
+    cat > "$tmp"
+    setsid -f alacritty --class floating --title "$title" \
+        -e bash -c "bat --paging=always --style=plain --color=always --language=$lang '$tmp'; rm -f '$tmp'" \
+        >/dev/null 2>&1 &
+}
+
+_show_file() {
+    local file="$1" title="$2"
+    setsid -f alacritty --class floating --title "$title" \
+        -e bat --paging=always "$file" >/dev/null 2>&1 &
+}
+
+# ─── Build menu ────────────────────────────────────────────────────────────
+
+_menu() {
+    printf '󰌌  Hyprland keybindings (live)\n'
+    printf '  Tmux keybindings (live)\n'
+    printf '  Vim / Neovim keybindings (live)\n'
+    printf '󰒓  Zsh aliases (live)\n'
+    printf 'ƒ  Shell functions (live)\n'
+    if [[ -d "$DOCS_DIR" ]]; then
+        for f in "$DOCS_DIR"/*.md; do
+            [[ -f "$f" ]] || continue
+            printf '󰈙  %s\n' "$(basename "$f" .md)"
+        done
+    fi
+}
+
+pick="$(_menu | wofi --dmenu --prompt 'Cheatsheet:' --width 640 --height 520 --insensitive)"
+[[ -z "$pick" ]] && exit 0
+
+# ─── Render ────────────────────────────────────────────────────────────────
+
+case "$pick" in
+    *Hyprland*)
+        {
+            printf '# Hyprland keybindings\n\n'
+            printf '_(parsed from ~/.config/hypr/bindings.conf)_\n\n'
+            grep -E '^(bind|bindel|bindl|bindm)' "$HOME/.config/hypr/bindings.conf" 2>/dev/null \
+                | sed 's/\$mainMod/Super/g' \
+                | column -t -s, -o ' │ '
+        } | _show_stdin "Hyprland keybindings" md
+        ;;
+    *Tmux*)
+        {
+            printf '# Tmux keybindings (prefix C-a)\n\n'
+            printf '_(parsed from ~/.tmux.conf)_\n\n'
+            grep -E '^(bind|set|setw)' "$HOME/.tmux.conf" 2>/dev/null
+        } | _show_stdin "Tmux keybindings" conf
+        ;;
+    *Vim*|*Neovim*)
+        {
+            printf '# Vim / Neovim keymaps\n\n'
+            if [[ -f "$HOME/.vimrc" ]]; then
+                printf '## ~/.vimrc\n\n'
+                grep -E '^(let mapleader|nnoremap|vnoremap|inoremap|map\b)' "$HOME/.vimrc"
+            fi
+            for f in "$HOME"/.config/nvim/plugin/*.lua "$HOME"/.config/nvim/lua/config/keymaps.lua; do
+                [[ -f "$f" ]] || continue
+                printf '\n## %s\n\n' "${f#$HOME/}"
+                grep -E 'vim\.keymap\.set|map\(' "$f" 2>/dev/null || true
+            done
+        } | _show_stdin "Vim / Neovim keymaps" vim
+        ;;
+    *Zsh*aliases*)
+        {
+            printf '# Zsh aliases\n\n'
+            alias
+        } | _show_stdin "Zsh aliases" sh
+        ;;
+    *Shell*functions*)
+        {
+            printf '# Shell functions (~/.zsh_functions)\n\n'
+            cat "$HOME/.zsh_functions" 2>/dev/null
+        } | _show_stdin "Shell functions" sh
+        ;;
+    *)
+        # Static cheatsheet from docs/
+        name="${pick##*  }"   # strip "󰈙  " prefix
+        file="$DOCS_DIR/$name.md"
+        if [[ -f "$file" ]]; then
+            _show_file "$file" "$name cheatsheet"
+        else
+            notify-send -a cheatsheet "cheatsheet" "Not found: $name"
+        fi
+        ;;
+esac

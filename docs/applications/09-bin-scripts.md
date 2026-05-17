@@ -36,6 +36,9 @@ Every script supports `--help`.
 | `magnify`        | Hyprland cursor:zoom_factor in/out/toggle/reset    | `Super+=`/`Super+-`/`Super+Shift+M` |
 | `sudo-askpass`   | `SUDO_ASKPASS` helper (gum / zenity / read fallback) | (called by sudo -A)  |
 | `sudo-tui`       | sudo wrapper with the gum prompt + faillock check    | (CLI)                 |
+| `waybar-gpu`     | JSON output for waybar showing AMD GPU usage + VRAM  | (waybar exec)         |
+| `cheatsheet`     | wofi cheatsheet picker (binds + docs) → floating bat | `Super+F1`            |
+| `obsidian-note`  | Obsidian vault helper: new/today/find/search/obsidian| `Super+N` / `+Shift+N` / `+Ctrl+N` |
 
 ## sudo-tui / sudo-askpass
 
@@ -220,6 +223,49 @@ magnify set 2.0         # absolute
 ```
 
 Clamped to `[1.0, 3.0]`. Uses `hyprctl keyword cursor:zoom_factor`.
+
+## cheatsheet
+
+wofi picker that lists your live keybind sources + every static cheatsheet
+in `docs/cheatsheets/`. Selected entry opens in a floating Alacritty paged
+through `bat`. Always current because the live entries parse your actual
+configs, not a doc that can drift.
+
+| Pick                       | Source                                              |
+| -------------------------- | --------------------------------------------------- |
+| 󰌌 Hyprland keybindings    | `~/.config/hypr/bindings.conf` (live)               |
+|  Tmux keybindings         | `~/.tmux.conf` (live)                               |
+|  Vim / Neovim keybindings | `~/.vimrc` + `~/.config/nvim/plugin/*.lua` (live)   |
+| 󰒓 Zsh aliases             | `alias` output (live)                               |
+| ƒ Shell functions          | `~/.zsh_functions` (live)                           |
+| 󰈙 zsh / bat / git / …      | `docs/cheatsheets/<tool>.md`                        |
+
+Bound to `Super + F1`. Override the docs path with `CHEATSHEET_DIR=…`.
+
+## obsidian-note
+
+CLI + wofi helper for an Obsidian vault. Defaults to
+`~/Documents/vault`; override with `OBSIDIAN_VAULT=/path/to/vault`.
+
+| Subcommand                  | What it does                                      |
+| --------------------------- | ------------------------------------------------- |
+| `obsidian-note new "Title"` | New note `YYYY-MM-DD-slug.md` with YAML frontmatter |
+| `obsidian-note today`       | Open `Daily/YYYY-MM-DD.md` (creates if missing)   |
+| `obsidian-note find`        | wofi list of `*.md` in vault → open in `$EDITOR`  |
+| `obsidian-note search [Q]`  | ripgrep → wofi pick line → open at line          |
+| `obsidian-note open <file>` | Open in `$EDITOR` (alacritty floating if from wofi) |
+| `obsidian-note obsidian`    | wofi pick → open in Obsidian GUI via `obsidian://` URI |
+
+Binds (default in `hyprland/bindings.conf`):
+
+| Bind               | Action                                           |
+| ------------------ | ------------------------------------------------ |
+| `Super + N`        | today's daily note                               |
+| `Super + Shift + N`| fuzzy-find a note                                |
+| `Super + Ctrl + N` | search by content                                |
+
+Editor is `$EDITOR` (default `nvim`). When invoked from wofi (no TTY),
+it pops a floating Alacritty.
 
 ## Adding new scripts
 
