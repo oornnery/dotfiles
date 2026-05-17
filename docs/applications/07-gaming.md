@@ -9,10 +9,13 @@ Steam + wine + gamemode stack. Requires `[multilib]` enabled in
 | Package         | Purpose                                                  |
 | --------------- | -------------------------------------------------------- |
 | steam           | Valve client + Proton                                    |
-| lutris          | Game launcher for non-Steam stores (Epic, GOG via Heroic) |
+| lutris          | Game launcher for non-Steam stores                       |
+| heroic-games-launcher-bin (AUR) | Epic / GOG / Amazon launcher             |
 | wine, wine-mono, wine-gecko, winetricks | Windows compat baseline            |
 | gamemode, lib32-gamemode | runtime CPU governor tuning while a game runs   |
 | mangohud, lib32-mangohud | FPS + frametime overlay (toggle with `F12`)     |
+| sc-controller   | DS4 / Steam Controller / generic gamepad mapper          |
+| xboxdrv         | Xbox controller userspace driver                         |
 
 ## Run
 
@@ -33,11 +36,26 @@ Or pick `game/gaming` from the menu (under "game" section).
 3. AMD GPU on Wayland: most modern Vulkan titles work out of the box;
    problematic titles can be forced to OpenGL via Proton tinkering.
 
+## Controllers
+
+- **sc-controller** ships a daemon + GTK GUI that maps any joystick
+  (DS4, generic) to a virtual Xbox controller, which most Linux games
+  understand:
+  ```bash
+  sc-controller-daemon            # start daemon (auto-detects connected gamepad)
+  sc-controller                   # GUI to remap buttons/axes per game
+  ```
+- Connect DS4 via USB or Bluetooth (bluez pairs it; `bluetuectl trust <MAC>`
+  to keep it connected across reboots).
+- After install, you may need to re-login for `input`/`uucp` group
+  membership to apply.
+
 ## Tools beyond the script
 
-- **Heroic Launcher** (AUR — Epic/GOG): `paru -S heroic-games-launcher-bin`
 - **Bottles** (Flatpak — wine prefix manager): `flatpak install flathub com.usebottles.bottles`
 - **Moonlight** (AUR — GeForce streaming): `paru -S moonlight-qt`
+- **GameHub** (Flatpak — multi-launcher with native + emulators)
+- **RetroArch** (`pacman -S retroarch`)
 
 None auto-installed — `game/gaming.sh` keeps to the basics.
 
