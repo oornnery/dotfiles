@@ -97,6 +97,13 @@ if [[ -x "$HOME/.local/bin/sudo-askpass" ]]; then
     alias sudo='sudo -A'
 fi
 
+# Clear PAM faillock counters after canceling a sudo prompt locks you out.
+# Usage: sudo-unlock           (current user)
+#        sudo-unlock alice     (another user)
+sudo-unlock() {
+    sudo faillock --user "${1:-$USER}" --reset
+}
+
 # Better listing with eza
 alias ls='eza --icons=always'
 alias ll='eza -la --icons=always --git'
