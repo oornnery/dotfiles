@@ -42,15 +42,18 @@ sudo pacman -S --needed --noconfirm curl unzip jq glib2
 # ─── Helpers ───────────────────────────────────────────────────────────────
 
 _run_user()    { sudo -u "$USER_NAME" -H "$@"; }
-_run_session() { sudo -u "$USER_NAME" -H dbus-run-session -- "$@" 2>/dev/null; }
+
+# dbus-run-session spawns a fresh DBus + gnome-keyring-daemon each call;
+# the daemon prints "GNOME_KEYRING_CONTROL=…" to stdout. Silence both
+# fds by default — callers that actually need output use _run_user.
+_run_session() { sudo -u "$USER_NAME" -H dbus-run-session -- "$@" >/dev/null 2>&1; }
 
 USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6)"
 EXT_DIR="$USER_HOME/.local/share/gnome-shell/extensions"
 _run_user mkdir -p "$EXT_DIR"
 
-# Detect Shell version. GNOME reports e.g. "50.1" — the API key is usually
-# just "50" (major). We try both.
-SHELL_FULL="$(_run_session gnome-shell --version 2>/dev/null | awk '{print $3}')"
+# Detect Shell version (no dbus session needed for --version).
+SHELL_FULL="$(_run_user gnome-shell --version 2>/dev/null | awk '{print $3}')"
 SHELL_MAJOR="${SHELL_FULL%%.*}"
 SHELL_PREV=$(( SHELL_MAJOR - 1 ))
 log::info "GNOME Shell: $SHELL_FULL (major=$SHELL_MAJOR, prev=$SHELL_PREV)"
@@ -133,57 +136,80 @@ done
 # ─── Per-extension gsettings (sensible defaults) ────────────────────────────
 
 log::step "Applying per-extension defaults"
-_gset() {
-    _run_session gsettings set "$@" 2>/dev/null \
-        || log::warn "    gsettings set $* failed"
+
+# gsettings needs --schemadir for extensions just installed: GNOME Shell
+# only registers the schemas after the next session reload, but pointing
+# gsettings at the extension's own schemas/ dir works immediately.
+_gset_ext() {
+    local uuid="$1" schema="$2"; shift 2
+    local sd="$EXT_DIR/$uuid/schemas"
+    if [[ ! -d "$sd" ]]; then
+        log::warn "    no schemadir for $uuid — skipping $schema $*"
+        return 0
+    fi
+    if sudo -u "$USER_NAME" -H dbus-run-session -- \
+        gsettings --schemadir "$sd" set "$schema" "$@" >/dev/null 2>&1; then
+        :  # ok
+    else
+        log::warn "    gsettings $schema $* failed"
+    fi
 }
 
-_has() { printf '%s\n' "${installed[@]}" | grep -q "$1"; }
+# Resolve a partial-match pattern to a fully-installed UUID (or empty).
+_uuid_of() {
+    printf '%s\n' "${installed[@]}" | grep -E "$1" | head -1
+}
 
-if _has 'dash-to-dock@'; then
+uuid="$(_uuid_of 'dash-to-dock@')"
+if [[ -n "$uuid" ]]; then
     log::info "  Dash to Dock"
-    _gset org.gnome.shell.extensions.dash-to-dock dock-position           'BOTTOM'
-    _gset org.gnome.shell.extensions.dash-to-dock dock-fixed              false
-    _gset org.gnome.shell.extensions.dash-to-dock extend-height           false
-    _gset org.gnome.shell.extensions.dash-to-dock intellihide             true
-    _gset org.gnome.shell.extensions.dash-to-dock transparency-mode       'DYNAMIC'
-    _gset org.gnome.shell.extensions.dash-to-dock dash-max-icon-size      40
-    _gset org.gnome.shell.extensions.dash-to-dock click-action            'minimize-or-overview'
+    _gset_ext "$uuid" org.gnome.shell.extensions.dash-to-dock dock-position      'BOTTOM'
+    _gset_ext "$uuid" org.gnome.shell.extensions.dash-to-dock dock-fixed         false
+    _gset_ext "$uuid" org.gnome.shell.extensions.dash-to-dock extend-height      false
+    _gset_ext "$uuid" org.gnome.shell.extensions.dash-to-dock intellihide        true
+    _gset_ext "$uuid" org.gnome.shell.extensions.dash-to-dock transparency-mode  'DYNAMIC'
+    _gset_ext "$uuid" org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 40
+    _gset_ext "$uuid" org.gnome.shell.extensions.dash-to-dock click-action       'minimize-or-overview'
 fi
 
-if _has 'just-perfection'; then
+uuid="$(_uuid_of 'just-perfection')"
+if [[ -n "$uuid" ]]; then
     log::info "  Just Perfection"
-    _gset org.gnome.shell.extensions.just-perfection activities-button    false
-    _gset org.gnome.shell.extensions.just-perfection app-menu             false
-    _gset org.gnome.shell.extensions.just-perfection panel-size           28
-    _gset org.gnome.shell.extensions.just-perfection startup-status       0
+    _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection activities-button false
+    _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection app-menu          false
+    _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection panel-size        28
+    _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection startup-status    0
 fi
 
-if _has 'blur-my-shell'; then
+uuid="$(_uuid_of 'blur-my-shell')"
+if [[ -n "$uuid" ]]; then
     log::info "  Blur My Shell"
-    _gset org.gnome.shell.extensions.blur-my-shell.panel blur             true
-    _gset org.gnome.shell.extensions.blur-my-shell.panel sigma            20
-    _gset org.gnome.shell.extensions.blur-my-shell.overview blur          true
-    _gset org.gnome.shell.extensions.blur-my-shell.applications blur      true
+    _gset_ext "$uuid" org.gnome.shell.extensions.blur-my-shell.panel        blur  true
+    _gset_ext "$uuid" org.gnome.shell.extensions.blur-my-shell.panel        sigma 20
+    _gset_ext "$uuid" org.gnome.shell.extensions.blur-my-shell.overview     blur  true
+    _gset_ext "$uuid" org.gnome.shell.extensions.blur-my-shell.applications blur  true
 fi
 
-if _has 'tilingshell@'; then
+uuid="$(_uuid_of 'tilingshell@')"
+if [[ -n "$uuid" ]]; then
     log::info "  Tiling Shell"
-    _gset org.gnome.shell.extensions.tilingshell inner-gaps               8
-    _gset org.gnome.shell.extensions.tilingshell outer-gaps               8
-    _gset org.gnome.shell.extensions.tilingshell snap-assist              true
+    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell inner-gaps   8
+    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell outer-gaps   8
+    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell snap-assist  true
 fi
 
-if _has 'caffeine@'; then
+uuid="$(_uuid_of 'caffeine@')"
+if [[ -n "$uuid" ]]; then
     log::info "  Caffeine"
-    _gset org.gnome.shell.extensions.caffeine show-indicator              'always'
-    _gset org.gnome.shell.extensions.caffeine toggle-state                false
+    _gset_ext "$uuid" org.gnome.shell.extensions.caffeine show-indicator 'always'
+    _gset_ext "$uuid" org.gnome.shell.extensions.caffeine toggle-state   false
 fi
 
-if _has 'clipboard-history'; then
+uuid="$(_uuid_of 'clipboard-history')"
+if [[ -n "$uuid" ]]; then
     log::info "  Clipboard History"
-    _gset org.gnome.shell.extensions.clipboard-history history-size       50
-    _gset org.gnome.shell.extensions.clipboard-history paste-on-selection true
+    _gset_ext "$uuid" org.gnome.shell.extensions.clipboard-history history-size       50
+    _gset_ext "$uuid" org.gnome.shell.extensions.clipboard-history paste-on-selection true
 fi
 
 # ─── Summary ───────────────────────────────────────────────────────────────
