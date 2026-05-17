@@ -35,6 +35,12 @@ done
 
 stow_system greetd
 
+# Note: tuigreet is a TTY greeter — it draws on the active VT and has
+# no concept of multi-monitor layout. The Wayland session it spawns
+# (Hyprland) reads ~/.config/hypr/monitors.conf, which is where the
+# layout lives. If you swap tuigreet for a graphical greeter like
+# regreet, mirror the gdm.sh monitors.xml sync block here.
+
 sudo systemctl enable greetd.service
 
 log::ok "greetd enabled — edit greetd/etc/greetd/config.toml to tweak"
