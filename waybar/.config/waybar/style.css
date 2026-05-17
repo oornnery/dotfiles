@@ -54,10 +54,15 @@ window#waybar {
 #battery,
 #cpu,
 #memory,
+#temperature,
 #power-profiles-daemon,
+#mpris,
 #tray,
 #custom-power,
-#custom-ai-usage {
+#custom-ai-usage,
+#custom-apps,
+#custom-gpu,
+#custom-updates {
     padding: 0 8px;
     margin: 0 2px;
     background: alpha(@bg-alt, 0.6);
@@ -78,6 +83,14 @@ window#waybar {
 #tray         { background: transparent; }
 #custom-power    { color: @red; }
 #custom-ai-usage { color: @mauve; }
+
+#custom-apps     { color: @accent; }
+#custom-gpu      { color: @teal; }
+#custom-gpu.warning  { color: @yellow; }
+#custom-gpu.critical { color: @red; }
+#custom-updates  { color: @sapphire; }
+#temperature     { color: @peach; }
+#mpris           { color: @green; }
 
 #custom-power:hover {
     background: @red;

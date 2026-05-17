@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# waybar-gpu — JSON output for waybar custom module showing AMD GPU usage.
+#
+# Reads /sys/class/drm/card*/device/gpu_busy_percent (kernel-exposed,
+# no root needed). Falls back to first card if multiple GPUs.
+#
+# Tooltip includes VRAM usage if available.
+
+set -u
+
+CARD=""
+for c in /sys/class/drm/card*/device/gpu_busy_percent; do
+    [[ -r "$c" ]] && { CARD="${c%/gpu_busy_percent}"; break; }
+done
+
+if [[ -z "$CARD" ]]; then
+    printf '{"text":"","tooltip":"no AMD GPU","class":"no-gpu"}\n'
+    exit 0
+fi
+
+busy="$(cat "$CARD/gpu_busy_percent" 2>/dev/null || echo 0)"
+
+# VRAM (in bytes), if amdgpu exposes it
+vram_total="$(cat "$CARD/mem_info_vram_total" 2>/dev/null || echo 0)"
+vram_used="$(cat "$CARD/mem_info_vram_used"  2>/dev/null || echo 0)"
+
+tooltip=""
+if [[ "$vram_total" -gt 0 ]]; then
+    pct=$(( vram_used * 100 / vram_total ))
+    tooltip="VRAM: $((vram_used >> 20)) / $((vram_total >> 20)) MiB (${pct}%)"
+fi
+
+# Color class crossing thresholds
+class="ok"
+(( busy > 60 )) && class="warning"
+(( busy > 90 )) && class="critical"
+
+printf '{"text":"%s%%","tooltip":"GPU %s%% — %s","class":"%s"}\n' \
+    "$busy" "$busy" "${tooltip:-no VRAM info}" "$class"
