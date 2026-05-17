@@ -27,6 +27,18 @@ done
 
 stow_system gdm
 
+# Mirror user's monitor layout into GDM so the greeter shows on the
+# same screens as the session. GDM's mutter reads ~gdm/.config/monitors.xml.
+user_monitors="/home/${USER_NAME}/.config/monitors.xml"
+if [[ -f "$user_monitors" ]]; then
+    log::info "Syncing monitors.xml to /var/lib/gdm/.config/"
+    sudo install -d -o gdm -g gdm -m 700 /var/lib/gdm/.config
+    sudo install -o gdm -g gdm -m 644 "$user_monitors" /var/lib/gdm/.config/monitors.xml
+    log::ok "GDM greeter will follow your GNOME monitor layout"
+else
+    log::skip "No ${user_monitors} yet — open GNOME Settings → Displays once, then re-run"
+fi
+
 sudo systemctl enable gdm.service
 
 log::ok "GDM enabled — edit gdm/etc/gdm/custom.conf to tweak (WaylandEnable, autologin)"
