@@ -28,18 +28,31 @@ done
 stow_system gdm
 
 # Mirror user's monitor layout into GDM so the greeter shows on the
-# same screens as the session. GDM's mutter reads /var/lib/gdm/.config/monitors.xml.
-# On modern Arch GDM has no static `gdm` user (only the gid=120 group),
-# so we own the file root:root mode 644 — readable by whatever UID GDM allocates.
+# same screens as the session.
+#
+# Modern Arch GDM uses DynamicUser-style per-seat config dirs:
+#   /var/lib/gdm/seat0/config/   (mode 700, owned by the dynamic GDM UID)
+# Mutter reads $XDG_CONFIG_HOME/monitors.xml from there.
+# The legacy /var/lib/gdm/.config/ path is ignored.
 _user="${SUDO_USER:-${USER_NAME:-$USER}}"
 user_monitors="$(getent passwd "$_user" | cut -d: -f6)/.config/monitors.xml"
-if [[ -f "$user_monitors" ]]; then
-    log::info "Syncing monitors.xml to /var/lib/gdm/.config/"
-    sudo install -d -m 755 /var/lib/gdm/.config
-    sudo install -m 644 "$user_monitors" /var/lib/gdm/.config/monitors.xml
-    log::ok "GDM greeter will follow your GNOME monitor layout"
-else
+seat_cfg="/var/lib/gdm/seat0/config"
+if [[ ! -f "$user_monitors" ]]; then
     log::skip "No ${user_monitors} yet — open GNOME Settings → Displays once, then re-run"
+elif [[ ! -d "$seat_cfg" ]]; then
+    log::skip "${seat_cfg} not present yet — start GDM at least once, then re-run"
+else
+    dyn_uid=$(stat -c '%u' "$seat_cfg")
+    dyn_gid=$(stat -c '%g' "$seat_cfg")
+    log::info "Syncing monitors.xml to ${seat_cfg}/ (uid=${dyn_uid} gid=${dyn_gid})"
+    sudo install -m 600 -o "$dyn_uid" -g "$dyn_gid" \
+        "$user_monitors" "$seat_cfg/monitors.xml"
+    # Clean up the old wrong path if a previous run left a file there.
+    if [[ -f /var/lib/gdm/.config/monitors.xml ]]; then
+        sudo rm -f /var/lib/gdm/.config/monitors.xml
+        sudo rmdir --ignore-fail-on-non-empty /var/lib/gdm/.config 2>/dev/null || true
+    fi
+    log::ok "GDM greeter will follow your GNOME monitor layout (restart gdm to apply)"
 fi
 
 sudo systemctl enable gdm.service
