@@ -50,6 +50,7 @@ declare -A MODULES_DESC=(
     [desktop/ly]="ly TUI display manager"
     [desktop/gnome]="GNOME desktop (vanilla)"
     [desktop/gnome-rice]="GNOME rice: theming + WM-like keybinds + extension list"
+    [desktop/gnome-extensions]="Auto-install + enable + configure GNOME extensions (via AUR installer)"
     [desktop/hyprland]="Hyprland + utilities + stow hyprland dotfiles"
 
     # dev/ — tools, shell, TUI, dotfiles workflow
@@ -85,7 +86,7 @@ SECTION_core=(
     fingerprint windows-vm firefoxpwa
 )
 # shellcheck disable=SC2034
-SECTION_desktop=(hyprland gdm greetd sddm ly gnome gnome-rice)
+SECTION_desktop=(hyprland gdm greetd sddm ly gnome gnome-rice gnome-extensions)
 # shellcheck disable=SC2034
 SECTION_dev=(
     tools

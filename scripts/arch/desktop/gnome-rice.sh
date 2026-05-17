@@ -50,14 +50,17 @@ sudo pacman -S --needed --noconfirm \
 # ─── AUR extras (opt-in via paru) ──────────────────────────────────────────
 
 if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
-    log::info "Installing AUR extras (gradience, bibata, morewaita)"
-    sudo -u "$USER_NAME" -H paru -S --needed --noconfirm \
-        gradience \
-        bibata-cursor-theme-bin \
-        morewaita-icon-theme || \
-        log::warn "Some AUR extras failed — non-fatal"
+    log::info "Installing AUR extras (per-package, tolerate failures)"
+    for aur_pkg in bibata-cursor-theme-bin morewaita-icon-theme; do
+        if sudo -u "$USER_NAME" -H paru -S --needed --noconfirm "$aur_pkg"; then
+            log::ok "  $aur_pkg"
+        else
+            log::warn "  $aur_pkg failed — skipping"
+        fi
+    done
+    # gradience was removed from AUR in late 2025 — skip it.
 else
-    log::warn "paru not installed — skipping AUR extras (gradience, cursor, icons)"
+    log::warn "paru not installed — skipping AUR extras (cursor, icons)"
 fi
 
 # ─── gsettings wrapper (drops priv + dbus-run-session) ─────────────────────
@@ -114,13 +117,20 @@ for i in 1 2 3 4 5 6 7 8 9; do
     _gset "org.gnome.desktop.wm.keybindings" "move-to-workspace-$i"   "['<Super><Shift>$i']"
 done
 
-# Super + Enter → open terminal (gnome-terminal); change to alacritty if preferred
-_gset org.gnome.settings-daemon.plugins.media-keys terminal "['<Super>Return']"
+# Super + Enter → open terminal — GNOME 47+ dropped the static `terminal`
+# media-key, so wire a custom-keybinding instead. Picks alacritty if
+# present, else gnome-terminal as fallback.
+TERM_CMD="$(command -v alacritty || command -v gnome-terminal || echo gnome-terminal)"
+KEYBIND_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/term/"
+_gset org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$KEYBIND_PATH']"
+_gset "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEYBIND_PATH" name 'Terminal'
+_gset "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEYBIND_PATH" command "$TERM_CMD"
+_gset "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEYBIND_PATH" binding '<Super>Return'
 
-# Super + Shift + S → screenshot region
+# Super + Shift + S → screenshot region (works in GNOME ≥ 42)
 _gset org.gnome.shell.keybindings show-screenshot-ui "['<Super><Shift>s', 'Print']"
 
-# Super + L → lock
+# Super + L → lock. screensaver key still exists in GNOME 50.
 _gset org.gnome.settings-daemon.plugins.media-keys screensaver "['<Super>l']"
 
 # ─── Profile-specific tweaks ───────────────────────────────────────────────
