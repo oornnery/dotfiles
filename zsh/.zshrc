@@ -92,10 +92,14 @@ alias mv='mv -i'
 alias rm='rm -i'
 
 # Sudo with a gum-based TUI password prompt (no fragile echo|sudo -S pipe).
-# Aliasing sudo only affects interactive shells — scripts keep plain sudo.
+# Use a zsh function instead of an alias: aliases don't expand inside
+# other functions (e.g. `sudo-unlock` below), but functions do — so the
+# gum prompt fires consistently for interactive commands AND for any
+# helper that wraps sudo. Bash scripts still get the plain prompt
+# (they don't inherit zsh functions); use `sudo -A` explicitly there.
 if [[ -x "$HOME/.local/bin/sudo-askpass" ]]; then
     export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass"
-    alias sudo='sudo -A'
+    sudo() { command sudo -A "$@" }
 fi
 
 # Clear PAM faillock counters after canceling a sudo prompt locks you out.
