@@ -8,8 +8,9 @@
 
 export ZSH="$HOME/.oh-my-zsh"
 
-# If you later switch to starship, set ZSH_THEME="" and initialize starship below.
-ZSH_THEME="robbyrussell"
+# Starship owns the prompt — empty ZSH_THEME stops OMZ from setting its own.
+# (Plugins/completion from OMZ stay loaded; only the theme is disabled.)
+ZSH_THEME=""
 
 # Plugins:
 # - git: git aliases and helpers

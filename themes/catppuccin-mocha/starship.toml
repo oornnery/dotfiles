@@ -1,89 +1,204 @@
-# themes/catppuccin-mocha/starship.toml — color palette for starship.
-# This file is the COMPLETE starship config when this theme is active.
-# Switched by `theme set <name>`.
+# themes/catppuccin-mocha/starship.toml
+# Linked to ~/.config/starship.toml by `theme set catppuccin-mocha`.
+#
+# Layout:
+#   line 1 ─ directory · git branch+status · lang version · cmd duration · jobs · exit-code
+#   line 2 ─ chevron prompt
+#
+# Reads palette as a native starship `[palettes.*]` so any module can
+# reference `pink`/`mauve`/etc by name — no scattered hex codes.
+
+add_newline   = true
+palette       = "catppuccin_mocha"
+command_timeout = 800
 
 format = """
 $directory\
 $git_branch\
 $git_status\
+$git_state\
 $python\
 $nodejs\
 $rust\
 $golang\
 $docker_context\
+$kubernetes\
+$status\
 $cmd_duration\
+$jobs\
 $line_break\
 $character"""
 
-add_newline = false
+# Right-aligned hostname when on SSH + time
+right_format = """$hostname"""
+
+# ── Palette ────────────────────────────────────────────────────────────────
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo  = "#f2cdcd"
+pink      = "#f5c2e7"
+mauve     = "#cba6f7"
+red       = "#f38ba8"
+maroon    = "#eba0ac"
+peach     = "#fab387"
+yellow    = "#f9e2af"
+green     = "#a6e3a1"
+teal      = "#94e2d5"
+sky       = "#89dceb"
+sapphire  = "#74c7ec"
+blue      = "#89b4fa"
+lavender  = "#b4befe"
+text      = "#cdd6f4"
+subtext1  = "#bac2de"
+subtext0  = "#a6adc8"
+overlay2  = "#9399b2"
+overlay1  = "#7f849c"
+overlay0  = "#6c7086"
+surface2  = "#585b70"
+surface1  = "#45475a"
+surface0  = "#313244"
+base      = "#1e1e2e"
+mantle    = "#181825"
+crust     = "#11111b"
+
+# ── Character (prompt chevron) ─────────────────────────────────────────────
 
 [character]
-success_symbol = "[❯](bold #f5c2e7)"
-error_symbol   = "[❯](bold #f38ba8)"
-vimcmd_symbol  = "[❮](bold #a6e3a1)"
+success_symbol = "[❯](bold pink)"
+error_symbol   = "[❯](bold red)"
+vimcmd_symbol  = "[❮](bold green)"
+
+# ── Directory ──────────────────────────────────────────────────────────────
 
 [directory]
-style = "bold #94e2d5"
+style             = "bold teal"
 truncation_length = 3
 truncate_to_repo  = true
 read_only         = " 󰌾"
+read_only_style   = "red"
+format            = "[$path]($style)[$read_only]($read_only_style) "
+
+[directory.substitutions]
+"~/dotfiles"  = " dotfiles"
+"~/Documents" = " Documents"
+"~/Downloads" = " Downloads"
+"~/Pictures"  = " Pictures"
+"~"           = " "
+
+# ── Git ────────────────────────────────────────────────────────────────────
 
 [git_branch]
 symbol = " "
-style  = "bold #f5c2e7"
+style  = "bold pink"
 format = "[$symbol$branch]($style) "
 
 [git_status]
-style    = "bold #f9e2af"
-format   = "[$all_status$ahead_behind]($style) "
-modified = "✱"
-staged   = "✓"
-ahead    = "⇡${count}"
-behind   = "⇣${count}"
-diverged = "⇕"
-untracked = "?"
+style      = "bold yellow"
+format     = "([\\[$all_status$ahead_behind\\]]($style) )"
+modified   = "✱"
+staged     = "✓"
+deleted    = "✗"
+renamed    = "»"
+untracked  = "?"
+stashed    = "≡"
+conflicted = "✘"
+ahead      = "⇡${count}"
+behind     = "⇣${count}"
+diverged   = "⇕⇡${ahead_count}⇣${behind_count}"
+
+[git_state]
+style                = "bold red"
+format               = '([\($state( $progress_current/$progress_total)\)]($style) )'
+rebase               = "REBASE"
+merge                = "MERGE"
+revert               = "REVERT"
+cherry_pick          = "CHERRY"
+
+# ── Status / duration / jobs ───────────────────────────────────────────────
+
+[status]
+disabled         = false
+format           = "[$symbol$common_meaning$signal_name$maybe_int]($style) "
+style            = "bold red"
+symbol           = "✘ "
+success_symbol   = ""
+not_executable_symbol = "🚫 "
+not_found_symbol      = "🔍 "
+sigint_symbol         = "🧱 "
+signal_symbol         = "⚡ "
 
 [cmd_duration]
-min_time = 2000
-format   = "[took $duration]($style) "
-style    = "#7f849c"
+min_time         = 2000
+format           = "[ $duration]($style) "
+style            = "dimmed yellow"
+
+[jobs]
+symbol           = "✦ "
+style            = "bold blue"
+number_threshold = 1
+symbol_threshold = 1
+
+# ── Languages / contexts ──────────────────────────────────────────────────
 
 [python]
-symbol = " "
-format = "[$symbol(\\($virtualenv\\) )]($style)"
-style  = "#f9e2af"
+symbol  = " "
+format  = "[$symbol(\\($virtualenv\\) )]($style)"
+style   = "yellow"
+python_binary = ["python", "python3"]
 
 [nodejs]
-symbol = " "
-format = "[$symbol($version )]($style)"
-style  = "#a6e3a1"
+symbol       = " "
+format       = "[$symbol($version )]($style)"
+style        = "green"
 detect_files = ["package.json", ".nvmrc"]
 
 [rust]
 symbol = " "
 format = "[$symbol($version )]($style)"
-style  = "#f38ba8"
+style  = "red"
 
 [golang]
 symbol = " "
 format = "[$symbol($version )]($style)"
-style  = "#89dceb"
+style  = "sky"
 
 [docker_context]
-symbol = " "
-format = "[$symbol$context]($style) "
-style  = "#89b4fa"
+symbol         = " "
+format         = "[$symbol$context]($style) "
+style          = "blue"
 only_with_files = true
 
+[kubernetes]
+disabled = false
+symbol   = "󱃾 "
+format   = "[$symbol$context( \\($namespace\\))]($style) "
+style    = "mauve"
+
+# ── Hostname (right side, only on SSH) ─────────────────────────────────────
+
 [hostname]
-disabled = true
+disabled = false
+ssh_only = true
+format   = "[@$hostname]($style) "
+style    = "bold sapphire"
+
+# ── Disabled noise ─────────────────────────────────────────────────────────
+
 [username]
 disabled = true
+
 [time]
 disabled = true
+
 [battery]
 disabled = true
+
+[memory_usage]
+disabled = true
+
 [package]
 disabled = true
-[memory_usage]
+
+[shlvl]
 disabled = true
