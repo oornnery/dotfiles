@@ -483,7 +483,10 @@ stow_safe() {
         log::info "Backed up: $conflict → ${conflict}.bak.${ts}"
     done < <(
         _as_user_priv stow -n -d "$dotfiles_dir" -t "$target" "$pkg" 2>&1 \
-            | sed -nE 's/.*existing target is (neither a link nor a directory|not owned by stow): //p'
+            | sed -nE '
+                s/.*existing target is (neither a link nor a directory|not owned by stow): //p
+                s/.*over existing target ([^ ]+) since neither a link nor a directory.*/\1/p
+            '
     )
 
     if _as_user_priv stow -d "$dotfiles_dir" -t "$target" -R "$pkg"; then
@@ -525,7 +528,10 @@ stow_system() {
         log::info "Backed up: $conflict → ${conflict}.bak.${ts}"
     done < <(
         stow -n -d "$dotfiles_dir" -t / "$pkg" 2>&1 \
-            | sed -nE 's/.*existing target is (neither a link nor a directory|not owned by stow): //p'
+            | sed -nE '
+                s/.*existing target is (neither a link nor a directory|not owned by stow): //p
+                s/.*over existing target ([^ ]+) since neither a link nor a directory.*/\1/p
+            '
     )
 
     if sudo stow -d "$dotfiles_dir" -t / -R "$pkg"; then
