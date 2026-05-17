@@ -15,13 +15,11 @@ $rust\
 $golang\
 $docker_context\
 $kubernetes\
-$status\
-$cmd_duration\
 $jobs\
 $line_break\
 $character"""
 
-right_format = """$hostname"""
+right_format = """$status$cmd_duration$hostname$time"""
 
 [palettes.tokyo_night]
 bg       = "#1a1b26"
@@ -84,14 +82,14 @@ format = '([\($state( $progress_current/$progress_total)\)]($style) )'
 
 [status]
 disabled       = false
-format         = "[$symbol$common_meaning$signal_name$maybe_int]($style) "
+format         = "[$symbol$common_meaning$signal_name$maybe_int]($style) · "
 style          = "bold red"
 symbol         = "✘ "
 success_symbol = ""
 
 [cmd_duration]
 min_time = 2000
-format   = "[ $duration]($style) "
+format   = "[ $duration]($style) · "
 style    = "dimmed yellow"
 
 [jobs]
@@ -136,13 +134,17 @@ style    = "mauve"
 [hostname]
 disabled = false
 ssh_only = true
-format   = "[@$hostname]($style) "
+format   = "[@$hostname]($style) · "
 style    = "bold sapphire"
 
-[username]
-disabled = true
-
 [time]
+disabled    = false
+format      = "[$time]($style)"
+style       = "dimmed muted"
+time_format = "%H:%M"
+utc_time_offset = "local"
+
+[username]
 disabled = true
 
 [battery]

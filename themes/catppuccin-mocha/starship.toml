@@ -23,14 +23,12 @@ $rust\
 $golang\
 $docker_context\
 $kubernetes\
-$status\
-$cmd_duration\
 $jobs\
 $line_break\
 $character"""
 
-# Right-aligned hostname when on SSH + time
-right_format = """$hostname"""
+# Right side: last-command status · duration · hostname (SSH) · clock
+right_format = """$status$cmd_duration$hostname$time"""
 
 # ── Palette ────────────────────────────────────────────────────────────────
 
@@ -119,7 +117,7 @@ cherry_pick          = "CHERRY"
 
 [status]
 disabled         = false
-format           = "[$symbol$common_meaning$signal_name$maybe_int]($style) "
+format           = "[$symbol$common_meaning$signal_name$maybe_int]($style) · "
 style            = "bold red"
 symbol           = "✘ "
 success_symbol   = ""
@@ -130,7 +128,7 @@ signal_symbol         = "⚡ "
 
 [cmd_duration]
 min_time         = 2000
-format           = "[ $duration]($style) "
+format           = "[ $duration]($style) · "
 style            = "dimmed yellow"
 
 [jobs]
@@ -180,15 +178,19 @@ style    = "mauve"
 [hostname]
 disabled = false
 ssh_only = true
-format   = "[@$hostname]($style) "
+format   = "[@$hostname]($style) · "
 style    = "bold sapphire"
+
+[time]
+disabled    = false
+format      = "[$time]($style)"
+style       = "dimmed overlay2"
+time_format = "%H:%M"
+utc_time_offset = "local"
 
 # ── Disabled noise ─────────────────────────────────────────────────────────
 
 [username]
-disabled = true
-
-[time]
 disabled = true
 
 [battery]
