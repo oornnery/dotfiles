@@ -1,0 +1,37 @@
+# GNOME Shell extensions for the "modern" rice profile.
+#
+# Install via Extension Manager (extension-manager package) — browse and
+# install each by name. Versions matter — GNOME breaks compatibility
+# between Shell versions, so don't pin via script.
+#
+# Format: extension UUID  (lookup at extensions.gnome.org or via
+#         `gnome-extensions list` after installing one).
+
+# ── Visual (the "rice") ─────────────────────────────────────────────────────
+
+blur-my-shell@aunetx
+dash-to-dock@micxgx.gmail.com
+just-perfection-desktop@just-perfection
+rounded-window-corners@fxgn
+user-theme@gnome-shell-extensions.gcampax.github.com
+
+# ── Workflow / productivity ─────────────────────────────────────────────────
+
+appindicatorsupport@rgcjonas.gmail.com
+caffeine@patapon.info
+clipboard-history@alexsaveau.dev
+gsconnect@andyholmes.github.io
+quick-settings-tweaks@qwreey
+space-bar@luchrioh
+tilingshell@ferrarodomenico.com
+
+# ── Optional eye-candy (enable selectively, can conflict) ───────────────────
+
+# burn-my-windows@schneegans.github.com         # close/open animations
+# compiz-windows-effect@hermes83.github.com     # wobbly drag
+# desktop-cube@schneegans.github.com            # workspace cube transition
+
+# ── Alternate WM-like layouts (mutually exclusive with tilingshell) ─────────
+
+# forge@jmmaranan.com                           # i3-style tiling
+# paperwm@paperwm.github.com                    # scrolling workspaces

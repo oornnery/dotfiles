@@ -48,7 +48,8 @@ declare -A MODULES_DESC=(
     [desktop/greetd]="greetd + tuigreet display manager"
     [desktop/sddm]="SDDM display manager"
     [desktop/ly]="ly TUI display manager"
-    [desktop/gnome]="GNOME desktop"
+    [desktop/gnome]="GNOME desktop (vanilla)"
+    [desktop/gnome-rice]="GNOME rice: theming + WM-like keybinds + extension list"
     [desktop/hyprland]="Hyprland + utilities + stow hyprland dotfiles"
 
     # dev/ — tools, shell, TUI, dotfiles workflow
@@ -84,7 +85,7 @@ SECTION_core=(
     fingerprint windows-vm firefoxpwa
 )
 # shellcheck disable=SC2034
-SECTION_desktop=(hyprland gdm greetd sddm ly gnome)
+SECTION_desktop=(hyprland gdm greetd sddm ly gnome gnome-rice)
 # shellcheck disable=SC2034
 SECTION_dev=(
     tools

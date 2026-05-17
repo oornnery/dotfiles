@@ -36,6 +36,8 @@ but tailored to this hardware and workflow.
 - [Common Tweaks](configuration/06-tweaks.md) — power, snapper, swap, etc.
 - [Theming](configuration/07-theming.md) — catppuccin-mocha / tokyo-night / catppuccin-latte
 - [System stow](configuration/08-system-stow.md) — managing `/etc/` files via stow
+- [GNOME rice](configuration/09-gnome-rice.md) — visual + WM-like workflow on top of GNOME
+- [GNOME extensions](configuration/10-gnome-extensions.md) — curated list + install workflow
 
 ## The Rest
 
