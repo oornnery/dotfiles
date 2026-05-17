@@ -16,12 +16,10 @@ if [[ $IS_WSL -eq 1 ]]; then
     exit 0
 fi
 
-log::info "Installing Hyprland packages"
+log::info "Installing Hyprland packages (official repos)"
 sudo pacman -S --needed --noconfirm \
     hyprland hypridle hyprlock hyprshot hyprpaper hyprsunset hyprpicker \
-    hyprland-qtutils \
     xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
-    xdg-terminal-exec \
     uwsm \
     waybar swaync mako \
     swayosd \
@@ -30,10 +28,27 @@ sudo pacman -S --needed --noconfirm \
     qt5-wayland qt6-wayland qt5ct qt6ct \
     xorg-xwayland \
     hyprpolkitagent polkit-gnome \
-    grim slurp satty swappy wlogout \
+    grim slurp satty swappy \
     wl-clipboard cliphist \
     woff2-font-awesome \
     stow
+
+# AUR-only: dropped from extra/ or only exist there.
+#   hyprland-qtutils  → AUR (Qt5/Qt6 utility libs for hyprland)
+#   xdg-terminal-exec → AUR (spec implementation, sometimes split as -git)
+#   wlogout           → AUR (logout screen — moved out of community)
+if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
+    log::info "Installing AUR extras (hyprland-qtutils, xdg-terminal-exec, wlogout)"
+    for aur_pkg in hyprland-qtutils xdg-terminal-exec wlogout; do
+        if sudo -u "$USER_NAME" -H paru -S --needed --noconfirm "$aur_pkg"; then
+            log::ok "  $aur_pkg"
+        else
+            log::warn "  $aur_pkg failed — try '$aur_pkg-git' manually if needed"
+        fi
+    done
+else
+    log::warn "paru not installed — skipping AUR extras. Run core/paru.sh first."
+fi
 
 log::step "Stowing hyprland dotfiles"
 

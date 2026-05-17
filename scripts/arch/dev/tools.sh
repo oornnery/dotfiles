@@ -43,4 +43,19 @@ PKGS=(
 
 sudo pacman -S --needed --noconfirm "${PKGS[@]}"
 
+# AUR-only TUIs (best-effort — skip if paru/AUR unavailable).
+USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
+if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
+    log::info "Installing AUR TUIs (pacsea, cliamp)"
+    for aur_pkg in pacsea cliamp; do
+        if sudo -u "$USER_NAME" -H paru -S --needed --noconfirm "$aur_pkg"; then
+            log::ok "  $aur_pkg"
+        else
+            log::warn "  $aur_pkg failed — try '$aur_pkg-bin' or '$aur_pkg-git' manually"
+        fi
+    done
+else
+    log::warn "paru not found — skipping AUR TUIs (pacsea, cliamp). Run core/paru.sh first."
+fi
+
 log::ok "CLI tools installed"
