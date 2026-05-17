@@ -56,7 +56,8 @@ window#waybar {
 #memory,
 #power-profiles-daemon,
 #tray,
-#custom-power {
+#custom-power,
+#custom-ai-usage {
     padding: 0 8px;
     margin: 0 2px;
     background: alpha(@bg-alt, 0.6);
@@ -75,7 +76,8 @@ window#waybar {
 #memory       { color: @sapphire; }
 #power-profiles-daemon { color: @accent; }
 #tray         { background: transparent; }
-#custom-power { color: @red; }
+#custom-power    { color: @red; }
+#custom-ai-usage { color: @mauve; }
 
 #custom-power:hover {
     background: @red;

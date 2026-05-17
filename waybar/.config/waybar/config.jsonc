@@ -14,7 +14,7 @@
 
     "modules-left":   ["hyprland/workspaces", "hyprland/submap"],
     "modules-center": ["clock"],
-    "modules-right":  ["tray", "network", "bluetooth", "pulseaudio", "backlight", "battery", "cpu", "memory", "power-profiles-daemon", "custom/power"],
+    "modules-right":  ["tray", "custom/ai-usage", "network", "bluetooth", "pulseaudio", "backlight", "battery", "cpu", "memory", "power-profiles-daemon", "custom/power"],
 
     "hyprland/workspaces": {
         "format": "{icon}",
@@ -104,5 +104,13 @@
         "format":   "󰐥",
         "on-click": "power-menu",
         "tooltip":  false
+    },
+
+    "custom/ai-usage": {
+        "exec":         "waybar-ai-usage",
+        "return-type":  "json",
+        "interval":     60,
+        "format":       "{}",
+        "tooltip":      true
     }
 }

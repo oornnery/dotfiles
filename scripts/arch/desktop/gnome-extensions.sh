@@ -176,9 +176,9 @@ uuid="$(_uuid_of 'just-perfection')"
 if [[ -n "$uuid" ]]; then
     log::info "  Just Perfection"
     _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection activities-button false
-    _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection app-menu          false
     _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection panel-size        28
     _gset_ext "$uuid" org.gnome.shell.extensions.just-perfection startup-status    0
+    # GNOME 50 removed the top-bar app menu; Just Perfection dropped its toggle.
 fi
 
 uuid="$(_uuid_of 'blur-my-shell')"
@@ -193,16 +193,16 @@ fi
 uuid="$(_uuid_of 'tilingshell@')"
 if [[ -n "$uuid" ]]; then
     log::info "  Tiling Shell"
-    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell inner-gaps   8
-    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell outer-gaps   8
-    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell snap-assist  true
+    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell inner-gaps          8
+    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell outer-gaps          8
+    _gset_ext "$uuid" org.gnome.shell.extensions.tilingshell enable-snap-assist  true
 fi
 
 uuid="$(_uuid_of 'caffeine@')"
 if [[ -n "$uuid" ]]; then
     log::info "  Caffeine"
     _gset_ext "$uuid" org.gnome.shell.extensions.caffeine show-indicator 'always'
-    _gset_ext "$uuid" org.gnome.shell.extensions.caffeine toggle-state   false
+    _gset_ext "$uuid" org.gnome.shell.extensions.caffeine user-enabled   false
 fi
 
 uuid="$(_uuid_of 'clipboard-history')"

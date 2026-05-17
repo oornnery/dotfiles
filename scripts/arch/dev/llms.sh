@@ -10,6 +10,7 @@ ENABLE_OLLAMA="${ENABLE_OLLAMA:-1}"
 ENABLE_LM_STUDIO="${ENABLE_LM_STUDIO:-0}"
 ENABLE_RTK="${ENABLE_RTK:-1}"
 ENABLE_AGENTS="${ENABLE_AGENTS:-1}"
+ENABLE_AI_WAYBAR="${ENABLE_AI_WAYBAR:-1}"
 AGENTS_REPO="${AGENTS_REPO:-oornnery/.agents}"
 
 require_root
@@ -35,12 +36,19 @@ if [[ $ENABLE_CODEX -eq 1 ]]; then
     log::step "OpenAI Codex CLI"
     if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ codex >/dev/null 2>&1; then
         log::skip "codex already installed"
-    else
+    elif command -v paru >/dev/null 2>&1; then
+        log::info "Installing openai-codex from AUR (paru)"
+        sudo -u "$USER_NAME" -H paru -S --needed --noconfirm openai-codex \
+            || log::warn "AUR install failed; falling back to npm"
+    fi
+
+    # Fallback: npm install if codex still missing and paru wasn't there / failed.
+    if ! sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ codex >/dev/null 2>&1; then
         if ! command -v npm >/dev/null 2>&1; then
             log::info "Installing nodejs + npm (codex prerequisite)"
             sudo pacman -S --needed --noconfirm nodejs npm
         fi
-        log::info "Installing @openai/codex via npm (user-local)"
+        log::info "Installing @openai/codex via npm (user-local fallback)"
         sudo -u "$USER_NAME" -H bash -c '
             mkdir -p "$HOME/.local/npm"
             npm config set prefix "$HOME/.local/npm"
@@ -112,6 +120,22 @@ if [[ $ENABLE_AGENTS -eq 1 ]]; then
         log::info "Cloning $AGENTS_REPO → $target"
         sudo -u "$USER_NAME" -H gh repo clone "$AGENTS_REPO" "$target" || \
             log::warn "gh clone failed — run 'gh auth login' then retry"
+    fi
+fi
+
+if [[ $ENABLE_AI_WAYBAR -eq 1 ]]; then
+    log::step "waybar-ai-usage (Claude / Codex / Copilot monitor)"
+    if ! pacman -Qq waybar >/dev/null 2>&1; then
+        log::skip "waybar not installed — install desktop/hyprland first"
+    elif ! command -v paru >/dev/null 2>&1; then
+        log::warn "paru not found — install core/paru.sh first"
+    elif pacman -Qq waybar-ai-usage >/dev/null 2>&1; then
+        log::skip "waybar-ai-usage already installed"
+    else
+        log::info "Installing waybar-ai-usage via paru (AUR)"
+        sudo -u "$USER_NAME" -H paru -S --needed --noconfirm waybar-ai-usage \
+            || log::warn "AUR install failed"
+        log::info "Waybar config already references custom/ai-usage — reload waybar"
     fi
 fi
 
