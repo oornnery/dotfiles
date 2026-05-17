@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # desktop/greetd.sh — greetd + tuigreet, configured via stow.
 #
-# Config lives at ~/dotfiles/greetd/etc/greetd/config.toml and is linked
-# to /etc/greetd/config.toml by `stow_system greetd`. Edit the file in
-# the repo and `sudo systemctl restart greetd` to apply.
+# Files (stowed to /):
+#   greetd/etc/greetd/config.toml   greeter command + default session
+#   greetd/etc/pam.d/greetd         PAM stack with pam_gnome_keyring
+#                                   so the user's keyring unlocks at
+#                                   login (Vivaldi/Chromium/SSH need it)
+#
+# Edit then: sudo systemctl restart greetd
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/detect.sh"
@@ -18,8 +22,8 @@ if [[ $IS_WSL -eq 1 || $IS_VM -eq 1 ]]; then
     exit 0
 fi
 
-log::info "Installing greetd + tuigreet"
-sudo pacman -S --needed --noconfirm greetd greetd-tuigreet
+log::info "Installing greetd + tuigreet + gnome-keyring (PAM unlock)"
+sudo pacman -S --needed --noconfirm greetd greetd-tuigreet gnome-keyring
 
 log::info "Disabling other display managers"
 for unit in gdm.service sddm.service ly.service; do

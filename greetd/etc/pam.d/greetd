@@ -1,0 +1,14 @@
+#%PAM-1.0
+# PAM stack for greetd — mirrors gdm-password so pam_gnome_keyring
+# unlocks the keyring at login (Vivaldi/Chromium/SSH all expect this).
+
+auth       include                     system-local-login
+auth       optional                    pam_gnome_keyring.so
+
+account    include                     system-local-login
+
+password   include                     system-local-login
+password   optional                    pam_gnome_keyring.so use_authtok
+
+session    include                     system-local-login
+session    optional                    pam_gnome_keyring.so auto_start
