@@ -41,6 +41,16 @@ if id "$USER_NAME" >/dev/null 2>&1; then
     sudo gpasswd -a "$USER_NAME" uucp   || true   # serial controllers
 fi
 
+# Load + persist uinput kernel module (sc-controller needs it to create
+# the virtual Xbox controller that translates DS4/Steam Controller input).
+sudo modprobe uinput || true
+echo uinput | sudo tee /etc/modules-load.d/uinput.conf >/dev/null
+
+# Reload udev rules so the sc-controller package's rules take effect
+# without needing a reboot. Re-plug or re-pair the controller after this.
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
 # ─── AUR launchers (Heroic for Epic / GOG / Amazon) ────────────────────────
 
 if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
