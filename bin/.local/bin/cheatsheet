@@ -59,6 +59,7 @@ case "$pick" in
         {
             printf '# Hyprland keybindings\n\n'
             printf '_(parsed from ~/.config/hypr/bindings.conf)_\n\n'
+            # shellcheck disable=SC2016  # sed pattern matches literal $mainMod
             grep -E '^(bind|bindel|bindl|bindm)' "$HOME/.config/hypr/bindings.conf" 2>/dev/null \
                 | sed 's/\$mainMod/Super/g' \
                 | column -t -s, -o ' │ '
@@ -80,7 +81,7 @@ case "$pick" in
             fi
             for f in "$HOME"/.config/nvim/plugin/*.lua "$HOME"/.config/nvim/lua/config/keymaps.lua; do
                 [[ -f "$f" ]] || continue
-                printf '\n## %s\n\n' "${f#$HOME/}"
+                printf '\n## %s\n\n' "${f#"$HOME"/}"
                 grep -E 'vim\.keymap\.set|map\(' "$f" 2>/dev/null || true
             done
         } | _show_stdin "Vim / Neovim keymaps" vim

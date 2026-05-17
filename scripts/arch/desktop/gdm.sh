@@ -28,12 +28,15 @@ done
 stow_system gdm
 
 # Mirror user's monitor layout into GDM so the greeter shows on the
-# same screens as the session. GDM's mutter reads ~gdm/.config/monitors.xml.
-user_monitors="/home/${USER_NAME}/.config/monitors.xml"
+# same screens as the session. GDM's mutter reads /var/lib/gdm/.config/monitors.xml.
+# On modern Arch GDM has no static `gdm` user (only the gid=120 group),
+# so we own the file root:root mode 644 — readable by whatever UID GDM allocates.
+_user="${SUDO_USER:-${USER_NAME:-$USER}}"
+user_monitors="$(getent passwd "$_user" | cut -d: -f6)/.config/monitors.xml"
 if [[ -f "$user_monitors" ]]; then
     log::info "Syncing monitors.xml to /var/lib/gdm/.config/"
-    sudo install -d -o gdm -g gdm -m 700 /var/lib/gdm/.config
-    sudo install -o gdm -g gdm -m 644 "$user_monitors" /var/lib/gdm/.config/monitors.xml
+    sudo install -d -m 755 /var/lib/gdm/.config
+    sudo install -m 644 "$user_monitors" /var/lib/gdm/.config/monitors.xml
     log::ok "GDM greeter will follow your GNOME monitor layout"
 else
     log::skip "No ${user_monitors} yet — open GNOME Settings → Displays once, then re-run"

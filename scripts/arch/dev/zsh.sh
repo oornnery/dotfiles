@@ -35,6 +35,7 @@ log::step "Installing Oh My Zsh"
 if [[ -d "$omz_dir" ]]; then
     log::skip "Oh My Zsh already installed at $omz_dir"
 else
+    # shellcheck disable=SC2016  # outer bash receives this as a literal cmd
     _run_user env RUNZSH=no CHSH=no KEEP_ZSHRC=yes bash -c \
         'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
     log::ok "Oh My Zsh installed"

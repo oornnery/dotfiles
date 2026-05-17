@@ -26,7 +26,8 @@ _active_pid() {
 }
 
 _start() {
-    local file="$OUT_DIR/$(date +%Y%m%d-%H%M%S).mp4"
+    local file
+    file="$OUT_DIR/$(date +%Y%m%d-%H%M%S).mp4"
     local geo="${1:-}"
     if [[ -n "$geo" ]]; then
         wf-recorder -g "$geo" -f "$file" &

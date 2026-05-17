@@ -13,7 +13,6 @@
 set -uo pipefail
 
 CACHE="${XDG_RUNTIME_DIR:-/tmp}/update-check.json"
-CACHE_TTL=3600   # seconds
 
 _have() { command -v "$1" >/dev/null 2>&1; }
 

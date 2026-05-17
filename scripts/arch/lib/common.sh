@@ -43,6 +43,8 @@ USE_UNICODE=1
 [[ "${FORCE_UNICODE:-0}" == "1" ]] && USE_UNICODE=1
 
 # ─── Palette ────────────────────────────────────────────────────────────────
+# Public color/glyph "stdlib" — exported so any module can use any entry.
+# shellcheck disable=SC2034  # not every var is referenced in this file
 
 if (( USE_COLOR )); then
     C_RESET=$'\033[0m'
@@ -75,6 +77,7 @@ else
 fi
 
 # ─── Glyphs ─────────────────────────────────────────────────────────────────
+# shellcheck disable=SC2034  # public glyph stdlib (see palette block above)
 
 if (( USE_UNICODE )); then
     G_CHEVRON='❯' G_CURSOR='❯' G_QMARK='?' G_ARROW='↳'
