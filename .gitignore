@@ -8,6 +8,10 @@ scripts/arch/lib/arch.log
 # Claude Code local state
 .claude/
 
+# Python bytecode caches (fabric-shell etc.)
+__pycache__/
+*.pyc
+
 .config/Code/*
 !.config/Code/User/
 .config/Code/User/*
