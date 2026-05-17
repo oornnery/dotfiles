@@ -24,16 +24,20 @@ window#waybar {
     border: 1px solid @border;
 }
 
+/* Workspaces container — same pill treatment as other modules so heights line up. */
 #workspaces {
-    margin: 0 6px;
-    padding: 0 4px;
+    padding: 4px 6px;
+    margin: 3px 2px;
+    background: alpha(@bg-alt, 0.6);
+    border-radius: 6px;
 }
 
 #workspaces button {
     padding: 0 6px;
+    margin: 0 1px;
     color: @muted;
     background: transparent;
-    border-radius: 6px;
+    border-radius: 4px;
 }
 
 #workspaces button.active {
@@ -58,16 +62,19 @@ window#waybar {
 #power-profiles-daemon,
 #mpris,
 #tray,
+#language,
 #custom-power,
 #custom-ai-usage,
 #custom-apps,
 #custom-gpu,
 #custom-updates {
-    padding: 0 8px;
-    margin: 0 2px;
+    padding: 4px 10px;
+    margin: 3px 2px;
     background: alpha(@bg-alt, 0.6);
     border-radius: 6px;
 }
+
+#language { color: @teal; }
 
 #clock        { color: @mauve; }
 #network      { color: @blue; }
@@ -80,7 +87,7 @@ window#waybar {
 #cpu          { color: @teal; }
 #memory       { color: @sapphire; }
 #power-profiles-daemon { color: @accent; }
-#tray         { background: transparent; }
+#tray menu    { background: @bg-darker; }
 #custom-power    { color: @red; }
 #custom-ai-usage { color: @mauve; }
 

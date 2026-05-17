@@ -10,9 +10,10 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 28,
+    "height": 34,
     "spacing": 4,
-    "margin-top": 4,
+    "margin-top": 8,
+    "margin-bottom": 8,
     "margin-left": 8,
     "margin-right": 8,
 
@@ -40,6 +41,7 @@
         "backlight",
         "battery",
         "power-profiles-daemon",
+        "hyprland/language",
         "tray",
         "custom/power"
     ],
@@ -60,6 +62,15 @@
             "6": "6", "7": "7", "8": "8", "9": "9", "10": "10",
             "active": "●", "default": "○"
         }
+    },
+
+    "hyprland/language": {
+        "format":      " {short}",
+        "format-us":   " US",
+        "format-br":   " BR",
+        "tooltip":     true,
+        "tooltip-format": "Layout: {long}\nClick to switch",
+        "on-click":    "hyprctl switchxkblayout all next"
     },
 
     // ─── Center ────────────────────────────────────────────────────────────

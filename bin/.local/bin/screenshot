@@ -40,7 +40,17 @@ case "$cmd" in
             grim -g "$(slurp)" - | wl-copy
             notify-send -a screenshot "Screenshot" "Region → clipboard"
         else
-            grim -g "$(slurp)" - | satty --filename - --output-filename "$file"
+            # Pre-copy raw image so paste works immediately, even if the
+            # user closes satty without explicitly clicking Copy. If they
+            # do click Copy in satty, --copy-command overwrites with the
+            # annotated version.
+            geo="$(slurp)"
+            grim -g "$geo" - \
+                | tee >(wl-copy --type image/png) \
+                | satty --filename - \
+                        --output-filename "$file" \
+                        --copy-command 'wl-copy --type image/png' \
+                        --early-exit
             _notify "$file"
         fi
         ;;

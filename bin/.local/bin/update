@@ -65,7 +65,7 @@ _run() {
         _as_user=(sudo -u "$user" -H)
     else
         _as_user=()
-    fi
+    fi21
 
     # 1. Pre-update btrfs snapshot if snapper is present + root is btrfs.
     if _have snapper && findmnt -no FSTYPE / 2>/dev/null | grep -qx btrfs; then

@@ -3,17 +3,19 @@
 # Minimal Wayland-first config. Matches the pink/dim palette used by
 # starship, tmux status bar and hyprland borders.
 
+# Active theme + live reload — both under [general] since alacritty 0.14.
+[general]
 live_config_reload = true
-
-# Active theme — managed by `theme set <name>`. Default: catppuccin-mocha.
-general.import = ["~/.config/alacritty/theme.toml"]
+import = ["~/.config/alacritty/theme.toml"]
 
 [window]
 opacity     = 0.95
 padding     = { x = 8, y = 8 }
 dynamic_padding = true
-decorations = "None"            # Hyprland handles borders + title
 title       = "alacritty"
+# decorations default ("Full") → GNOME gets a title bar, Hyprland border
+# stays via its own config. Set to "None" if you want bezel-less under
+# Hyprland and never use GNOME.
 
 [scrolling]
 history     = 10000
