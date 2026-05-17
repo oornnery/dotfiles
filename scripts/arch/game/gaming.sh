@@ -29,9 +29,7 @@ sudo pacman -S --needed --noconfirm \
 # ─── Controllers ───────────────────────────────────────────────────────────
 
 log::info "Installing controller drivers + mappers"
-sudo pacman -S --needed --noconfirm \
-    sc-controller \
-    xboxdrv
+sudo pacman -S --needed --noconfirm sc-controller
 
 # udev rules for game controllers (Steam, Xbox, DS4) are usually shipped
 # by their respective packages; force-add user to input/uinput groups
@@ -54,11 +52,12 @@ sudo udevadm trigger
 # ─── AUR launchers (Heroic for Epic / GOG / Amazon) ────────────────────────
 
 if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
-    log::info "Installing Heroic Games Launcher (AUR via paru)"
+    log::info "Installing AUR extras (Heroic + xboxdrv)"
     sudo -u "$USER_NAME" -H paru -S --needed --noconfirm \
-        heroic-games-launcher-bin
+        heroic-games-launcher-bin \
+        xboxdrv
 else
-    log::warn "paru not installed — skipping Heroic. Run core/paru.sh then re-run this."
+    log::warn "paru not installed — skipping AUR extras. Run core/paru.sh then re-run this."
 fi
 
 log::ok "Gaming stack installed"
