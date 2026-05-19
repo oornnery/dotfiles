@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# dots:summary=Mirror eDP→HDMI for presentations
+# hypr-monitor-mirror — espelha o display interno (eDP-*) no externo.
+# Use para apresentações. Sem args = toggle.
+#
+# Usage:
+#   hypr-monitor-mirror on     # ativa mirror
+#   hypr-monitor-mirror off    # desativa
+#   hypr-monitor-mirror toggle # alterna (default)
+
+set -euo pipefail
+
+action="${1:-toggle}"
+STATE="${XDG_RUNTIME_DIR:-/tmp}/hypr-mirror-state"
+
+# Detect monitors: assume eDP-* is internal, anything else is external.
+internal=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name | startswith("eDP")) | .name' | head -1)
+external=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name | startswith("eDP") | not) | .name' | head -1)
+
+if [[ -z "$internal" || -z "$external" ]]; then
+    notify-send -a hypr-mirror "Mirror" "Precisa de 2 monitores conectados (interno + externo)"
+    exit 1
+fi
+
+_on() {
+    hyprctl keyword monitor "$external,preferred,auto,1,mirror,$internal" >/dev/null
+    touch "$STATE"
+    notify-send -a hypr-mirror "Mirror" "$external mirrors $internal"
+}
+_off() {
+    hyprctl keyword monitor "$external,preferred,1600x0,1" >/dev/null
+    rm -f "$STATE"
+    notify-send -a hypr-mirror "Mirror" "OFF — $external à direita"
+}
+
+case "$action" in
+    on)     _on ;;
+    off)    _off ;;
+    toggle) [[ -f "$STATE" ]] && _off || _on ;;
+    *) echo "Usage: hypr-monitor-mirror [on|off|toggle]" >&2; exit 1 ;;
+esac

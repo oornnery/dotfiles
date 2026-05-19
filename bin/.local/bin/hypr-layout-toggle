@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# dots:summary=Cycle Hyprland layout (dwindle ↔ master)
+# hypr-layout-toggle — cicla entre dwindle ↔ master layout.
+
+set -euo pipefail
+
+current=$(hyprctl getoption general:layout 2>/dev/null | awk '/str:/ {print $2; exit}')
+
+case "$current" in
+    dwindle) next="master" ;;
+    master)  next="dwindle" ;;
+    *)       next="dwindle" ;;
+esac
+
+hyprctl keyword general:layout "$next" >/dev/null
+notify-send -a hypr-layout "Layout" "→ $next"
