@@ -1,0 +1,236 @@
+@use "theme" as *;
+
+/* GTK4 auto-adiciona class `.background` em windows com bg do tema.
+   Specificity de `window.bar.background` (2 classes + 1 elem) > `.background` (Adwaita). */
+window.bar,
+window.bar.background {
+  background: none;
+  background-color: transparent;
+  color: $fg;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  font-weight: 600;
+}
+
+window.bar > decoration {
+  background: none;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+window.bar > centerbox {
+  background: none;
+  background-color: transparent;
+  border: none;
+  padding: 0 6px;
+  min-height: 26px;
+}
+
+/* Slot boxes (start/center/end) — just layout, no chrome. */
+window.bar > centerbox > box {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+}
+
+/* Pills com bg (modules). Bar window/centerbox transparent — só os pills aparecem. */
+apps, workspaces, calendar, music, updates,
+cpu, memory, gpu, temperature, ai-usage,
+wifi, bluetooth, volume, brightness, battery,
+kb-layout, power {
+  padding: 2px 7px;
+  margin: 2px 1px;
+  background: rgba($bg-alt, 0.7);
+  border-radius: 6px;
+  min-height: 18px;
+}
+
+/* Menubutton-based modules: kill the inner GTK button chrome so the pill
+   draws once on the outer named node. */
+calendar > button, volume > button, brightness > button,
+bluetooth > button, wifi > button, battery > button,
+cpu > button, memory > button, gpu > button, temperature > button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+}
+
+/* Bluetooth pill - widen so single glyph isn't cramped */
+bluetooth {
+  min-width: 28px;
+}
+
+/* Workspaces — botões com bg/border próprio pra distinguir do pill. */
+workspaces > button {
+  padding: 0 8px;
+  margin: 0 2px;
+  background: rgba($bg-darker, 0.55);
+  border: 1px solid rgba($muted, 0.25);
+  color: $muted;
+  border-radius: 4px;
+  min-width: 16px;
+  min-height: 0;
+  font-weight: 700;
+}
+workspaces > button.active {
+  color: $bg;
+  background: $accent;
+  border-color: $accent;
+}
+workspaces > button:hover:not(.active) {
+  background: rgba($accent, 0.18);
+  border-color: rgba($accent, 0.5);
+  color: $accent;
+}
+
+/* Glyph spacing — Nerd Font glyphs have no right-bearing, give them air. */
+.glyph {
+  margin-right: 2px;
+  font-size: 13px;
+}
+
+/* Music inline controls — buttons sit directly inside the music pill. */
+music {
+  padding: 2px 8px;
+}
+music > button {
+  padding: 2px 6px;
+  margin: 0 1px;
+  background: rgba($bg-darker, 0.55);
+  border: 1px solid rgba($muted, 0.25);
+  border-radius: 4px;
+  min-width: 22px;
+  min-height: 22px;
+  color: $fg;
+}
+music > button:hover {
+  background: rgba($accent, 0.2);
+  border-color: rgba($accent, 0.5);
+  color: $accent;
+}
+music > button > label {
+  font-size: 13px;
+}
+
+/* Per-module colors. */
+calendar           { color: $mauve; }
+music              { color: $green; }
+volume             { color: $yellow; }
+brightness         { color: $peach; }
+bluetooth          { color: $sky; }
+wifi               { color: $blue; }
+battery            { color: $green; }
+battery.warning    { color: $yellow; }
+battery.critical   { color: $red; }
+cpu                { color: $teal; }
+memory             { color: $sapphire; }
+temperature        { color: $peach; }
+gpu                { color: $sky; }
+gpu.warning        { color: $yellow; }
+gpu.critical       { color: $red; }
+power-profile      { color: $accent; }
+kb-layout          { color: $teal; }
+updates            { color: $sapphire; }
+ai-usage           { color: $mauve; }
+apps               { color: $accent; }
+power              { color: $red; }
+power:hover        { background: $red; color: $bg; }
+
+/* Generic hover on the pills (excluding menubutton internals). */
+apps:hover, updates:hover, kb-layout:hover {
+  background: rgba($bg-alt, 0.95);
+}
+
+/* Popovers — the dropdown panels. */
+popover > contents {
+  background: $bg-darker;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 12px;
+  color: $fg;
+  min-width: 240px;
+}
+popover label.title {
+  color: $muted;
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+popover label.muted {
+  color: $muted;
+  font-size: 11px;
+}
+popover button {
+  padding: 6px 10px;
+  margin: 1px 0;
+  background: transparent;
+  border-radius: 6px;
+  border: none;
+}
+popover button:hover {
+  background: rgba($accent, 0.15);
+}
+
+/* GTK4 Scale (slider) inside popovers — proper thin track + circular thumb. */
+popover scale {
+  min-width: 220px;
+  padding: 6px 4px;
+}
+popover scale > contents > trough {
+  background: rgba($bg-alt, 0.8);
+  border-radius: 999px;
+  min-height: 5px;
+}
+popover scale > contents > trough > highlight,
+popover scale > contents > trough > fill {
+  background: $accent;
+  border-radius: 999px;
+  min-height: 5px;
+}
+popover scale > contents > trough > slider {
+  background: $fg;
+  min-width: 14px;
+  min-height: 14px;
+  margin: -6px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+popover .device, popover .ap {
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 1px 0;
+}
+
+/* CPU per-core text bars — colored, monospace. */
+popover .cpu-bar {
+  color: $accent;
+  font-family: "JetBrainsMono Nerd Font";
+  letter-spacing: -1px;
+}
+popover .device.active, popover .ap.active {
+  background: rgba($accent, 0.22);
+  color: $accent;
+}
+
+/* Switch styling inside popovers — force natural compact size, no stretch */
+popover switch {
+  min-width: 48px;
+  min-height: 24px;
+  font-size: 0;   /* hide Adwaita's default ON/OFF labels */
+  padding: 2px;
+}
+popover switch > slider {
+  background: $fg;
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 50%;
+}
+popover switch:checked {
+  background: $accent;
+}
