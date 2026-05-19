@@ -35,7 +35,9 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("hypr-monitor-watch")
 
   -- Walker daemon (launcher) — Super+R aciona via D-Bus se já rodando.
-  -- elephant.service (systemd user) inicia automático via graphical-session.target.
+  -- Garantir que elephant (provider backend) inicia explícito; o systemd
+  -- graphical-session.target pode não ser alcançado em todas as sessions.
+  hl.exec_cmd("systemctl --user start elephant.service")
   hl.exec_cmd("walker --gapplication-service")
 
   -- Custom Fabric shell (opcional).
