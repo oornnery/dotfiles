@@ -1,4 +1,4 @@
-.rumdl_cache/
+.*_cache/
 .env
 
 # Bootstrap runtime log (lib/common.sh appends here).
@@ -23,3 +23,8 @@ vscode/.config/Code/*
 vscode/.config/Code/User/*
 !vscode/.config/Code/User/settings.json
 !vscode/.config/Code/User/keybindings.json
+
+.venv/
+node_modules/
+@girs/
+theme.scss
