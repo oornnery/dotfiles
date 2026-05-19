@@ -1,0 +1,21 @@
+-- ~/.config/hypr/lua/events.lua — event hooks (vazio por enquanto).
+--
+-- Esta é uma feature nova da API Lua: callbacks reagindo a eventos
+-- do compositor (foco, abertura de janela, troca de workspace, etc).
+-- Limite: 100ms timeout por callback, max depth 5 (anti-loop).
+--
+-- Exemplos comentados pra referência futura:
+--
+-- hl.on("focuswindow", function(window)
+--   print("foco em:", window.title, window.class)
+-- end)
+--
+-- hl.on("workspacev2", function(workspace, action)
+--   if action == "open" then
+--     hl.dsp.exec_cmd("notify-send 'workspace " .. workspace.name .. " aberto'")
+--   end
+-- end)
+--
+-- hl.on("monitoradded", function(monitor)
+--   hl.dsp.exec_cmd("notify-send 'monitor " .. monitor.name .. " conectado'")
+-- end)
