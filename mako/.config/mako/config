@@ -32,3 +32,26 @@ default-timeout=0
 # Hidden tray icons for these spammy apps
 [summary~="Spotify"]
 invisible=1
+
+# ─── Action handlers (clicáveis) ───────────────────────────────────────────
+# notify-send com summary específico aciona ações ao clicar na notif.
+
+[summary="Update System"]
+on-button-left=dismiss; exec alacritty -e bash -c 'update; read -p Done...'
+
+[summary="Setup Wi-Fi"]
+on-button-left=dismiss; exec floating-tui impala
+
+[summary="Setup Bluetooth"]
+on-button-left=dismiss; exec floating-tui bluetui
+
+[summary="Learn Keybindings"]
+on-button-left=dismiss; exec cheatsheet
+
+[summary~="Screenshot.*"]
+icon-size=80
+markup=1
+
+[urgency=critical]
+default-timeout=0
+layer=overlay

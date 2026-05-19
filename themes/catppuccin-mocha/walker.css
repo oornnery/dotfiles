@@ -1,0 +1,7 @@
+/* themes/catppuccin-mocha/walker.css */
+
+@define-color text          #cdd6f4;
+@define-color base          #1e1e2e;
+@define-color border        rgba(245, 194, 231, 0.4);
+@define-color selected-text #f5c2e7;
+@define-color background    #1e1e2e;

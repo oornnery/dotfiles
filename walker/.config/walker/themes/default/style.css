@@ -1,0 +1,112 @@
+/* themes/default/style.css — walker visuals.
+ * Paleta: theme.css (escrito por `theme set <name>` — define @text, @base,
+ *                    @border, @selected-text). */
+
+@import "./theme.css";
+
+* {
+  all: unset;
+}
+
+* {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 14px;
+  color: @text;
+}
+
+scrollbar {
+  opacity: 0;
+}
+
+.normal-icons {
+  -gtk-icon-size: 18px;
+}
+
+.large-icons {
+  -gtk-icon-size: 32px;
+}
+
+.box-wrapper {
+  background: alpha(@base, 0.92);
+  padding: 16px;
+  border: 1px solid @border;
+  border-radius: 12px;
+}
+
+.search-container {
+  background: alpha(@base, 1.0);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid alpha(@border, 0.5);
+}
+
+.input placeholder {
+  opacity: 0.5;
+}
+
+.input:focus,
+.input:active {
+  box-shadow: none;
+  outline: none;
+}
+
+.content-container {
+}
+
+.placeholder {
+  opacity: 0.5;
+  padding: 20px;
+}
+
+.scroll {
+}
+
+.list {
+}
+
+child:hover .item-box {
+  background: alpha(@text, 0.04);
+  border-radius: 6px;
+}
+
+child:selected .item-box {
+  background: alpha(@selected-text, 0.12);
+  border-radius: 6px;
+}
+
+child:selected .item-box * {
+  color: @selected-text;
+}
+
+.item-box {
+  padding: 8px 12px;
+}
+
+.item-text-box {
+  all: unset;
+  padding: 6px 0;
+}
+
+.item-text {
+}
+
+.item-subtext {
+  font-size: 11px;
+  opacity: 0.6;
+  min-height: 0;
+}
+
+.elephant-hint {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+.keybinds {
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+.error {
+  color: @selected-text;
+  font-size: 11px;
+}

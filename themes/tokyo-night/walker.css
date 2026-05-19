@@ -1,0 +1,7 @@
+/* themes/tokyo-night/walker.css */
+
+@define-color text          #c0caf5;
+@define-color base          #1a1b26;
+@define-color border        rgba(122, 162, 247, 0.4);
+@define-color selected-text #7aa2f7;
+@define-color background    #1a1b26;

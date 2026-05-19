@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+ags quit &
+ags run --log-file /tmp/ags-bar.log >/tmp/ags-stderr.log 2>&1 &
