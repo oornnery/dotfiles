@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Toggle Hyprland cursor zoom (zoom_factor)
 # magnify — toggle Hyprland's cursor:zoom_factor (screen zoom).
 #
 # Usage:

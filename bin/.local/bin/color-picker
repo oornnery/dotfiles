@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Pick color from screen (hyprpicker) → clipboard + history
 # color-picker — hyprpicker wrapper that copies hex + notifies + appends history.
 
 set -euo pipefail

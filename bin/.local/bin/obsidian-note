@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Obsidian vault helper (today/find/search via wofi)
 # obsidian-note — wofi + CLI helper for an Obsidian vault.
 #
 # Subcommands:

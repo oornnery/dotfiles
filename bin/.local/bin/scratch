@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Quake-style scratchpad terminal (alacritty floating)
 # scratch — quake-style scratchpad terminal toggle.
 #
 # Uses Hyprland's "special:scratch" workspace. First invocation

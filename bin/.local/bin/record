@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Screen recording via wf-recorder
 # record — toggle screen recording via wf-recorder.
 #
 # Usage:

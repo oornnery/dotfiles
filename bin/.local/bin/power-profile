@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Cycle power-profiles-daemon (power-saver/balanced/performance)
 # power-profile — switch / inspect power-profiles-daemon profile.
 #
 # Usage:

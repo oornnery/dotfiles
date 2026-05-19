@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Toggle gaming mode (disable animations/idle, enable gamemoded)
 # gamemode-toggle — kill animations/blur/idle while a game runs.
 #
 # Usage:

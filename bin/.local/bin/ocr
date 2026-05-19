@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=OCR screen region (grim + tesseract → clipboard)
 # ocr — capture screen region, OCR via tesseract, copy text to clipboard.
 #
 # Usage:

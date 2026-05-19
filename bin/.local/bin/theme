@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+# dots:summary=Switch active visual theme across alacritty/waybar/wofi/mako/starship/ags/walker
 # theme — switch the active visual theme across alacritty, waybar, wofi,
-#         mako and starship.
+#         mako, starship and AGS.
 #
 # Usage:
 #   theme list             list available themes
@@ -14,6 +15,7 @@
 #   wofi.css         @define-color block (imported by style.css)
 #   mako.config      colors block (included by mako config)
 #   starship.toml    full starship config
+#   ags.scss         SCSS palette ($bg, $fg, …) imported by ags/style.scss
 #
 # Adding a theme: copy one of the existing dirs, edit the colors, done.
 
@@ -69,6 +71,17 @@ _apply() {
         install -D -m 644 "$src/starship.toml" "$HOME/.config/starship.toml"
     fi
 
+    # 6. AGS — SCSS palette imported by style.scss. Bundle compiles at start.
+    if [[ -f "$src/ags.scss" ]]; then
+        install -D -m 644 "$src/ags.scss" "$HOME/.config/ags/theme.scss"
+    fi
+
+    # 7. Walker — palette importado por themes/default/style.css.
+    if [[ -f "$src/walker.css" ]]; then
+        install -D -m 644 "$src/walker.css" \
+            "$HOME/.config/walker/themes/default/theme.css"
+    fi
+
     echo "$name" > "$STATE_FILE"
 
     # Reload daemons.
@@ -76,6 +89,11 @@ _apply() {
     pkill -SIGUSR2 waybar           2>/dev/null || true   # waybar config reload
     # Alacritty has live_config_reload = true → picks up theme.toml on save.
     # Starship reloads automatically on next prompt.
+    # AGS: dart-sass compiles SCSS at start, so a running instance needs restart.
+    if pgrep -f 'gjs.*ags' >/dev/null 2>&1; then
+        ags quit 2>/dev/null || true
+        (nohup ags run >/dev/null 2>&1 &)
+    fi
 
     _notify "Theme" "→ $name"
 }

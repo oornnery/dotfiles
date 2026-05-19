@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Toggle Do-Not-Disturb (makoctl mode)
 # dnd — toggle Do Not Disturb on mako.
 
 set -euo pipefail

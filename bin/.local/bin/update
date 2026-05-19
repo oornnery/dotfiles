@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=System + ecosystem updater (pacman, AUR, flatpak, npm, cargo, pipx, uv)
 # update — system + ecosystem updater.
 #
 # Usage:

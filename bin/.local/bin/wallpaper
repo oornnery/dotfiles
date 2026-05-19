@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Manage hyprpaper wallpaper (next/prev/random/set/get)
 # wallpaper — manage Hyprland wallpapers via hyprpaper.
 #
 # Usage:

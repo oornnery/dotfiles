@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Wofi power menu (lock/logout/suspend/reboot/shutdown)
 # power-menu — fast wofi-based power menu (lock / suspend / reboot / shutdown).
 #
 # Bound in hyprland/bindings.conf:

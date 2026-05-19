@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Capture screen region/full/window (grim + slurp + satty)
 # screenshot — unified Wayland screenshot wrapper (grim + slurp + satty).
 #
 # Usage:

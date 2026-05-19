@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dots:summary=Launch Firefox PWA web app by name
 # web-app — thin wrapper around firefoxpwa for installing/launching site PWAs.
 #
 # Usage:
