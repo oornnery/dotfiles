@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# dots:summary=Run terminal-text-effects screensaver in fullscreen alacritty
+# dots:examples=dots-screensaver (Ctrl+C ou any key sai)
+
+set -euo pipefail
+
+if ! command -v tte >/dev/null; then
+    dots-notification-send "Screensaver" "tte (python-terminaltexteffects) não instalado" -g "⚠"
+    exit 1
+fi
+
+EFFECTS=(beams binarypath blackhole bouncyballs bubbles burn colorshift crumble decrypt
+         errorcorrect expand fireworks middleout orbittingvolley overflow pour print
+         rain randomsequence rings scattered slide spotlights spray swarm synthgrid
+         unstable verticalslice vhstape waves wipe)
+
+effect="${EFFECTS[$((RANDOM % ${#EFFECTS[@]}))]}"
+
+# Frase aleatória — usa fortune se tem, senão texto simples
+if command -v fortune >/dev/null 2>&1; then
+    msg=$(fortune)
+else
+    msg=$(printf "%s\n" \
+        "Wake the machine — touch any key" \
+        "The screen is alive" \
+        "Hyprland breathing" \
+        "Idle is a state of grace" \
+        "$(date)" | shuf -n 1)
+fi
+
+# Roda em alacritty floating fullscreen
+exec alacritty --class screensaver \
+    -o window.startup_mode=Fullscreen \
+    -o window.opacity=1.0 \
+    -e bash -c "echo '$msg' | tte $effect; read -n 1"

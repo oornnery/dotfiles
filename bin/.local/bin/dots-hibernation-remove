@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# dots:summary=Remove hibernation: disable swap, delete swapfile, clean fstab
+# dots:requires-sudo=true
+# dots:examples=sudo dots-hibernation-remove
+
+set -euo pipefail
+
+[[ $EUID -ne 0 ]] && { echo "Run as root (sudo)" >&2; exit 1; }
+
+SWAPFILE="/swapfile"
+
+[[ -f "$SWAPFILE" ]] && swapoff "$SWAPFILE" 2>/dev/null || true
+[[ -f "$SWAPFILE" ]] && rm -f "$SWAPFILE"
+
+# Limpa fstab
+sed -i "\|$SWAPFILE|d" /etc/fstab
+
+systemctl disable systemd-hibernate.target 2>/dev/null || true
+
+echo "Hibernation removed. Remember to also clear resume= from bootloader kernel args."

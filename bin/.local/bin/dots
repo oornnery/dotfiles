@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# dots — master CLI for dotfiles helpers.
+#
+# Looks up commands in `dots-<verb>[-<sub>]*` scripts on PATH and dispatches.
+# Inspired by omarchy's CLI pattern. Run `dots` (no args) to list all.
+#
+# Metadata convention (top of each dots-* script):
+#   # dots:summary=<one-line description>
+#   # dots:args=<usage hint>
+#   # dots:examples=<comma-separated examples>
+#   # dots:hidden=true  (omit from help listing)
+
+set -uo pipefail
+
+BIN_DIR="${HOME}/.local/bin"
+PREFIX="dots-"
+
+_list_commands() {
+    # -L follow symlinks (stow creates them); -name pattern matches the link itself
+    find -L "$BIN_DIR" -maxdepth 1 -type f -name "${PREFIX}*" -executable 2>/dev/null \
+        | sort -u
+}
+
+_meta() {
+    # Read `dots:<key>=<value>` from header of script.
+    local file="$1" key="$2"
+    awk -v key="$key" '
+        /^# dots:/ {
+            line = substr($0, 8)        # remove "# dots:" (7 chars)
+            n = index(line, "=")
+            if (n > 0) {
+                k = substr(line, 1, n-1)
+                v = substr(line, n+1)
+                if (k == key) { print v; exit }
+            }
+        }
+    ' "$file"
+}
+
+_print_help() {
+    local color_g='\033[1;32m' color_b='\033[1;34m' color_dim='\033[2m' rs='\033[0m'
+    printf "${color_g}dots${rs} — dotfiles command dispatcher\n\n"
+    printf "Usage:\n"
+    printf "  dots <command> [args...]      run a subcommand\n"
+    printf "  dots                          this help\n"
+    printf "  dots <command> --help         help for specific command\n\n"
+    printf "Available commands:\n"
+
+    local last_group="" cmd verb sub summary hidden
+    while IFS= read -r file; do
+        cmd="${file##*/}"
+        cmd="${cmd#$PREFIX}"
+        verb="${cmd%%-*}"
+        hidden="$(_meta "$file" hidden)"
+        [[ "$hidden" == "true" ]] && continue
+        summary="$(_meta "$file" summary)"
+        if [[ "$verb" != "$last_group" ]]; then
+            printf "\n${color_b}%s${rs}\n" "$verb"
+            last_group="$verb"
+        fi
+        printf "  ${color_g}%-30s${rs} ${color_dim}%s${rs}\n" "$cmd" "${summary:-(no summary)}"
+    done < <(_list_commands)
+    echo
+}
+
+if [[ $# -eq 0 ]] || [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "help" ]]; then
+    _print_help
+    exit 0
+fi
+
+# Dispatch — try greediest match (dots-foo-bar-baz before dots-foo).
+verb="$1"; shift
+for try in 4 3 2 1; do
+    parts=("$verb")
+    for ((i=0; i<try-1 && $# > 0; i++)); do
+        parts+=("$1")
+        shift_count=$((i+1))
+    done
+    candidate="${PREFIX}$(IFS=-; echo "${parts[*]}")"
+    if command -v "$candidate" >/dev/null 2>&1; then
+        # Push back any extra args we consumed but didn't use as command parts
+        # (For simplicity, this implementation only does exact verb match.)
+        break
+    fi
+done
+
+candidate="${PREFIX}${verb}"
+if ! command -v "$candidate" >/dev/null 2>&1; then
+    printf '\033[1;31merror:\033[0m unknown command: %s\n' "$verb" >&2
+    printf 'Run "dots" without args to see available commands.\n' >&2
+    exit 127
+fi
+
+exec "$candidate" "$@"

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# dots:summary=Toggle walker corner rounding via CSS override
+# dots:args=<sharp|round>
+# dots:hidden=true
+
+set -euo pipefail
+
+mode="$1"
+OVERRIDE="${XDG_CONFIG_HOME:-$HOME/.config}/walker/themes/default/corners.css"
+
+case "$mode" in
+    sharp) target="0" ;;
+    round) target="12" ;;
+esac
+
+cat > "$OVERRIDE" <<EOF
+.box-wrapper { border-radius: ${target}px; }
+.search-container { border-radius: $((target / 2))px; }
+EOF
+
+# Walker re-reads CSS on next invocation

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# dots:summary=Toggle mako notification corner rounding (sharp/round)
+# dots:args=<sharp|round>
+# dots:hidden=true
+
+set -euo pipefail
+
+mode="$1"
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config"
+
+case "$mode" in
+    sharp) target=0 ;;
+    round) target=8 ;;
+esac
+
+if grep -qE '^border-radius=' "$CFG"; then
+    sed -i -E "s/^border-radius=.*/border-radius=$target/" "$CFG"
+else
+    echo "border-radius=$target" >> "$CFG"
+fi
+
+makoctl reload 2>/dev/null || true

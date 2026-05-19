@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# dots:summary=Show Hyprland keybindings in a searchable walker menu
+# dots:examples=dots-menu-keybindings
+
+set -euo pipefail
+
+# Parse keybindings from Hyprland (works for .conf + Lua via hyprctl binds)
+LINES=$(hyprctl binds -j 2>/dev/null \
+    | jq -r '.[] | select(.dispatcher != "")
+           | "\(.modmask // 0)+\(.key)  →  \(.dispatcher) \(.arg // "")"' \
+    | head -200)
+
+choice=$(printf '%s\n' "$LINES" | walker --dmenu --placeholder "Keybinds:" 2>/dev/null)
+
+[[ -n "$choice" ]] && {
+    # Copy do que foi selecionado para clipboard
+    printf '%s' "$choice" | wl-copy
+    dots-notification-send "Bind" "Copied" -g ""
+}

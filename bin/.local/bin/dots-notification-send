@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# dots:summary=Send a notification with glyph presets and consistent app-id
+# dots:args=<title> [body] [-g <glyph>] [-u <urgency>] [-t <ms>]
+# dots:examples=dots-notification-send "Theme" "→ tokyo-night" -g
+
+set -euo pipefail
+
+TITLE=""
+BODY=""
+GLYPH=""
+URGENCY="normal"
+TIMEOUT="3000"
+APP="dots"
+
+while (($# > 0)); do
+    case "$1" in
+        -g|--glyph)   GLYPH="$2"; shift 2 ;;
+        -u|--urgency) URGENCY="$2"; shift 2 ;;
+        -t|--timeout) TIMEOUT="$2"; shift 2 ;;
+        -a|--app)     APP="$2"; shift 2 ;;
+        *)
+            if [[ -z "$TITLE" ]]; then TITLE="$1"
+            elif [[ -z "$BODY" ]];  then BODY="$1"
+            fi
+            shift
+            ;;
+    esac
+done
+
+[[ -z "$TITLE" ]] && { echo "Usage: dots-notification-send <title> [body] [-g glyph]" >&2; exit 1; }
+
+DISPLAY_TITLE="$TITLE"
+[[ -n "$GLYPH" ]] && DISPLAY_TITLE="$GLYPH  $TITLE"
+
+notify-send -a "$APP" -u "$URGENCY" -t "$TIMEOUT" "$DISPLAY_TITLE" "$BODY"

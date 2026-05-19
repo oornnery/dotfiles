@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# dots:summary=List installed Firefox PWA web apps
+# dots:examples=dots-webapp-list
+
+set -euo pipefail
+
+if ! command -v firefoxpwa >/dev/null; then
+    echo "firefoxpwa não instalado" >&2
+    exit 1
+fi
+
+firefoxpwa profile list 2>&1 | grep -E '^- ' || echo "(no webapps installed)"

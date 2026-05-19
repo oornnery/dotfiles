@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# dots:summary=Run a named hook from ~/.config/dots/hooks/<name>(.d/)
+# dots:args=<hook-name> [args...]
+# dots:examples=dots-hook post-boot | dots-hook theme-changed catppuccin-mocha
+
+set -e
+
+if (( $# < 1 )); then
+    echo "Usage: dots-hook <name> [args...]" >&2
+    echo "Hooks live in ~/.config/dots/hooks/<name> and ~/.config/dots/hooks/<name>.d/*" >&2
+    exit 1
+fi
+
+HOOK_NAME="$1"; shift
+HOOK_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dots/hooks"
+HOOK_FILE="$HOOK_DIR/$HOOK_NAME"
+HOOK_DROPIN="$HOOK_FILE.d"
+
+mkdir -p "$HOOK_DIR"
+
+# Single hook file
+if [[ -x "$HOOK_FILE" ]]; then
+    "$HOOK_FILE" "$@" || echo "Hook failed: $HOOK_FILE" >&2
+elif [[ -f "$HOOK_FILE" ]]; then
+    bash "$HOOK_FILE" "$@" || echo "Hook failed: $HOOK_FILE" >&2
+fi
+
+# Drop-in directory (.d/)
+if [[ -d "$HOOK_DROPIN" ]]; then
+    for h in "$HOOK_DROPIN"/*; do
+        [[ -f "$h" ]] || continue
+        [[ "$h" == *.sample ]] && continue
+        if [[ -x "$h" ]]; then
+            "$h" "$@" || echo "Hook failed: $h" >&2
+        else
+            bash "$h" "$@" || echo "Hook failed: $h" >&2
+        fi
+    done
+fi

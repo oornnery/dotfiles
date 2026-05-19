@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# dots:summary=Set sharp or round corners across Hyprland + Hyprlock + Mako + Walker
+# dots:args=<sharp|round>
+# dots:examples=dots-style-corners sharp | dots-style-corners round
+
+set -euo pipefail
+
+mode="${1:-}"
+[[ "$mode" != "sharp" && "$mode" != "round" ]] && {
+    echo "Usage: dots-style-corners <sharp|round>" >&2
+    exit 1
+}
+
+dots-style-corners-hyprland "$mode"
+dots-style-corners-mako     "$mode"
+dots-style-corners-walker   "$mode" 2>/dev/null || true
+# hyprlock corners — config is regenerated only on next lock launch
+
+case "$mode" in
+    sharp) dots-notification-send "Corners" "Sharp" -g "󰝣" ;;
+    round) dots-notification-send "Corners" "Round" -g "󰘇" ;;
+esac

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# dots:summary=Manage persistent state flags (~/.local/state/dots/<name>)
+# dots:args=<set|clear|check> <name>
+# dots:examples=dots-state set waybar-off | dots-state clear waybar-off | dots-state check gaps-off
+
+set -euo pipefail
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dots"
+mkdir -p "$STATE_DIR"
+
+cmd="${1:-}"
+name="${2:-}"
+
+[[ -z "$cmd" || -z "$name" ]] && {
+    echo "Usage: dots-state <set|clear|check> <name>" >&2
+    exit 1
+}
+
+case "$cmd" in
+    set)   touch "$STATE_DIR/$name" ;;
+    clear) rm -f "$STATE_DIR/$name" ;;
+    check) [[ -f "$STATE_DIR/$name" ]] ;;   # exit 0 if set, 1 if not
+    *) echo "Unknown: $cmd" >&2; exit 1 ;;
+esac

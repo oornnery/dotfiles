@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# dots:summary=Install a Firefox PWA from URL with custom name + icon
+# dots:args=<name> <url> [icon-path]
+# dots:examples=dots-webapp-install ChatGPT https://chat.openai.com /tmp/icon.png
+
+set -euo pipefail
+
+[[ $# -lt 2 ]] && {
+    echo "Usage: dots-webapp-install <name> <url> [icon]" >&2
+    exit 1
+}
+
+NAME="$1"
+URL="$2"
+ICON="${3:-}"
+
+if ! command -v firefoxpwa >/dev/null; then
+    dots-notification-send "Webapp" "firefoxpwa não instalado" -g "⚠"
+    exit 1
+fi
+
+# Cria o site via firefoxpwa
+ARGS=(site create --name "$NAME" --start-url "$URL")
+[[ -n "$ICON" && -f "$ICON" ]] && ARGS+=(--icon-url "file://$ICON")
+
+firefoxpwa "${ARGS[@]}"
+
+dots-notification-send "Webapp installed" "$NAME" -g ""

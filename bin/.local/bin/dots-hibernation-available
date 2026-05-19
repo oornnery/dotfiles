@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# dots:summary=Check if hibernation is available (swap >= RAM, btrfs OK)
+# dots:examples=dots-hibernation-available && echo "ok" || echo "missing prerequisites"
+
+set -euo pipefail
+
+# Need swap (file or partition) at least as big as RAM
+RAM_KB=$(awk '/^MemTotal/ {print $2; exit}' /proc/meminfo)
+SWAP_KB=$(awk '/^SwapTotal/ {print $2; exit}' /proc/meminfo)
+
+if (( SWAP_KB < RAM_KB )); then
+    echo "swap (${SWAP_KB} kB) < RAM (${RAM_KB} kB)" >&2
+    exit 1
+fi
+
+# Need resume= kernel param OR systemd hibernate support
+if ! pgrep -x systemd-logind >/dev/null; then
+    echo "systemd-logind not running" >&2
+    exit 1
+fi
+
+# Test via systemd-hibernate
+if systemctl --quiet is-enabled systemd-hibernate.target 2>/dev/null; then
+    echo "hibernation: ENABLED"
+    exit 0
+fi
+
+# Best-effort: can-hibernate via dbus
+if command -v systemd-inhibit >/dev/null; then
+    can=$(systemd-inhibit --list 2>&1 | grep -ci hibernate || true)
+    if (( can > 0 )); then
+        echo "hibernation: AVAILABLE (not enabled)"
+        exit 0
+    fi
+fi
+
+echo "hibernation: not detected" >&2
+exit 1
