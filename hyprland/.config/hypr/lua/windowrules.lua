@@ -59,3 +59,14 @@ hl.window_rule({
   center = 1,
   size = "900 600",
 })
+
+-- 7. floating-md: glow/bat reader pra cheatsheet docs. Reading-friendly
+--    proportions (mais alto que largo, padding generoso, ideal pra MD).
+hl.window_rule({
+  name = "floating-md",
+  match = { class = "^floating-md$" },
+  float = true,
+  center = 1,
+  size = "900 800",
+  opacity = "0.98 0.95",
+})

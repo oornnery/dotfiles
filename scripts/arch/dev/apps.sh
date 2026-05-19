@@ -23,7 +23,8 @@ sudo pacman -S --needed --noconfirm \
     evince \
     gnome-calculator libqalculate \
     sushi \
-    gpu-screen-recorder
+    gpu-screen-recorder \
+    glow
 
 USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
 
