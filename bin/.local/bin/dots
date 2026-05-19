@@ -1,32 +1,64 @@
 #!/usr/bin/env bash
 # dots — master CLI for dotfiles helpers.
 #
-# Looks up commands in `dots-<verb>[-<sub>]*` scripts on PATH and dispatches.
-# Inspired by omarchy's CLI pattern. Run `dots` (no args) to list all.
+# Two routing modes:
+#   1. ALIASES table below: `dots <verb>` execs the mapped script. Used to
+#      surface legacy scripts (theme, screenshot, etc) under `dots <verb>`.
+#   2. Real dots-* files on PATH: any executable named `dots-X` is also
+#      dispatched as `dots X`.
 #
-# Metadata convention (top of each dots-* script):
+# Metadata convention (top of each dots-* script OR target of alias):
 #   # dots:summary=<one-line description>
 #   # dots:args=<usage hint>
-#   # dots:examples=<comma-separated examples>
-#   # dots:hidden=true  (omit from help listing)
+#   # dots:hidden=true (omit from help listing)
 
 set -uo pipefail
 
 BIN_DIR="${HOME}/.local/bin"
 PREFIX="dots-"
 
-_list_commands() {
-    # -L follow symlinks (stow creates them); -name pattern matches the link itself
-    find -L "$BIN_DIR" -maxdepth 1 -type f -name "${PREFIX}*" -executable 2>/dev/null \
-        | sort -u
-}
+# ─── Aliases: dots <verb> → legacy script ──────────────────────────────────
+# Keeps legacy script names (theme, screenshot, etc.) usable as
+# `dots <verb>` without polluting the repo with symlinks.
+declare -A ALIASES=(
+    [theme]=theme
+    [update]=update
+    [wallpaper]=wallpaper
+    [magnify]=magnify
+    [scratch]=scratch
+    [obsidian]=obsidian-note
+    [webapp]=web-app
+
+    # power family
+    [power-menu]=power-menu
+    [power-profile]=power-profile
+
+    # capture family
+    [capture-screenshot]=screenshot
+    [capture-record]=record
+    [capture-ocr]=ocr
+    [capture-color]=color-picker
+
+    # toggle family
+    [toggle-dnd]=dnd
+    [toggle-gamemode]=gamemode-toggle
+    [toggle-night-mode]=night-mode
+    [toggle-gaps]=hypr-gaps-toggle
+    [toggle-transparency]=hypr-transparency-toggle
+    [toggle-layout]=hypr-layout-toggle
+
+    # monitor family
+    [monitor-mirror]=hypr-monitor-mirror
+    [monitor-watch]=hypr-monitor-watch
+    [monitor-scale]=hypr-scale
+)
 
 _meta() {
-    # Read `dots:<key>=<value>` from header of script.
+    # Read `dots:<key>=<value>` from header of script (first 80 lines).
     local file="$1" key="$2"
-    awk -v key="$key" '
+    head -80 "$file" 2>/dev/null | awk -v key="$key" '
         /^# dots:/ {
-            line = substr($0, 8)        # remove "# dots:" (7 chars)
+            line = substr($0, 8)
             n = index(line, "=")
             if (n > 0) {
                 k = substr(line, 1, n-1)
@@ -34,7 +66,13 @@ _meta() {
                 if (k == key) { print v; exit }
             }
         }
-    ' "$file"
+    '
+}
+
+_list_real_dots() {
+    # Real files (or symlinks) named dots-* on PATH.
+    find -L "$BIN_DIR" -maxdepth 1 -type f -name "${PREFIX}*" -executable 2>/dev/null \
+        | sort -u
 }
 
 _print_help() {
@@ -42,53 +80,71 @@ _print_help() {
     printf "${color_g}dots${rs} — dotfiles command dispatcher\n\n"
     printf "Usage:\n"
     printf "  dots <command> [args...]      run a subcommand\n"
-    printf "  dots                          this help\n"
-    printf "  dots <command> --help         help for specific command\n\n"
+    printf "  dots                          this help\n\n"
     printf "Available commands:\n"
 
-    local last_group="" cmd verb sub summary hidden
-    while IFS= read -r file; do
-        cmd="${file##*/}"
-        cmd="${cmd#$PREFIX}"
-        verb="${cmd%%-*}"
+    # Merge: aliases + real dots-* commands → sorted unique list.
+    declare -A SEEN
+    local rows=()
+
+    # 1. Aliases
+    for verb in "${!ALIASES[@]}"; do
+        local target="${ALIASES[$verb]}"
+        local file="$BIN_DIR/$target"
+        local hidden summary
         hidden="$(_meta "$file" hidden)"
         [[ "$hidden" == "true" ]] && continue
         summary="$(_meta "$file" summary)"
-        if [[ "$verb" != "$last_group" ]]; then
-            printf "\n${color_b}%s${rs}\n" "$verb"
-            last_group="$verb"
+        rows+=("$verb|${summary:-(no summary)}")
+        SEEN[$verb]=1
+    done
+
+    # 2. Real dots-* files (only those not already aliased)
+    while IFS= read -r file; do
+        local cmd="${file##*/}"
+        cmd="${cmd#$PREFIX}"
+        [[ -n "${SEEN[$cmd]:-}" ]] && continue
+        local hidden summary
+        hidden="$(_meta "$file" hidden)"
+        [[ "$hidden" == "true" ]] && continue
+        summary="$(_meta "$file" summary)"
+        rows+=("$cmd|${summary:-(no summary)}")
+    done < <(_list_real_dots)
+
+    # Sort + group by first segment (verb prefix before -)
+    local last_group=""
+    while IFS='|' read -r verb summary; do
+        local group="${verb%%-*}"
+        if [[ "$group" != "$last_group" ]]; then
+            printf "\n${color_b}%s${rs}\n" "$group"
+            last_group="$group"
         fi
-        printf "  ${color_g}%-30s${rs} ${color_dim}%s${rs}\n" "$cmd" "${summary:-(no summary)}"
-    done < <(_list_commands)
+        printf "  ${color_g}%-30s${rs} ${color_dim}%s${rs}\n" "$verb" "$summary"
+    done < <(printf '%s\n' "${rows[@]}" | sort)
     echo
 }
+
+# ─── Dispatch ──────────────────────────────────────────────────────────────
 
 if [[ $# -eq 0 ]] || [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "help" ]]; then
     _print_help
     exit 0
 fi
 
-# Dispatch — try greediest match (dots-foo-bar-baz before dots-foo).
 verb="$1"; shift
-for try in 4 3 2 1; do
-    parts=("$verb")
-    for ((i=0; i<try-1 && $# > 0; i++)); do
-        parts+=("$1")
-        shift_count=$((i+1))
-    done
-    candidate="${PREFIX}$(IFS=-; echo "${parts[*]}")"
-    if command -v "$candidate" >/dev/null 2>&1; then
-        # Push back any extra args we consumed but didn't use as command parts
-        # (For simplicity, this implementation only does exact verb match.)
-        break
-    fi
-done
 
-candidate="${PREFIX}${verb}"
-if ! command -v "$candidate" >/dev/null 2>&1; then
-    printf '\033[1;31merror:\033[0m unknown command: %s\n' "$verb" >&2
-    printf 'Run "dots" without args to see available commands.\n' >&2
-    exit 127
+# 1. Alias table
+if [[ -n "${ALIASES[$verb]:-}" ]]; then
+    target="${ALIASES[$verb]}"
+    exec "$target" "$@"
 fi
 
-exec "$candidate" "$@"
+# 2. Real dots-* file
+candidate="${PREFIX}${verb}"
+if command -v "$candidate" >/dev/null 2>&1; then
+    exec "$candidate" "$@"
+fi
+
+printf '\033[1;31merror:\033[0m unknown command: %s\n' "$verb" >&2
+printf 'Run "dots" without args to see available commands.\n' >&2
+exit 127
