@@ -31,6 +31,7 @@ sudo pacman -S --needed --noconfirm \
     grim slurp satty swappy \
     wl-clipboard cliphist \
     woff2-font-awesome \
+    impala \
     stow
 
 # AUR-only: dropped from extra/ or only exist there.
@@ -38,9 +39,11 @@ sudo pacman -S --needed --noconfirm \
 #   xdg-terminal-exec → AUR (spec implementation, sometimes split as -git)
 #   wlogout           → AUR (logout screen — moved out of community)
 if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
-    log::info "Installing AUR extras (hyprland-qtutils, xdg-terminal-exec, wlogout)"
-    for aur_pkg in hyprland-qtutils xdg-terminal-exec wlogout; do
-        if sudo -u "$USER_NAME" -H paru -S --needed --noconfirm "$aur_pkg"; then
+    log::info "Installing AUR extras (hyprland-qtutils, xdg-terminal-exec, wlogout, walker, elephant)"
+    for aur_pkg in hyprland-qtutils xdg-terminal-exec wlogout walker elephant-all; do
+        # --skipreview + echo 1 cobre o caso de paru perguntar provider
+        # (e.g. wlogout vs wlogout-git) sem trancar no prompt.
+        if echo 1 | sudo -u "$USER_NAME" -H paru -S --needed --noconfirm --skipreview "$aur_pkg"; then
             log::ok "  $aur_pkg"
         else
             log::warn "  $aur_pkg failed — try '$aur_pkg-git' manually if needed"
@@ -48,6 +51,29 @@ if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
     done
 else
     log::warn "paru not installed — skipping AUR extras. Run core/paru.sh first."
+fi
+
+# ─── Astal / AGS ─────────────────────────────────────────────────────────────
+# Astal: libs Wayland (network, mpris, notifd, tray, hyprland, …) com bindings
+#        GObject-introspection — substitui internals do waybar.
+# AGS:   CLI + runtime TypeScript/JSX (GJS) que consome Astal — substitui o
+#        layout do waybar e o launcher do wofi.
+# Config vive em astal/.config/ags/ no dotfiles, stowed pra ~/.config/ags.
+log::info "Installing Astal/AGS runtime deps (official repos)"
+sudo pacman -S --needed --noconfirm \
+    gjs gtk4-layer-shell dart-sass
+
+if sudo -u "$USER_NAME" -H bash -c 'command -v paru' >/dev/null 2>&1; then
+    log::info "Installing Astal/AGS (AUR: libastal-meta, aylurs-gtk-shell)"
+    for aur_pkg in libastal-meta aylurs-gtk-shell; do
+        if sudo -u "$USER_NAME" -H paru -S --needed --noconfirm "$aur_pkg"; then
+            log::ok "  $aur_pkg"
+        else
+            log::warn "  $aur_pkg failed — try '$aur_pkg-git' manually if needed"
+        fi
+    done
+else
+    log::warn "paru not installed — skipping Astal/AGS AUR install."
 fi
 
 log::step "Stowing hyprland dotfiles"

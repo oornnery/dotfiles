@@ -42,6 +42,8 @@ declare -A MODULES_DESC=(
     [core/fingerprint]="Fingerprint reader (fprintd + PAM sudo/login)"
     [core/windows-vm]="Windows 11 VM via Docker (dockur/windows)"
     [core/firefoxpwa]="Firefox PWA backend (web-app launcher)"
+    [core/printing]="Printing stack (CUPS + auto-discovery + PDF + GUI)"
+    [core/mdns]="mDNS / Avahi (descobre dispositivos .local na rede)"
 
     # desktop/
     [desktop/gdm]="GDM display manager"
@@ -55,6 +57,7 @@ declare -A MODULES_DESC=(
 
     # dev/ — tools, shell, TUI, dotfiles workflow
     [dev/tools]="Modern CLI / TUI tools (eza, bat, fzf, lazygit, gum, neovim, tmux, …)"
+    [dev/apps]="Productivity apps (mpv, imv, localsend, evince, calculator, sushi, gpu-screen-recorder, obsidian)"
     [dev/zsh]="zsh + Oh My Zsh + plugins + stow zsh dotfiles"
     [dev/bash]="bash + bash-completion + stow bash dotfiles"
     [dev/tmux]="tmux + tpm + stow tmux dotfiles"
@@ -84,12 +87,13 @@ SECTION_core=(
     paru flatpak
     wsl
     fingerprint windows-vm firefoxpwa
+    printing mdns
 )
 # shellcheck disable=SC2034
 SECTION_desktop=(hyprland gdm greetd sddm ly gnome gnome-rice gnome-extensions)
 # shellcheck disable=SC2034
 SECTION_dev=(
-    tools
+    tools apps
     zsh bash tmux vim nvim alacritty git vscodium
     languages docker llms
     stow

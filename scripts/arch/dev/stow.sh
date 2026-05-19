@@ -31,7 +31,8 @@ packages=(
     git editor fabric
     alacritty
     bin
-    hyprland waybar wofi mako
+    hyprland waybar wofi walker mako
+    astal
 )
 
 # Neovim: mini.nvim or LazyVim — mutually exclusive.
