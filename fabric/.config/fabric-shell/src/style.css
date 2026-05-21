@@ -1,10 +1,12 @@
 /* style.css — bar visual rules.
  *
  * Palette comes from theme.css (managed by `theme set <name>`).
+ * NB: theme.css is concatenated by main.py before being passed to fabric's
+ * stylesheet loader so the :vars block lives in the SAME source — fabric's
+ * preprocessor only resolves vars within the string it receives.
+ *
  * Layout / typography / hover behaviour live here.
  */
-
-@import url("theme.css");
 
 * {
     all: unset;
@@ -163,10 +165,6 @@
 }
 
 /* ─── Popups (BatteryPopup, WifiPopup, etc.) — Omarchy-ish dark card ──── */
-
-window[name^="popup-"] {
-    background-color: transparent;
-}
 
 .popup-container {
     background-color: var(--bg-darker);
