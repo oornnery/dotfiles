@@ -57,14 +57,17 @@ app.start({
     const close = (name: string) => {
       const entry = windows.get(name)
       if (!entry) return
-      // Hide first (sets visible=false, releases surface refs cleanly), then
-      // try destroy in a try/catch. Plain .destroy() on a dead GdkSurface
-      // segfaults — calling hide() first dissociates the window from the
-      // (possibly-invalidated) surface so destroy() can proceed safely.
-      try { entry.bar?.set_visible?.(false) } catch {}
-      try { entry.sidebar?.set_visible?.(false) } catch {}
-      try { entry.bar?.destroy?.() } catch {}
-      try { entry.sidebar?.destroy?.() } catch {}
+      // CRITICAL: do NOT touch entry.bar / entry.sidebar here. By the time
+      // items-changed fires for a monitor disconnect (KVM swap, lid close),
+      // the GdkSurface backing those windows is already invalidated. ANY
+      // GTK call on them — including set_visible(false), destroy(), or even
+      // reading a property — triggers a C-level assertion
+      // (gdk_surface_get_display: !GDK_IS_SURFACE) that segfaults the whole
+      // AGS process. try/catch in JS cannot save us.
+      //
+      // Trade-off: the widget itself is orphaned in GTK's tree, invisible
+      // (no surface to render to), and eventually GC'd. Tiny memory leak per
+      // monitor disconnect — acceptable vs the entire bar crashing.
       try { entry.dispose() } catch (e) {
         console.error(`[ags] dispose error closing ${name}:`, e)
       }
