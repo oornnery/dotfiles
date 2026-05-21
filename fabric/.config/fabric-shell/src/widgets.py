@@ -392,7 +392,7 @@ class VolumeWidget(PollLabel):
         value = run('sh -lc "wpctl get-volume @DEFAULT_AUDIO_SINK@"')
         if not value:
             return "--"
-        # Ex.: Volume: 0.42 [MUTED]
+        # Format: "Volume: 0.42 [MUTED]"
         muted = "MUTED" in value.upper()
         parts = value.split()
         vol = 0
@@ -401,9 +401,21 @@ class VolumeWidget(PollLabel):
                 vol = int(float(parts[1]) * 100)
             except Exception:
                 vol = 0
+
+        # Dynamic glyph — matches AGS Volume.tsx GLYPHS exactly:
+        # ["󰕿", "󰖀", "󰕾"] (low/mid/high) + "󰖁" (muted).
         if muted:
-            return f"{vol}% mute"
-        return f"{vol}%"
+            glyph = "󰖁"
+        elif vol >= 66:
+            glyph = "󰕾"
+        elif vol >= 33:
+            glyph = "󰖀"
+        else:
+            glyph = "󰕿"
+        if self.icon_label is not None:
+            self.icon_label.set_label(glyph)
+
+        return "muted" if muted else f"{vol}%"
 
     def on_scroll(self, direction: int):
         if direction > 0:
@@ -417,7 +429,7 @@ class BrightnessWidget(PollLabel):
         self.popup = BrightnessPopup(monitor)
         super().__init__(
             name="brightness-widget",
-            icon="󰃠",
+            icon="󰃟",  # matches AGS Brightness.tsx
             interval=4000,
             poll_from=self.get_brightness,
             on_click=self.popup.toggle,
@@ -1097,30 +1109,93 @@ class LauncherButton(Button):
         )
 
 
-# ─── Music (MPRIS via playerctl) ───────────────────────────────────────────
+# ─── Music (MPRIS via playerctl) — matches AGS Music.tsx exactly ──────────
+# Box layout: [prev][play/pause][next] [player-glyph] [title] (hidden when no player)
 
-class MusicWidget(PollLabel):
+# Player identity → glyph (same as AGS PLAYER_GLYPHS).
+_MUSIC_PLAYER_GLYPHS = {
+    "spotify":  "",
+    "mpv":      "󰎁",
+    "firefox":  "󰈹",
+    "chromium": "",
+}
+
+
+def _music_pick_glyph(identity: str) -> str:
+    key = (identity or "").lower()
+    for k, glyph in _MUSIC_PLAYER_GLYPHS.items():
+        if k in key:
+            return glyph
+    return "󰎈"
+
+
+class MusicWidget(Box):
     def __init__(self, monitor: int = 0):
+        self.prev_btn = Button(
+            name="music-btn",
+            label="󰒮",
+            on_clicked=lambda *_: self._playerctl("previous"),
+        )
+        self.play_btn = Button(
+            name="music-btn",
+            label="󰐎",
+            on_clicked=lambda *_: self._playerctl("play-pause"),
+        )
+        self.next_btn = Button(
+            name="music-btn",
+            label="󰒭",
+            on_clicked=lambda *_: self._playerctl("next"),
+        )
+        self.glyph_label = Label(name="music-glyph", label="󰎈")
+        self.title_label = Label(name="music-title", label="")
+
         super().__init__(
             name="music-widget",
-            icon="󰎈",
-            interval=2000,
-            poll_from=self.get_music,
-            on_click=lambda *_: subprocess.Popen(
-                ["playerctl", "play-pause"],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            ),
+            spacing=4,
+            orientation="h",
+            children=[
+                self.prev_btn,
+                self.play_btn,
+                self.next_btn,
+                self.glyph_label,
+                self.title_label,
+            ],
         )
 
-    def get_music(self) -> str:
+        self._poller = Fabricator(
+            interval=1500,
+            poll_from=lambda *_: self._snapshot(),
+            on_changed=lambda *_args: self._apply(_args[-1]),
+        )
+
+    @staticmethod
+    def _playerctl(action: str):
+        subprocess.Popen(
+            ["playerctl", action],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+
+    @staticmethod
+    def _snapshot() -> dict:
         title = run("playerctl metadata --format '{{title}}'")
         if not title:
+            return {"visible": False}
+        return {
+            "visible":  True,
+            "title":    title,
+            "status":   run("playerctl status"),
+            "identity": run("playerctl metadata --format '{{playerName}}'"),
+        }
+
+    def _apply(self, data: dict):
+        if not isinstance(data, dict) or not data.get("visible"):
             self.set_visible(False)
-            return ""
+            return
         self.set_visible(True)
-        status = run("playerctl status")
-        glyph = "󰏤" if status == "Playing" else "󰐎"
-        return f"{glyph} {shorten(title, 14)}"
+        self.title_label.set_label(shorten(data.get("title", ""), 18))
+        playing = data.get("status") == "Playing"
+        self.play_btn.set_label("󰏤" if playing else "󰐎")
+        self.glyph_label.set_label(_music_pick_glyph(data.get("identity", "")))
 
 
 # ─── Updates ───────────────────────────────────────────────────────────────

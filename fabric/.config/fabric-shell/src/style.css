@@ -164,66 +164,188 @@
     font-size: 13px;
 }
 
-/* ─── Popups (BatteryPopup, WifiPopup, etc.) — Omarchy-ish dark card ──── */
+/* ─── Popups — solid dark card (matches the IDs each PopupWindow sets) ── */
 
-.popup-container {
+#control-popup-network,
+#control-popup-memcpu,
+#control-popup-slider,
+#control-popup-calendar,
+#control-popup-battery {
     background-color: var(--bg-darker);
-    border: 1px solid alpha(var(--fg), 0.08);
+    border: 1px solid alpha(var(--fg), 0.10);
     border-radius: 12px;
     padding: 14px 16px;
     min-width: 240px;
     color: var(--fg);
 }
 
-.popup-container label {
+#control-title {
     color: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
 }
 
-.popup-container .popup-title {
+#control-subtitle {
     color: var(--muted);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 2px;
-    margin-bottom: 6px;
+    margin-top: 8px;
+    margin-bottom: 4px;
 }
 
-.popup-container .popup-muted {
+#net-status {
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#net-action {
     color: var(--muted);
     font-size: 11px;
 }
 
-.popup-container button {
-    background-color: alpha(var(--bg), 0.6);
+#net-entry {
+    background-color: alpha(var(--bg), 0.7);
+    border: 1px solid alpha(var(--fg), 0.12);
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: var(--fg);
+    min-width: 220px;
+}
+
+#net-row, #net-row-label {
+    color: var(--fg);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+#net-row:hover {
+    background-color: alpha(var(--fg), 0.06);
+}
+
+#net-empty {
+    color: var(--muted);
+    font-style: italic;
+    padding: 12px 8px;
+}
+
+#net-chip-btn,
+#net-chip-btn-danger {
+    background-color: alpha(var(--bg), 0.7);
+    border: 1px solid alpha(var(--fg), 0.12);
+    border-radius: 8px;
+    padding: 4px 10px;
+    color: var(--fg);
+    margin: 2px 0;
+    min-height: 22px;
+}
+
+#net-chip-btn:hover {
+    background-color: alpha(var(--accent), 0.18);
+    border-color: alpha(var(--accent), 0.4);
+    color: var(--accent);
+}
+
+#net-chip-btn-danger {
+    color: var(--red);
+}
+#net-chip-btn-danger:hover {
+    background-color: alpha(var(--red), 0.2);
+    border-color: var(--red);
+    color: var(--red);
+}
+
+#net-list {
+    min-height: 120px;
+}
+
+/* Generic popup button fallback (Battery profile buttons, Calendar nav, …). */
+#control-popup-network button,
+#control-popup-memcpu button,
+#control-popup-slider button,
+#control-popup-calendar button,
+#control-popup-battery button {
+    background-color: alpha(var(--bg), 0.7);
     border: 1px solid alpha(var(--fg), 0.12);
     border-radius: 8px;
     padding: 6px 12px;
     color: var(--fg);
     margin: 2px 0;
+    min-height: 26px;
 }
 
-.popup-container button:hover {
-    background-color: alpha(var(--accent), 0.15);
+#control-popup-network button:hover,
+#control-popup-memcpu button:hover,
+#control-popup-slider button:hover,
+#control-popup-calendar button:hover,
+#control-popup-battery button:hover {
+    background-color: alpha(var(--accent), 0.18);
     border-color: alpha(var(--accent), 0.4);
     color: var(--accent);
 }
 
-/* Sliders in popups (volume/brightness). */
-.popup-container scale trough {
+/* Sliders in volume/brightness popups. */
+#control-popup-slider scale trough {
     background-color: alpha(var(--fg), 0.1);
     border-radius: 999px;
     min-height: 5px;
 }
 
-.popup-container scale highlight {
+#control-popup-slider scale highlight {
     background-color: var(--accent);
     border-radius: 999px;
     min-height: 5px;
 }
 
-.popup-container scale slider {
+#control-popup-slider scale slider {
     background-color: var(--fg);
     min-width: 14px;
     min-height: 14px;
     border-radius: 50%;
     margin: -5px;
+}
+
+/* ─── Music inline controls (prev/play/next as small pills inside the bar) ─ */
+
+#music-widget {
+    padding: 2px 6px;
+}
+
+#music-btn {
+    background-color: alpha(var(--bg-darker), 0.55);
+    border: 1px solid alpha(var(--muted), 0.25);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 0 1px;
+    color: var(--fg);
+    min-width: 22px;
+    min-height: 18px;
+    font-size: 12px;
+}
+
+#music-btn:hover {
+    background-color: alpha(var(--accent), 0.2);
+    border-color: alpha(var(--accent), 0.5);
+    color: var(--accent);
+}
+
+#music-glyph {
+    margin-left: 4px;
+    font-size: 13px;
+}
+
+#music-title {
+    margin-left: 2px;
+}
+
+/* Power widget — ensure icon is visible + readable size. */
+#power-widget {
+    min-width: 26px;
+}
+
+#power-widget-icon {
+    font-size: 14px;
+    color: var(--red);
 }
