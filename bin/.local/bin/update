@@ -19,13 +19,16 @@ _have() { command -v "$1" >/dev/null 2>&1; }
 
 # ─── Counters ──────────────────────────────────────────────────────────────
 
-_count_pacman()  { _have checkupdates && checkupdates 2>/dev/null | wc -l || echo 0; }
-_count_aur()     { _have paru && paru -Qua 2>/dev/null | wc -l || echo 0; }
-_count_flatpak() { _have flatpak && flatpak remote-ls --updates 2>/dev/null | wc -l || echo 0; }
-_count_npm()     { _have npm && npm outdated -g --parseable 2>/dev/null | wc -l || echo 0; }
-_count_cargo()   { _have cargo-install-update && cargo install-update -l 2>/dev/null | grep -c '^Yes ' || echo 0; }
-_count_pipx()    { _have pipx && pipx list --json 2>/dev/null | jq -r '.venvs | keys | length' 2>/dev/null || echo 0; }
-_count_uv()      { _have uv && uv tool list 2>/dev/null | grep -c '^' || echo 0; }
+# Each counter wraps the pipeline in `{ ... || true; }` so pipefail can't
+# trigger the outer `|| echo 0` *after* wc/grep already printed a count
+# (otherwise empty/partial inputs produced "N\n0" and broke _check's JSON).
+_count_pacman()  { _have checkupdates && { checkupdates 2>/dev/null | wc -l || true; } || echo 0; }
+_count_aur()     { _have paru && { paru -Qua 2>/dev/null | wc -l || true; } || echo 0; }
+_count_flatpak() { _have flatpak && { flatpak remote-ls --updates 2>/dev/null | wc -l || true; } || echo 0; }
+_count_npm()     { _have npm && { npm outdated -g --parseable 2>/dev/null | wc -l || true; } || echo 0; }
+_count_cargo()   { _have cargo-install-update && { cargo install-update -l 2>/dev/null | grep -c '^Yes ' || true; } || echo 0; }
+_count_pipx()    { _have pipx && { pipx list --json 2>/dev/null | jq -r '.venvs | keys | length' 2>/dev/null || true; } || echo 0; }
+_count_uv()      { _have uv && { uv tool list 2>/dev/null | grep -c '^' || true; } || echo 0; }
 
 # ─── Subcommands ──────────────────────────────────────────────────────────
 
@@ -66,7 +69,7 @@ _run() {
         _as_user=(sudo -u "$user" -H)
     else
         _as_user=()
-    fi21
+    fi
 
     # 1. Pre-update btrfs snapshot if snapper is present + root is btrfs.
     if _have snapper && findmnt -no FSTYPE / 2>/dev/null | grep -qx btrfs; then

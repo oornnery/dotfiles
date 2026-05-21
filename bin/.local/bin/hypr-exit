@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# dots:summary=Exit Hyprland (graceful via hyprshutdown if available)
+# hypr-exit — prefer `hyprshutdown` (state-save + clean teardown) when it
+# exists; fall back to a plain `hyprctl dispatch exit`.
+
+set -euo pipefail
+
+if command -v hyprshutdown >/dev/null 2>&1; then
+    exec hyprshutdown
+else
+    exec hyprctl dispatch exit
+fi

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# dots:summary=Obsidian vault helper (today/find/search via wofi)
-# obsidian-note — wofi + CLI helper for an Obsidian vault.
+# dots:summary=Obsidian vault helper (today/find/search via walker)
+# obsidian-note — walker + CLI helper for an Obsidian vault.
 #
 # Subcommands:
 #   obsidian-note new "Title"   create a new note with frontmatter
 #   obsidian-note today         open today's daily note (creates if missing)
-#   obsidian-note find          wofi fuzzy-pick by filename → open in $EDITOR
-#   obsidian-note search [Q]    ripgrep across the vault → wofi pick line → open
+#   obsidian-note find          walker fuzzy-pick by filename → open in $EDITOR
+#   obsidian-note search [Q]    ripgrep across the vault → walker pick → open
 #   obsidian-note open <file>   open <file> in $EDITOR
-#   obsidian-note obsidian      wofi pick → open in Obsidian GUI (obsidian:// URI)
+#   obsidian-note obsidian      walker pick → open in Obsidian GUI (obsidian:// URI)
 #
 # Vault: $OBSIDIAN_VAULT (default ~/Documents/vault). Daily notes go to
 # $VAULT/Daily/YYYY-MM-DD.md.
@@ -21,13 +21,17 @@ EDITOR="${EDITOR:-nvim}"
 
 mkdir -p "$VAULT" "$DAILY"
 
+_pick() {
+    walker --dmenu --placeholder "$1" 2>/dev/null
+}
+
 _open_editor() {
     local file="$1" line="${2:-1}"
     if [[ -n "${TMUX:-}" ]] || [[ -t 1 ]]; then
         # Already in a terminal — open directly.
         "$EDITOR" "+$line" "$file"
     else
-        # Launched from wofi / Hyprland — pop a floating terminal.
+        # Launched from walker / Hyprland — pop a floating terminal.
         setsid -f alacritty --class floating -e "$EDITOR" "+$line" "$file" \
             >/dev/null 2>&1 &
     fi
@@ -97,7 +101,7 @@ EOF
         pick="$(
             find "$VAULT" -name '*.md' -type f -printf '%P\n' 2>/dev/null \
                 | sort \
-                | wofi --dmenu --prompt 'Note:' --width 720 --insensitive
+                | _pick 'Note:'
         )" || exit 0
         [[ -z "$pick" ]] && exit 0
         _open_editor "$VAULT/$pick"
@@ -107,13 +111,13 @@ EOF
         shift || true
         query="${*:-}"
         if [[ -z "$query" ]]; then
-            query="$(printf '' | wofi --dmenu --prompt 'Search vault:' --lines 1)" || exit 0
+            query="$(printf '' | _pick 'Search vault:')" || exit 0
         fi
         [[ -z "$query" ]] && exit 0
         result="$(
             rg --color=never --line-number --no-heading "$query" "$VAULT" --type md 2>/dev/null \
                 | sed -E "s|^$VAULT/||" \
-                | wofi --dmenu --prompt 'Match:' --width 1000 --insensitive
+                | _pick 'Match:'
         )" || exit 0
         [[ -z "$result" ]] && exit 0
         file="${result%%:*}"
@@ -129,7 +133,7 @@ EOF
         pick="$(
             find "$VAULT" -name '*.md' -type f -printf '%P\n' 2>/dev/null \
                 | sort \
-                | wofi --dmenu --prompt 'Open in Obsidian:' --width 720 --insensitive
+                | _pick 'Open in Obsidian:'
         )" || exit 0
         [[ -z "$pick" ]] && exit 0
         _open_obsidian "$VAULT/$pick"

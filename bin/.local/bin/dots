@@ -49,7 +49,6 @@ declare -A ALIASES=(
 
     # monitor family
     [monitor-mirror]=hypr-monitor-mirror
-    [monitor-watch]=hypr-monitor-watch
     [monitor-scale]=hypr-scale
 )
 

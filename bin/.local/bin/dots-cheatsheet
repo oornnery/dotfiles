@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
-# dots:summary=Cheatsheet picker via walker (Hyprland/Tmux/Vim/Zsh/Functions + MD docs)
+# dots:summary=Cheatsheet picker via walker (markdown docs + live zsh aliases/functions)
 # dots:examples=dots-cheatsheet
 #
 # Two-level walker dmenu:
-#   1. Category picker (Hyprland binds, Tmux, Vim, Zsh aliases, …, MD docs)
-#   2. Lines within category → Enter copia pra clipboard
+#   1. Category picker (.md docs + live aliases/functions)
+#   2. For live sources: lines within category → Enter copies to clipboard
+#      For docs: opens in floating alacritty via glow|bat|rich + less -R
 #
-# Live sources:
-#   Hyprland binds      ← hyprctl binds -j (descriptions de bindings.lua)
-#   Tmux binds          ← ~/.tmux.conf
-#   Vim / Neovim binds  ← ~/.vimrc + ~/.config/nvim/plugin/*.lua
-#   Zsh aliases         ← `alias` em shell interactive
-#   Shell functions     ← ~/.zsh_functions
-# Static sources:
-#   docs/cheatsheets/*.md   ← per-tool md (eza, bat, fzf, …)
+# Sources:
+#   docs/cheatsheets/*.md   ← canonical reference (hyprland, tmux, vim, …)
+#   Zsh aliases (live)      ← awk on ~/.zshrc (current state)
+#   Shell functions (live)  ← awk on ~/.zsh_functions (current state)
+#
+# For raw current state of Hyprland/tmux/vim binds, query the source directly:
+#   hyprctl binds -j | jq          (Hyprland — needs interpretation)
+#   grep -E '^(bind|set)' ~/.tmux.conf
+#   grep -E '^(map|nnoremap)' ~/.vimrc
 
 set -uo pipefail
 
@@ -23,48 +25,21 @@ _walker_dmenu() {
     walker --dmenu --placeholder "$1" 2>/dev/null
 }
 
-# ─── Modmask decoder (Hyprland numerical → human) ──────────────────────────
-
-_decode_mods() {
-    local m="$1" parts=()
-    (( m & 64 )) && parts+=("Super")
-    (( m & 4  )) && parts+=("Ctrl")
-    (( m & 8  )) && parts+=("Alt")
-    (( m & 1  )) && parts+=("Shift")
-    if (( ${#parts[@]} == 0 )); then echo "—"
-    else local IFS=+; echo "${parts[*]}"; fi
-}
-
-# ─── Sources ───────────────────────────────────────────────────────────────
-
-_src_hyprland() {
-    hyprctl binds -j 2>/dev/null \
-        | jq -r '.[]
-               | select(.key != "")
-               | "\(.modmask // 0)|\(.key)|\(.description // .dispatcher) \(.arg // "")"' \
-        | while IFS='|' read -r mods key rest; do
-              printf "%-30s  →  %s\n" "$(_decode_mods "$mods")+$key" "$rest"
-          done \
-        | sort -u
-}
-
-_src_tmux() {
-    [[ -f "$HOME/.tmux.conf" ]] && grep -E '^(bind|set|setw)' "$HOME/.tmux.conf"
-}
-
-_src_vim() {
-    [[ -f "$HOME/.vimrc" ]] && \
-        grep -E '^(let mapleader|nnoremap|vnoremap|inoremap|map\b)' "$HOME/.vimrc"
-    for f in "$HOME"/.config/nvim/plugin/*.lua \
-             "$HOME"/.config/nvim/lua/config/keymaps.lua; do
-        [[ -f "$f" ]] || continue
-        grep -E 'vim\.keymap\.set|map\(' "$f" 2>/dev/null \
-            | sed "s|^|${f##*/}: |"
-    done
-}
+# ─── Live sources ──────────────────────────────────────────────────────────
+# Hyprland / tmux / vim previously had live grep-based sources here. They were
+# removed when hyprland.md / tmux.md / vim.md became the canonical reference.
+# For raw current state, run the underlying tool directly:
+#   hyprctl binds -j | jq …          (Hyprland)
+#   grep -E '^(bind|set)' ~/.tmux.conf  (tmux)
+#   grep -E '^(map|nnoremap)' ~/.vimrc  (vim)
 
 _src_zsh_aliases() {
-    zsh -ic 'alias' 2>/dev/null | sort
+    # Parse ~/.zshrc directly — `zsh -ic 'alias'` was ~200ms because it loads
+    # all OMZ plugins + completions just to dump aliases. Trade-off: misses
+    # plugin-generated aliases (git, etc.), but those usually have their own
+    # man pages and aren't what the user wrote into the cheatsheet anyway.
+    [[ -f "$HOME/.zshrc" ]] || return
+    awk '/^[[:space:]]*alias / { sub(/^[[:space:]]*alias /, ""); print }' "$HOME/.zshrc" | sort
 }
 
 _src_zsh_functions() {
@@ -81,25 +56,56 @@ _src_zsh_functions() {
 
 _show_doc() {
     local file="$1" title="$2"
-    # `floating-md` é uma classe própria (window rule em windowrules.lua dá
-    # tamanho reading-friendly — mais estreito + alto que o `floating-tui`).
+    # `floating-md` é classe própria — window rule em windowrules.lua dá
+    # tamanho reading-friendly (mais estreito + alto).
     local class="floating-md"
 
-    if command -v glow >/dev/null 2>&1; then
-        # -s dark   — tema escuro pré-built
-        # -w 90     — wrap em 90 colunas (legível)
-        # -p        — pager mode (q sai, /search, n/N navegar matches)
-        alacritty --class "$class" --title " $title" \
-            -o font.size=12 \
-            -o window.padding.x=20 -o window.padding.y=14 \
-            -e glow -s dark -w 90 -p "$file"
-    else
-        alacritty --class "$class" --title " $title" \
-            -o font.size=12 \
-            -o window.padding.x=20 -o window.padding.y=14 \
-            -e bat --paging=always --language=md --theme=base16 \
-            --style=plain --color=always "$file"
+    # Choice override: DOTS_MD_VIEWER=bat|glow|rich|auto (default: auto)
+    #   glow → renderiza MD (headers stylized, tabelas reais, melhor leitura)
+    #   bat  → mostra source com syntax highlighting (vê markup cru)
+    #   rich → renderiza MD via python rich (paleta cyan/orange, AUR: rich-cli)
+    local viewer="${DOTS_MD_VIEWER:-auto}"
+    if [[ "$viewer" == "auto" ]]; then
+        if   command -v glow >/dev/null; then viewer="glow"
+        elif command -v rich >/dev/null; then viewer="rich"
+        else                                  viewer="bat"
+        fi
     fi
+
+    local cmd
+    case "$viewer" in
+        glow)
+            # Pipe glow → less -R em vez do pager interno do glow (-p): o
+            # mini-pager do glow não tem busca funcional com ANSI codes;
+            # less -R preserva cores E faz `/` busca propriamente.
+            # less flags:
+            #   -R          deixa ANSI escape codes passarem (cores do glow)
+            #   -i          busca case-insensitive
+            #   --mouse     scroll com mouse wheel
+            #   --use-color colore o prompt do less
+            cmd=(sh -c 'glow -s dark -w 90 "$1" | less -R -i --mouse --use-color' _ "$file")
+            ;;
+        bat)
+            # MD com syntax highlighting (não renderiza headers etc, mostra source).
+            # Bom pra ver markup cru + cores.
+            cmd=(bat -l md --theme=base16 --paging=always
+                 --wrap=auto --style=plain --color=always "$file")
+            ;;
+        rich)
+            # rich-cli (AUR): renderização MD com paleta cyan/orange,
+            # tabelas reais, code blocks com highlight. --pager usa less.
+            cmd=(rich --markdown --pager --width 90 "$file")
+            ;;
+        *)
+            dots-notification-send "Cheatsheet" "Viewer desconhecido: $viewer (use bat|glow|rich|auto)" -g "⚠"
+            return 1
+            ;;
+    esac
+
+    alacritty --class "$class" --title " $title" \
+        -o font.size=12 \
+        -o window.padding.x=20 -o window.padding.y=14 \
+        -e "${cmd[@]}"
 }
 
 # ─── Inner menu: lines within category ─────────────────────────────────────
@@ -122,17 +128,19 @@ _browse() {
 # ─── Main menu ─────────────────────────────────────────────────────────────
 
 _main_menu() {
-    printf '󰌌  Hyprland keybindings (live)\n'
-    printf '  Tmux keybindings (live)\n'
-    printf '  Vim / Neovim keybindings (live)\n'
-    printf '󰒓  Zsh aliases (live)\n'
-    printf 'ƒ  Shell functions (live)\n'
+    # Docs first — the polished .md cheatsheets are the canonical reference.
+    # `hyprland.md`, `tmux.md`, `vim.md`, `zsh.md`, etc. all live in $DOCS_DIR.
     if [[ -d "$DOCS_DIR" ]]; then
         for f in "$DOCS_DIR"/*.md; do
             [[ -f "$f" ]] || continue
             printf '󰈙  %s\n' "$(basename "$f" .md)"
         done
     fi
+    # Live sources — only kept where there's no static .md equivalent.
+    # Aliases/functions change too often to be worth documenting statically;
+    # show the current state from .zshrc / .zsh_functions instead.
+    printf '󰒓  zsh aliases (live)\n'
+    printf 'ƒ  shell functions (live)\n'
 }
 
 # ─── Main loop ─────────────────────────────────────────────────────────────
@@ -141,14 +149,15 @@ while :; do
     pick="$(_main_menu | _walker_dmenu 'Cheatsheet:')"
     [[ -z "$pick" ]] && exit 0
 
+    # Branches match on the menu line's glyph prefix (unambiguous: each
+    # category has a unique glyph). The doc branch then strips that exact
+    # prefix to recover the filename — robust to doc names containing any
+    # characters, including "  " which broke the previous `${pick##*  }`.
     case "$pick" in
-        *Hyprland*)        _src_hyprland       | _browse "Hyprland" ;;
-        *Tmux*)            _src_tmux           | _browse "Tmux" ;;
-        *Vim*|*Neovim*)    _src_vim            | _browse "Vim/Neovim" ;;
-        *Zsh*aliases*)     _src_zsh_aliases    | _browse "Zsh aliases" ;;
-        *Shell*functions*) _src_zsh_functions  | _browse "Shell functions" ;;
-        *)
-            name="${pick##*  }"   # strip glyph prefix
+        '󰒓  '*)  _src_zsh_aliases    | _browse "Zsh aliases" ;;
+        'ƒ  '*)  _src_zsh_functions  | _browse "Shell functions" ;;
+        '󰈙  '*)
+            name="${pick#󰈙  }"
             file="$DOCS_DIR/$name.md"
             if [[ -f "$file" ]]; then
                 _show_doc "$file" "$name"
@@ -157,7 +166,13 @@ while :; do
                 dots-notification-send "Cheatsheet" "Not found: $name" -g "⚠"
             fi
             ;;
+        *)
+            dots-notification-send "Cheatsheet" "Unknown entry: $pick" -g "⚠"
+            ;;
     esac
+    rc=$?
 
-    [[ $? -eq 10 ]] || exit 0
+    # _browse returns 10 on "← Back" → loop back to main menu.
+    # Anything else (copy notification fired, user cancelled) → exit.
+    [[ $rc -eq 10 ]] || exit 0
 done

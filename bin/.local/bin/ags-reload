@@ -1,4 +1,18 @@
 #!/usr/bin/env bash
+# dots:summary=Reload AGS — kill old instance then restart with logs
+# Logs:
+#   /tmp/ags-bar.log     internal logger output (--log-file)
+#   /tmp/ags-stderr.log  stderr (JS errors, console.error from app.ts)
 
-ags quit &
-ags run --log-file /tmp/ags-bar.log >/tmp/ags-stderr.log 2>&1 &
+set -u
+
+# Try graceful quit first; if AGS is wedged (often is after a JS error in main),
+# fall back to SIGTERM on the gjs process directly.
+ags quit 2>/dev/null
+sleep 0.3
+pkill -TERM -f 'gjs.*ags' 2>/dev/null || true
+sleep 0.3
+pkill -KILL -f 'gjs.*ags' 2>/dev/null || true
+
+# Start fresh — daemon detached.
+setsid -f ags run --log-file /tmp/ags-bar.log >/tmp/ags-stderr.log 2>&1
