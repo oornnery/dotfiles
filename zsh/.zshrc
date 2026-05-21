@@ -24,6 +24,7 @@ ZSH_THEME=""
 # - fast-syntax-highlighting: replaces the slower zsh-syntax-highlighting. MUST be
 #   loaded near the end (before history-substring-search) per upstream docs.
 plugins=(
+  zsh-defer
   zsh-vi-mode
   git
   gh
@@ -31,6 +32,7 @@ plugins=(
   zsh-completions
   zsh-autosuggestions
   fzf-tab
+  forgit
   fast-syntax-highlighting
   zsh-history-substring-search
 )
@@ -164,6 +166,21 @@ alias g='git'
 alias lg='lazygit'
 alias ld='lazydocker'
 
+# Modern CLI replacements (all gated → no-op if tool missing)
+command -v btm   >/dev/null && alias top='btm'
+command -v dust  >/dev/null && alias du='dust'
+command -v duf   >/dev/null && alias df='duf'
+command -v procs >/dev/null && alias ps='procs'
+command -v xh    >/dev/null && alias http='xh'
+# `sd` keeps original name — no alias (would shadow sed which is still useful)
+# `tldr` keeps original name
+# `jless` keeps original name (used inline: `cat file.json | jless`)
+
+# pay-respects (typo corrector) — type `f` after a failed command to fix it
+if command -v pay-respects >/dev/null 2>&1; then
+    eval "$(pay-respects zsh --alias f)"
+fi
+
 # -------------------------------
 # Functions
 # -------------------------------
@@ -222,8 +239,21 @@ if command -v zoxide >/dev/null 2>&1; then
   }
   zle -N accept-line _zoxide_accept_line
 fi
-command -v fnm      >/dev/null && eval "$(fnm env --use-on-cd)"
-command -v atuin    >/dev/null && eval "$(atuin init zsh)"
-command -v mise     >/dev/null && eval "$(mise activate zsh)"
-command -v direnv   >/dev/null && eval "$(direnv hook zsh)"
+# Starship (prompt) must run synchronously — it owns the prompt rendering.
 command -v starship >/dev/null && eval "$(starship init zsh)"
+
+# Everything else deferred to AFTER the first prompt via zsh-defer if loaded.
+# Shaves ~200ms off shell startup by moving fnm/atuin/mise/direnv off the hot
+# path. They become active a few hundred ms later (you won't notice unless
+# you immediately need direnv for the very first command).
+if (( $+functions[zsh-defer] )); then
+    command -v fnm    >/dev/null && zsh-defer eval "$(fnm env --use-on-cd)"
+    command -v atuin  >/dev/null && zsh-defer eval "$(atuin init zsh)"
+    command -v mise   >/dev/null && zsh-defer eval "$(mise activate zsh)"
+    command -v direnv >/dev/null && zsh-defer eval "$(direnv hook zsh)"
+else
+    command -v fnm    >/dev/null && eval "$(fnm env --use-on-cd)"
+    command -v atuin  >/dev/null && eval "$(atuin init zsh)"
+    command -v mise   >/dev/null && eval "$(mise activate zsh)"
+    command -v direnv >/dev/null && eval "$(direnv hook zsh)"
+fi
