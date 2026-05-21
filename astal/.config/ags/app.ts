@@ -7,19 +7,25 @@ import Sidebar from "./widget/Sidebar"
 
 type Entry = { bar: any; sidebar: any; dispose: () => void }
 
+// Connector name → entry. Keyed by string (eDP-1, HDMI-A-1, …) instead of by
+// Gdk.Monitor reference because GTK sometimes hands out a NEW Gdk.Monitor for
+// the same physical monitor across KVM transitions — keying by ref creates
+// duplicate bars; keying by name dedups properly.
+function connectorOf(m: Gdk.Monitor): string {
+  return (m.get_connector?.() ?? (m as any).connector ?? "?") as string
+}
+
 app.start({
   css: style,
   main() {
-    const windows = new Map<Gdk.Monitor, Entry>()
+    const windows = new Map<string, Entry>()
 
     const open = (m: Gdk.Monitor) => {
-      if (windows.has(m)) return
+      const name = connectorOf(m)
+      if (windows.has(name)) return
 
       // Bar and Sidebar in SEPARATE reactive scopes — a runtime error in
-      // Sidebar (missing API, null binding, etc.) doesn't take down the Bar
-      // on the same monitor. Each can fail independently.
-      const monLabel = (m.get_connector?.() ?? m.connector ?? "?") as string
-
+      // Sidebar (null binding, missing API) doesn't take down the Bar.
       const barEntry = createRoot<{ win: any; dispose: () => void }>((dispose) => ({
         win: Bar(m),
         dispose,
@@ -35,10 +41,10 @@ app.start({
         sidebarWin = sbEntry.win
         sidebarDispose = sbEntry.dispose
       } catch (e) {
-        console.error(`[ags] Sidebar mount failed for monitor ${monLabel}:`, e)
+        console.error(`[ags] Sidebar mount failed for monitor ${name}:`, e)
       }
 
-      windows.set(m, {
+      windows.set(name, {
         bar: barEntry.win,
         sidebar: sidebarWin,
         dispose: () => {
@@ -48,42 +54,44 @@ app.start({
       })
     }
 
-    const close = (m: Gdk.Monitor) => {
-      const entry = windows.get(m)
+    const close = (name: string) => {
+      const entry = windows.get(name)
       if (!entry) return
-      // DON'T call .destroy() on the windows here — when GTK fires items-changed
-      // on monitor disconnect (KVM switch, lid close, dock unplug), the
-      // underlying GdkSurface is already invalidated. Calling .destroy() on
-      // it triggers a C-level assertion (gdk_surface_get_display: !GDK_IS_SURFACE)
-      // that segfaults the entire AGS process — try/catch in JS can't save us.
-      // Just dispose the reactive scope; GTK garbage-collects the widget tree.
+      // Hide first (sets visible=false, releases surface refs cleanly), then
+      // try destroy in a try/catch. Plain .destroy() on a dead GdkSurface
+      // segfaults — calling hide() first dissociates the window from the
+      // (possibly-invalidated) surface so destroy() can proceed safely.
+      try { entry.bar?.set_visible?.(false) } catch {}
+      try { entry.sidebar?.set_visible?.(false) } catch {}
+      try { entry.bar?.destroy?.() } catch {}
+      try { entry.sidebar?.destroy?.() } catch {}
       try { entry.dispose() } catch (e) {
-        console.error("[ags] dispose error during monitor close:", e)
+        console.error(`[ags] dispose error closing ${name}:`, e)
       }
-      windows.delete(m)
+      windows.delete(name)
     }
 
     // Initial monitors.
     app.get_monitors().forEach(open)
 
-    // React to plug/unplug (KVM, lid, dock).
-    // Debounced: KVM switches fire remove+add in quick succession; waiting
-    // 500ms before reacting lets the transient settle.
+    // React to plug/unplug (KVM, lid, dock). Debounce 500ms so KVM swap
+    // (rapid remove+add) settles before we sync.
     const display = Gdk.Display.get_default()
     if (display) {
       const monitors = display.get_monitors()
       let pending: ReturnType<typeof setTimeout> | null = null
       const sync = () => {
         try {
-          const current = new Set<Gdk.Monitor>()
+          const currentNames = new Set<string>()
           const n = monitors.get_n_items()
           for (let i = 0; i < n; i++) {
             const m = monitors.get_item(i) as Gdk.Monitor
-            current.add(m)
-            if (!windows.has(m)) open(m)
+            const name = connectorOf(m)
+            currentNames.add(name)
+            if (!windows.has(name)) open(m)
           }
-          for (const m of [...windows.keys()]) {
-            if (!current.has(m)) close(m)
+          for (const name of [...windows.keys()]) {
+            if (!currentNames.has(name)) close(name)
           }
         } catch (e) {
           console.error("[ags] monitor sync failed:", e)
