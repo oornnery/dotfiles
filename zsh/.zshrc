@@ -199,20 +199,28 @@ fi
 command -v zoxide   >/dev/null && eval "$(zoxide init zsh --cmd cd)"
 
 # Bare-word fallback: typing just `ve-tools` (no `cd` prefix) → if it's not
-# a command AND not a subdir of $PWD, try zoxide to find a frecent match.
-# This restores autojump-style UX while still letting AUTO_CD handle direct
-# subdir names first.
+# a command AND not a subdir of $PWD AND zoxide has a frecent match, rewrite
+# the buffer to `cd <word>` before submitting. Restores autojump-style UX.
+#
+# NB: a command_not_found_handler would not work — zsh runs that in a context
+# where `cd` doesn't persist. Intercepting accept-line (Enter) at the ZLE
+# layer lets us rewrite the buffer in the parent shell.
 if command -v zoxide >/dev/null 2>&1; then
-  command_not_found_handler() {
-    if [[ -n "$1" ]]; then
-      local target
-      if target="$(zoxide query "$@" 2>/dev/null)" && [[ -n "$target" ]]; then
-        cd "$target" && return 0
+  _zoxide_accept_line() {
+    # Single bare word with no special chars / args / pipes? Try it.
+    if [[ "$BUFFER" =~ ^[[:space:]]*([^[:space:]/$\|\&\;\<\>]+)[[:space:]]*$ ]]; then
+      local word="${match[1]}"
+      # Skip if it's already a known command, builtin, alias, function, or dir.
+      if ! command -v "$word" >/dev/null 2>&1 && [[ ! -d "$word" ]]; then
+        local target
+        if target="$(zoxide query "$word" 2>/dev/null)" && [[ -n "$target" ]]; then
+          BUFFER="cd ${(q)word}"
+        fi
       fi
     fi
-    print -r -- "zsh: command not found: $1" >&2
-    return 127
+    zle .accept-line
   }
+  zle -N accept-line _zoxide_accept_line
 fi
 command -v fnm      >/dev/null && eval "$(fnm env --use-on-cd)"
 command -v atuin    >/dev/null && eval "$(atuin init zsh)"
