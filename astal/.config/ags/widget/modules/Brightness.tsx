@@ -2,6 +2,8 @@ import { Gtk } from "ags/gtk4"
 import { createPoll } from "ags/time"
 import { execAsync } from "ags/process"
 import PopButton from "../lib/PopButton"
+import { attachVerticalScroll } from "../lib/scroll"
+import { run } from "../lib/sh"
 
 const STEP = 5
 
@@ -19,7 +21,7 @@ export default function Brightness() {
   })
 
   const set = (v: number) =>
-    execAsync(["brightnessctl", "set", `${Math.round(Math.max(5, Math.min(100, v)))}%`]).catch(() => {})
+    run(["brightnessctl", "set", `${Math.round(Math.max(5, Math.min(100, v)))}%`])
 
   return (
     <PopButton
@@ -27,16 +29,7 @@ export default function Brightness() {
       tooltip={pct((p) => `Brightness ${Math.round(p)}%`)}
       glyph="󰃟"
       text={pct((p) => `${Math.round(p)}%`)}
-      setup={(self: any) => {
-        const ctl = new Gtk.EventControllerScroll({
-          flags: Gtk.EventControllerScrollFlags.VERTICAL,
-        })
-        ctl.connect("scroll", (_c: any, _dx: number, dy: number) => {
-          set(pct.peek() + (dy < 0 ? STEP : -STEP))
-          return true
-        })
-        self.add_controller(ctl)
-      }}
+      setup={(self) => attachVerticalScroll(self, (dir) => set(pct.peek() + dir * STEP))}
     >
       <box orientation={Gtk.Orientation.VERTICAL} spacing={8}>
         <label label="Screen" cssClasses={["title"]} />
@@ -44,7 +37,7 @@ export default function Brightness() {
           hexpand
           min={5} max={100} step={1}
           value={pct}
-          onChangeValue={(self: any) => { set(self.value) }}
+          onChangeValue={(self: Gtk.Scale) => { set(self.value) }}
         />
       </box>
     </PopButton>

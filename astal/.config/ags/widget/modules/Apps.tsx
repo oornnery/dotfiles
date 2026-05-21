@@ -1,11 +1,11 @@
-import { execAsync } from "ags/process"
+import { run } from "../lib/sh"
 
 export default function Apps() {
   return (
     <button
       cssName="apps"
       tooltipText="Launch app"
-      onClicked={() => execAsync(["wofi", "--show", "drun"]).catch(() => {})}
+      onClicked={() => run(["wofi", "--show", "drun"])}
     >
       <label label=" Apps" />
     </button>

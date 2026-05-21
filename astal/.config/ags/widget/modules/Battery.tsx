@@ -63,7 +63,7 @@ export default function BatteryModule() {
             <label label="Power profile" cssClasses={["title"]} />
             {profiles.map((profile) => (
               <button
-                cssClasses={active((a: any) => a === profile ? ["device", "active"] : ["device"])}
+                cssClasses={active((a: string) => a === profile ? ["device", "active"] : ["device"])}
                 onClicked={() => pp.set_active_profile(profile)}
               >
                 <box spacing={6}>

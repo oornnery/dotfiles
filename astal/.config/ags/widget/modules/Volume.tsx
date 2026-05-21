@@ -2,6 +2,7 @@ import { Gtk } from "ags/gtk4"
 import Wp from "gi://AstalWp"
 import { createBinding, createComputed } from "ags"
 import PopButton from "../lib/PopButton"
+import { attachVerticalScroll } from "../lib/scroll"
 
 const GLYPHS = ["󰕿", "󰖀", "󰕾"]
 const STEP = 0.05
@@ -34,30 +35,21 @@ export default function Volume() {
       tooltip={text}
       glyph={glyph}
       text={text}
-      setup={(self: any) => {
-        const ctl = new Gtk.EventControllerScroll({
-          flags: Gtk.EventControllerScrollFlags.VERTICAL,
-        })
-        ctl.connect("scroll", (_c: any, _dx: number, dy: number) => {
-          adjust(dy < 0 ? STEP : -STEP)
-          return true
-        })
-        self.add_controller(ctl)
-      }}
+      setup={(self) => attachVerticalScroll(self, (dir) => adjust(dir * STEP))}
     >
       <box orientation={Gtk.Orientation.VERTICAL} spacing={8}>
         <label label="Output" cssClasses={["title"]} />
         <slider
           hexpand
           min={0} max={1} step={0.01}
-          $={(self: any) => {
+          $={(self: Gtk.Scale) => {
             self.value = speaker.volume
             speaker.connect("notify::volume", () => {
               if (Math.abs(self.value - speaker.volume) > 0.005)
                 self.value = speaker.volume
             })
           }}
-          onChangeValue={(self: any) => speaker.set_volume(self.value)}
+          onChangeValue={(self: Gtk.Scale) => speaker.set_volume(self.value)}
         />
         <button onClicked={() => speaker.set_mute(!speaker.mute)}>
           <label label={muted((m) => m ? "Unmute" : "Mute")} />

@@ -1,11 +1,11 @@
-import { execAsync } from "ags/process"
+import { run } from "../lib/sh"
 
 export default function Power() {
   return (
     <button
       cssName="power"
       tooltipText="Power menu"
-      onClicked={() => execAsync(["power-menu"]).catch(() => {})}
+      onClicked={() => run(["power-menu"])}
     >
       <image iconName="system-shutdown-symbolic" />
     </button>

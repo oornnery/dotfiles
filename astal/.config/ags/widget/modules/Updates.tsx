@@ -1,5 +1,6 @@
 import { createPoll } from "ags/time"
 import { execAsync } from "ags/process"
+import { run } from "../lib/sh"
 
 type Data = { text: string; tooltip: string }
 
@@ -22,7 +23,7 @@ export default function Updates() {
     <button
       cssName="updates"
       tooltipText={data((d) => d.tooltip || `${d.text} updates`)}
-      onClicked={() => execAsync(["alacritty", "-e", "bash", "-c", "update; read -p Done..."]).catch(() => {})}
+      onClicked={() => run(["alacritty", "-e", "bash", "-c", "update; read -p Done..."])}
     >
       <box spacing={8}>
         <label cssClasses={["glyph"]} label="󰚰" />

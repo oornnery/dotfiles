@@ -50,7 +50,7 @@ export default function Wifi() {
             halign={Gtk.Align.END}
             valign={Gtk.Align.CENTER}
             active={enabled}
-            onStateSet={(self: any, state: boolean) => {
+            onStateSet={(self: Gtk.Switch, state: boolean) => {
               if (state !== wifi.enabled) wifi.enabled = state
               self.state = state
               return true
@@ -60,8 +60,11 @@ export default function Wifi() {
             <label label="󰑐" />
           </button>
         </box>
-        <For each={aps((arr) => arr.filter((a: any) => a.ssid && a.ssid !== "?"))}>
-          {(ap: any) => (
+        <For
+          each={aps((arr: Network.AccessPoint[]) => arr.filter((a) => a.ssid && a.ssid !== "?"))}
+          id={(ap: Network.AccessPoint) => ap.bssid ?? ap.ssid ?? ""}
+        >
+          {(ap: Network.AccessPoint) => (
             <button
               cssClasses={ssid((s: string | null) =>
                 ap.ssid && ap.ssid === s ? ["ap", "active"] : ["ap"]

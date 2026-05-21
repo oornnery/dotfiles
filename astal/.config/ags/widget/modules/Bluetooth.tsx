@@ -1,8 +1,8 @@
 import { Gtk } from "ags/gtk4"
 import Bluetooth from "gi://AstalBluetooth"
 import { createBinding, createComputed, For } from "ags"
-import { execAsync } from "ags/process"
 import PopButton from "../lib/PopButton"
+import { run } from "../lib/sh"
 
 export default function BluetoothModule() {
   const bt = Bluetooth.get_default()
@@ -25,7 +25,7 @@ export default function BluetoothModule() {
   const tooltipText = createComputed((track) => {
     if (!track(powered)) return "Bluetooth: off"
     if (!track(connected)) return "Bluetooth: idle (no device)"
-    const dev = track(devices).find((d: any) => d.connected)
+    const dev = track(devices).find((d: Bluetooth.Device) => d.connected)
     return `Bluetooth: connected — ${dev?.name ?? dev?.alias ?? "device"}`
   })
 
@@ -43,25 +43,24 @@ export default function BluetoothModule() {
             halign={Gtk.Align.END}
             valign={Gtk.Align.CENTER}
             active={powered}
-            onStateSet={(self: any, state: boolean) => {
+            onStateSet={(self: Gtk.Switch, state: boolean) => {
               // bt.toggle()/bt.is_powered= no-op silently on some setups
               // (perm/rfkill). bluetoothctl always works.
-              execAsync(["bluetoothctl", "power", state ? "on" : "off"])
-                .catch(() => {})
+              run(["bluetoothctl", "power", state ? "on" : "off"])
               self.state = state
               return true
             }}
           />
         </box>
-        <For each={devices}>
-          {(dev: any) => {
+        <For each={devices} id={(d: Bluetooth.Device) => d.address}>
+          {(dev: Bluetooth.Device) => {
             const devConnected = createBinding(dev, "connected")
             return (
               <button
                 cssClasses={devConnected((c: boolean) => c ? ["device", "active"] : ["device"])}
                 onClicked={() => {
                   const cmd = dev.connected ? "disconnect" : "connect"
-                  execAsync(["bluetoothctl", cmd, dev.address]).catch(() => {})
+                  run(["bluetoothctl", cmd, dev.address])
                 }}
               >
                 <box spacing={6}>

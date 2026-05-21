@@ -44,7 +44,7 @@ export default function Temperature() {
       glyph="󰔏"
       text={data((d) => `${Math.round(d.primary)}°`)}
       tooltip={data((d) => `Temp ${Math.round(d.primary)}°C`)}
-      setup={(self: any) => {
+      setup={(self) => {
         klass.subscribe(() => {
           self.cssClasses = klass.peek()
         })

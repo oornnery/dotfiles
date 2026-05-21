@@ -9,17 +9,17 @@ export default function Workspaces() {
   const workspaces = createBinding(hl, "workspaces")
   const focused = createBinding(hl, "focusedWorkspace")
 
-  const sorted = workspaces((arr) =>
-    [...arr].filter((w: any) => w.id >= 1).sort((a: any, b: any) => a.id - b.id)
+  const sorted = workspaces((arr: Hyprland.Workspace[]) =>
+    [...arr].filter((w) => w.id >= 1).sort((a, b) => a.id - b.id)
   )
 
   return (
     <box cssName="workspaces">
-      <For each={sorted}>
-        {(ws: any) => (
+      <For each={sorted} id={(ws: Hyprland.Workspace) => ws.id}>
+        {(ws: Hyprland.Workspace) => (
           <button
-            cssClasses={focused((f: any) => f?.id === ws.id ? ["active"] : [])}
-            onClicked={() => ws.focus()}
+            cssClasses={focused((f: Hyprland.Workspace | null) => f?.id === ws.id ? ["active"] : [])}
+            onClicked={() => hl.dispatch("workspace", String(ws.id))}
           >
             <label label={`${ws.id}`} />
           </button>

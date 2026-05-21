@@ -34,8 +34,11 @@ export default function Music() {
 
   return (
     <box visible={visible}>
-      <For each={players((arr) => arr.slice(0, 1))} id={(p: any) => p.busName}>
-        {(player: any) => {
+      <For
+        each={players((arr: Mpris.Player[]) => arr.slice(0, 1))}
+        id={(p: Mpris.Player) => p.busName}
+      >
+        {(player: Mpris.Player) => {
           const title = createBinding(player, "title")
           const status = createBinding(player, "playbackStatus")
           // Mpris players don't emit notify::position during natural playback,

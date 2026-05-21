@@ -2,6 +2,7 @@ import { Gtk } from "ags/gtk4"
 import Hyprland from "gi://AstalHyprland"
 import { createState } from "ags"
 import { execAsync } from "ags/process"
+import { run } from "../lib/sh"
 
 export default function KbLayout() {
   const hl = Hyprland.get_default()
@@ -11,7 +12,7 @@ export default function KbLayout() {
     .then((s) => setLayout(s.trim() || "us"))
     .catch(() => {})
 
-  hl?.connect("keyboard-layout", (_self: any, _kb: string, variant: string) => {
+  hl?.connect("keyboard-layout", (_self, _kb: string, variant: string) => {
     setLayout((variant || "us").slice(0, 2).toLowerCase())
   })
 
@@ -19,7 +20,7 @@ export default function KbLayout() {
     <button
       cssName="kb-layout"
       tooltipText={layout((l) => `Layout: ${l.toUpperCase()}`)}
-      onClicked={() => execAsync(["hyprctl", "switchxkblayout", "all", "next"]).catch(() => {})}
+      onClicked={() => run(["hyprctl", "switchxkblayout", "all", "next"])}
     >
       <box spacing={8}>
         <label cssClasses={["glyph"]} label="󰌌" />

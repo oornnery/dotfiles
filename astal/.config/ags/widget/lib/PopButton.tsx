@@ -1,10 +1,15 @@
+import type { Gtk } from "ags/gtk4"
+import type { Accessor } from "ags"
+
+type StringProp = string | Accessor<string>
+
 type Props = {
   cssName?: string
-  tooltip?: any
-  glyph?: any
-  text?: any
-  children?: any
-  setup?: (self: any) => void
+  tooltip?: StringProp
+  glyph?: StringProp
+  text?: StringProp
+  children?: JSX.Element | JSX.Element[]
+  setup?: (self: Gtk.MenuButton) => void
 }
 
 export default function PopButton(p: Props) {
