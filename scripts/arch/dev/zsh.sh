@@ -65,6 +65,29 @@ for plugin in "${!plugins[@]}"; do
     fi
 done
 
+# Deprecated plugins — remove if leftover from previous setup. .zshrc no
+# longer references them, but the dirs linger and waste disk.
+for old in zsh-syntax-highlighting z; do
+    old_target="$custom_dir/$old"
+    if [[ -d "$old_target" ]]; then
+        log::info "Removing deprecated plugin: $old"
+        _run_user rm -rf "$old_target"
+    fi
+done
+
+# ─── atuin (shell history database) ────────────────────────────────────────
+
+log::step "Initializing atuin history DB"
+if [[ -f "$user_home/.local/share/atuin/history.db" ]]; then
+    log::skip "atuin DB already exists"
+else
+    log::info "Importing existing zsh history into atuin"
+    _run_user atuin import auto 2>/dev/null \
+        || log::warn "atuin import auto failed — run manually after first zsh start"
+fi
+# Login is optional (only needed for cross-machine sync — atuin.sh account).
+# Not done here; user runs `atuin login -u <name>` manually if they want it.
+
 # ─── Stow dotfiles ─────────────────────────────────────────────────────────
 
 stow_safe zsh
