@@ -1097,6 +1097,148 @@ class LauncherButton(Button):
         )
 
 
+# ─── Music (MPRIS via playerctl) ───────────────────────────────────────────
+
+class MusicWidget(PollLabel):
+    def __init__(self, monitor: int = 0):
+        super().__init__(
+            name="music-widget",
+            icon="󰎈",
+            interval=2000,
+            poll_from=self.get_music,
+            on_click=lambda *_: subprocess.Popen(
+                ["playerctl", "play-pause"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            ),
+        )
+
+    def get_music(self) -> str:
+        title = run("playerctl metadata --format '{{title}}'")
+        if not title:
+            self.set_visible(False)
+            return ""
+        self.set_visible(True)
+        status = run("playerctl status")
+        glyph = "󰏤" if status == "Playing" else "󰐎"
+        return f"{glyph} {shorten(title, 14)}"
+
+
+# ─── Updates ───────────────────────────────────────────────────────────────
+
+class UpdatesWidget(PollLabel):
+    def __init__(self, monitor: int = 0):
+        super().__init__(
+            name="updates-widget",
+            icon="󰚰",
+            interval=3600_000,  # 1h — `update check` is moderately expensive
+            poll_from=self.get_count,
+            on_click=lambda *_: subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", "update; read -p Done..."],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            ),
+        )
+
+    def get_count(self) -> str:
+        out = run("update check")
+        try:
+            data = json.loads(out) if out else {}
+            n = int(data.get("count", 0))
+            return str(n) if n > 0 else "0"
+        except Exception:
+            return "0"
+
+
+# ─── Power (button only, no popup — opens power-menu) ─────────────────────
+
+class PowerWidget(Button):
+    def __init__(self, monitor: int = 0):
+        super().__init__(
+            name="power-widget",
+            child=Label(label="", name="power-widget-icon"),
+            on_clicked=lambda *_: subprocess.Popen(
+                ["power-menu"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            ),
+        )
+
+
+# ─── GPU (AMD: /sys/class/drm/cardN/device/gpu_busy_percent) ──────────────
+
+class GpuWidget(PollLabel):
+    def __init__(self, monitor: int = 0):
+        super().__init__(
+            name="gpu-widget",
+            icon="󰢮",
+            interval=3000,
+            poll_from=self.get_gpu,
+        )
+
+    def get_gpu(self) -> str:
+        for card in ("card0", "card1", "card2"):
+            path = Path(f"/sys/class/drm/{card}/device/gpu_busy_percent")
+            if path.exists():
+                try:
+                    return f"{int(path.read_text().strip())}%"
+                except Exception:
+                    continue
+        return "--"
+
+
+# ─── Temperature (first available /sys/class/thermal/thermal_zone*) ──────
+
+class TemperatureWidget(PollLabel):
+    def __init__(self, monitor: int = 0):
+        super().__init__(
+            name="temperature-widget",
+            icon="󰔏",
+            interval=5000,
+            poll_from=self.get_temp,
+        )
+
+    def get_temp(self) -> str:
+        for i in range(0, 10):
+            path = Path(f"/sys/class/thermal/thermal_zone{i}/temp")
+            if path.exists():
+                try:
+                    millic = int(path.read_text().strip())
+                    return f"{millic // 1000}°"
+                except Exception:
+                    continue
+        return "--"
+
+
+# ─── AI Usage (Claude / Codex token estimates from local caches) ─────────
+
+class AiUsageWidget(PollLabel):
+    def __init__(self, monitor: int = 0):
+        super().__init__(
+            name="ai-usage-widget",
+            icon="󰧑",
+            interval=60_000,
+            poll_from=self.get_usage,
+        )
+
+    def get_usage(self) -> str:
+        # Read claude / codex token counters if their CLIs write usage files.
+        # Falls back to "—" when nothing is available.
+        for path in (
+            Path.home() / ".claude" / "usage.json",
+            Path.home() / ".config" / "claude" / "usage.json",
+        ):
+            if path.exists():
+                try:
+                    data = json.loads(path.read_text())
+                    tokens = data.get("total_tokens") or data.get("today_tokens") or 0
+                    if tokens >= 1_000_000:
+                        return f"{tokens / 1_000_000:.1f}M"
+                    if tokens >= 1000:
+                        return f"{tokens // 1000}k"
+                    return str(tokens)
+                except Exception:
+                    pass
+        return "—"
+
+
 class ActiveWindowWidget(PollLabel):
     def __init__(self):
         super().__init__(

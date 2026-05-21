@@ -1,8 +1,13 @@
-from fabric.hyprland.widgets import (
-    HyprlandActiveWindow,
-    HyprlandWorkspaces,
-    WorkspaceButton,
-)
+"""StatusBar — mirrors the AGS bar layout exactly.
+
+Layout (matches astal/.config/ags/widget/Bar.tsx):
+  LEFT:   Apps · Workspaces · Music
+  CENTER: Calendar (date/time with calendar popup)
+  RIGHT:  AiUsage · Updates · Cpu · Memory · Gpu · Temperature ·
+          Wifi · Bluetooth · Volume · Brightness · Battery · KbLayout · Power
+"""
+
+from fabric.hyprland.widgets import HyprlandWorkspaces, WorkspaceButton
 from fabric.widgets.box import Box
 from fabric.widgets.centerbox import CenterBox
 from fabric.widgets.wayland import WaylandWindow as Window
@@ -10,28 +15,40 @@ from fabric.widgets.wayland import WaylandWindow as Window
 try:
     from .launcher import AppLauncher
     from .widgets import (
+        AiUsageWidget,
         BatteryWidget,
         BluetoothWidget,
         BrightnessWidget,
         CpuWidget,
         DateWidget,
+        GpuWidget,
         KeyboardLayoutWidget,
         LauncherButton,
         MemoryWidget,
+        MusicWidget,
+        PowerWidget,
+        TemperatureWidget,
+        UpdatesWidget,
         VolumeWidget,
         WifiWidget,
     )
 except ImportError:
     from launcher import AppLauncher
     from widgets import (
+        AiUsageWidget,
         BatteryWidget,
         BluetoothWidget,
         BrightnessWidget,
         CpuWidget,
         DateWidget,
+        GpuWidget,
         KeyboardLayoutWidget,
         LauncherButton,
         MemoryWidget,
+        MusicWidget,
+        PowerWidget,
+        TemperatureWidget,
+        UpdatesWidget,
         VolumeWidget,
         WifiWidget,
     )
@@ -46,7 +63,7 @@ class StatusBar(Window):
             name=f"bar-{monitor_id}",
             layer="top",
             anchor="left top right",
-            margin="10px 10px -2px 10px",
+            margin="8px 8px -2px 8px",
             exclusivity="auto",
             monitor=monitor,
             visible=False,
@@ -54,9 +71,10 @@ class StatusBar(Window):
 
         self.launcher = launcher
 
+        # ─── LEFT: Apps · Workspaces · Music ───────────────────────────────
         left = Box(
             name="start-container",
-            spacing=8,
+            spacing=3,
             orientation="h",
             children=[
                 LauncherButton(self.launcher.toggle),
@@ -64,52 +82,45 @@ class StatusBar(Window):
                     name="workspaces",
                     spacing=4,
                     buttons_factory=lambda ws_id: (
-                        WorkspaceButton(
-                            id=ws_id,
-                            label=str(ws_id),
-                        )
+                        WorkspaceButton(id=ws_id, label=str(ws_id))
                         if ws_id > 0
                         else None
                     ),
                 ),
+                MusicWidget(monitor=monitor_id),
             ],
         )
 
+        # ─── CENTER: Calendar (date/time) ──────────────────────────────────
+        date = DateWidget(monitor=monitor_id)
         center = Box(
             name="center-container",
             spacing=8,
             orientation="h",
             h_align="center",
             h_expand=True,
-            children=[
-                HyprlandActiveWindow(name="active-window"),
-            ],
+            children=[date],
         )
 
-        wifi = WifiWidget(monitor=monitor_id)
-        bluetooth = BluetoothWidget(monitor=monitor_id)
-        brightness = BrightnessWidget(monitor=monitor_id)
-        volume = VolumeWidget(monitor=monitor_id)
-        memory = MemoryWidget(monitor=monitor_id)
-        cpu = CpuWidget(monitor=monitor_id)
-        battery = BatteryWidget(monitor=monitor_id)
-        keyboard_layout = KeyboardLayoutWidget(monitor=monitor_id)
-        date = DateWidget(monitor=monitor_id)
-
+        # ─── RIGHT: system widgets in AGS order ────────────────────────────
         right = Box(
             name="end-container",
-            spacing=6,
+            spacing=3,
             orientation="h",
             children=[
-                wifi,
-                bluetooth,
-                brightness,
-                volume,
-                memory,
-                cpu,
-                battery,
-                keyboard_layout,
-                date,
+                AiUsageWidget(monitor=monitor_id),
+                UpdatesWidget(monitor=monitor_id),
+                CpuWidget(monitor=monitor_id),
+                MemoryWidget(monitor=monitor_id),
+                GpuWidget(monitor=monitor_id),
+                TemperatureWidget(monitor=monitor_id),
+                WifiWidget(monitor=monitor_id),
+                BluetoothWidget(monitor=monitor_id),
+                VolumeWidget(monitor=monitor_id),
+                BrightnessWidget(monitor=monitor_id),
+                BatteryWidget(monitor=monitor_id),
+                KeyboardLayoutWidget(monitor=monitor_id),
+                PowerWidget(monitor=monitor_id),
             ],
         )
 

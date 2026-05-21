@@ -82,6 +82,12 @@ _apply() {
             "$HOME/.config/walker/themes/default/theme.css"
     fi
 
+    # 8. Fabric (Python/GTK shell) — palette imported by src/style.css via theme.css.
+    if [[ -f "$src/fabric.css" ]]; then
+        install -D -m 644 "$src/fabric.css" \
+            "$HOME/.config/fabric-shell/src/theme.css"
+    fi
+
     echo "$name" > "$STATE_FILE"
 
     # Reload daemons.
@@ -93,6 +99,19 @@ _apply() {
     if pgrep -f 'gjs.*ags' >/dev/null 2>&1; then
         ags quit 2>/dev/null || true
         (nohup ags run >/dev/null 2>&1 &)
+    fi
+
+    # Fabric shell: imports theme.css via @import; needs a process restart to
+    # re-load the CSS. Detect by python process under fabric-shell dir.
+    if pgrep -fl 'fabric-shell/.*/main\.py' >/dev/null 2>&1; then
+        pkill -TERM -f 'fabric-shell/.*/main\.py' 2>/dev/null || true
+        sleep 0.3
+        fabric_dir="$HOME/.config/fabric-shell"
+        [[ -d "$HOME/dotfiles/fabric/.config/fabric-shell" ]] \
+            && fabric_dir="$HOME/dotfiles/fabric/.config/fabric-shell"
+        if [[ -f "$fabric_dir/src/main.py" ]]; then
+            (cd "$fabric_dir" && nohup uv run src/main.py >/dev/null 2>&1 &)
+        fi
     fi
 
     _notify "Theme" "→ $name"
