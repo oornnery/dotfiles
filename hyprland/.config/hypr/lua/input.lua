@@ -15,11 +15,8 @@ hl.config({
   },
 })
 
--- Gestures: 3-finger horizontal swipe → muda workspace.
+-- Gestures: 3-finger horizontal swipe → switch workspace.
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 
--- Per-device config (exemplo — adapte conforme seus dispositivos).
-hl.device({
-  name = "epic-mouse-v1",
-  sensitivity = -0.5,
-})
+-- Per-device config: uncomment and adapt when needed.
+-- hl.device({ name = "<device-name-from-hyprctl-devices>", sensitivity = -0.5 })

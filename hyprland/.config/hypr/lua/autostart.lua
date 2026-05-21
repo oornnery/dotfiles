@@ -9,10 +9,9 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("dbus-update-activation-environment --systemd --all")
   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP GNOME_KEYRING_CONTROL SSH_AUTH_SOCK")
 
-  -- Wallpaper + status bar + notificações.
+  -- Wallpaper + status bar (AGS) + notifications.
   hl.exec_cmd("hyprpaper")
   hl.exec_cmd("ags run")
-  -- hl.exec_cmd("waybar")   -- desativado: substituído por AGS
   hl.exec_cmd("mako")
 
   -- Clipboard history (Mod+V → cliphist).
@@ -31,10 +30,9 @@ hl.on("hyprland.start", function()
   -- Network applet.
   hl.exec_cmd("nm-applet --indicator")
 
-  -- Monitor watch: re-aplica monitors.lua quando plugar/desplugar display.
-  hl.exec_cmd("hypr-monitor-watch")
+  -- (Monitor plug/unplug is handled natively in events.lua via hl.on.)
 
-  -- Walker daemon (launcher) — Super+R aciona via D-Bus se já rodando.
+  -- Walker daemon (launcher) — Super+R triggers via D-Bus if already running.
   -- Garantir que elephant (provider backend) inicia explícito; o systemd
   -- graphical-session.target pode não ser alcançado em todas as sessions.
   hl.exec_cmd("systemctl --user start elephant.service")

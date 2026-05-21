@@ -17,11 +17,13 @@ hl.monitor({
   scale    = 1.2,
 })
 
--- HDMI externo à direita do eDP-1, escala 1.
+-- HDMI externo. `position = "auto"` deixa Hyprland calcular a posição
+-- baseada no scale corrente do eDP-1 (evita hard-coding "1600x0" que
+-- quebra quando o scale interno muda).
 hl.monitor({
   output   = "HDMI-A-1",
   mode     = "preferred",
-  position = "1600x0",
+  position = "auto",
   scale    = 1,
 })
 

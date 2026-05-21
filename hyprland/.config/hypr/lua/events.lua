@@ -4,7 +4,7 @@
 -- Limite: 100ms timeout por callback, max recursion depth 5 (anti-loop).
 -- Erros não interrompem outros handlers.
 
--- ─── Monitor plug/unplug (substituí hypr-monitor-watch shell script) ───────
+-- ─── Monitor plug/unplug ───────────────────────────────────────────────────
 -- Quando monitor é conectado/desconectado, re-aplica monitors.lua via reload.
 -- Notifica o usuário pra não pensar que tela bugou.
 

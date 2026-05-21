@@ -9,7 +9,8 @@
 --   hl.dsp.window.fullscreen()                          — fullscreen
 --   hl.dsp.window.float({ action = "toggle" })          — float toggle
 --   hl.dsp.window.pseudo()                              — pseudo tile
---   hl.dsp.window.swap({ direction = "l/r/u/d" })       — move window in tile layout
+--   hl.dsp.window.move({ direction = "l/r/u/d" })       — move window in tile layout
+--   hl.dsp.window.swap({ direction = "l/r/u/d" })       — swap window with neighbor
 --   hl.dsp.window.move({ workspace = N })               — move window to ws
 --   hl.dsp.window.move({ monitor = "+1" })              — move window to monitor
 --   hl.dsp.window.drag()                                — mouse drag
@@ -27,12 +28,9 @@ local MSA = "SUPER + SHIFT + ALT"
 -- Programas
 local terminal    = "alacritty"
 local fileManager = "nautilus"
--- Launcher: walker é o atual; wofi --show drun continua como fallback.
-local menu        = "walker"
-local menu_old    = "wofi --show drun"
+local menu        = "walker"  -- launcher (apps, clipboard, symbols, windows, …)
 local browser     = "firefox"
 local lock        = "hyprlock"
-local logout      = "wlogout"
 
 local function exec(cmd) return hl.dsp.exec_cmd(cmd) end
 
@@ -43,21 +41,21 @@ end
 
 -- ─── Apps ──────────────────────────────────────────────────────────────────
 
-kb(M  .. " + Q",      exec(terminal),                       "terminal")
+kb(M  .. " + Return", exec(terminal),                       "terminal")
 kb(M  .. " + E",      exec(fileManager),                    "file manager")
-kb(M  .. " + R",      exec(menu),                           "launcher (walker)")
-kb(MS .. " + R",      exec(menu_old),                       "launcher (wofi fallback)")
+kb(M  .. " + R",      exec(menu),                           "launcher (walker default search)")
+kb(M  .. " + space",  exec("walker -m providerlist"),       "launcher (walker provider picker)")
+kb(M  .. " + I",      exec("llm"),                          "LLM picker (claude/codex/…)")
 kb(M  .. " + B",      exec(browser),                        "browser")
 kb(M  .. " + L",      exec(lock),                           "lock screen")
-kb(MS .. " + E",      exec(logout),                         "logout (wlogout)")
-kb(MS .. " + P",      exec("power-menu"),                   "power menu")
-kb(M  .. " + M",      exec("sh -c 'command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit'"), "exit Hyprland")
+kb(MS .. " + P",      exec("power-menu"),                   "power menu (lock/suspend/logout/reboot/shutdown)")
+kb(M  .. " + M",      exec("hypr-exit"),                    "exit Hyprland (graceful)")
 kb(M  .. " + grave",  exec("scratch"),                      "scratchpad terminal")
 
 -- ─── Window management ─────────────────────────────────────────────────────
 
-kb(M  .. " + C",      hl.dsp.window.close(),                "close window")
-kb(M  .. " + V",      hl.dsp.window.float({ action = "toggle" }), "toggle floating")
+kb(MS .. " + Q",      hl.dsp.window.close(),                "close window")
+kb(M  .. " + T",      hl.dsp.window.float({ action = "toggle" }), "toggle floating (T = tile/float)")
 kb(M  .. " + P",      hl.dsp.window.pseudo(),               "pseudo tile")
 kb(M  .. " + J",      hl.dsp.layout("togglesplit"),         "toggle split (dwindle)")
 kb(M  .. " + F",      hl.dsp.window.fullscreen(),           "fullscreen")
@@ -68,18 +66,20 @@ kb(M  .. " + right",  hl.dsp.focus({ direction = "r" }),    "focus right")
 kb(M  .. " + up",     hl.dsp.focus({ direction = "u" }),    "focus up")
 kb(M  .. " + down",   hl.dsp.focus({ direction = "d" }),    "focus down")
 
--- Move window in tile layout (swap with neighbor)
-kb(MS .. " + left",   hl.dsp.window.swap({ direction = "l" }), "move window left")
-kb(MS .. " + right",  hl.dsp.window.swap({ direction = "r" }), "move window right")
-kb(MS .. " + up",     hl.dsp.window.swap({ direction = "u" }), "move window up")
-kb(MS .. " + down",   hl.dsp.window.swap({ direction = "d" }), "move window down")
+-- Move window in tile layout (rearranges position, doesn't swap with neighbor)
+kb(MS .. " + left",   hl.dsp.window.move({ direction = "l" }), "move window left")
+kb(MS .. " + right",  hl.dsp.window.move({ direction = "r" }), "move window right")
+kb(MS .. " + up",     hl.dsp.window.move({ direction = "u" }), "move window up")
+kb(MS .. " + down",   hl.dsp.window.move({ direction = "d" }), "move window down")
 
 -- Mouse drag
 hl.bind(M  .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(M  .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Window finder (walker)
-hl.bind(MS .. " + Tab",    exec("walker -m windows"))
+-- Tab: cycle monitor focus / Alt+Tab opens window picker (Windows-style)
+kb(M  .. " + Tab", hl.dsp.focus({ monitor = "+1" }), "cycle monitor focus")
+kb("ALT + Tab",    exec("walker -m windows"),        "window picker (alt-tab)")
+kb(MS .. " + Tab", exec("walker -m windows"),        "window picker (MS+Tab fallback)")
 
 -- ─── Workspaces ────────────────────────────────────────────────────────────
 
@@ -170,7 +170,17 @@ kb(MA .. " + space", exec("hyprctl switchxkblayout all next"), "cycle keyboard l
 kb(MS .. " + H",  exec("dots-cheatsheet"),            "cheatsheet (all sources)")
 kb(M  .. " + N",  exec("obsidian-note today"),       "obsidian: today's note")
 kb(MS .. " + N",  exec("obsidian-note find"),        "obsidian: find note")
-hl.bind(MC .. " + N",  exec("obsidian-note search"))
+kb(MC .. " + N",  exec("obsidian-note search"),      "obsidian: search content")
+
+-- ─── Notifications (mako) ──────────────────────────────────────────────────
+
+kb(M  .. " + Backspace",  exec("dots-notifications clear"),   "notifications: dismiss all")
+kb(MS .. " + Backspace",  exec("dots-notifications restore"), "notifications: restore last")
+kb(MC .. " + Backspace",  exec("dots-notifications pick"),    "notifications: pick (walker)")
+
+-- ─── AGS sidebar (control panel) ───────────────────────────────────────────
+
+kb(M  .. " + backslash",  exec("ags toggle sidebar"),         "toggle sidebar (control panel)")
 
 -- ─── Multimedia keys (sem mod, repeating + locked) ─────────────────────────
 
