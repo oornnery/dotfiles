@@ -12,27 +12,38 @@ export ZSH="$HOME/.oh-my-zsh"
 # (Plugins/completion from OMZ stay loaded; only the theme is disabled.)
 ZSH_THEME=""
 
-# Plugins:
-# - git: git aliases and helpers
-# - gh: GitHub CLI helpers
-# - sudo: double-ESC to prepend sudo in many setups
-# - z: fast directory jumping
-# - fzf-tab: better tab completion UI
-# - zsh-autosuggestions: fish-like command suggestions
-# - zsh-syntax-highlighting: command highlighting
-# - zsh-completions: extra completions
+# Plugins (order matters — see notes):
+# - zsh-vi-mode: vi modal in shell. MUST come first; it remaps keys others rely on.
+# - git / gh: aliases (gst, ga, gco, …)
+# - sudo: double-ESC to prepend sudo
+# - z: fast dir jumping (still useful alongside zoxide)
+# - fzf-tab: fuzzy tab completion UI
+# - zsh-autosuggestions: fish-like ghost text from history
+# - zsh-completions: extra completions catalog
+# - zsh-history-substring-search: type "git" then ↑/↓ navigates only matching history
+# - fast-syntax-highlighting: replaces the slower zsh-syntax-highlighting. MUST be
+#   loaded near the end (before history-substring-search) per upstream docs.
 plugins=(
+  zsh-vi-mode
   git
   gh
   sudo
-  z
   zsh-completions
   zsh-autosuggestions
   fzf-tab
-  zsh-syntax-highlighting
+  fast-syntax-highlighting
+  zsh-history-substring-search
 )
+# Note: dropped OMZ's `z` plugin — zoxide does the same with --cmd cd below.
 
 source "$ZSH/oh-my-zsh.sh"
+
+# zsh-history-substring-search: bind ↑/↓ to substring search after a query.
+# Both Emacs (default) and vi insert/normal mode covered.
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
 
 # -------------------------------
 # Completion and navigation
@@ -181,7 +192,28 @@ fi
 # -------------------------------
 
 # Tool initializations (each gated by `command -v` so missing tools are no-ops).
-command -v zoxide   >/dev/null && eval "$(zoxide init zsh)"
+# --cmd cd: zoxide replaces the `cd` builtin entirely.
+# - `cd foo/bar` (valid path) → cd as usual
+# - `cd <fragment>` → jump to most-frecent matching dir
+# - `cdi` → interactive picker with fzf
+command -v zoxide   >/dev/null && eval "$(zoxide init zsh --cmd cd)"
+
+# Bare-word fallback: typing just `ve-tools` (no `cd` prefix) → if it's not
+# a command AND not a subdir of $PWD, try zoxide to find a frecent match.
+# This restores autojump-style UX while still letting AUTO_CD handle direct
+# subdir names first.
+if command -v zoxide >/dev/null 2>&1; then
+  command_not_found_handler() {
+    if [[ -n "$1" ]]; then
+      local target
+      if target="$(zoxide query "$@" 2>/dev/null)" && [[ -n "$target" ]]; then
+        cd "$target" && return 0
+      fi
+    fi
+    print -r -- "zsh: command not found: $1" >&2
+    return 127
+  }
+fi
 command -v fnm      >/dev/null && eval "$(fnm env --use-on-cd)"
 command -v atuin    >/dev/null && eval "$(atuin init zsh)"
 command -v mise     >/dev/null && eval "$(mise activate zsh)"

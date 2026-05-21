@@ -6,9 +6,13 @@ USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
 
 ENABLE_CLAUDE_CODE="${ENABLE_CLAUDE_CODE:-1}"
 ENABLE_CODEX="${ENABLE_CODEX:-1}"
+ENABLE_ANTIGRAVITY="${ENABLE_ANTIGRAVITY:-1}"
 ENABLE_OLLAMA="${ENABLE_OLLAMA:-1}"
 ENABLE_LM_STUDIO="${ENABLE_LM_STUDIO:-0}"
 ENABLE_RTK="${ENABLE_RTK:-1}"
+ENABLE_CAVEMAN="${ENABLE_CAVEMAN:-1}"
+ENABLE_CAVEKIT="${ENABLE_CAVEKIT:-1}"
+ENABLE_CAVEMEM="${ENABLE_CAVEMEM:-1}"
 ENABLE_AGENTS="${ENABLE_AGENTS:-1}"
 ENABLE_AI_WAYBAR="${ENABLE_AI_WAYBAR:-1}"
 AGENTS_REPO="${AGENTS_REPO:-oornnery/.agents}"
@@ -58,6 +62,19 @@ if [[ $ENABLE_CODEX -eq 1 ]]; then
     fi
 fi
 
+if [[ $ENABLE_ANTIGRAVITY -eq 1 ]]; then
+    log::step "Antigravity CLI (Google AI agent CLI)"
+    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ antigravity >/dev/null 2>&1; then
+        log::skip "antigravity already installed"
+    else
+        log::info "Installing via official installer (antigravity.google)"
+        sudo -u "$USER_NAME" -H bash -c \
+            'curl -fsSL https://antigravity.google/cli/install.sh | bash' || \
+            log::warn "Antigravity install failed (check network / installer)"
+        log::ok "Antigravity installed (run 'antigravity --help' to verify)"
+    fi
+fi
+
 if [[ $ENABLE_OLLAMA -eq 1 ]]; then
     log::step "Ollama (local LLM runtime)"
     if pacman -Qq ollama >/dev/null 2>&1; then
@@ -98,6 +115,70 @@ if [[ $ENABLE_RTK -eq 1 ]]; then
         sudo -u "$USER_NAME" -H bash -c 'rtk init --global' || \
             log::warn "rtk init --global failed (rerun manually after PATH refresh)"
         log::ok "RTK installed (rerun 'rtk init --global' if PATH wasn't picked up)"
+    fi
+fi
+
+user_home="$(getent passwd "$USER_NAME" | cut -d: -f6)"
+
+# Helper: ensure Node.js + npm before installing any of the caveman tools.
+_ensure_node() {
+    if ! command -v node >/dev/null 2>&1; then
+        log::info "Installing nodejs + npm (Caveman ecosystem needs Node ≥18)"
+        sudo pacman -S --needed --noconfirm nodejs npm
+    fi
+}
+
+# ─── Caveman ecosystem (JuliusBrussee) ─────────────────────────────────────
+# Three complementary tools for token-efficient AI agent workflows:
+#   caveman → compress OUTPUT (what the agent says) via "caveman language"
+#   cavekit → spec-driven dev (SPEC.md + /ck:spec /ck:build /ck:check)
+#   cavemem → persistent memory across sessions (SQLite + MCP)
+
+if [[ $ENABLE_CAVEMAN -eq 1 ]]; then
+    log::step "Caveman (output token compression, ~65%)"
+    if [[ -d "$user_home/.claude/skills/caveman" ]]; then
+        log::skip "caveman skill already installed"
+    else
+        _ensure_node
+        log::info "Installing via official installer"
+        sudo -u "$USER_NAME" -H bash -c \
+            'curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash' \
+            || log::warn "caveman install failed (check network)"
+        log::ok "caveman installed — trigger with /caveman in Claude/Codex/Gemini"
+    fi
+fi
+
+if [[ $ENABLE_CAVEKIT -eq 1 ]]; then
+    log::step "Cavekit (spec-driven dev for Claude Code)"
+    if [[ -d "$user_home/.claude/plugins/cavekit" ]]; then
+        log::skip "cavekit plugin already installed"
+    else
+        _ensure_node
+        log::info "Installing via git clone → ~/.claude/plugins/cavekit"
+        sudo -u "$USER_NAME" -H bash -c '
+            mkdir -p "$HOME/.claude/plugins"
+            git clone --depth 1 https://github.com/JuliusBrussee/cavekit.git "$HOME/.claude/plugins/cavekit"
+        ' || log::warn "cavekit clone failed"
+        log::ok "cavekit installed — commands: /ck:spec /ck:build /ck:check"
+    fi
+fi
+
+if [[ $ENABLE_CAVEMEM -eq 1 ]]; then
+    log::step "Cavemem (cross-session persistent memory + MCP)"
+    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ cavemem >/dev/null 2>&1; then
+        log::skip "cavemem already installed"
+    else
+        _ensure_node
+        log::info "Installing globally via npm"
+        sudo -u "$USER_NAME" -H bash -c '
+            mkdir -p "$HOME/.local/npm"
+            npm config set prefix "$HOME/.local/npm"
+            npm install -g cavemem
+        ' || log::warn "cavemem npm install failed"
+        log::info "Registering Claude Code hooks + MCP"
+        sudo -u "$USER_NAME" -H bash -c 'cavemem install' \
+            || log::warn "cavemem install hooks failed — run 'cavemem install' manually"
+        log::ok "cavemem installed (viewer: cavemem viewer → http://localhost:37777)"
     fi
 fi
 

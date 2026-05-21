@@ -11,8 +11,8 @@ require_root
 
 log::banner "Dev" "Zsh + Oh My Zsh"
 
-log::info "Installing zsh"
-sudo pacman -S --needed --noconfirm zsh
+log::info "Installing zsh + atuin (shell history database)"
+sudo pacman -S --needed --noconfirm zsh atuin
 
 if ! id "$USER_NAME" >/dev/null 2>&1; then
     die "User $USER_NAME doesn't exist — run core/user.sh first"
@@ -48,8 +48,10 @@ custom_dir="$omz_dir/custom/plugins"
 
 declare -A plugins=(
     [zsh-autosuggestions]="https://github.com/zsh-users/zsh-autosuggestions"
-    [zsh-syntax-highlighting]="https://github.com/zsh-users/zsh-syntax-highlighting"
+    [fast-syntax-highlighting]="https://github.com/zdharma-continuum/fast-syntax-highlighting"
     [zsh-completions]="https://github.com/zsh-users/zsh-completions"
+    [zsh-history-substring-search]="https://github.com/zsh-users/zsh-history-substring-search"
+    [zsh-vi-mode]="https://github.com/jeffreytse/zsh-vi-mode"
     [fzf-tab]="https://github.com/Aloxaf/fzf-tab"
 )
 

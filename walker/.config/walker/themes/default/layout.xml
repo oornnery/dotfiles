@@ -26,6 +26,31 @@
             <property name="hexpand-set">true</property>
             <property name="hexpand">true</property>
             <property name="spacing">10</property>
+            <!-- Tab strip ABOVE the search input — standard launcher convention.
+                 Walker doesn't wire layout buttons to provider switching, so these
+                 are decorative-but-prominent chips that show the prefix per provider.
+                 Type the prefix character first to filter to that tab. -->
+            <child>
+              <object class="GtkBox" id="TabStrip">
+                <style>
+                  <class name="tab-strip"></class>
+                </style>
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <property name="halign">center</property>
+                <property name="margin-bottom">6</property>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-apps"/></style><property name="label">  Apps</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-calc"/></style><property name="label">  =  Calc</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-runner"/></style><property name="label">  &gt;  Run</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-clipboard"/></style><property name="label">  :  Clip</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-symbols"/></style><property name="label">  .  Sym</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-bluetooth"/></style><property name="label">󰂯  #  BT</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-files"/></style><property name="label">  /  Files</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-windows"/></style><property name="label">  $  Win</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-web"/></style><property name="label">  @  Web</property></object></child>
+                <child><object class="GtkLabel"><style><class name="tab-chip"/><class name="chip-pkg"/></style><property name="label">  ?  Pkg</property></object></child>
+              </object>
+            </child>
             <child>
               <object class="GtkBox" id="SearchContainer">
                 <style>

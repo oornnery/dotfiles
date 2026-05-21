@@ -38,14 +38,21 @@ anchor_right   = true
 "symbols" = 3
 
 # ─── Providers (sources) ───────────────────────────────────────────────────
-# Default = querido por padrão quando você digita sem prefix.
-# Empty   = exibido quando input vazio (lista inicial).
+# Default = queried on every keystroke (sem prefix). Mais providers = busca
+# mais ampla, mas resultados ficam mais ruidosos. Adicionei só os "leves":
+#   clipboard / symbols / playerctl / bluetooth — lookup em memória, fast.
+# Excluídos do default (mas acessíveis via prefix):
+#   files (filesystem walk), archlinuxpkgs (pacman DB query), bookmarks/todo.
 [providers]
 default = [
   "desktopapplications",   # apps (.desktop)
-  "calc",                   # calculator
-  "runner",                 # shell commands
-  "websearch",              # DuckDuckGo etc
+  "calc",                   # = calculator
+  "runner",                 # > shell commands
+  "websearch",              # @ DuckDuckGo etc
+  "clipboard",              # : clipboard history (cliphist)
+  "symbols",                # . unicode/emoji
+  "bluetooth",              # # paired devices
+  "playerctl",              # mpris players
 ]
 empty = ["desktopapplications"]
 ignore_preview = []
@@ -109,6 +116,10 @@ provider = "archlinuxpkgs"
 [[providers.prefixes]]
 prefix = "#"
 provider = "bluetooth"
+
+[[providers.prefixes]]
+prefix = "&"
+provider = "playerctl"
 
 # ─── Keybinds globais ──────────────────────────────────────────────────────
 [keybinds]

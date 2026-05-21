@@ -101,6 +101,37 @@ child:selected .item-box * {
   font-style: italic;
 }
 
+/* ───── Tab strip (provider chips above results) ────────────────────────────
+ * Decorative — shows what providers are available + their prefix shortcut.
+ * Not clickable (walker doesn't wire layout buttons to provider switching),
+ * but functions as a persistent cheat-sheet. */
+
+.tab-strip {
+  padding: 4px 0 8px 0;
+}
+
+.tab-chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;       /* pill */
+  background: alpha(@text, 0.08);
+  border: 1px solid alpha(@text, 0.12);
+  min-height: 0;
+}
+
+/* Per-provider colors — chip text + subtle bg tint */
+.chip-apps      { color: #cba6f7; background: alpha(#cba6f7, 0.12); border-color: alpha(#cba6f7, 0.25); }
+.chip-calc      { color: #f9e2af; background: alpha(#f9e2af, 0.12); border-color: alpha(#f9e2af, 0.25); }
+.chip-runner    { color: #f38ba8; background: alpha(#f38ba8, 0.12); border-color: alpha(#f38ba8, 0.25); }
+.chip-clipboard { color: #94e2d5; background: alpha(#94e2d5, 0.12); border-color: alpha(#94e2d5, 0.25); }
+.chip-symbols   { color: #fab387; background: alpha(#fab387, 0.12); border-color: alpha(#fab387, 0.25); }
+.chip-bluetooth { color: #89dceb; background: alpha(#89dceb, 0.12); border-color: alpha(#89dceb, 0.25); }
+.chip-files     { color: #a6e3a1; background: alpha(#a6e3a1, 0.12); border-color: alpha(#a6e3a1, 0.25); }
+.chip-windows   { color: #f5c2e7; background: alpha(#f5c2e7, 0.12); border-color: alpha(#f5c2e7, 0.25); }
+.chip-web       { color: #89b4fa; background: alpha(#89b4fa, 0.12); border-color: alpha(#89b4fa, 0.25); }
+.chip-pkg       { color: #74c7ec; background: alpha(#74c7ec, 0.12); border-color: alpha(#74c7ec, 0.25); }
+
 .keybinds {
   font-size: 11px;
   opacity: 0.55;

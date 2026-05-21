@@ -1,9 +1,7 @@
-/* themes/default/theme.css — overridden per active theme.
- * Esse fallback é catppuccin-mocha; `theme set <name>` copia o palette
- * de `themes/<name>/walker.css` aqui. */
+/* themes/tokyo-night/walker.css */
 
-@define-color text          #cdd6f4;
-@define-color base          #1e1e2e;
-@define-color border        rgba(245, 194, 231, 0.4);
-@define-color selected-text #f5c2e7;
-@define-color background    #1e1e2e;
+@define-color text          #c0caf5;
+@define-color base          #1a1b26;
+@define-color border        rgba(122, 162, 247, 0.4);
+@define-color selected-text #7aa2f7;
+@define-color background    #1a1b26;
