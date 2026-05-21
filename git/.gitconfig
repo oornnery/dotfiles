@@ -22,5 +22,21 @@
 
 [merge]
   tool = nvim
+
 [core]
 	quotepath = false
+	# delta as pager: syntax-highlighted diffs everywhere (git log/show/diff,
+	# blame, etc.). lazygit picks this up automatically too.
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true            # n/N to jump between hunks
+	light = false
+	line-numbers = true
+	syntax-theme = base16
+
+[pager]
+	delta = delta
