@@ -1,0 +1,92 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
+  "$schema_doc": "Mirrors Hyprland setup from this dotfiles repo. See windows/docs/cheatsheet.md.",
+
+  "app_specific_configuration_path": "$Env:USERPROFILE\\.config\\komorebi\\applications.yaml",
+
+  "border": true,
+  "border_width": 2,
+  "border_offset": -1,
+  "border_implementation": "Komorebi",
+  "border_style": "Rounded",
+  "border_colours": {
+    "single": "#cba6f7",
+    "stack":  "#94e2d5",
+    "monocle":"#f5c2e7",
+    "unfocused": "#11111b"
+  },
+
+  "active_window_border": true,
+  "auto_stack_by_category": true,
+  "auto_focus_follows_mouse": "Mouse",
+  "focus_follows_mouse": "Komorebi",
+  "mouse_follows_focus": true,
+  "transparency": true,
+  "transparency_alpha": 245,
+
+  "default_workspace_padding": 8,
+  "default_container_padding": 4,
+  "global_work_area_offset": { "left": 0, "top": 38, "right": 0, "bottom": 0 },
+  "$comment_offset": "top: 38 reserves vertical space for the yasb bar (matches Hyprland exclusive bar).",
+
+  "stackbar": {
+    "height": 32,
+    "mode": "OnStack",
+    "tabs": {
+      "background": "#11111b",
+      "focused_text": "#cdd6f4",
+      "unfocused_text": "#6c7086",
+      "width": 200
+    }
+  },
+
+  "cross_monitor_move_behaviour": "Insert",
+  "cross_boundary_behaviour": "Monitor",
+  "unmanaged_window_operation_behaviour": "Op",
+
+  "default_workspace": {
+    "$comment": "Applied to every workspace unless overridden in monitors[].workspaces[]",
+    "tile":             true,
+    "name":             "ws",
+    "layout":           "BSP",
+    "layout_flip":      null,
+    "workspace_padding": 8,
+    "container_padding": 4
+  },
+
+  "monitors": [
+    {
+      "$comment": "Primary — laptop eDP-1 analog: 10 workspaces matching Hyprland M+1..M+0",
+      "workspaces": [
+        { "name": "1" }, { "name": "2" }, { "name": "3" }, { "name": "4" }, { "name": "5" },
+        { "name": "6" }, { "name": "7" }, { "name": "8" }, { "name": "9" }, { "name": "10" }
+      ]
+    },
+    {
+      "$comment": "Secondary — HDMI external. Same workspace layout as monitor 1.",
+      "workspaces": [
+        { "name": "1" }, { "name": "2" }, { "name": "3" }, { "name": "4" }, { "name": "5" },
+        { "name": "6" }, { "name": "7" }, { "name": "8" }, { "name": "9" }, { "name": "10" }
+      ]
+    }
+  ],
+
+  "$rules": "Per-app rules live in komorebi/applications.yaml. Common cases:",
+  "ignore_rules": [
+    { "kind": "Class", "id": "TaskListThumbnailWnd" },
+    { "kind": "Class", "id": "Windows.UI.Core.CoreWindow" },
+    { "kind": "Class", "id": "tooltips_class32" }
+  ],
+  "float_rules": [
+    { "kind": "Title", "id": "Settings" },
+    { "kind": "Title", "id": "Calculator" },
+    { "kind": "Title", "matching_strategy": "StartsWith", "id": "Open " },
+    { "kind": "Title", "matching_strategy": "StartsWith", "id": "Save " },
+    { "kind": "Title", "matching_strategy": "Contains", "id": "Sign in" },
+    { "kind": "Title", "matching_strategy": "Contains", "id": "Picture-in-Picture" },
+    { "kind": "Exe", "id": "snippingtool.exe" },
+    { "kind": "Exe", "id": "ScreenClippingHost.exe" },
+    { "kind": "Exe", "id": "ShareX.exe" },
+    { "kind": "Exe", "id": "Flow.Launcher.exe" }
+  ]
+}

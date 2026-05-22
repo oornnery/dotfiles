@@ -1,0 +1,162 @@
+/* yasb styles.css — mirrors AGS bar visual language exactly.
+ *
+ * Theme palette (catppuccin-mocha by default — matches AGS theme.scss).
+ * To change theme: edit the variables block below or run a sync script
+ * from windows/scripts/win.ps1 that mirrors the `theme` helper on Linux.
+ */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "Cascadia Code", "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #cdd6f4;
+  font-weight: 600;
+}
+
+/* ─── Theme palette (catppuccin-mocha) ─────────────────────────────────── */
+/* For other themes, replace these values:
+ *   tokyo-night:    bg=#1a1b26, bg-alt=#24283b, fg=#c0caf5, accent=#7aa2f7
+ *   gruvbox:        bg=#282828, bg-alt=#3c3836, fg=#ebdbb2, accent=#fe8019
+ *   nord:           bg=#2e3440, bg-alt=#3b4252, fg=#d8dee9, accent=#88c0d0
+ *   catppuccin-latte (light): bg=#eff1f5, bg-alt=#e6e9ef, fg=#4c4f69, accent=#ea76cb
+ */
+
+/* ─── Bar wrapper ──────────────────────────────────────────────────────── */
+
+.yasb-bar {
+  background-color: rgba(17, 17, 27, 0.74);
+  border-radius: 0;
+  border-bottom: 1px solid rgba(245, 194, 231, 0.18);
+}
+
+/* Container groups — transparent so only pills show. */
+.container-left, .container-center, .container-right {
+  background-color: transparent;
+}
+
+/* ─── Pills (shared base) — every widget gets the same look ─────────────── */
+
+.widget {
+  background-color: rgba(49, 50, 68, 0.7);
+  padding: 2px 8px;
+  margin: 2px 1px;
+  border-radius: 6px;
+  min-height: 18px;
+}
+
+.widget:hover {
+  background-color: rgba(49, 50, 68, 0.95);
+}
+
+.widget .icon { margin-right: 4px; font-size: 13px; }
+.widget .label { font-weight: 600; }
+
+/* ─── Per-module accent colors (mirrors AGS color assignments) ─────────── */
+
+.home-widget        { color: #f5c2e7; }   /* accent */
+.clock-widget       { color: #cba6f7; }   /* mauve  */
+.media-widget       { color: #a6e3a1; }   /* green  */
+.github-widget      { color: #cba6f7; }   /* mauve  */
+.update-widget      { color: #74c7ec; }   /* sapphire */
+.cpu-widget         { color: #94e2d5; }   /* teal   */
+.memory-widget      { color: #74c7ec; }   /* sapphire */
+.gpu-widget         { color: #89dceb; }   /* sky    */
+.cpu-temp-widget    { color: #fab387; }   /* peach  */
+.wifi-widget        { color: #89b4fa; }   /* blue   */
+.bluetooth-widget   { color: #89dceb; }   /* sky    */
+.volume-widget      { color: #f9e2af; }   /* yellow */
+.brightness-widget  { color: #fab387; }   /* peach  */
+.battery-widget     { color: #a6e3a1; }   /* green  */
+.language-widget    { color: #94e2d5; }   /* teal   */
+.power-menu-widget  { color: #f38ba8; }   /* red    */
+
+/* Power button — red on hover (matches AGS .power:hover). */
+.power-menu-widget:hover {
+  background-color: #f38ba8;
+  color: #1e1e2e;
+}
+
+/* ─── Komorebi Workspaces ──────────────────────────────────────────────── */
+
+.komorebi-workspaces .ws-btn {
+  padding: 0 8px;
+  margin: 0 2px;
+  background-color: rgba(24, 24, 37, 0.55);
+  border: 1px solid rgba(108, 112, 134, 0.25);
+  color: #6c7086;
+  border-radius: 4px;
+  min-width: 16px;
+  min-height: 18px;
+  font-weight: 700;
+}
+
+.komorebi-workspaces .ws-btn.active {
+  color: #1e1e2e;
+  background-color: #cba6f7;
+  border-color: #cba6f7;
+}
+
+.komorebi-workspaces .ws-btn:hover:not(.active) {
+  background-color: rgba(203, 166, 247, 0.18);
+  border-color: rgba(203, 166, 247, 0.5);
+  color: #cba6f7;
+}
+
+/* ─── Media (Now Playing controls) ─────────────────────────────────────── */
+
+.media-widget .btn {
+  background-color: rgba(24, 24, 37, 0.55);
+  border: 1px solid rgba(108, 112, 134, 0.25);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 0 1px;
+  min-width: 22px;
+  min-height: 18px;
+  color: #cdd6f4;
+}
+
+.media-widget .btn:hover {
+  background-color: rgba(203, 166, 247, 0.2);
+  border-color: rgba(203, 166, 247, 0.5);
+  color: #cba6f7;
+}
+
+/* ─── Clock — wider, centered ──────────────────────────────────────────── */
+
+.clock-widget {
+  min-width: 160px;
+  padding: 2px 12px;
+}
+
+/* ─── Power menu popup ─────────────────────────────────────────────────── */
+
+.power-menu-popup {
+  background-color: #181825;
+  border: 1px solid rgba(205, 214, 244, 0.10);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.power-menu-popup .button {
+  background-color: rgba(30, 30, 46, 0.7);
+  border: 1px solid rgba(205, 214, 244, 0.12);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #cdd6f4;
+  margin: 4px;
+}
+
+.power-menu-popup .button:hover {
+  background-color: rgba(245, 194, 231, 0.2);
+  border-color: #f5c2e7;
+  color: #f5c2e7;
+}
+
+/* ─── Tooltip ─────────────────────────────────────────────────────────── */
+
+QToolTip {
+  background-color: #181825;
+  color: #cdd6f4;
+  border: 1px solid rgba(205, 214, 244, 0.12);
+  padding: 6px 10px;
+  border-radius: 6px;
+}

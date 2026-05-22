@@ -1,0 +1,120 @@
+# whkdrc — keybindings for komorebi (mirrors Hyprland bindings from this repo).
+#
+# Windows OS reserves many `win+*` chords (Start menu, Cortana, dictation,
+# emoji panel, etc.), so we use ALT as the primary modifier — same as i3
+# convention. ALT here ≡ M (Super) on the Hyprland side.
+#
+# Mods:
+#   alt          ≡ M  (Super)
+#   alt + shift  ≡ MS
+#   alt + ctrl   ≡ MC
+#   alt + ctrl + shift ≡ MCA
+#   shift + alt  ≡ MSA
+#
+# Reload after edits: `Stop-Process -Name whkd ; whkd` in PowerShell.
+
+.shell pwsh
+
+# ─── Apps ──────────────────────────────────────────────────────────────────
+alt + return        : wt.exe                                  # terminal (Windows Terminal)
+alt + e             : explorer.exe                            # file manager
+alt + r             : flow-launcher.exe                       # launcher (Flow Launcher = walker analog)
+alt + b             : firefox.exe                             # browser
+alt + l             : rundll32.exe user32.dll,LockWorkStation # lock screen
+alt + shift + p     : powershell.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\power-menu.ps1"
+alt + m             : komorebic stop                          # exit komorebi (analog to "exit Hyprland")
+alt + oem_3         : pwsh.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\scratchpad.ps1"  # M+grave
+
+# ─── Window management ─────────────────────────────────────────────────────
+alt + shift + q     : komorebic close
+alt + t             : komorebic toggle-float
+alt + p             : komorebic toggle-monocle                # pseudo / monocle
+alt + j             : komorebic toggle-split-orientation
+alt + f             : komorebic toggle-maximize               # fullscreen
+
+# Focus direction
+alt + left          : komorebic focus left
+alt + right         : komorebic focus right
+alt + up            : komorebic focus up
+alt + down          : komorebic focus down
+alt + h             : komorebic focus left
+alt + l             : komorebic focus right
+alt + k             : komorebic focus up
+alt + j             : komorebic focus down
+
+# Move window
+alt + shift + left  : komorebic move left
+alt + shift + right : komorebic move right
+alt + shift + up    : komorebic move up
+alt + shift + down  : komorebic move down
+
+# Cycle monitor (analog to M+Tab)
+alt + tab           : komorebic cycle-monitor next
+alt + shift + tab   : komorebic cycle-monitor previous
+
+# ─── Workspaces ────────────────────────────────────────────────────────────
+alt + 1             : komorebic focus-workspace 0
+alt + 2             : komorebic focus-workspace 1
+alt + 3             : komorebic focus-workspace 2
+alt + 4             : komorebic focus-workspace 3
+alt + 5             : komorebic focus-workspace 4
+alt + 6             : komorebic focus-workspace 5
+alt + 7             : komorebic focus-workspace 6
+alt + 8             : komorebic focus-workspace 7
+alt + 9             : komorebic focus-workspace 8
+alt + 0             : komorebic focus-workspace 9
+
+alt + shift + 1     : komorebic move-to-workspace 0
+alt + shift + 2     : komorebic move-to-workspace 1
+alt + shift + 3     : komorebic move-to-workspace 2
+alt + shift + 4     : komorebic move-to-workspace 3
+alt + shift + 5     : komorebic move-to-workspace 4
+alt + shift + 6     : komorebic move-to-workspace 5
+alt + shift + 7     : komorebic move-to-workspace 6
+alt + shift + 8     : komorebic move-to-workspace 7
+alt + shift + 9     : komorebic move-to-workspace 8
+alt + shift + 0     : komorebic move-to-workspace 9
+
+# Mouse-wheel workspace nav
+alt + scroll_up     : komorebic cycle-workspace previous
+alt + scroll_down   : komorebic cycle-workspace next
+
+# Layout cycling (BSP / Rows / Columns / Grid / VerticalStack / HorizontalStack)
+alt + ctrl + alt + l : komorebic cycle-layout next             # MCA+L analog
+
+# Stack — komorebi's equivalent of "special workspace" / scratchpad
+alt + s             : komorebic toggle-workspace-layer
+alt + shift + s     : komorebic send-to-named-workspace scratch
+
+# ─── Screenshots ──────────────────────────────────────────────────────────
+# Built-in Win+Shift+S is the default region screenshot. Keep that.
+# ShareX shortcuts (install: scoop install sharex) — if installed:
+ctrl + alt + 3      : C:\Program Files\ShareX\ShareX.exe -RectangleRegion
+ctrl + alt + 4      : C:\Program Files\ShareX\ShareX.exe -CaptureFullscreen
+alt + shift + f     : C:\Program Files\ShareX\ShareX.exe -RectangleRegion -Clipboard
+
+# ─── Clipboard / Pickers ──────────────────────────────────────────────────
+alt + v             : flow-launcher.exe -open "history://clipboard"   # walker -m clipboard analog
+alt + shift + c     : pwsh.exe -NoProfile -Command "Get-Clipboard"     # placeholder color picker
+alt + oem_period    : "C:\\Program Files\\PowerToys\\PowerToys.exe" --activate Awake  # emoji: use Win+. (built-in)
+
+# ─── TUIs floating ────────────────────────────────────────────────────────
+alt + shift + g     : wt.exe -p "PowerShell" lazygit
+alt + shift + d     : wt.exe -p "PowerShell" lazydocker
+alt + shift + t     : wt.exe -p "PowerShell" btop
+alt + shift + w     : wt.exe -p "PowerShell" netsh wlan show interfaces
+
+# ─── LLM picker (M+I) ─────────────────────────────────────────────────────
+alt + i             : wt.exe -p "PowerShell" pwsh.exe -NoProfile -Command "claude"
+
+# ─── Helpers ──────────────────────────────────────────────────────────────
+alt + shift + h     : pwsh.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\cheatsheet.ps1"
+alt + n             : code.exe "$Env:USERPROFILE\\obsidian\\daily.md"   # obsidian-note today analog
+alt + backslash     : pwsh.exe -NoProfile -Command "yasb-cli sidebar toggle"  # ags toggle sidebar analog
+
+# ─── Notifications (Windows Action Center is the equivalent) ──────────────
+# Win+A opens Action Center — keep that as is (OS-level binding).
+
+# ─── Multimedia ───────────────────────────────────────────────────────────
+# Volume / mute / brightness / media keys all handled by Windows OEM keys.
+# Keep OS defaults — komorebi/whkd don't intercept them.

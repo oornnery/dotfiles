@@ -1,0 +1,281 @@
+# yasb config — bar mirroring AGS Bar.tsx exactly.
+#
+# Layout (matches astal/.config/ags/widget/Bar.tsx):
+#   LEFT:   home (launcher) · komorebi_workspaces · media
+#   CENTER: clock (calendar popup on click)
+#   RIGHT:  github · update · cpu · memory · gpu · cpu_temp · wifi ·
+#           bluetooth · volume · brightness · battery · language · power_menu
+
+watch_stylesheet: true
+watch_config: true
+debug: false
+komorebi:
+  start_command: "komorebic start --whkd --bar"
+  stop_command:  "komorebic stop"
+  reload_command: "komorebic reload-configuration"
+
+bars:
+  yasb-bar:
+    enabled: true
+    screens: ['*']
+    class_name: "yasb-bar"
+    alignment:
+      position: "top"
+      center: false
+    blur_effect:
+      enabled: true
+      acrylic: false
+      dark_mode: true
+      round_corners: true
+      border_color: "System"
+    window_flags:
+      always_on_top: true
+      windows_app_bar: true
+    dimensions:
+      width: "100%"
+      height: 30
+    padding:
+      top: 4
+      left: 8
+      bottom: 0
+      right: 8
+    widgets:
+      left:
+        - home
+        - komorebi_workspaces
+        - komorebi_active_layout
+        - media
+      center:
+        - clock
+      right:
+        - github
+        - update
+        - cpu
+        - memory
+        - gpu
+        - cpu_temp
+        - wifi
+        - bluetooth
+        - volume
+        - brightness
+        - battery
+        - language
+        - power_menu
+
+widgets:
+  # ─── LEFT ────────────────────────────────────────────────────────────────
+
+  home:
+    type: "yasb.home.HomeWidget"
+    options:
+      label: "󰃗"  # nf-md-arch (Arch-like glyph; pick a Windows-y one too)
+      menu_list:
+        - { title: "User folder", path: "~" }
+        - { title: "Documents",   path: "~/Documents" }
+        - { title: "Downloads",   path: "~/Downloads" }
+        - { title: "Pictures",    path: "~/Pictures" }
+
+  komorebi_workspaces:
+    type: "yasb.komorebi.workspaces.WorkspaceWidget"
+    options:
+      label_offline: "Komorebi offline"
+      label_workspace_btn: "{name}"
+      label_workspace_active_btn: "{name}"
+      label_default_name: "{index}"
+      label_zero_index: false
+      hide_empty_workspaces: false
+      hide_if_offline: true
+
+  komorebi_active_layout:
+    type: "yasb.komorebi.active_layout.ActiveLayoutWidget"
+    options:
+      hide_if_offline: true
+      label: "{icon}"
+      layouts: ['bsp', 'columns', 'rows', 'grid', 'vertical_stack', 'horizontal_stack']
+      layout_icons:
+        bsp: "BSP"
+        columns: "COLS"
+        rows: "ROWS"
+        grid: "GRID"
+        vertical_stack: "VSTACK"
+        horizontal_stack: "HSTACK"
+
+  media:
+    type: "yasb.media.MediaWidget"
+    options:
+      label: "{title} - {artist}"
+      label_alt: "{title}"
+      max_field_size: { label: 32, label_alt: 24 }
+      show_thumbnail: true
+      controls_only: false
+      controls_left: true
+      thumbnail_alpha: 80
+      thumbnail_padding: 6
+      thumbnail_corner_radius: 4
+      icons:
+        prev_track: ""
+        next_track: ""
+        play:       ""
+        pause:      ""
+
+  # ─── CENTER ─────────────────────────────────────────────────────────────
+
+  clock:
+    type: "yasb.clock.ClockWidget"
+    options:
+      label: "{%a %d %b · %H:%M}"
+      label_alt: "{%A, %B %d, %Y · %H:%M:%S · week %V}"
+      timezones: []
+      locale: { name: "pt_BR", time: "%H:%M", date: "%a %d %b" }
+
+  # ─── RIGHT ──────────────────────────────────────────────────────────────
+
+  github:
+    type: "yasb.github.GithubWidget"
+    options:
+      label: "{icon} {data}"
+      icons: { issue: "", pull_request: "", notification: "", github_logo: "" }
+      max_notification: 20
+      tooltip: true
+      only_unread: true
+      max_field_size: 100
+
+  update:
+    type: "yasb.update_check.UpdateCheckWidget"
+    options:
+      windows_update:
+        enabled: true
+        label: "󰝮 {count}"
+        interval: 1440  # check daily
+      winget_update:
+        enabled: true
+        label: "󰝸 {count}"
+        interval: 240   # check every 4h
+
+  cpu:
+    type: "yasb.cpu.CpuWidget"
+    options:
+      label: "󰵤 {info[percent][total]}%"
+      label_alt: "󰵤 {info[percent][1]}% {info[percent][2]}% {info[percent][3]}% {info[percent][4]}%"
+      update_interval: 2000
+
+  memory:
+    type: "yasb.memory.MemoryWidget"
+    options:
+      label: "󰆋 {virtual_mem_percent}%"
+      label_alt: "󰆋 {virtual_mem_avail:.1f}/{virtual_mem_total:.1f} GiB"
+      update_interval: 5000
+
+  gpu:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "󰊦 {data}%"
+      label_alt: "GPU usage"
+      exec_options:
+        run_cmd: "powershell -NoProfile -Command \"(Get-Counter '\\GPU Engine(*engtype_3D)\\Utilization Percentage').CounterSamples | Where-Object CookedValue | Sort-Object CookedValue -Descending | Select-Object -First 1 -ExpandProperty CookedValue\""
+        run_interval: 4000
+        return_format: "string"
+
+  cpu_temp:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "󰲏 {data}°"
+      label_alt: "CPU temp"
+      exec_options:
+        run_cmd: "powershell -NoProfile -Command \"$t = (Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace 'root/wmi' -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty CurrentTemperature); if ($t) { [math]::Round(($t / 10) - 273.15) }\""
+        run_interval: 5000
+        return_format: "string"
+
+  wifi:
+    type: "yasb.wifi.WifiWidget"
+    options:
+      label: "{wifi_icon} {wifi_name}"
+      label_alt: "{wifi_name} ({wifi_strength}%)"
+      wifi_icons:
+        - "󰤯"  # signal
+        - "󰤟"
+        - "󰤢"
+        - "󰤥"
+        - "󰤨"
+
+  bluetooth:
+    type: "yasb.bluetooth.BluetoothWidget"
+    options:
+      label: "󰂯"
+      label_alt: "{device_name}"
+      label_no_device: "󰂲"
+      label_device_separator: ", "
+      max_length: 14
+      max_length_ellipsis: "…"
+      icons:
+        bluetooth_on:  "󰂯"
+        bluetooth_off: "󰂲"
+        bluetooth_connected: "󰂱"
+
+  volume:
+    type: "yasb.volume.VolumeWidget"
+    options:
+      label: "{icon} {level}"
+      label_alt: "{volume[level]}%"
+      tooltip: true
+      scroll_step: 5
+      icons:
+        normal:  "󰕾"
+        low:     "󰕿"
+        medium:  "󰖀"
+        high:    "󰖁"
+        muted:   "󰕽"
+
+  brightness:
+    type: "yasb.brightness.BrightnessWidget"
+    options:
+      label: "󰃟 {brightness_level}"
+      tooltip: true
+      scroll_step: 5
+      hide_if_no_brightness: true
+
+  battery:
+    type: "yasb.battery.BatteryWidget"
+    options:
+      label: "{icon} {percent}%"
+      label_alt: "{percent}% · {time_remaining}"
+      tooltip: true
+      charging_options:
+        icon_format: "{icon} "
+      status_thresholds:
+        critical: 10
+        low:      25
+        medium:   50
+        high:     75
+        full:     100
+      status_icons:
+        icon_charging: "󰂄"
+        icon_critical: "󰁺"
+        icon_low:      "󰁽"
+        icon_medium:   "󰁿"
+        icon_high:     "󰂁"
+        icon_full:     "󰂃"
+
+  language:
+    type: "yasb.language.LanguageWidget"
+    options:
+      label: "󰋌 {lang[language_code]}"
+      label_alt: "{lang[full_name]}"
+      update_interval: 5
+
+  power_menu:
+    type: "yasb.power_menu.PowerMenuWidget"
+    options:
+      label: ""
+      uptime: true
+      blur: true
+      blur_background: true
+      animation_duration: 200
+      buttons:
+        lock:      ["Lock",      ["", "Win+L"]]
+        signout:   ["Sign out",  [""]]
+        sleep:     ["Sleep",     [""]]
+        shutdown:  ["Shutdown",  [""]]
+        restart:   ["Restart",   [""]]
+        hibernate: ["Hibernate", [""]]
+        cancel:    ["Cancel",    [""]]
