@@ -18,7 +18,8 @@
 # ─── Apps ──────────────────────────────────────────────────────────────────
 alt + return        : wt.exe                                  # terminal (Windows Terminal)
 alt + e             : explorer.exe                            # file manager
-alt + r             : flow-launcher.exe                       # launcher (Flow Launcher = walker analog)
+alt + r             : PowerToys.exe --activate PowerToysRun   # launcher (PowerToys Run = walker analog)
+alt + space         : PowerToys.exe --activate PowerToysRun   # alt entry (matches Linux M+space)
 alt + b             : firefox.exe                             # browser
 alt + l             : rundll32.exe user32.dll,LockWorkStation # lock screen
 alt + shift + p     : powershell.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\power-menu.ps1"
@@ -93,10 +94,14 @@ ctrl + alt + 3      : C:\Program Files\ShareX\ShareX.exe -RectangleRegion
 ctrl + alt + 4      : C:\Program Files\ShareX\ShareX.exe -CaptureFullscreen
 alt + shift + f     : C:\Program Files\ShareX\ShareX.exe -RectangleRegion -Clipboard
 
-# ─── Clipboard / Pickers ──────────────────────────────────────────────────
-alt + v             : flow-launcher.exe -open "history://clipboard"   # walker -m clipboard analog
-alt + shift + c     : pwsh.exe -NoProfile -Command "Get-Clipboard"     # placeholder color picker
-alt + oem_period    : "C:\\Program Files\\PowerToys\\PowerToys.exe" --activate Awake  # emoji: use Win+. (built-in)
+# ─── Clipboard / Pickers (PowerToys provides these built-in) ─────────────
+# Win+V        — clipboard history (Windows native; PowerToys not needed)
+# Win+.        — emoji panel (Windows native)
+# Win+Shift+T  — text extractor (PowerToys, OCR)
+# Win+Shift+C  — color picker (PowerToys)
+# Win+Shift+/  — Run / shortcut guide (PowerToys)
+# Alt+R / Alt+Space — PowerToys Run launcher (mapped above)
+alt + shift + c     : PowerToys.exe --activate ColorPicker     # color picker (PowerToys)
 
 # ─── TUIs floating ────────────────────────────────────────────────────────
 alt + shift + g     : wt.exe -p "PowerShell" lazygit
@@ -110,7 +115,8 @@ alt + i             : wt.exe -p "PowerShell" pwsh.exe -NoProfile -Command "claud
 # ─── Helpers ──────────────────────────────────────────────────────────────
 alt + shift + h     : pwsh.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\cheatsheet.ps1"
 alt + n             : code.exe "$Env:USERPROFILE\\obsidian\\daily.md"   # obsidian-note today analog
-alt + backslash     : pwsh.exe -NoProfile -Command "yasb-cli sidebar toggle"  # ags toggle sidebar analog
+# Alt+\ → sidebar: PowerToys doesn't have one. Closest is "FancyZones overlay"
+# or open Action Center via Win+A — leaving unbound on Windows.
 
 # ─── Notifications (Windows Action Center is the equivalent) ──────────────
 # Win+A opens Action Center — keep that as is (OS-level binding).
