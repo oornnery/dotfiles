@@ -26,6 +26,7 @@ set encoding=utf-8
 set number relativenumber
 set cursorline
 set ruler showcmd
+set noshowmode
 set laststatus=2
 set scrolloff=8
 set sidescrolloff=8
@@ -91,14 +92,74 @@ set ttyfast
 set spelllang=en_us,pt_br
 
 " Statusline: native, no plugin ----------------------------------------------
-set statusline=
-set statusline+=\ %f
-set statusline+=\ %m%r%h%w
-set statusline+=%=
-set statusline+=\ %{&filetype==#''?'noft':&filetype}
-set statusline+=\ %{&fileencoding==#''?&encoding:&fileencoding}
-set statusline+=\ %l:%c
-set statusline+=\ %p%%
+function! DotfilesStatusMode() abort
+  let l:modes = {
+        \ 'n': 'NORMAL',
+        \ 'no': 'OP',
+        \ 'v': 'VISUAL',
+        \ 'V': 'V-LINE',
+        \ "\<C-v>": 'V-BLOCK',
+        \ 's': 'SELECT',
+        \ 'S': 'S-LINE',
+        \ "\<C-s>": 'S-BLOCK',
+        \ 'i': 'INSERT',
+        \ 'R': 'REPLACE',
+        \ 'c': 'COMMAND',
+        \ 't': 'TERMINAL',
+        \ }
+  return get(l:modes, mode(), toupper(mode()))
+endfunction
+
+function! DotfilesStatusText(text) abort
+  return substitute(printf('%s', a:text), '%', '%%', 'g')
+endfunction
+
+function! DotfilesStatusFile() abort
+  let l:file = expand('%:~:.')
+  return empty(l:file) ? '[No Name]' : l:file
+endfunction
+
+function! DotfilesStatusFlags() abort
+  let l:flags = ''
+  let l:flags .= &modified ? '[+]' : ''
+  let l:flags .= &readonly ? '[RO]' : ''
+  let l:flags .= &buftype ==# 'help' ? '[help]' : ''
+  let l:flags .= exists('&previewwindow') && &previewwindow ? '[preview]' : ''
+  return empty(l:flags) ? '' : ' ' . DotfilesStatusText(l:flags) . ' '
+endfunction
+
+function! DotfilesStatusFiletype() abort
+  return empty(&filetype) ? 'noft' : &filetype
+endfunction
+
+function! DotfilesStatusEncoding() abort
+  return empty(&fileencoding) ? &encoding : &fileencoding
+endfunction
+
+function! DotfilesStatusPosition() abort
+  return line('.') . ':' . col('.')
+endfunction
+
+function! DotfilesStatusPercent() abort
+  return printf('%d%%', line('.') * 100 / line('$'))
+endfunction
+
+highlight default link DotfilesStatusMode StatusLine
+highlight default link DotfilesStatusFile StatusLine
+highlight default link DotfilesStatusInfo StatusLine
+highlight default link DotfilesStatusMuted StatusLineNC
+highlight default link DotfilesStatusAccent StatusLine
+
+let &statusline = join([
+      \ '%#DotfilesStatusMode# %{DotfilesStatusText(DotfilesStatusMode())} ',
+      \ '%#DotfilesStatusFile# %{DotfilesStatusText(DotfilesStatusFile())} ',
+      \ '%#DotfilesStatusMuted#%{DotfilesStatusFlags()}',
+      \ '%=',
+      \ '%#DotfilesStatusInfo# %{DotfilesStatusText(DotfilesStatusFiletype())} ',
+      \ '%#DotfilesStatusFile# %{DotfilesStatusText(DotfilesStatusEncoding())} ',
+      \ '%#DotfilesStatusMode# %{DotfilesStatusText(DotfilesStatusPosition())} ',
+      \ '%#DotfilesStatusAccent# %{DotfilesStatusText(DotfilesStatusPercent())} ',
+      \ ], '')
 
 " Active theme drop-in written by the `theme` command.
 " It is loaded after the statusline so it can override status colors.
@@ -112,6 +173,8 @@ command! -nargs=1 Search execute 'silent! vimgrep /' . escape(<q-args>, '/\') . 
 command! Term botright split | resize 14 | terminal
 command! MkSession mksession! .session.vim
 command! LoadSession source .session.vim
+command! -nargs=? Helpme call <SID>OpenHelpme(<q-args> ==# '' ? 'vim' : <q-args>)
+command! -nargs=? Cheatsheet call <SID>OpenHelpme(<q-args> ==# '' ? 'vim' : <q-args>)
 
 " Keymaps ---------------------------------------------------------------------
 " Files / write / quit
@@ -152,6 +215,7 @@ nnoremap <leader>f gg=G``
 xnoremap <leader>f =
 nnoremap <leader>tw :setlocal wrap!<CR>
 nnoremap <leader>ts :setlocal spell!<CR>
+nnoremap <leader>? :Cheatsheet vim<CR>
 
 " Terminal
 nnoremap <leader>tt :Term<CR>
@@ -165,6 +229,21 @@ function! s:TrimTrailingWhitespace() abort
   let l:view = winsaveview()
   silent! keeppatterns %s/\s\+$//e
   call winrestview(l:view)
+endfunction
+
+function! s:OpenHelpme(topic) abort
+  let l:helper = expand('~/.local/bin/helpme')
+  if !executable(l:helper)
+    let l:helper = 'helpme'
+  endif
+
+  tabnew
+  setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted filetype=markdown
+  silent execute 'read !' . shellescape(l:helper) . ' --no-pager ' . shellescape(a:topic)
+  silent! 1delete _
+  setlocal nomodifiable
+  nnoremap <silent> <buffer> q :close<CR>
+  normal! gg
 endfunction
 
 function! s:CommentParts() abort

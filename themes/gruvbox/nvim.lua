@@ -1,8 +1,8 @@
-return require("theme_apply").setup({
+return {
   name = "gruvbox",
   background = "dark",
-  colorscheme = "habamax",
-  lazyvim_colorscheme = "habamax",
+  colorscheme = "dotfiles",
+  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#282828",
     fg = "#ebdbb2",
@@ -14,5 +14,9 @@ return require("theme_apply").setup({
     yellow = "#fabd2f",
     red = "#fb4934",
     blue = "#83a598",
+    green = "#b8bb26",
+    cyan = "#8ec07c",
+    magenta = "#d3869b",
+    orange = "#fe8019",
   },
-})
+}

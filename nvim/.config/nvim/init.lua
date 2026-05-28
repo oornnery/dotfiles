@@ -128,19 +128,10 @@ opt.spelllang = { 'en_us', 'pt_br' }
 -- Colors ---------------------------------------------------------------------
 pcall(vim.cmd.colorscheme, 'habamax')
 
--- Statusline: native, no plugin ---------------------------------------------
-opt.statusline = table.concat({
-  ' %f',
-  ' %m%r%h%w',
-  '%=',
-  ' %{&filetype ==# "" ? "noft" : &filetype}',
-  ' %{&fileencoding ==# "" ? &encoding : &fileencoding}',
-  ' %l:%c',
-  ' %p%% ',
-})
-
 -- Active theme drop-in written by the `theme` command.
 pcall(require, 'theme')
+pcall(function() require('statusline').setup() end)
+pcall(function() require('cheatsheet').setup() end)
 
 -- Helpers --------------------------------------------------------------------
 local map = vim.keymap.set

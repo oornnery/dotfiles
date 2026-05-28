@@ -17,6 +17,11 @@ highlight! VertSplit guifg=#403d52 guibg=#191724
 highlight! WinSeparator guifg=#403d52 guibg=#191724
 highlight! StatusLine guifg=#191724 guibg=#c4a7e7 gui=bold cterm=bold
 highlight! StatusLineNC guifg=#6e6a86 guibg=#26233a
+highlight! DotfilesStatusMode guifg=#191724 guibg=#c4a7e7 gui=bold cterm=bold
+highlight! DotfilesStatusFile guifg=#e0def4 guibg=#26233a
+highlight! DotfilesStatusInfo guifg=#191724 guibg=#9ccfd8 gui=bold cterm=bold
+highlight! DotfilesStatusMuted guifg=#6e6a86 guibg=#26233a
+highlight! DotfilesStatusAccent guifg=#191724 guibg=#f6c177 gui=bold cterm=bold
 highlight! Pmenu guifg=#e0def4 guibg=#26233a
 highlight! PmenuSel guifg=#191724 guibg=#c4a7e7 gui=bold cterm=bold
 highlight! Visual guibg=#403d52

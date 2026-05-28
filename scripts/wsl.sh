@@ -354,13 +354,14 @@ locale-gen
 echo "LANG=$LOCALE" > /etc/locale.conf
 
 log "Configure /etc/wsl.conf"
-if [[ -e /etc/wsl.conf && ! -L /etc/wsl.conf ]]; then
+if [[ -L /etc/wsl.conf ]]; then
+  rm -f /etc/wsl.conf
+elif [[ -e /etc/wsl.conf ]]; then
   cp -a /etc/wsl.conf "/etc/wsl.conf.bak.$(date +%Y%m%d%H%M%S)"
 fi
 
 if [[ -f "$DOTFILES_DIR/wsl/etc/wsl.conf" && "$USERNAME" == "oornnery" ]]; then
-  stow -d "$DOTFILES_DIR" -t / -R wsl \
-    || install -D -m 0644 "$DOTFILES_DIR/wsl/etc/wsl.conf" /etc/wsl.conf
+  install -D -m 0644 "$DOTFILES_DIR/wsl/etc/wsl.conf" /etc/wsl.conf
 else
   cat > /etc/wsl.conf <<EOF
 [boot]
@@ -409,19 +410,22 @@ fi
 run_user atuin import auto 2>/dev/null || true
 
 # -----------------------------------------------------------------------------
-# Stow dotfiles
+# Manual dotfiles instructions
 # -----------------------------------------------------------------------------
 
-log "Stow user dotfiles"
+log "Prepare manual dotfiles instructions"
 
 # Keep WSL stow scope terminal-only.
 # Do not stow desktop/WM packages here:
 # - fabric is a fabric-shell config, not useful in plain WSL
-# - bin contains many Hyprland/Waybar/Wofi/Mako helper scripts
 # - alacritty, hyprland, waybar, wofi, walker, mako and astal are desktop config
-STOW_PKGS=(
-  bash
+CORE_STOW_PKGS=(
+  bin
   zsh
+)
+
+OPTIONAL_STOW_PKGS=(
+  bash
   tmux
   git
   editor
@@ -430,69 +434,39 @@ STOW_PKGS=(
 # VIM_DISTRO is configured at the top of this file.
 # It chooses which Vim config package gets linked.
 case "$VIM_DISTRO" in
-  native|plain|basic)
-    STOW_PKGS+=(vim)
+  native|plain|basic|vim)
+    VIM_PKG="vim"
     ;;
-  plug|vim-plug|vimplug)
-    STOW_PKGS+=(vim.plug)
+  plug|vim-plug|vimplug|vim.plug)
+    VIM_PKG="vim.plug"
     ;;
   *)
     warn "Unknown VIM_DISTRO=$VIM_DISTRO; using native"
     VIM_DISTRO="native"
-    STOW_PKGS+=(vim)
+    VIM_PKG="vim"
     ;;
 esac
+CORE_STOW_PKGS+=("$VIM_PKG")
 
 # NVIM_DISTRO is configured at the top of this file.
 # It chooses which Neovim config package gets linked.
 case "$NVIM_DISTRO" in
-  lazy|lazyvim)
-    STOW_PKGS+=(nvim.lazy)
+  lazy|lazyvim|nvim.lazy)
+    NVIM_PKG="nvim.lazy"
     ;;
-  mini|minimal)
-    STOW_PKGS+=(nvim.mini)
+  mini|minimal|nvim.mini)
+    NVIM_PKG="nvim.mini"
     ;;
-  native|plain|basic)
-    STOW_PKGS+=(nvim)
+  native|plain|basic|nvim)
+    NVIM_PKG="nvim"
     ;;
   *)
     warn "Unknown NVIM_DISTRO=$NVIM_DISTRO; using native"
     NVIM_DISTRO="native"
-    STOW_PKGS+=(nvim)
+    NVIM_PKG="nvim"
     ;;
 esac
-
-# Editor packages below target the same files, so remove symlinks from the
-# inactive variants before stowing the selected one.
-for editor_pkg in vim vim.plug nvim nvim.mini nvim.lazy; do
-  case " ${STOW_PKGS[*]} " in
-    *" $editor_pkg "*) continue ;;
-  esac
-
-  [[ -d "$DOTFILES_DIR/$editor_pkg" ]] || continue
-  run_user stow -d "$DOTFILES_DIR" -t "$USER_HOME" -D "$editor_pkg" 2>/dev/null || true
-done
-
-for pkg in "${STOW_PKGS[@]}"; do
-  [[ -d "$DOTFILES_DIR/$pkg" ]] || { echo "    skip $pkg"; continue; }
-
-  # If stow would overwrite a real file, move it to *.bak.TIMESTAMP.
-  while IFS= read -r conflict; do
-    [[ -z "$conflict" ]] && continue
-
-    path="$USER_HOME/$conflict"
-    [[ -e "$path" && ! -L "$path" ]] || continue
-
-    run_user mv "$path" "${path}.bak.$(date +%Y%m%d%H%M%S)"
-  done < <(
-    run_user stow -n -d "$DOTFILES_DIR" -t "$USER_HOME" "$pkg" 2>&1 \
-      | sed -nE 's/.*existing target is (neither a link nor a directory|not owned by stow): //p'
-  )
-
-  run_user stow -d "$DOTFILES_DIR" -t "$USER_HOME" -R "$pkg" \
-    && echo "    stowed $pkg" \
-    || warn "stow failed for $pkg"
-done
+CORE_STOW_PKGS+=("$NVIM_PKG")
 
 cat <<EOF
 
@@ -507,5 +481,20 @@ Notes:
   - Vim distro: $VIM_DISTRO
   - Neovim distro: $NVIM_DISTRO
   - Dotfiles source: $DOTFILES_DIR
+  - Dotfiles were not stowed automatically.
   - Docker daemon was not installed here; use Docker Desktop WSL integration.
+
+Manual dotfiles step:
+  # Run these as $USERNAME, not as root:
+  cd "$DOTFILES_DIR"
+  stow -n -R -t "$USER_HOME" ${CORE_STOW_PKGS[*]}
+  stow -R -t "$USER_HOME" ${CORE_STOW_PKGS[*]}
+  "$USER_HOME/.local/bin/theme" set "\$("$USER_HOME/.local/bin/theme" get)"
+
+Optional dotfiles, after checking/backing up conflicts:
+  stow -n -R -t "$USER_HOME" ${OPTIONAL_STOW_PKGS[*]}
+  stow -R -t "$USER_HOME" ${OPTIONAL_STOW_PKGS[*]}
+
+If stow reports existing-target conflicts, back up the real file or stale
+symlink first, then run the same stow command again.
 EOF

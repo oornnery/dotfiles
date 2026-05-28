@@ -1,8 +1,8 @@
-return require("theme_apply").setup({
+return {
   name = "catppuccin-mocha",
   background = "dark",
-  colorscheme = "habamax",
-  lazyvim_colorscheme = "habamax",
+  colorscheme = "dotfiles",
+  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#1e1e2e",
     fg = "#cdd6f4",
@@ -14,5 +14,9 @@ return require("theme_apply").setup({
     yellow = "#f9e2af",
     red = "#f38ba8",
     blue = "#89b4fa",
+    green = "#a6e3a1",
+    cyan = "#94e2d5",
+    magenta = "#f5c2e7",
+    orange = "#fab387",
   },
-})
+}

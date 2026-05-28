@@ -1,8 +1,8 @@
-return require("theme_apply").setup({
+return {
   name = "rose-pine",
   background = "dark",
-  colorscheme = "habamax",
-  lazyvim_colorscheme = "habamax",
+  colorscheme = "dotfiles",
+  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#191724",
     fg = "#e0def4",
@@ -14,5 +14,9 @@ return require("theme_apply").setup({
     yellow = "#f6c177",
     red = "#eb6f92",
     blue = "#31748f",
+    green = "#31748f",
+    cyan = "#9ccfd8",
+    magenta = "#c4a7e7",
+    orange = "#f6c177",
   },
-})
+}

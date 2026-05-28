@@ -1,8 +1,8 @@
-return require("theme_apply").setup({
+return {
   name = "catppuccin-latte",
   background = "light",
-  colorscheme = "habamax",
-  lazyvim_colorscheme = "habamax",
+  colorscheme = "dotfiles",
+  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#eff1f5",
     fg = "#4c4f69",
@@ -14,5 +14,9 @@ return require("theme_apply").setup({
     yellow = "#df8e1d",
     red = "#d20f39",
     blue = "#1e66f5",
+    green = "#40a02b",
+    cyan = "#179299",
+    magenta = "#ea76cb",
+    orange = "#fe640b",
   },
-})
+}

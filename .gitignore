@@ -29,3 +29,5 @@ node_modules/
 @girs/
 theme.scss
 windows/yasb/*.log
+
+*.log

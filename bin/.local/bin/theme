@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # dots:summary=Switch active visual theme across alacritty/waybar/wofi/mako/starship/ags/walker/tmux/vim/nvim/zsh
+# dots:args=<list|get|set [name]|cycle>
 # theme — switch the active visual theme across alacritty, waybar, wofi,
 #         mako, starship, AGS, walker, tmux, Vim, Neovim and Zsh.
 #
 # Usage:
 #   theme list             list available themes
 #   theme get              show current theme
-#   theme set <name>       activate theme + reload daemons
+#   theme set [name]       activate theme + reload daemons
 #   theme cycle            rotate through available themes
 #
 # Themes live in $DOTFILES_DIR/themes/<name>/ and contain:
@@ -18,7 +19,7 @@
 #   ags.scss         SCSS palette ($bg, $fg, …) imported by ags/style.scss
 #   tmux.conf        tmux statusline/pane palette
 #   vim.vim          Vim highlight/statusline palette
-#   nvim.lua         Neovim highlight/statusline palette
+#   nvim.lua         Neovim highlight/statusline palette read by lua/theme.lua
 #   zsh.zsh          Antigen/Oh My Zsh prompt theme and fzf colors
 #
 # Adding a theme: copy one of the existing dirs, edit the colors, done.
@@ -38,6 +39,40 @@ _themes() {
 
 _current() {
     [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" || echo "catppuccin-mocha"
+}
+
+_has_gum_tty() {
+    [[ -t 0 && -t 1 && -r /dev/tty && -w /dev/tty ]] && command -v gum >/dev/null 2>&1
+}
+
+_pick_theme() {
+    local cur selected
+    cur="$(_current)"
+
+    _has_gum_tty || { echo "Usage: theme set <name>" >&2; exit 1; }
+
+    selected="$(
+        while IFS= read -r t; do
+            if [[ "$t" == "$cur" ]]; then
+                printf '* %s\n' "$t"
+            else
+                printf '  %s\n' "$t"
+            fi
+        done < <(_themes) | gum filter \
+            --height 12 \
+            --prompt "theme> " \
+            --placeholder "choose a theme" \
+            --indicator ">" \
+            --header "Current theme is marked with *" \
+            --header.foreground 212 \
+            --match.foreground 212 \
+            --indicator.foreground 212
+    )" || exit 0
+
+    selected="${selected#\* }"
+    selected="${selected#  }"
+    [[ -n "$selected" ]] || exit 0
+    printf '%s\n' "$selected"
 }
 
 _notify() {
@@ -102,10 +137,9 @@ _apply() {
         install -D -m 644 "$src/vim.vim" "$HOME/.vim/theme.vim"
     fi
 
-    # 11. Neovim — required as lua/theme.lua by every nvim distro.
-    if [[ -f "$src/nvim.lua" ]]; then
-        install -D -m 644 "$src/nvim.lua" "$HOME/.config/nvim/lua/theme.lua"
-    fi
+    # 11. Neovim reads the active theme from STATE_FILE on next startup.
+    # Keep lua/theme.lua stow-managed so switching nvim distros cannot leave a
+    # stale generated theme file behind.
 
     # 12. Zsh — sourced before Antigen chooses the Oh My Zsh theme.
     if [[ -f "$src/zsh.zsh" ]]; then
@@ -156,8 +190,9 @@ case "${1:-help}" in
         _current
         ;;
     set)
-        [[ -z "${2:-}" ]] && { echo "Usage: theme set <name>" >&2; exit 1; }
-        _apply "$2"
+        name="${2:-}"
+        [[ -n "$name" ]] || name="$(_pick_theme)"
+        _apply "$name"
         ;;
     cycle)
         mapfile -t themes < <(_themes)

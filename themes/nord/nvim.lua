@@ -1,8 +1,8 @@
-return require("theme_apply").setup({
+return {
   name = "nord",
   background = "dark",
-  colorscheme = "habamax",
-  lazyvim_colorscheme = "habamax",
+  colorscheme = "dotfiles",
+  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#2e3440",
     fg = "#d8dee9",
@@ -14,5 +14,9 @@ return require("theme_apply").setup({
     yellow = "#ebcb8b",
     red = "#bf616a",
     blue = "#5e81ac",
+    green = "#a3be8c",
+    cyan = "#88c0d0",
+    magenta = "#b48ead",
+    orange = "#d08770",
   },
-})
+}

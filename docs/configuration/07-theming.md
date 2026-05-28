@@ -42,12 +42,14 @@ themes/<name>/
 ├── starship.toml     full starship config (optional drop-in)
 ├── tmux.conf         statusline/pane colors (sourced by tmux)
 ├── vim.vim           Vim highlights (sourced by .vimrc)
-├── nvim.lua          Neovim highlights (required as lua/theme.lua)
+├── nvim.lua          Neovim palette table (read by lua/theme.lua)
 └── zsh.zsh           Antigen theme + terminal-tool colors
 ```
 
-The [`theme`](../applications/09-bin-scripts.md) script copies them into
-the corresponding live paths:
+The [`theme`](../applications/09-bin-scripts.md) script copies most of
+them into the corresponding live paths. Neovim keeps `lua/theme.lua`
+stow-managed; that file reads the active theme name from state, loads
+`themes/<name>/nvim.lua` as a palette table, and applies the highlights:
 
 | Source                         | Destination                              |
 | ------------------------------ | ---------------------------------------- |
@@ -58,7 +60,7 @@ the corresponding live paths:
 | `themes/<n>/starship.toml`     | `~/.config/starship.toml`                |
 | `themes/<n>/tmux.conf`         | `~/.config/tmux/theme.conf`              |
 | `themes/<n>/vim.vim`           | `~/.vim/theme.vim`                       |
-| `themes/<n>/nvim.lua`          | `~/.config/nvim/lua/theme.lua`           |
+| `themes/<n>/nvim.lua`          | read by `~/.config/nvim/lua/theme.lua`   |
 | `themes/<n>/zsh.zsh`           | `~/.config/zsh/theme.zsh`                |
 
 The active theme name is recorded in

@@ -44,4 +44,11 @@ path=(
 # The Astral installer may create this helper file.
 [[ -f "$HOME/.local/bin/env" ]] && source "$HOME/.local/bin/env"
 
+# WSL appends Windows PATH entries when appendWindowsPath=true. Keep useful
+# interop, but do not let Windows npm shims shadow Linux CLIs such as codex.
+if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null \
+  || grep -qi "wsl" /proc/sys/kernel/osrelease 2>/dev/null; then
+  path=(${path:#/mnt/c/Users/*/AppData/Roaming/npm})
+fi
+
 export PATH

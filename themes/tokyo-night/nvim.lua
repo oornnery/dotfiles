@@ -1,8 +1,8 @@
-return require("theme_apply").setup({
+return {
   name = "tokyo-night",
   background = "dark",
-  colorscheme = "habamax",
-  lazyvim_colorscheme = "habamax",
+  colorscheme = "dotfiles",
+  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#1a1b26",
     fg = "#c0caf5",
@@ -14,5 +14,9 @@ return require("theme_apply").setup({
     yellow = "#e0af68",
     red = "#f7768e",
     blue = "#bb9af7",
+    green = "#9ece6a",
+    cyan = "#7dcfff",
+    magenta = "#bb9af7",
+    orange = "#ff9e64",
   },
-})
+}

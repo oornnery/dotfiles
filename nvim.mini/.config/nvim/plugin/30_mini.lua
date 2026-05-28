@@ -118,23 +118,14 @@ now(function() require('mini.sessions').setup() end)
 -- - `:h MiniStarter-lifecycle` - how to work with Starter buffer
 now(function() require('mini.starter').setup() end)
 
--- Statusline. Sets `:h 'statusline'` to show more info in a line below window.
--- Example usage:
--- - Left most section indicates current mode (text + highlighting).
--- - Second from left section shows "developer info": Git, diff, diagnostics, LSP.
--- - Center section shows the name of displayed buffer.
--- - Second to right section shows more buffer info.
--- - Right most section shows current cursor coordinates and search results.
---
--- See also:
--- - `:h MiniStatusline-example-content` - example of default content. Use it to
---   configure a custom statusline by setting `config.content.active` function.
+-- Statusline. Uses the same no-plugin dotfiles statusline as Vim/native Nvim.
 now(function()
-  require('mini.statusline').setup()
   local ok, theme = pcall(require, 'theme')
   if ok and type(theme.apply) == 'function' then
     theme.apply()
   end
+  pcall(function() require('statusline').setup() end)
+  pcall(function() require('cheatsheet').setup() end)
 end)
 
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.

@@ -1,8 +1,8 @@
-return require("theme_apply").setup({
+return {
   name = "kanagawa",
   background = "dark",
-  colorscheme = "habamax",
-  lazyvim_colorscheme = "habamax",
+  colorscheme = "dotfiles",
+  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#1f1f28",
     fg = "#dcd7ba",
@@ -14,5 +14,9 @@ return require("theme_apply").setup({
     yellow = "#e6c384",
     red = "#c34043",
     blue = "#7fb4ca",
+    green = "#98bb6c",
+    cyan = "#7fb4ca",
+    magenta = "#957fb8",
+    orange = "#ffa066",
   },
-})
+}

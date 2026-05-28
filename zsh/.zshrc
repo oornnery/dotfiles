@@ -10,6 +10,11 @@
 # without requiring a separate ~/.oh-my-zsh install.
 export ANTIGEN_HOME="${ANTIGEN_HOME:-$HOME/.antigen}"
 
+# Oh My Zsh's gh plugin writes generated completions here on first load.
+# Fresh Antigen installs may not have created the directory yet.
+export ZSH_CACHE_DIR="${ZSH_CACHE_DIR:-$ANTIGEN_HOME/bundles/robbyrussell/oh-my-zsh/cache}"
+mkdir -p "$ZSH_CACHE_DIR/completions" 2>/dev/null || true
+
 # Active theme drop-in written by the `theme` command.
 # It may set ANTIGEN_THEME and terminal-tool color variables before plugins load.
 [[ -f "$HOME/.config/zsh/theme.zsh" ]] && source "$HOME/.config/zsh/theme.zsh"
@@ -52,6 +57,31 @@ if (( $+widgets[history-substring-search-up] )); then
   bindkey -M vicmd 'k' history-substring-search-up
   bindkey -M vicmd 'j' history-substring-search-down
 fi
+
+# Export zsh-vi-mode state to the active tmux pane so the statusline can show it.
+_dotfiles_tmux_set_vi_mode() {
+  [[ -n "${TMUX:-}" ]] || return 0
+
+  local mode="${ZVM_MODE:-}" label="INSERT"
+  if [[ -n "${ZVM_MODE_NORMAL:-}" && "$mode" == "$ZVM_MODE_NORMAL" ]]; then
+    label="NORMAL"
+  elif [[ -n "${ZVM_MODE_VISUAL:-}" && "$mode" == "$ZVM_MODE_VISUAL" ]]; then
+    label="VISUAL"
+  elif [[ -n "${ZVM_MODE_VISUAL_LINE:-}" && "$mode" == "$ZVM_MODE_VISUAL_LINE" ]]; then
+    label="V-LINE"
+  elif [[ -n "${ZVM_MODE_REPLACE:-}" && "$mode" == "$ZVM_MODE_REPLACE" ]]; then
+    label="REPLACE"
+  elif [[ "${KEYMAP:-}" == "vicmd" ]]; then
+    label="NORMAL"
+  fi
+
+  command tmux set-option -pq @dotfiles-zle-mode "$label" 2>/dev/null || true
+}
+
+if (( $+parameters[zvm_after_select_vi_mode_commands] )); then
+  zvm_after_select_vi_mode_commands+=(_dotfiles_tmux_set_vi_mode)
+fi
+_dotfiles_tmux_set_vi_mode
 
 # -------------------------------
 # Completion and navigation

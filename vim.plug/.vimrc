@@ -33,6 +33,7 @@ set ruler showcmd
 set cursorline
 set scrolloff=4
 set sidescrolloff=8
+set noshowmode
 set wildmenu wildmode=longest:full,full
 
 " Search
@@ -102,18 +103,96 @@ vnoremap > >gv
 nnoremap <leader><space> :Files<CR>
 nnoremap <leader>b       :Buffers<CR>
 nnoremap <leader>r       :Rg<CR>
+nnoremap <leader>?       :Cheatsheet vim<CR>
 
-" ─── Statusline (minimal) ──────────────────────────────────────────────────
+command! -nargs=? Helpme call <SID>OpenHelpme(<q-args> ==# '' ? 'vim' : <q-args>)
+command! -nargs=? Cheatsheet call <SID>OpenHelpme(<q-args> ==# '' ? 'vim' : <q-args>)
+
+function! s:OpenHelpme(topic) abort
+    let l:helper = expand('~/.local/bin/helpme')
+    if !executable(l:helper)
+        let l:helper = 'helpme'
+    endif
+
+    tabnew
+    setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted filetype=markdown
+    silent execute 'read !' . shellescape(l:helper) . ' --no-pager ' . shellescape(a:topic)
+    silent! 1delete _
+    setlocal nomodifiable
+    nnoremap <silent> <buffer> q :close<CR>
+    normal! gg
+endfunction
+
+" ─── Statusline (native, no plugin) ────────────────────────────────────────
+
+function! DotfilesStatusMode() abort
+    let l:modes = {
+        \ 'n': 'NORMAL',
+        \ 'no': 'OP',
+        \ 'v': 'VISUAL',
+        \ 'V': 'V-LINE',
+        \ "\<C-v>": 'V-BLOCK',
+        \ 's': 'SELECT',
+        \ 'S': 'S-LINE',
+        \ "\<C-s>": 'S-BLOCK',
+        \ 'i': 'INSERT',
+        \ 'R': 'REPLACE',
+        \ 'c': 'COMMAND',
+        \ }
+    return get(l:modes, mode(), toupper(mode()))
+endfunction
+
+function! DotfilesStatusText(text) abort
+    return substitute(printf('%s', a:text), '%', '%%', 'g')
+endfunction
+
+function! DotfilesStatusFile() abort
+    let l:file = expand('%:~:.')
+    return empty(l:file) ? '[No Name]' : l:file
+endfunction
+
+function! DotfilesStatusFlags() abort
+    let l:flags = ''
+    let l:flags .= &modified ? '[+]' : ''
+    let l:flags .= &readonly ? '[RO]' : ''
+    let l:flags .= &buftype ==# 'help' ? '[help]' : ''
+    let l:flags .= exists('&previewwindow') && &previewwindow ? '[preview]' : ''
+    return empty(l:flags) ? '' : ' ' . DotfilesStatusText(l:flags) . ' '
+endfunction
+
+function! DotfilesStatusFiletype() abort
+    return empty(&filetype) ? 'noft' : &filetype
+endfunction
+
+function! DotfilesStatusEncoding() abort
+    return empty(&fileencoding) ? &encoding : &fileencoding
+endfunction
+
+function! DotfilesStatusPosition() abort
+    return line('.') . ':' . col('.')
+endfunction
+
+function! DotfilesStatusPercent() abort
+    return printf('%d%%', line('.') * 100 / line('$'))
+endfunction
+
+highlight default link DotfilesStatusMode StatusLine
+highlight default link DotfilesStatusFile StatusLine
+highlight default link DotfilesStatusInfo StatusLine
+highlight default link DotfilesStatusMuted StatusLineNC
+highlight default link DotfilesStatusAccent StatusLine
 
 set laststatus=2
-set statusline=
-set statusline+=%#PmenuSel#
-set statusline+=\ %f                    " filename
-set statusline+=\ %m%r%h%w              " modified/readonly flags
-set statusline+=%=                      " right-align
-set statusline+=\ %y                    " filetype
-set statusline+=\ %l:%c                 " line:column
-set statusline+=\ %p%%\                 " percent through file
+let &statusline = join([
+        \ '%#DotfilesStatusMode# %{DotfilesStatusText(DotfilesStatusMode())} ',
+        \ '%#DotfilesStatusFile# %{DotfilesStatusText(DotfilesStatusFile())} ',
+        \ '%#DotfilesStatusMuted#%{DotfilesStatusFlags()}',
+        \ '%=',
+        \ '%#DotfilesStatusInfo# %{DotfilesStatusText(DotfilesStatusFiletype())} ',
+        \ '%#DotfilesStatusFile# %{DotfilesStatusText(DotfilesStatusEncoding())} ',
+        \ '%#DotfilesStatusMode# %{DotfilesStatusText(DotfilesStatusPosition())} ',
+        \ '%#DotfilesStatusAccent# %{DotfilesStatusText(DotfilesStatusPercent())} ',
+        \ ], '')
 
 " Active theme drop-in written by the `theme` command.
 " It is loaded after the statusline so it can override status colors.
