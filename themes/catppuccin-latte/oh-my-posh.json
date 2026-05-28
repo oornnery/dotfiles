@@ -1,0 +1,56 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 3,
+  "final_space": true,
+  "palette": {
+    "pink":     "#ea76cb",
+    "mauve":    "#8839ef",
+    "red":      "#d20f39",
+    "peach":    "#fe640b",
+    "yellow":   "#df8e1d",
+    "green":    "#40a02b",
+    "teal":     "#179299",
+    "sapphire": "#209fb5",
+    "blue":     "#1e66f5",
+    "text":     "#4c4f69",
+    "subtext":  "#6c6f85",
+    "overlay2": "#7c7f93"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        { "type": "path", "style": "plain", "foreground": "p:teal",
+          "properties": { "style": "agnoster_short", "max_depth": 3, "home_icon": "~",
+            "mapped_locations": { "~/dotfiles": " dotfiles", "~/Documents": " Documents", "~/Downloads": " Downloads", "~/Pictures": " Pictures" } },
+          "template": "<b>{{ .Path }}</b> " },
+        { "type": "git", "style": "plain", "foreground": "p:pink",
+          "foreground_templates": [ "{{ if or (.Working.Changed) (.Staging.Changed) }}p:yellow{{ end }}" ],
+          "properties": { "fetch_status": true, "branch_icon": " ", "branch_max_length": 24 },
+          "template": "<b>{{ .UpstreamIcon }}{{ .HEAD }}</b>{{ if .Working.Changed }} ✱{{ .Working.String }}{{ end }}{{ if .Staging.Changed }} ✓{{ .Staging.String }}{{ end }}{{ if gt .Ahead 0 }} ⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }} ⇣{{ .Behind }}{{ end }} " },
+        { "type": "python", "style": "plain", "foreground": "p:yellow",   "template": " {{ if .Venv }}({{ .Venv }}) {{ end }}" },
+        { "type": "node",   "style": "plain", "foreground": "p:green",    "template": " {{ .Full }} " },
+        { "type": "rust",   "style": "plain", "foreground": "p:red",      "template": " {{ .Full }} " },
+        { "type": "go",     "style": "plain", "foreground": "p:sapphire", "template": " {{ .Full }} " }
+      ]
+    },
+    {
+      "type": "rprompt",
+      "alignment": "right",
+      "segments": [
+        { "type": "status",        "style": "plain", "foreground": "p:red",     "template": "{{ if .Error }}<b>✘ {{ .Code }}</b> · {{ end }}" },
+        { "type": "executiontime", "style": "plain", "foreground": "p:yellow",  "properties": { "threshold": 2000, "style": "round" }, "template": " {{ .FormattedMs }} · " },
+        { "type": "time",          "style": "plain", "foreground": "p:overlay2","properties": { "time_format": "15:04" }, "template": "{{ .CurrentDate | date .Format }}" }
+      ]
+    },
+    {
+      "type": "prompt", "alignment": "left", "newline": true,
+      "segments": [
+        { "type": "text", "style": "plain", "foreground": "p:pink",
+          "foreground_templates": [ "{{ if gt .Code 0 }}p:red{{ end }}" ],
+          "template": "<b>❯</b> " }
+      ]
+    }
+  ]
+}

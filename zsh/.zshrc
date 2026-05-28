@@ -3,49 +3,55 @@
 # Put aliases, completions, plugins, keybindings, prompt, and interactive UX here.
 
 # -------------------------------
-# Oh My Zsh
+# Antigen + Oh My Zsh
 # -------------------------------
 
-export ZSH="$HOME/.oh-my-zsh"
+# Antigen is the plugin manager. It can load Oh My Zsh plugins and themes
+# without requiring a separate ~/.oh-my-zsh install.
+export ANTIGEN_HOME="${ANTIGEN_HOME:-$HOME/.antigen}"
 
-# Starship owns the prompt — empty ZSH_THEME stops OMZ from setting its own.
-# (Plugins/completion from OMZ stay loaded; only the theme is disabled.)
-ZSH_THEME=""
+# Active theme drop-in written by the `theme` command.
+# It may set ANTIGEN_THEME and terminal-tool color variables before plugins load.
+[[ -f "$HOME/.config/zsh/theme.zsh" ]] && source "$HOME/.config/zsh/theme.zsh"
 
-# Plugins (order matters — see notes):
-# - zsh-vi-mode: vi modal in shell. MUST come first; it remaps keys others rely on.
-# - git / gh: aliases (gst, ga, gco, …)
-# - sudo: double-ESC to prepend sudo
-# - z: fast dir jumping (still useful alongside zoxide)
-# - fzf-tab: fuzzy tab completion UI
-# - zsh-autosuggestions: fish-like ghost text from history
-# - zsh-completions: extra completions catalog
-# - zsh-history-substring-search: type "git" then ↑/↓ navigates only matching history
-# - fast-syntax-highlighting: replaces the slower zsh-syntax-highlighting. MUST be
-#   loaded near the end (before history-substring-search) per upstream docs.
-plugins=(
-  zsh-defer
-  zsh-vi-mode
-  git
-  gh
-  sudo
-  zsh-completions
-  zsh-autosuggestions
-  fzf-tab
-  forgit
-  fast-syntax-highlighting
-  zsh-history-substring-search
-)
-# Note: dropped OMZ's `z` plugin — zoxide does the same with --cmd cd below.
+# Change this before starting zsh to try another Oh My Zsh theme:
+#   ANTIGEN_THEME=agnoster zsh
+export ANTIGEN_THEME="${ANTIGEN_THEME:-robbyrussell}"
 
-source "$ZSH/oh-my-zsh.sh"
+if [[ -f "$ANTIGEN_HOME/antigen.zsh" ]]; then
+  source "$ANTIGEN_HOME/antigen.zsh"
+
+  antigen use oh-my-zsh
+
+  # Bundles are loaded in order. Keep zsh-vi-mode early because it remaps keys,
+  # and keep highlighting/history search near the end because they wrap widgets.
+  antigen bundle romkatv/zsh-defer
+  antigen bundle jeffreytse/zsh-vi-mode
+  antigen bundle git
+  antigen bundle gh
+  antigen bundle sudo
+  antigen bundle zsh-users/zsh-completions
+  antigen bundle zsh-users/zsh-autosuggestions
+  antigen bundle Aloxaf/fzf-tab
+  antigen bundle wfxr/forgit
+  antigen bundle zdharma-continuum/fast-syntax-highlighting
+  antigen bundle zsh-users/zsh-history-substring-search
+
+  # Oh My Zsh theme managed by Antigen.
+  antigen theme "$ANTIGEN_THEME"
+  antigen apply
+else
+  print -P "%F{yellow}Antigen not found at $ANTIGEN_HOME/antigen.zsh%f"
+fi
 
 # zsh-history-substring-search: bind ↑/↓ to substring search after a query.
 # Both Emacs (default) and vi insert/normal mode covered.
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
-bindkey -M vicmd 'k' history-substring-search-up
-bindkey -M vicmd 'j' history-substring-search-down
+if (( $+widgets[history-substring-search-up] )); then
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[[B' history-substring-search-down
+  bindkey -M vicmd 'k' history-substring-search-up
+  bindkey -M vicmd 'j' history-substring-search-down
+fi
 
 # -------------------------------
 # Completion and navigation
@@ -239,9 +245,6 @@ if command -v zoxide >/dev/null 2>&1; then
   }
   zle -N accept-line _zoxide_accept_line
 fi
-# Starship (prompt) must run synchronously — it owns the prompt rendering.
-command -v starship >/dev/null && eval "$(starship init zsh)"
-
 # Everything else deferred to AFTER the first prompt via zsh-defer if loaded.
 # Shaves ~200ms off shell startup by moving fnm/atuin/mise/direnv off the hot
 # path. They become active a few hundred ms later (you won't notice unless

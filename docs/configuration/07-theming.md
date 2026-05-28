@@ -1,12 +1,11 @@
 # Theming
 
-Three themes ship: **catppuccin-mocha** (default, pink), **tokyo-night**
-(blue, dark), and **catppuccin-latte** (light). They cover the visible
-day-to-day surfaces: alacritty, waybar, wofi, mako, starship.
+Themes live under [`themes/`](../../themes/) and are switched with one
+command. They cover the visible day-to-day surfaces: alacritty, waybar,
+wofi, mako, starship when present, tmux, Vim, Neovim and Zsh.
 
-Tmux follows the terminal's ANSI palette automatically, so it themes
-itself when alacritty does. Hyprland borders are themed by editing
-`hyprland.conf` directly — kept stable across themes to avoid churn.
+Hyprland borders are themed by editing `hyprland.conf` directly — kept
+stable across themes to avoid churn.
 
 ## Switch themes
 
@@ -24,13 +23,15 @@ Daemons reload automatically:
 - alacritty: `live_config_reload = true` picks up `theme.toml` on save
 - mako: `makoctl reload`
 - waybar: `pkill -SIGUSR2 waybar` (CSS reread)
+- tmux: live server reload when a tmux session exists
 - starship: next prompt
+- Vim / Neovim / Zsh: next startup or manual config reload
 - wofi: launches fresh per-invocation, no reload needed
 
 ## How it works
 
-Each theme is a directory under [`themes/`](../../themes/) containing 5
-files:
+Each theme is a directory under [`themes/`](../../themes/) containing
+drop-in files:
 
 ```
 themes/<name>/
@@ -38,7 +39,11 @@ themes/<name>/
 ├── waybar.css        @define-color block (@import in style.css)
 ├── wofi.css          @define-color block (@import in style.css)
 ├── mako.config       colors only (include from mako config)
-└── starship.toml     full starship config (drop-in)
+├── starship.toml     full starship config (optional drop-in)
+├── tmux.conf         statusline/pane colors (sourced by tmux)
+├── vim.vim           Vim highlights (sourced by .vimrc)
+├── nvim.lua          Neovim highlights (required as lua/theme.lua)
+└── zsh.zsh           Antigen theme + terminal-tool colors
 ```
 
 The [`theme`](../applications/09-bin-scripts.md) script copies them into
@@ -51,6 +56,10 @@ the corresponding live paths:
 | `themes/<n>/wofi.css`          | `~/.config/wofi/theme.css`               |
 | `themes/<n>/mako.config`       | `~/.config/mako/theme.config`            |
 | `themes/<n>/starship.toml`     | `~/.config/starship.toml`                |
+| `themes/<n>/tmux.conf`         | `~/.config/tmux/theme.conf`              |
+| `themes/<n>/vim.vim`           | `~/.vim/theme.vim`                       |
+| `themes/<n>/nvim.lua`          | `~/.config/nvim/lua/theme.lua`           |
+| `themes/<n>/zsh.zsh`           | `~/.config/zsh/theme.zsh`                |
 
 The active theme name is recorded in
 `~/.local/share/dotfiles/active-theme`. `theme cycle` reads it to
@@ -87,5 +96,3 @@ That's it — `theme list` discovers it automatically because it scans
   pink (Catppuccin Mocha). Edit by hand if you want it to track theme.
 - **GTK / Qt apps** — set those via `nwg-look` / `qt5ct` / `qt6ct`.
   Outside the scope of this theme switcher.
-- **Neovim** — each distro has its own colorscheme system. mini.nvim
-  follows the terminal; LazyVim uses `tokyonight` by default.

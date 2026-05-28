@@ -1,0 +1,18 @@
+{
+  "export_version": 3,
+  "packages": [
+    { "Id": "Valve.Steam",                     "Name": "Steam",                  "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "EpicGames.EpicGamesLauncher",     "Name": "Epic Games Launcher",    "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "ElectronicArts.EADesktop",        "Name": "EA app",                 "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "RiotGames.LeagueOfLegends.BR",    "Name": "League of Legends (BR)", "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Mojang.MinecraftLauncher",        "Name": "Minecraft Launcher",     "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "RockstarGames.Launcher",          "Name": "Rockstar Launcher",      "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Overwolf.CurseForge",             "Name": "CurseForge",             "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Blitz.Blitz",                     "Name": "Blitz (LoL companion)",  "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Ryochan7.DS4Windows",             "Name": "DS4Windows",             "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Nefarius.HidHide",                "Name": "HidHide",                "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "ViGEm.ViGEmBus",                  "Name": "ViGEmBus",               "Source": "winget", "ManagerName": "Winget" }
+  ],
+  "incompatible_packages_info": "DS4Windows + HidHide + ViGEmBus = PS4/PS5 controller emulation stack. Install all three together.",
+  "incompatible_packages": []
+}

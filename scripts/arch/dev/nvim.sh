@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # dev/nvim.sh — neovim + stow the chosen distro.
 #
-# Picks between mini.nvim (nvim/) and LazyVim (nvim-lazy/) based on
-# $NVIM_DISTRO (set in arch.conf). Both target ~/.config/nvim so they
+# Picks between native (nvim/), mini.nvim (nvim.mini/) and LazyVim
+# (nvim.lazy/) based on $NVIM_DISTRO. All target ~/.config/nvim, so they
 # are mutually exclusive — switching is `NVIM_DISTRO=lazy ./nvim.sh`.
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
@@ -18,11 +18,19 @@ log::info "Installing neovim"
 sudo pacman -S --needed --noconfirm neovim
 
 case "$NVIM_DISTRO" in
-    lazy|lazyvim)
-        pkg="nvim-lazy"
-        ;;
-    mini|*)
+    native|plain|basic)
         pkg="nvim"
+        ;;
+    mini|minimal)
+        pkg="nvim.mini"
+        ;;
+    lazy|lazyvim)
+        pkg="nvim.lazy"
+        ;;
+    *)
+        log::warn "Unknown NVIM_DISTRO=$NVIM_DISTRO; using mini"
+        NVIM_DISTRO="mini"
+        pkg="nvim.mini"
         ;;
 esac
 
@@ -36,7 +44,7 @@ _run_user() {
     fi
 }
 
-for other in nvim nvim-lazy; do
+for other in nvim nvim.mini nvim.lazy; do
     [[ "$other" == "$pkg" ]] && continue
     if [[ -L "$user_home/.config/nvim" ]] \
        && _run_user readlink "$user_home/.config/nvim" 2>/dev/null \
@@ -49,8 +57,7 @@ done
 
 stow_safe "$pkg"
 
-# LazyVim auto-installs plugins on first launch — pre-warm if user wants.
-# Mini.nvim has minimal deps (no plugin manager). Either way, nothing
-# extra to do here.
+# LazyVim auto-installs plugins on first launch. Native Neovim has no plugin
+# manager, and mini.nvim keeps its own lightweight setup.
 
 log::ok "Neovim ($NVIM_DISTRO) setup completed"

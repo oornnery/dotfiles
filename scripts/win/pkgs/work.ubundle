@@ -1,0 +1,20 @@
+{
+  "export_version": 3,
+  "packages": [
+    { "Id": "Brave.Brave",                       "Name": "Brave",                "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Zen-Team.Zen-Browser",              "Name": "Zen Browser",          "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Perplexity.Comet",                  "Name": "Comet (Perplexity)",   "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Notion.Notion",                     "Name": "Notion",               "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Obsidian.Obsidian",                 "Name": "Obsidian",             "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "qBittorrent.qBittorrent",           "Name": "qBittorrent",          "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "VideoLAN.VLC",                      "Name": "VLC media player",     "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "TheDocumentFoundation.LibreOffice", "Name": "LibreOffice",          "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Google.GoogleDrive",                "Name": "Google Drive",         "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Audacity.Audacity",                 "Name": "Audacity",             "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "GIMP.GIMP.3",                       "Name": "GIMP 3",               "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "KDE.Kdenlive",                      "Name": "Kdenlive",             "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "WiresharkFoundation.Wireshark",     "Name": "Wireshark",            "Source": "winget", "ManagerName": "Winget" }
+  ],
+  "incompatible_packages_info": "Incompatible packages cannot be installed from UniGetUI, either because they came from a local source (for example Local PC) or because the package manager was unavailable. Nevertheless, they have been listed here for logging purposes.",
+  "incompatible_packages": []
+}

@@ -16,7 +16,8 @@ set -euo pipefail
 USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
 DOTFILES_DIR="${DOTFILES_DIR:-/home/$USER_NAME/dotfiles}"
 THEME="${THEME:-catppuccin-mocha}"
-NVIM_DISTRO="${NVIM_DISTRO:-mini}"     # mini | lazy
+VIM_DISTRO="${VIM_DISTRO:-native}"     # native | plug
+NVIM_DISTRO="${NVIM_DISTRO:-mini}"     # native | mini | lazy
 USE_IWD="${USE_IWD:-1}"                # NM wifi backend
 WEATHER_CITY="${WEATHER_CITY:-Salvador}"
 MIRROR_COUNTRY="${MIRROR_COUNTRY:-Brazil}"
@@ -482,12 +483,36 @@ TPM_DIR="$USER_HOME/.tmux/plugins/tpm"
 # ─── Stow all dotfiles ──────────────────────────────────────────────────────
 
 echo "==> Stowing dotfiles → \$HOME"
-PACKAGES=(bash zsh tmux vim git editor fabric alacritty bin waybar wofi mako hyprland)
+PACKAGES=(bash zsh tmux git editor fabric alacritty bin waybar wofi mako hyprland)
+case "$VIM_DISTRO" in
+    native|plain|basic) PACKAGES+=(vim) ;;
+    plug|vim-plug|vimplug) PACKAGES+=(vim.plug) ;;
+    *)
+        echo "WARN: unknown VIM_DISTRO=$VIM_DISTRO; using native" >&2
+        VIM_DISTRO="native"
+        PACKAGES+=(vim)
+        ;;
+esac
 case "$NVIM_DISTRO" in
-    lazy|lazyvim) PACKAGES+=(nvim-lazy) ;;
-    *)            PACKAGES+=(nvim) ;;
+    native|plain|basic) PACKAGES+=(nvim) ;;
+    mini|minimal)       PACKAGES+=(nvim.mini) ;;
+    lazy|lazyvim)       PACKAGES+=(nvim.lazy) ;;
+    *)
+        echo "WARN: unknown NVIM_DISTRO=$NVIM_DISTRO; using mini" >&2
+        NVIM_DISTRO="mini"
+        PACKAGES+=(nvim.mini)
+        ;;
 esac
 [[ $IS_WSL -eq 1 ]] && PACKAGES+=(wsl)
+
+for editor_pkg in vim vim.plug nvim nvim.mini nvim.lazy; do
+    case " ${PACKAGES[*]} " in
+        *" $editor_pkg "*) continue ;;
+    esac
+
+    [[ -d "$DOTFILES_DIR/$editor_pkg" ]] || continue
+    sudo -u "$USER_NAME" -H stow -d "$DOTFILES_DIR" -t "$USER_HOME" -D "$editor_pkg" 2>/dev/null || true
+done
 
 for pkg in "${PACKAGES[@]}"; do
     if [[ ! -d "$DOTFILES_DIR/$pkg" ]]; then

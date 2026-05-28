@@ -126,7 +126,7 @@ widgets:
       label: "{%a %d %b · %H:%M}"
       label_alt: "{%A, %B %d, %Y · %H:%M:%S · week %V}"
       timezones: []
-      locale: { name: "pt_BR", time: "%H:%M", date: "%a %d %b" }
+      locale: "pt_BR"
 
   # ─── RIGHT ──────────────────────────────────────────────────────────────
 
@@ -134,7 +134,7 @@ widgets:
     type: "yasb.github.GithubWidget"
     options:
       label: "{icon} {data}"
-      icons: { issue: "", pull_request: "", notification: "", github_logo: "" }
+      icons: { issue: "", pull_request: "", github_logo: "" }
       max_notification: 20
       tooltip: true
       only_unread: true
@@ -168,6 +168,7 @@ widgets:
 
   gpu:
     type: "yasb.custom.CustomWidget"
+    class_name: "yasb-gpu"
     options:
       label: "󰊦 {data}%"
       label_alt: "GPU usage"
@@ -178,6 +179,7 @@ widgets:
 
   cpu_temp:
     type: "yasb.custom.CustomWidget"
+    class_name: "yasb-cpu-temp"
     options:
       label: "󰲏 {data}°"
       label_alt: "CPU temp"
@@ -217,29 +219,25 @@ widgets:
     options:
       label: "{icon} {level}"
       label_alt: "{volume[level]}%"
-      tooltip: true
       scroll_step: 5
-      icons:
-        normal:  "󰕾"
-        low:     "󰕿"
-        medium:  "󰖀"
-        high:    "󰖁"
-        muted:   "󰕽"
+      volume_icons:
+        - "󰕽"  # muted
+        - "󰕿"  # low
+        - "󰖀"  # medium
+        - "󰖁"  # high
+        - "󰕾"  # normal/full
 
   brightness:
     type: "yasb.brightness.BrightnessWidget"
     options:
       label: "󰃟 {brightness_level}"
-      tooltip: true
       scroll_step: 5
-      hide_if_no_brightness: true
 
   battery:
     type: "yasb.battery.BatteryWidget"
     options:
       label: "{icon} {percent}%"
       label_alt: "{percent}% · {time_remaining}"
-      tooltip: true
       charging_options:
         icon_format: "{icon} "
       status_thresholds:
@@ -272,10 +270,10 @@ widgets:
       blur_background: true
       animation_duration: 200
       buttons:
-        lock:      ["Lock",      ["", "Win+L"]]
-        signout:   ["Sign out",  [""]]
-        sleep:     ["Sleep",     [""]]
-        shutdown:  ["Shutdown",  [""]]
-        restart:   ["Restart",   [""]]
-        hibernate: ["Hibernate", [""]]
-        cancel:    ["Cancel",    [""]]
+        lock:      ["Lock", ""]
+        signout:   ["Sign out", ""]
+        sleep:     ["Sleep", ""]
+        shutdown:  ["Shutdown", ""]
+        restart:   ["Restart", ""]
+        hibernate: ["Hibernate", ""]
+        cancel:    ["Cancel", ""]

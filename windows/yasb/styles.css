@@ -2,7 +2,7 @@
  *
  * Theme palette (catppuccin-mocha by default — matches AGS theme.scss).
  * To change theme: edit the variables block below or run a sync script
- * from windows/scripts/win.ps1 that mirrors the `theme` helper on Linux.
+ * from scripts/win/win.ps1 that mirrors the `theme` helper on Linux.
  */
 
 * {

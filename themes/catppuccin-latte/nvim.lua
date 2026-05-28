@@ -1,0 +1,18 @@
+return require("theme_apply").setup({
+  name = "catppuccin-latte",
+  background = "light",
+  colorscheme = "habamax",
+  lazyvim_colorscheme = "habamax",
+  colors = {
+    bg = "#eff1f5",
+    fg = "#4c4f69",
+    surface = "#e6e9ef",
+    surface2 = "#ccd0da",
+    muted = "#8c8fa1",
+    accent = "#8839ef",
+    accent2 = "#179299",
+    yellow = "#df8e1d",
+    red = "#d20f39",
+    blue = "#1e66f5",
+  },
+})

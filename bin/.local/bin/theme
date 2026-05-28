@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# dots:summary=Switch active visual theme across alacritty/waybar/wofi/mako/starship/ags/walker
+# dots:summary=Switch active visual theme across alacritty/waybar/wofi/mako/starship/ags/walker/tmux/vim/nvim/zsh
 # theme — switch the active visual theme across alacritty, waybar, wofi,
-#         mako, starship and AGS.
+#         mako, starship, AGS, walker, tmux, Vim, Neovim and Zsh.
 #
 # Usage:
 #   theme list             list available themes
@@ -16,6 +16,10 @@
 #   mako.config      colors block (included by mako config)
 #   starship.toml    full starship config
 #   ags.scss         SCSS palette ($bg, $fg, …) imported by ags/style.scss
+#   tmux.conf        tmux statusline/pane palette
+#   vim.vim          Vim highlight/statusline palette
+#   nvim.lua         Neovim highlight/statusline palette
+#   zsh.zsh          Antigen/Oh My Zsh prompt theme and fzf colors
 #
 # Adding a theme: copy one of the existing dirs, edit the colors, done.
 
@@ -76,7 +80,7 @@ _apply() {
         install -D -m 644 "$src/ags.scss" "$HOME/.config/ags/theme.scss"
     fi
 
-    # 7. Walker — palette importado por themes/default/style.css.
+    # 7. Walker — palette imported by themes/default/style.css.
     if [[ -f "$src/walker.css" ]]; then
         install -D -m 644 "$src/walker.css" \
             "$HOME/.config/walker/themes/default/theme.css"
@@ -88,13 +92,36 @@ _apply() {
             "$HOME/.config/fabric-shell/src/theme.css"
     fi
 
+    # 9. tmux — sourced by ~/.tmux.conf.
+    if [[ -f "$src/tmux.conf" ]]; then
+        install -D -m 644 "$src/tmux.conf" "$HOME/.config/tmux/theme.conf"
+    fi
+
+    # 10. Vim — sourced by ~/.vimrc.
+    if [[ -f "$src/vim.vim" ]]; then
+        install -D -m 644 "$src/vim.vim" "$HOME/.vim/theme.vim"
+    fi
+
+    # 11. Neovim — required as lua/theme.lua by every nvim distro.
+    if [[ -f "$src/nvim.lua" ]]; then
+        install -D -m 644 "$src/nvim.lua" "$HOME/.config/nvim/lua/theme.lua"
+    fi
+
+    # 12. Zsh — sourced before Antigen chooses the Oh My Zsh theme.
+    if [[ -f "$src/zsh.zsh" ]]; then
+        install -D -m 644 "$src/zsh.zsh" "$HOME/.config/zsh/theme.zsh"
+    fi
+
     echo "$name" > "$STATE_FILE"
 
     # Reload daemons.
     command -v makoctl >/dev/null   && makoctl reload 2>/dev/null || true
     pkill -SIGUSR2 waybar           2>/dev/null || true   # waybar config reload
+    command -v tmux >/dev/null && tmux has-session 2>/dev/null \
+        && tmux source-file "$HOME/.tmux.conf" 2>/dev/null || true
     # Alacritty has live_config_reload = true → picks up theme.toml on save.
     # Starship reloads automatically on next prompt.
+    # Vim/Neovim/Zsh pick up the new theme on next startup/reload.
     # AGS: dart-sass compiles SCSS at start, so a running instance needs restart.
     if pgrep -f 'gjs.*ags' >/dev/null 2>&1; then
         ags quit 2>/dev/null || true

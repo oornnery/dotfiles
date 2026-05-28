@@ -18,7 +18,6 @@
 
   "active_window_border": true,
   "auto_stack_by_category": true,
-  "auto_focus_follows_mouse": "Mouse",
   "focus_follows_mouse": "Komorebi",
   "mouse_follows_focus": true,
   "transparency": true,

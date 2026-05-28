@@ -28,3 +28,4 @@ vscode/.config/Code/User/*
 node_modules/
 @girs/
 theme.scss
+windows/yasb/*.log

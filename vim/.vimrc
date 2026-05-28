@@ -1,116 +1,275 @@
-" ~/.vimrc — vim (not neovim) config.
-"
-" Use case: emergency editor (sudoedit, recovery TTY, SSH to boxes without
-" neovim). Neovim is the daily driver — see ~/.config/nvim/.
-
-" ─── Auto-install vim-plug ─────────────────────────────────────────────────
-
-let s:plug = expand('~/.vim/autoload/plug.vim')
-if empty(glob(s:plug))
-    silent execute '!curl -fLo ' . s:plug . ' --create-dirs '
-        \ . 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-
-" ─── Plugins ───────────────────────────────────────────────────────────────
-
-call plug#begin('~/.vim/plugged')
-Plug 'tpope/vim-sensible'            " baseline modern defaults
-Plug 'tpope/vim-commentary'          " gcc / gc{motion} toggle comment
-Plug 'tpope/vim-surround'            " cs"' ds" ys{motion}{char}
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'              " :Files :Buffers :Rg
-call plug#end()
-
-" ─── Options ───────────────────────────────────────────────────────────────
+" ~/.vimrc
+" Vim native-only setup: no vim-plug, no external plugins.
+" Goal: solid emergency/daily Vim using only built-in features.
 
 set nocompatible
-set encoding=utf-8
+scriptencoding utf-8
 
-" UI
-set number relativenumber
-set ruler showcmd
-set cursorline
-set scrolloff=4
-set sidescrolloff=8
-set wildmenu wildmode=longest:full,full
+" Leader ----------------------------------------------------------------------
+let mapleader = " "
+let maplocalleader = "\\"
 
-" Search
-set incsearch hlsearch
-set ignorecase smartcase
-
-" Indent
+" Built-in runtime plugins ----------------------------------------------------
 filetype plugin indent on
-set expandtab smarttab autoindent
-set tabstop=4 softtabstop=4 shiftwidth=4
+syntax enable
+silent! packadd matchit
 
-" Mouse + clipboard (system clipboard if compiled with +clipboard)
-set mouse=a
+" netrw: built-in file explorer ----------------------------------------------
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_winsize = 28
+let g:netrw_altv = 1
+let g:netrw_keepdir = 0
+
+" UI --------------------------------------------------------------------------
+set encoding=utf-8
+set number relativenumber
+set cursorline
+set ruler showcmd
+set laststatus=2
+set scrolloff=8
+set sidescrolloff=8
+set splitright splitbelow
+set pumheight=12
+set wildmenu
+set wildmode=longest:full,full
+set list
+set listchars=tab:»\ ,trail:·,nbsp:␣,extends:›,precedes:‹
+set colorcolumn=100
+set nowrap
+set linebreak
+set breakindent
+if exists('+signcolumn')
+  set signcolumn=yes
+endif
+if has('termguicolors')
+  set termguicolors
+endif
+silent! colorscheme habamax
+
+" Editing ---------------------------------------------------------------------
+set expandtab smarttab autoindent smartindent
+set tabstop=2 softtabstop=2 shiftwidth=2 shiftround
+set backspace=indent,eol,start
+set formatoptions-=o
+set formatoptions+=j
+
+" Search ----------------------------------------------------------------------
+set ignorecase smartcase
+set incsearch hlsearch
+
+" Completion / command line ---------------------------------------------------
+set completeopt=menuone,noselect
+set path+=**
+set wildignore+=*/.git/*,*/node_modules/*,*/.venv/*,*/venv/*,*/target/*,*/dist/*,*/build/*,*.pyc,*.o,*.a,*.so
+
+" Files / persistence ---------------------------------------------------------
+set hidden
+set autoread
+set confirm
+set undofile
+set backup
+set writebackup
+set directory=~/.vim/swap//
+set backupdir=~/.vim/backup//
+set undodir=~/.vim/undo//
+silent! call mkdir(expand('~/.vim/swap'), 'p')
+silent! call mkdir(expand('~/.vim/backup'), 'p')
+silent! call mkdir(expand('~/.vim/undo'), 'p')
+
+" Clipboard: only when Vim was compiled with support.
 if has('clipboard')
-    set clipboard^=unnamed,unnamedplus
+  set clipboard^=unnamed,unnamedplus
 endif
 
-" Buffers / files
-set hidden                           " allow switching with unsaved changes
-set autoread                         " reload externally-modified files
-set backup
-set backupdir=~/.vim/backup//
-set directory=~/.vim/swap//
-set undofile
-set undodir=~/.vim/undo//
-silent! call mkdir(expand('~/.vim/backup'), 'p')
-silent! call mkdir(expand('~/.vim/swap'),   'p')
-silent! call mkdir(expand('~/.vim/undo'),   'p')
-
-" Performance
-set lazyredraw
-set ttyfast
+" Performance / behavior ------------------------------------------------------
 set updatetime=300
 set timeoutlen=500
+set ttyfast
 
-" Splits
-set splitright splitbelow
+" Spelling: enable per filetype below.
+set spelllang=en_us,pt_br
 
-" Colors
-syntax on
-set background=dark
-silent! colorscheme habamax            " ships with vim 9.x; falls back silently
+" Statusline: native, no plugin ----------------------------------------------
+set statusline=
+set statusline+=\ %f
+set statusline+=\ %m%r%h%w
+set statusline+=%=
+set statusline+=\ %{&filetype==#''?'noft':&filetype}
+set statusline+=\ %{&fileencoding==#''?&encoding:&fileencoding}
+set statusline+=\ %l:%c
+set statusline+=\ %p%%
 
-" ─── Keymaps ───────────────────────────────────────────────────────────────
+" Active theme drop-in written by the `theme` command.
+" It is loaded after the statusline so it can override status colors.
+if filereadable(expand('~/.vim/theme.vim'))
+  source ~/.vim/theme.vim
+endif
 
-let mapleader = ','
+" Commands --------------------------------------------------------------------
+command! TrimWhitespace call <SID>TrimTrailingWhitespace()
+command! -nargs=1 Search execute 'silent! vimgrep /' . escape(<q-args>, '/\') . '/gj **/*' | copen
+command! Term botright split | resize 14 | terminal
+command! MkSession mksession! .session.vim
+command! LoadSession source .session.vim
 
-" Save / quit
-nnoremap <leader>w :w<CR>
-nnoremap <leader>q :q<CR>
+" Keymaps ---------------------------------------------------------------------
+" Files / write / quit
+nnoremap <leader>w :write<CR>
+nnoremap <leader>q :quit<CR>
 nnoremap <leader>x :x<CR>
+nnoremap <leader>e :Lexplore<CR>
+nnoremap <leader>E :Explore<CR>
+nnoremap <leader>ff :find<Space>
+nnoremap <leader>sg :Search<Space>
 
-" Clear search highlight
-nnoremap <silent> <Esc><Esc> :nohlsearch<CR>
+" Buffers / quickfix
+nnoremap <leader>bb :ls<CR>:buffer<Space>
+nnoremap <leader>bd :bdelete<CR>
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
+nnoremap <leader>co :copen<CR>
+nnoremap <leader>cc :cclose<CR>
 
-" Move between windows with Ctrl-h/j/k/l (matches tmux/vim-tmux-navigator).
+" Windows
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+nnoremap <leader>sv :vsplit<CR>
+nnoremap <leader>sh :split<CR>
+nnoremap <leader>= <C-w>=
 
-" Visual indent keeps selection.
-vnoremap < <gv
-vnoremap > >gv
+" Editing
+nnoremap <silent> <Esc><Esc> :nohlsearch<CR>
+nnoremap <silent> gcc :<C-u>call <SID>ToggleComment(line('.'), line('.'))<CR>
+xnoremap <silent> gc :<C-u>call <SID>ToggleComment(line("'<"), line("'>"))<CR>
+xnoremap < <gv
+xnoremap > >gv
+nnoremap <leader>f gg=G``
+xnoremap <leader>f =
+nnoremap <leader>tw :setlocal wrap!<CR>
+nnoremap <leader>ts :setlocal spell!<CR>
 
-" fzf.vim bindings
-nnoremap <leader><space> :Files<CR>
-nnoremap <leader>b       :Buffers<CR>
-nnoremap <leader>r       :Rg<CR>
+" Terminal
+nnoremap <leader>tt :Term<CR>
+tnoremap <Esc><Esc> <C-\><C-n>
 
-" ─── Statusline (minimal) ──────────────────────────────────────────────────
+" Functions -------------------------------------------------------------------
+function! s:TrimTrailingWhitespace() abort
+  if index(['markdown', 'text', 'gitcommit'], &filetype) >= 0
+    return
+  endif
+  let l:view = winsaveview()
+  silent! keeppatterns %s/\s\+$//e
+  call winrestview(l:view)
+endfunction
 
-set laststatus=2
-set statusline=
-set statusline+=%#PmenuSel#
-set statusline+=\ %f                    " filename
-set statusline+=\ %m%r%h%w              " modified/readonly flags
-set statusline+=%=                      " right-align
-set statusline+=\ %y                    " filetype
-set statusline+=\ %l:%c                 " line:column
-set statusline+=\ %p%%\                 " percent through file
+function! s:CommentParts() abort
+  let l:cs = &commentstring
+  if empty(l:cs) || l:cs !~# '%s'
+    let l:fallback = {
+          \ 'vim': '" %s',
+          \ 'lua': '-- %s',
+          \ 'python': '# %s',
+          \ 'sh': '# %s',
+          \ 'bash': '# %s',
+          \ 'zsh': '# %s',
+          \ 'conf': '# %s',
+          \ 'dosini': '# %s',
+          \ 'yaml': '# %s',
+          \ 'toml': '# %s',
+          \ 'rust': '// %s',
+          \ 'go': '// %s',
+          \ 'javascript': '// %s',
+          \ 'typescript': '// %s',
+          \ 'jsonc': '// %s',
+          \ 'c': '// %s',
+          \ 'cpp': '// %s',
+          \ 'css': '/* %s */',
+          \ 'html': '<!-- %s -->',
+          \ 'markdown': '<!-- %s -->',
+          \ }
+    let l:cs = get(l:fallback, &filetype, '# %s')
+  endif
+  let l:parts = split(l:cs, '\V%s', 1)
+  return [get(l:parts, 0, '# '), get(l:parts, 1, '')]
+endfunction
+
+function! s:EscPattern(text) abort
+  return escape(a:text, '\.^$*[]~')
+endfunction
+
+function! s:IsCommented(line, left, right) abort
+  if empty(a:left)
+    return 0
+  endif
+  let l:body = substitute(a:line, '^\s*', '', '')
+  if l:body !~# '^' . s:EscPattern(a:left)
+    return 0
+  endif
+  if !empty(a:right) && l:body !~# s:EscPattern(a:right) . '\s*$'
+    return 0
+  endif
+  return 1
+endfunction
+
+function! s:ToggleComment(first, last) abort
+  let [l:left, l:right] = s:CommentParts()
+  let l:all_commented = 1
+
+  for lnum in range(a:first, a:last)
+    let l:line = getline(lnum)
+    if l:line =~# '^\s*$'
+      continue
+    endif
+    if !s:IsCommented(l:line, l:left, l:right)
+      let l:all_commented = 0
+      break
+    endif
+  endfor
+
+  for lnum in range(a:first, a:last)
+    let l:line = getline(lnum)
+    if l:line =~# '^\s*$'
+      continue
+    endif
+
+    let l:indent = matchstr(l:line, '^\s*')
+    let l:body = substitute(l:line, '^\s*', '', '')
+
+    if l:all_commented
+      let l:body = substitute(l:body, '^' . s:EscPattern(l:left), '', '')
+      if !empty(l:right)
+        let l:body = substitute(l:body, '\s*' . s:EscPattern(l:right) . '\s*$', '', '')
+      endif
+      call setline(lnum, l:indent . l:body)
+    else
+      if !empty(l:right)
+        call setline(lnum, l:indent . l:left . l:body . l:right)
+      else
+        call setline(lnum, l:indent . l:left . l:body)
+      endif
+    endif
+  endfor
+endfunction
+
+" Autocommands ----------------------------------------------------------------
+augroup native_config
+  autocmd!
+
+  autocmd BufWritePre * call <SID>TrimTrailingWhitespace()
+
+  autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') | execute 'normal! g`"' | endif
+
+  autocmd FileType markdown,text,gitcommit setlocal wrap linebreak spell textwidth=100
+  autocmd FileType gitcommit setlocal textwidth=72
+  autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 expandtab
+  autocmd FileType go,make setlocal tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab
+
+  if exists('##TerminalOpen')
+    autocmd TerminalOpen * setlocal nonumber norelativenumber signcolumn=no
+  endif
+augroup END

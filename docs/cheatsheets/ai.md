@@ -1,6 +1,6 @@
 # AI / LLM Stack Cheatsheet
 
-Setup by `scripts/arch/dev/llms.sh` (toggled via `ENABLE_*` in `arch.conf`).
+Setup by `scripts/llms.sh` or `scripts/arch/dev/llms.sh` (toggled via `ENABLE_*`).
 Launcher: `M+I` opens a walker picker over installed LLM CLIs → floats in alacritty.
 
 ## Quick reference
@@ -9,11 +9,12 @@ Launcher: `M+I` opens a walker picker over installed LLM CLIs → floats in alac
 | ------------- | -------- | ---------------------------------------------------------- |
 | Claude Code   | `claude` | `curl claude.ai/install.sh \| bash` · `claude` to launch  |
 | Codex         | `codex`  | AUR `openai-codex` or `npm i -g @openai/codex`            |
+| OpenCode      | `opencode` | `curl opencode.ai/install \| bash`; `/connect`, `/models` |
 | Antigravity   | `antigravity` | `curl antigravity.google/cli/install.sh \| bash`     |
 | Ollama        | `ollama` | `pacman -S ollama` + `systemctl enable --now ollama`      |
 | LM Studio     | (GUI)    | `paru -S lmstudio` (opt-in)                               |
 | RTK           | `rtk`    | `curl rtk-ai/rtk/install.sh \| sh` + `rtk init --global`  |
-| caveman       | (skill)  | `curl JuliusBrussee/caveman/install.sh \| bash`           |
+| caveman       | (skill)  | `npx skills add JuliusBrussee/caveman -a opencode -a codex` |
 | cavekit       | (plugin) | `git clone ~/.claude/plugins/cavekit`                     |
 | cavemem       | `cavemem`| `npm i -g cavemem` + `cavemem install`                    |
 
@@ -41,6 +42,17 @@ Skills + agents in `~/.claude/skills/` (caveman, cavekit lives here too).
 | `codex login`            | Authenticate                          |
 | `codex "<prompt>"`       | One-shot                              |
 | `codex --model <name>`   | Choose model explicitly               |
+
+## OpenCode
+
+| Command      | What                                  |
+| ------------ | ------------------------------------- |
+| `opencode`   | Launch interactive OpenCode           |
+| `/connect`   | Connect providers; choose OpenAI      |
+| `/models`    | List/select available models          |
+
+This is the preferred harness for generic skills. The setup script targets
+OpenCode first, while keeping Claude Code and Codex installed.
 
 ## Antigravity (Google CLI)
 

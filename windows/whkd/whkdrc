@@ -20,7 +20,7 @@ alt + return        : wt.exe                                  # terminal (Window
 alt + e             : explorer.exe                            # file manager
 alt + r             : PowerToys.exe --activate PowerToysRun   # launcher (PowerToys Run = walker analog)
 alt + space         : PowerToys.exe --activate PowerToysRun   # alt entry (matches Linux M+space)
-alt + b             : firefox.exe                             # browser
+alt + b             : brave.exe                               # browser (Brave; fallback: zen.exe / firefox.exe)
 alt + l             : rundll32.exe user32.dll,LockWorkStation # lock screen
 alt + shift + p     : powershell.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\power-menu.ps1"
 alt + m             : komorebic stop                          # exit komorebi (analog to "exit Hyprland")
@@ -30,7 +30,7 @@ alt + oem_3         : pwsh.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komo
 alt + shift + q     : komorebic close
 alt + t             : komorebic toggle-float
 alt + p             : komorebic toggle-monocle                # pseudo / monocle
-alt + j             : komorebic toggle-split-orientation
+alt + ctrl + v      : komorebic toggle-split-orientation      # was alt+j; conflicted with focus-down
 alt + f             : komorebic toggle-maximize               # fullscreen
 
 # Focus direction
@@ -49,9 +49,10 @@ alt + shift + right : komorebic move right
 alt + shift + up    : komorebic move up
 alt + shift + down  : komorebic move down
 
-# Cycle monitor (analog to M+Tab)
-alt + tab           : komorebic cycle-monitor next
-alt + shift + tab   : komorebic cycle-monitor previous
+# Cycle monitor. Alt+Tab kept as Windows native (we disabled browser-tabs in
+# core/qol-registry so Alt+Tab now only shows windows). Use Ctrl+Alt+Tab here.
+alt + ctrl + tab         : komorebic cycle-monitor next
+alt + ctrl + shift + tab : komorebic cycle-monitor previous
 
 # ─── Workspaces ────────────────────────────────────────────────────────────
 alt + 1             : komorebic focus-workspace 0
@@ -81,7 +82,7 @@ alt + scroll_up     : komorebic cycle-workspace previous
 alt + scroll_down   : komorebic cycle-workspace next
 
 # Layout cycling (BSP / Rows / Columns / Grid / VerticalStack / HorizontalStack)
-alt + ctrl + alt + l : komorebic cycle-layout next             # MCA+L analog
+alt + ctrl + shift + l : komorebic cycle-layout next           # MCA+L analog
 
 # Stack — komorebi's equivalent of "special workspace" / scratchpad
 alt + s             : komorebic toggle-workspace-layer
@@ -114,7 +115,7 @@ alt + i             : wt.exe -p "PowerShell" pwsh.exe -NoProfile -Command "claud
 
 # ─── Helpers ──────────────────────────────────────────────────────────────
 alt + shift + h     : pwsh.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\cheatsheet.ps1"
-alt + n             : code.exe "$Env:USERPROFILE\\obsidian\\daily.md"   # obsidian-note today analog
+alt + n             : Obsidian.exe                            # open Obsidian (daily-note analog)
 # Alt+\ → sidebar: PowerToys doesn't have one. Closest is "FancyZones overlay"
 # or open Action Center via Win+A — leaving unbound on Windows.
 
@@ -124,3 +125,20 @@ alt + n             : code.exe "$Env:USERPROFILE\\obsidian\\daily.md"   # obsidi
 # ─── Multimedia ───────────────────────────────────────────────────────────
 # Volume / mute / brightness / media keys all handled by Windows OEM keys.
 # Keep OS defaults — komorebi/whkd don't intercept them.
+
+# ─── Personal Win+* binds (lwin = left Win key) ──────────────────────────
+# Windows reserves many Win+* chords. The ones below are safe to use:
+#   - Win+Enter:   freed by core/qol-registry.ps1 (Narrator launch disabled)
+#   - Win+Y:       free in modern Windows
+#   - Win+Comma:   peek desktop (low-impact override)
+#   - Win+/:       free in non-IME locales (pt-BR ok)
+# DON'T override: Win+. (emoji), Win+; (emoji alt), Win+V (clipboard hist),
+# Win+L (lock), Win+E (Explorer), Win+R (run), Win+I (settings), Win+Tab.
+#
+# Reload after edit: `Stop-Process -Name whkd; whkd` (in pwsh).
+
+lwin + return         : wt.exe                                # Windows Terminal
+lwin + shift + return : wt.exe -p "PowerShell" pwsh           # new pwsh window
+lwin + y              : brave.exe                             # browser
+lwin + oem_2          : pwsh.exe -NoProfile -File "$Env:USERPROFILE\\.config\\komorebi\\cheatsheet.ps1"   # Win+/
+lwin + oem_comma      : code.exe                              # Win+,  -> VSCode
