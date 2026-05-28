@@ -1,21 +1,23 @@
 # Neovim
 
-Two configs live side-by-side as **stow packages**:
+Three configs live side-by-side as mutually exclusive stow packages:
 
-| Package        | Distro     | Source                                                          |
-| -------------- | ---------- | --------------------------------------------------------------- |
-| `nvim/`        | mini.nvim  | hand-rolled, mini.nvim modules ([init.lua](../../../nvim/.config/nvim/init.lua)) |
-| `nvim-lazyvim/`| LazyVim    | [LazyVim starter](https://github.com/LazyVim/starter) (clone)   |
+| Package      | Distro       | Shape |
+| ------------ | ------------ | ----- |
+| `nvim/`      | native       | Built-in Neovim only, no plugin manager |
+| `nvim.lazy/` | lazy.nvim    | Sources `nvim/` first, then adds plugins |
+| `nvim.mini/` | mini.nvim    | Separate mini.nvim-focused distro |
 
-Both target `~/.config/nvim` — you can only have one active at a time.
+All target `~/.config/nvim`, so only one should be stowed at a time.
 
-## Pick a distro
+## Pick A Distro
 
 Edit [`scripts/arch/arch.conf`](../../../scripts/arch/arch.conf):
 
 ```bash
-NVIM_DISTRO="mini"        # default
-# NVIM_DISTRO="lazyvim"
+NVIM_DISTRO="native"
+# NVIM_DISTRO="lazy"
+# NVIM_DISTRO="mini"
 ```
 
 Then re-run [`dev/stow.sh`](../../../scripts/arch/dev/stow.sh):
@@ -24,49 +26,48 @@ Then re-run [`dev/stow.sh`](../../../scripts/arch/dev/stow.sh):
 ./scripts/arch/arch.sh dev/stow
 ```
 
-It unstows the other and stows the chosen one. No data loss — both
-configs remain in the repo.
+## Native Base
 
-## mini.nvim (default)
+The native config is the source of truth for daily editor behavior:
 
-Lightweight, opinionated, native Lua. Plugins:
+- Leader is `Space`
+- Custom statusline and theme loader
+- `:Helpme`, `:Cheatsheet`, and `<Space>?`
+- Netrw explorer, quickfix search, terminal split, sessions
+- Native comment toggling and project-root helper
 
-- mini.basics — sane defaults
-- mini.surround — `sa`/`sd`/`sr` to add/delete/replace surrounds
-- mini.comment — `gcc` to toggle line comment
-- mini.pairs — auto pairs
-- mini.indentscope — visual indent scope
-- mini.animate — smooth scroll/cursor
-- mini.statusline — minimal statusline
-- LSP for Lua via `after/lsp/lua_ls.lua`
-- Markdown ftplugin
-- Snippets in `snippets/global.json`
+## lazy.nvim Variant
 
-Leader: `Space`. Run `:h mini.<module>` for help on each. Config lives
-in `nvim/.config/nvim/plugin/{10_options,20_keymaps,30_mini,40_plugins}.lua`.
+`nvim.lazy/` keeps the same native options, keymaps, statusline, cheatsheet,
+and theme behavior. It only adds plugin extras through lazy.nvim, such as:
 
-## LazyVim (alternative)
+- `mini.nvim` modules for surround, comment, pairs, indentscope, and animation
+- Harpoon pinned-file navigation
+- render-markdown.nvim
+- nvim-ufo folds
+- dial.nvim smart increment/decrement
+- smear-cursor.nvim cursor effect
 
-Heavier, plugin-rich, batteries included. Closer to what omarchy ships.
-After switching, on first launch:
+Run `:Lazy` to manage plugins.
 
-1. Lazy.nvim auto-installs everything (~30s)
-2. Mason auto-installs LSP servers, formatters, linters
+## mini.nvim Variant
 
-Leader: `Space`. Keymaps documented at <https://www.lazyvim.org/keymaps>.
+`nvim.mini/` remains a separate mini.nvim distro. Use it when you want a
+plugin-centered config instead of the strict native base.
 
-> NOTE: `nvim-lazyvim/` is a stub today — clone
-> <https://github.com/LazyVim/starter> into it on first setup.
+## Common Bindings
 
-## Common bindings (both distros)
-
-| Bind              | Action                            |
-| ----------------- | --------------------------------- |
-| `Space Space`     | find file                         |
-| `Space E`         | file explorer                     |
-| `Space G G`       | LazyGit (if `lazygit` installed)  |
-| `Space S F`       | live grep (ripgrep)               |
-| `K`               | LSP hover                         |
-
-Sudoedit alias: `sudoedit /etc/foo.conf` opens neovim as root via PAM
-(no env leak).
+| Bind          | Action |
+| ------------- | ------ |
+| `<Space>w`    | Write file |
+| `<Space>q`    | Quit window |
+| `<Space>e`    | Toggle netrw explorer |
+| `<Space>ff`   | Native `:find` file lookup |
+| `<Space>sg`   | Project search into quickfix |
+| `<Space>bb`   | Switch buffer |
+| `[b` / `]b`   | Previous / next buffer |
+| `[q` / `]q`   | Previous / next quickfix item |
+| `<Space>sv`   | Vertical split |
+| `<Space>sh`   | Horizontal split |
+| `<Space>tt`   | Terminal split |
+| `<Space>?`    | Cheatsheet |

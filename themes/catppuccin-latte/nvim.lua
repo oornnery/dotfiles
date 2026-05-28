@@ -2,7 +2,6 @@ return {
   name = "catppuccin-latte",
   background = "light",
   colorscheme = "dotfiles",
-  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#eff1f5",
     fg = "#4c4f69",

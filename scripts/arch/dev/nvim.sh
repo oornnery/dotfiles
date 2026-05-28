@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dev/nvim.sh — neovim + stow the chosen distro.
 #
-# Picks between native (nvim/), mini.nvim (nvim.mini/) and LazyVim
+# Picks between native (nvim/), mini.nvim (nvim.mini/) and lazy.nvim extras
 # (nvim.lazy/) based on $NVIM_DISTRO. All target ~/.config/nvim, so they
 # are mutually exclusive — switching is `NVIM_DISTRO=lazy ./nvim.sh`.
 
@@ -57,7 +57,7 @@ done
 
 stow_safe "$pkg"
 
-# LazyVim auto-installs plugins on first launch. Native Neovim has no plugin
+# The lazy.nvim variant auto-installs plugins on first launch. Native Neovim has no plugin
 # manager, and mini.nvim keeps its own lightweight setup.
 
 log::ok "Neovim ($NVIM_DISTRO) setup completed"

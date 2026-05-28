@@ -2,7 +2,6 @@ return {
   name = "gruvbox",
   background = "dark",
   colorscheme = "dotfiles",
-  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#282828",
     fg = "#ebdbb2",

@@ -2,7 +2,6 @@ return {
   name = "nord",
   background = "dark",
   colorscheme = "dotfiles",
-  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#2e3440",
     fg = "#d8dee9",

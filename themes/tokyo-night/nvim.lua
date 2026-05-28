@@ -2,7 +2,6 @@ return {
   name = "tokyo-night",
   background = "dark",
   colorscheme = "dotfiles",
-  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#1a1b26",
     fg = "#c0caf5",

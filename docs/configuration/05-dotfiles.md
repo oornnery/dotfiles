@@ -15,8 +15,9 @@ See also [docs/stow.md](../cheatsheets/stow.md) for the tool cheatsheet.
 | `tmux/`         | `~/.tmux.conf`                                |
 | `alacritty/`    | `~/.config/alacritty/alacritty.toml`          |
 | `hyprland/`     | `~/.config/hypr/{hyprland,hypridle,hyprlock,bindings,monitors}.conf` |
-| `nvim/`         | `~/.config/nvim/` (mini.nvim distro)          |
-| `nvim-lazyvim/` | `~/.config/nvim/` (LazyVim distro) — mutually exclusive with `nvim/` |
+| `nvim/`         | `~/.config/nvim/` (native, no plugins)        |
+| `nvim.lazy/`    | `~/.config/nvim/` (native base + lazy.nvim plugins) |
+| `nvim.mini/`    | `~/.config/nvim/` (mini.nvim distro)          |
 | `git/`          | `~/.gitconfig`                                |
 | `editor/`       | `~/.config/Code/`, `~/.config/Zed/`           |
 | `fabric/`       | `~/.config/fabric-shell/`                     |

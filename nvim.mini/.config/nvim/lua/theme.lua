@@ -5,7 +5,6 @@ function M.setup(spec)
 
   M.name = spec.name or "dotfiles"
   M.colorscheme = spec.colorscheme or "dotfiles"
-  M.lazyvim_colorscheme = spec.lazyvim_colorscheme or M.colorscheme
 
   local function hl(group, opts)
     pcall(vim.api.nvim_set_hl, 0, group, opts)
@@ -221,7 +220,6 @@ return M.setup(spec or {
   name = "catppuccin-mocha",
   background = "dark",
   colorscheme = "dotfiles",
-  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#1e1e2e",
     fg = "#cdd6f4",

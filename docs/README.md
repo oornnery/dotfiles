@@ -17,7 +17,7 @@ but tailored to this hardware and workflow.
 ## Applications
 
 - [Terminal](applications/01-terminal.md) — alacritty + tmux + ghostty
-- [Neovim](applications/02-neovim.md) — mini.nvim + LazyVim alternative
+- [Neovim](applications/02-neovim.md) — native base, lazy.nvim extras, mini.nvim alternative
 - [Shell Tools](applications/03-shell-tools.md) — fzf, zoxide, eza, bat, fd, ripgrep
 - [Shell Functions](applications/04-shell-functions.md) — `compress`, `iso2sd`, `fip`, …
 - [TUIs](applications/05-tuis.md) — lazygit, lazydocker, btop, bluetui, impala

@@ -18,7 +18,9 @@ Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Sto
 
 - `bash/` → `.bashrc`
 - `zsh/` → `.zshrc` (Oh My Zsh + plugins)
-- `nvim/` → Neovim configuration (LazyVim-based)
+- `nvim/` → native Neovim configuration
+- `nvim.lazy/` → native Neovim base plus lazy.nvim plugin extras
+- `nvim.mini/` → mini.nvim-based Neovim distro
 - `editor/` → VS Code and Zed settings for the Windows setup
 - `docs/` → Full reference (basics, applications, configuration, cheatsheets)
 - `scripts/debian.sh` → Debian bootstrap script
@@ -86,10 +88,10 @@ stow -D -v -t ~ zsh
 
 ## Neovim
 
-- Config lives in `nvim/.config/nvim`
-- Main entrypoint: `init.lua`
-- Plugin manager: `lazy.nvim` (via LazyVim)
-- Active `mini.nvim` modules: `basics`, `surround`, `comment`, `pairs`, `indentscope`, `animate`, `statusline`
+- `nvim/` is the native base: no plugin manager, built-in features only.
+- `nvim.lazy/` loads `nvim/` first, then adds lazy.nvim plugins.
+- `nvim.mini/` is a separate mini.nvim distro.
+- All three target `~/.config/nvim`, so stow only one at a time.
 
 ## What I use (stack)
 
@@ -97,7 +99,7 @@ stow -D -v -t ~ zsh
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | Shell                | [zsh](https://www.zsh.org/) + [Oh My Zsh](https://ohmyz.sh/)                                                                                                   | Main shell and terminal productivity   |
 | Shell fallback       | [bash](https://www.gnu.org/software/bash/)                                                                                                                     | Compatibility and scripting            |
-| Editor               | [Neovim](https://neovim.io/) + [LazyVim](https://www.lazyvim.org/)                                                                                             | Development and text editing           |
+| Editor               | [Neovim](https://neovim.io/) with native/lazy.nvim/mini.nvim dotfile variants                                                                                   | Development and text editing           |
 | GUI editors          | [VS Code](https://code.visualstudio.com/) + [Zed](https://zed.dev/)                                                                                            | Windows editor setup                   |
 | Multiplexer          | [tmux](https://github.com/tmux/tmux)                                                                                                                           | Terminal sessions and splits           |
 | Terminal UI          | [fastfetch](https://github.com/fastfetch-cli/fastfetch)                                                                                                        | System summary on terminal startup     |
@@ -133,16 +135,15 @@ stow -D -v -t ~ zsh
 - `ls` / `ll` / `tree` → `eza`-based versions
 - `cat` / `catp` → `batcat`-based versions
 
-### Neovim / LazyVim (useful shortcuts)
-
-> Since you use the LazyVim base and have no extra custom keymaps yet, the shortcuts below are common defaults.
+### Neovim (useful shortcuts)
 
 - `<Space>` = leader
 - `<Space>ff` → find files
-- `<Space>fg` → grep in project
+- `<Space>sg` → grep in project with native quickfix
 - `<Space>e` → file explorer
 - `<Space>w` → save
-- `<Space>qq` → quit all
+- `<Space>q` → quit window
+- `<Space>?` → cheatsheet
 
 ### mini.nvim (active modules)
 

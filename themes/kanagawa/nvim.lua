@@ -2,7 +2,6 @@ return {
   name = "kanagawa",
   background = "dark",
   colorscheme = "dotfiles",
-  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#1f1f28",
     fg = "#dcd7ba",

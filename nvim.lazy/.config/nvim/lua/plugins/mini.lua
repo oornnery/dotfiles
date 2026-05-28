@@ -17,10 +17,7 @@ return {
       require("mini.indentscope").setup({ symbol = "▎" })
       require("mini.animate").setup() -- Scroll/resize suaves
 
-      -- Statusline customizável
-      require("mini.statusline").setup({
-        use_icons = vim.g.icons_enabled or false,
-      })
+      -- Statusline stays the same as native nvim: lua/statusline.lua.
     end,
   },
 }

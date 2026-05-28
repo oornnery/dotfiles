@@ -1,156 +1,88 @@
-# Neovim (LazyVim) Cheatsheet
+# Neovim Cheatsheet
 
-LazyVim distro + lazy.nvim plugin manager. Config in
-`~/.config/nvim/lua/{config,plugins}/`. Leader is `<Space>`.
+The native config is the base. `nvim.lazy/` loads the same base first and then
+adds plugins with lazy.nvim.
 
-## Plugin manager
+## Core
 
-| Command        | What it does                                       |
-| -------------- | -------------------------------------------------- |
-| `:Lazy`        | Plugin manager UI (status, sync, install, etc.)    |
-| `:Lazy sync`   | Update + install all plugins                       |
-| `:Lazy clean`  | Remove unused plugins                              |
-| `:Lazy profile`| Plugin startup-time profile                        |
-| `:Mason`       | LSP / formatter / linter installer (under LazyVim) |
-| `:checkhealth` | Diagnose missing deps, broken setups               |
+| Bind          | Action |
+| ------------- | ------ |
+| `<Space>`     | Leader |
+| `<Space>w`    | Write file |
+| `<Space>q`    | Quit window |
+| `<Space>x`    | Write and quit |
+| `<Space>?`    | Open cheatsheet |
+| `:Helpme`     | Open helper |
+| `:Cheatsheet` | Open helper |
 
-## LazyVim core keymaps (telescope, neo-tree, buffers)
+## Files And Search
 
-| Key         | Action                              |
-| ----------- | ----------------------------------- |
-| `<Space>ff` | Find files (telescope)              |
-| `<Space>fg` | Live grep in project                |
-| `<Space>fb` | Find buffers                        |
-| `<Space>fr` | Recent files                        |
-| `<Space>fc` | Find config files                   |
-| `<Space>fn` | Find notifications                  |
-| `<Space>e`  | Toggle file explorer (neo-tree)     |
-| `<Space>w`  | Save file                           |
-| `<Space>qq` | Quit all                            |
-| `<Space>bd` | Delete buffer                       |
-| `<Space>cd` | Change directory (CWD)              |
-| `<Space>gg` | Open lazygit                        |
-| `<Space>l`  | LazyVim menu                        |
-| `<Space>x`  | Diagnostics / trouble panel         |
+| Bind          | Action |
+| ------------- | ------ |
+| `<Space>e`    | Toggle netrw explorer |
+| `<Space>E`    | Open netrw explorer |
+| `<Space>ff`   | Find file with native `:find` |
+| `<Space>sg`   | Search project with native `:vimgrep` |
+| `<Space>rr`   | Change cwd to project root |
 
-## Custom plugins (this dotfiles repo)
+## Buffers And Quickfix
 
-### Cursor effect — smear-cursor.nvim
+| Bind          | Action |
+| ------------- | ------ |
+| `<Space>bb`   | List and switch buffer |
+| `<Space>bd`   | Delete buffer |
+| `[b` / `]b`   | Previous / next buffer |
+| `[q` / `]q`   | Previous / next quickfix item |
+| `<Space>co`   | Open quickfix |
+| `<Space>cc`   | Close quickfix |
 
-| Key                | Action                                  |
-| ------------------ | --------------------------------------- |
-| (automatic)        | Smooth cursor trail effect while moving |
+## Windows And Terminal
 
-Config in `lua/plugins/cursor-effects.lua`. Tune `stiffness` /
-`trailing_exponent` to adjust trail length and opacity.
+| Bind          | Action |
+| ------------- | ------ |
+| `Ctrl-h/j/k/l`| Move between windows |
+| `<Space>sv`   | Vertical split |
+| `<Space>sh`   | Horizontal split |
+| `<Space>=`    | Equalize windows |
+| `<Space>tt`   | Terminal split |
+| `Esc Esc`     | Leave terminal mode / clear search |
 
-### Markdown rendering — render-markdown.nvim
+## Editing
 
-Renders headings / tables / code blocks / lists inline while editing MD.
-Anti-conceal enabled: shows raw markup on the cursor line so you can edit
-without losing context.
+| Bind          | Action |
+| ------------- | ------ |
+| `gcc`         | Toggle comment line |
+| `gc`          | Toggle comment selection |
+| `<` / `>`     | Indent visual selection and keep it selected |
+| `<Space>f`    | Reindent file or visual selection |
+| `<Space>tw`   | Toggle wrap |
+| `<Space>ts`   | Toggle spell |
 
-### Harpoon (v2) — pinned-file jumper
+## lazy.nvim Extras
 
-| Bind          | Action                          |
-| ------------- | ------------------------------- |
-| `<leader>ha`  | Add current file to list        |
-| `<leader>hh`  | Open Harpoon quick menu         |
-| `<leader>1..4`| Jump to pinned slot 1-4         |
-| `<leader>hn`  | Cycle to next pinned            |
-| `<leader>hp`  | Cycle to previous pinned        |
+Only in `nvim.lazy/`:
 
-> List is per-project (cwd-scoped). Persists in `~/.local/share/nvim/harpoon/`.
+| Bind           | Action |
+| -------------- | ------ |
+| `:Lazy`        | Plugin manager UI |
+| `<leader>ha`   | Harpoon add file |
+| `<leader>hh`   | Harpoon menu |
+| `<leader>1..4` | Harpoon jump to pinned slot |
+| `<leader>hn`   | Harpoon next |
+| `<leader>hp`   | Harpoon previous |
+| `zR`           | Open all folds with nvim-ufo |
+| `zM`           | Close all folds with nvim-ufo |
+| `zK`           | Peek fold or LSP hover |
+| `Ctrl-a`       | dial.nvim increment |
+| `Ctrl-x`       | dial.nvim decrement |
 
-### nvim-ufo — modern folding
+## Useful Commands
 
-| Key | Action                                          |
-| --- | ----------------------------------------------- |
-| `zR`| Open all folds                                  |
-| `zM`| Close all folds                                 |
-| `zK`| Peek folded lines (or LSP hover if not folded)  |
-| `zc`| Close fold under cursor                         |
-| `zo`| Open fold under cursor                          |
-| `za`| Toggle fold under cursor                        |
-
-Folds use LSP for languages with smart folding (TS/Go/Rust/…),
-treesitter+indent fallback for vim/python/lua. Indicator on folded blocks
-shows `+N lines` count.
-
-### dial.nvim — smart Ctrl-a / Ctrl-x
-
-| Bind            | Action                                                 |
-| --------------- | ------------------------------------------------------ |
-| `Ctrl + a`      | Increment (number / bool / date / day / month / hex)   |
-| `Ctrl + x`      | Decrement (same)                                       |
-| `g Ctrl + a/x`  | Cumulative (each line of visual selection by +N)       |
-
-Examples: cursor on `true` → `Ctrl-a` → `false`. On `2026-05-21` → next day.
-On `Monday` → `Tuesday`. On `#1a1b26` → bump hex by 1.
-
-## mini.nvim modules (active here)
-
-| Module             | What                                              |
-| ------------------ | ------------------------------------------------- |
-| `mini.basics`      | gdelete, gwipe, gmove                             |
-| `mini.surround`    | `gsa<obj>` add, `gsd<obj>` delete, `gsr` replace  |
-| `mini.comment`     | `gcc` line, `gc<motion>` over motion (treesitter) |
-| `mini.pairs`       | Auto-close `()` `[]` `{}` `""` etc.               |
-| `mini.indentscope` | `▎` symbol shows indent context                   |
-| `mini.animate`     | Smooth scroll/resize/cursor motion (subtle)       |
-| `mini.statusline`  | Lightweight bottom statusline                     |
-
-## Useful built-in commands
-
-| Command               | What                                  |
-| --------------------- | ------------------------------------- |
-| `:Telescope <picker>` | Run any telescope picker explicitly   |
-| `:Trouble`            | Diagnostics / quickfix / lsp_refs UI  |
-| `:Mason`              | LSP / DAP / formatter installer       |
-| `:LspInfo`            | Active LSP clients for buffer         |
-| `:LspRestart`         | Restart an LSP server                 |
-| `:Format`             | Format with conform (or LSP fallback) |
-| `:Lazy reload <name>` | Hot-reload a single plugin            |
-
-## Window / buffer / tab management
-
-| Bind          | Action                       |
-| ------------- | ---------------------------- |
-| `Ctrl-w h/j/k/l` | Move focus left/down/up/right |
-| `Ctrl-w v`    | Vertical split               |
-| `Ctrl-w s`    | Horizontal split             |
-| `Ctrl-w =`    | Equalize sizes               |
-| `Ctrl-w q`    | Close window                 |
-| `Ctrl-w o`    | Close all OTHER windows      |
-| `<S-h>` / `<S-l>` | Prev / next buffer       |
-| `[b` / `]b`   | Prev / next buffer (alt)     |
-| `<leader>bp`  | Toggle pin buffer (bufferline) |
-| `<leader>bo`  | Close all OTHER buffers      |
-
-## Examples
-
-```vim
-" Sync after editing plugin specs
-:Lazy sync
-
-" Quickly switch between 4 active files via harpoon
-<Space>ha       " add current
-<Space>1        " jump back to slot 1
-
-" Smart incrementing
-" In a markdown file with `- [ ] task` → cursor on the bracket → Ctrl-a → `- [x] task`
-
-" Peek a fold without opening it
-zK              " (ufo)
-```
-
-## Tips
-
-| Tip                                              | Why it helps                            |
-| ------------------------------------------------ | --------------------------------------- |
-| Keep plugin specs short — one file per topic     | `:Lazy reload` works per file           |
-| `:Lazy profile` after adding 5+ plugins          | Catches slow startup early              |
-| Harpoon for the 3-4 files you touch most         | Cuts switching time by 90%              |
-| `mini.animate` + `smear-cursor` — pick ONE       | They can compound and feel laggy        |
-| `:checkhealth` before debugging weirdness        | First-line triage for misconfig         |
-| Use treesitter text objects (`vif`, `daf`, …)    | Faster than visual + manual select      |
+| Command            | Action |
+| ------------------ | ------ |
+| `:Root`            | Change cwd to project root |
+| `:Search text`     | Search project into quickfix |
+| `:TrimWhitespace`  | Trim trailing whitespace |
+| `:Term`            | Open terminal split |
+| `:MkSession`       | Save `.session.vim` |
+| `:LoadSession`     | Load `.session.vim` |

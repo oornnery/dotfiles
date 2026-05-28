@@ -29,7 +29,7 @@ VIM_DISTRO="${VIM_DISTRO:-native}"
 # Which Neovim dotfiles package should be linked?
 #   native -> stow nvim/       (plain Neovim, no plugin manager)
 #   mini   -> stow nvim.mini/  (mini.nvim based config)
-#   lazy   -> stow nvim.lazy/  (LazyVim based config)
+#   lazy   -> stow nvim.lazy/  (native base + lazy.nvim plugins)
 NVIM_DISTRO="${NVIM_DISTRO:-native}"
 
 # 0: ask for a password when creating the user.

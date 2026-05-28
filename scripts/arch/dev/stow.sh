@@ -47,7 +47,7 @@ case "$VIM_DISTRO" in
         ;;
 esac
 
-# Neovim: native config, mini.nvim or LazyVim — mutually exclusive.
+# Neovim: native config, mini.nvim or lazy.nvim extras — mutually exclusive.
 case "$NVIM_DISTRO" in
     native|plain|basic) packages+=(nvim) ;;
     mini|minimal)       packages+=(nvim.mini) ;;

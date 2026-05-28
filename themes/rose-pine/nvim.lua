@@ -2,7 +2,6 @@ return {
   name = "rose-pine",
   background = "dark",
   colorscheme = "dotfiles",
-  lazyvim_colorscheme = "dotfiles",
   colors = {
     bg = "#191724",
     fg = "#e0def4",
