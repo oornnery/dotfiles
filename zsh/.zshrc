@@ -3,6 +3,23 @@
 # Put aliases, completions, plugins, keybindings, prompt, and interactive UX here.
 
 # -------------------------------
+# tmux auto-start
+# -------------------------------
+# Attach to (or create) the "main" tmux session for interactive terminals.
+# Runs first so plugins/theme load once — inside tmux $TMUX is set and this is
+# skipped. Skips VSCode's terminal, bare/dumb TERMs, and when
+# DISABLE_TMUX_AUTOSTART=1 (set that to opt a terminal out).
+if [[ -z "${TMUX:-}" ]] \
+   && [[ -o interactive ]] \
+   && [[ "${DISABLE_TMUX_AUTOSTART:-0}" != 1 ]] \
+   && [[ "${TERM_PROGRAM:-}" != "vscode" ]] \
+   && [[ -z "${VSCODE_INJECTION:-}" ]] \
+   && [[ "$TERM" != "dumb" && "$TERM" != "linux" ]] \
+   && command -v tmux >/dev/null 2>&1; then
+  exec tmux new-session -A -s main
+fi
+
+# -------------------------------
 # Antigen + Oh My Zsh
 # -------------------------------
 
@@ -38,15 +55,35 @@ if [[ -f "$ANTIGEN_HOME/antigen.zsh" ]]; then
   antigen bundle zsh-users/zsh-completions
   antigen bundle zsh-users/zsh-autosuggestions
   antigen bundle Aloxaf/fzf-tab
+  # forgit: antigen's auto-clone is flaky here (leaves an empty dir → "Error!
+  # Activate logging" every shell). Pre-clone so antigen just sources it.
+  [[ -f "$ANTIGEN_HOME/bundles/wfxr/forgit/forgit.plugin.zsh" ]] \
+    || { rm -rf "$ANTIGEN_HOME/bundles/wfxr/forgit"; git clone --depth 1 -q https://github.com/wfxr/forgit "$ANTIGEN_HOME/bundles/wfxr/forgit" 2>/dev/null; }
   antigen bundle wfxr/forgit
   antigen bundle zdharma-continuum/fast-syntax-highlighting
   antigen bundle zsh-users/zsh-history-substring-search
 
-  # Oh My Zsh theme managed by Antigen.
-  antigen theme "$ANTIGEN_THEME"
+  # Prompt: Starship drives it when installed (see the Starship block below);
+  # otherwise fall back to the Antigen/Oh-My-Zsh theme.
+  command -v starship >/dev/null 2>&1 || antigen theme "$ANTIGEN_THEME"
   antigen apply
 else
   print -P "%F{yellow}Antigen not found at $ANTIGEN_HOME/antigen.zsh%f"
+fi
+
+# -------------------------------
+# Starship prompt
+# -------------------------------
+# Borderless prompt with git/lang icons, themed per palette via
+# ~/.config/starship.toml (linked by `dots theme set`). Deferred through
+# zsh-vi-mode's init hook so vi-mode can't clobber it; immediate when zvm absent.
+if command -v starship >/dev/null 2>&1; then
+  _dotfiles_starship_init() { eval "$(starship init zsh)"; }
+  if (( $+parameters[zvm_after_init_commands] )); then
+    zvm_after_init_commands+=(_dotfiles_starship_init)
+  else
+    _dotfiles_starship_init
+  fi
 fi
 
 # zsh-history-substring-search: bind ↑/↓ to substring search after a query.
@@ -146,8 +183,8 @@ alias rm='rm -i'
 # gum prompt fires consistently for interactive commands AND for any
 # helper that wraps sudo. Bash scripts still get the plain prompt
 # (they don't inherit zsh functions); use `sudo -A` explicitly there.
-if [[ -x "$HOME/.local/bin/sudo-askpass" ]]; then
-    export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass"
+if [[ -x "$HOME/.local/lib/dots/askpass" ]]; then
+    export SUDO_ASKPASS="$HOME/.local/lib/dots/askpass"
     sudo() { command sudo -A "$@" }
 fi
 
@@ -233,11 +270,20 @@ mkcd() {
 # Prompt / UI extras
 # -------------------------------
 
-# Show fastfetch only once per login/session tree.
-# This avoids visual noise in every subshell.
-if [[ -o interactive ]] && [[ -z "${FASTFETCH_SHOWN:-}" ]]; then
-  export FASTFETCH_SHOWN=1
-  command -v fastfetch >/dev/null 2>&1 && fastfetch
+# Show fastfetch once per "terminal": once per tmux window (not on every split
+# pane), else once per non-tmux shell tree. Inside tmux we key off a *window*
+# option instead of an exported env var — an exported var gets captured into
+# tmux's global environment and would then suppress fastfetch in every pane.
+if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
+  if [[ -n "${TMUX:-}" ]]; then
+    if [[ "$(tmux show-options -wqv @fastfetch_shown 2>/dev/null)" != 1 ]]; then
+      tmux set-option -w @fastfetch_shown 1 2>/dev/null
+      fastfetch
+    fi
+  elif [[ -z "${FASTFETCH_SHOWN:-}" ]]; then
+    export FASTFETCH_SHOWN=1
+    fastfetch
+  fi
 fi
 
 # -------------------------------
