@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+# dots:summary=On-demand info notifications (date/weather/battery/network/system/volume/brightness)
+# dots:args=date|weather|battery|network|system|volume|brightness
+#
+# Bodies use pango markup (mako config has `markup=1`).
+set -u
+
+WEATHER_CITY="${WEATHER_CITY:-Salvador}"
+
+_notify() {
+    local title="$1" body="$2" icon="${3:-dialog-information}" urgency="${4:-normal}"
+    dots notify "$title" "$body" -a notice -i "$icon" -u "$urgency" -t 6000
+}
+
+_battery_icon() {
+    local cap="$1" status="$2"
+    if [[ "$status" == "Charging" ]]; then echo "battery-good-charging"
+    elif (( cap >= 80 )); then echo "battery-full"
+    elif (( cap >= 50 )); then echo "battery-good"
+    elif (( cap >= 25 )); then echo "battery-low"
+    else                       echo "battery-empty"
+    fi
+}
+
+case "${1:-help}" in
+    date)
+        line1="$(LC_TIME=pt_BR.UTF-8 date '+%A, %d de %B %Y')"
+        line2="$(date '+%H:%M:%S · semana %V')"
+        _notify "󰃭 $(date '+%H:%M')" "<b>${line1}</b>\n<small>${line2}</small>" "x-office-calendar" ;;
+
+    weather)
+        if ! command -v curl >/dev/null; then
+            _notify "Weather" "<i>curl not installed</i>" "weather-severe" "critical"; exit 1
+        fi
+        out="$(curl -fsSL --max-time 5 \
+            "https://wttr.in/${WEATHER_CITY}?format=%C+%t+(feels+%f)\\n%w+·+humidity+%h" 2>/dev/null)"
+        if [[ -z "$out" ]]; then
+            _notify "󰖙 Weather" "<i>could not reach wttr.in</i>" "weather-severe"
+        else
+            body="$(printf '%s' "$out" | sed 's/&/\&amp;/g; s/\\n/\n/g')"
+            _notify "󰖙 ${WEATHER_CITY}" "$body" "weather-clear"
+        fi ;;
+
+    battery)
+        cap=""; status=""; body=""
+        if [[ -d /sys/class/power_supply/BAT0 ]]; then
+            cap="$(cat /sys/class/power_supply/BAT0/capacity)"
+            status="$(cat /sys/class/power_supply/BAT0/status)"
+            body="<b>${status}</b> · <b>${cap}%</b>"
+            if command -v acpi >/dev/null && acpi -b 2>/dev/null | grep -q .; then
+                rest="$(acpi -b | sed -E 's/^Battery [0-9]+: [^,]+, [0-9]+%, ?//')"
+                [[ -n "$rest" ]] && body="$body\n<small>${rest}</small>"
+            fi
+        elif command -v acpi >/dev/null && acpi -b 2>/dev/null | grep -q .; then
+            body="$(acpi -b | sed 's/^Battery [0-9]*: //')"
+        else
+            body="<i>No battery detected</i>"
+        fi
+        icon="$(_battery_icon "${cap:-0}" "${status:-Unknown}")"
+        urgency="normal"
+        [[ -n "$cap" && "$cap" -le 15 && "$status" != "Charging" ]] && urgency="critical"
+        _notify "󰁹 Battery" "$body" "$icon" "$urgency" ;;
+
+    network)
+        if command -v nmcli >/dev/null; then
+            body="$(nmcli -t -f NAME,TYPE,DEVICE c show --active \
+                | awk -F: '{printf "<b>%s</b> <small>(%s · %s)</small>\n", $1, $2, $3}')"
+            [[ -z "$body" ]] && body="<i>No active connection</i>"
+            if command -v iwctl >/dev/null; then
+                signal="$(iwctl station "$(iwctl device list 2>/dev/null | awk '/station/{print $2; exit}')" show 2>/dev/null \
+                    | awk '/AverageRSSI/ {print $2; exit}')"
+                [[ -n "$signal" ]] && body="${body}\n<small>RSSI ${signal} dBm</small>"
+            fi
+        else
+            body="$(ip -4 -o addr show \
+                | awk '$2 != "lo" && $3 == "inet" {split($4,a,"/"); printf "<b>%s</b>: %s\n", $2, a[1]}')"
+        fi
+        _notify "󰖩 Network" "$body" "network-wireless" ;;
+
+    system)
+        uptime_s="$(uptime -p | sed 's/up //')"
+        load="$(cut -d' ' -f1-3 /proc/loadavg)"
+        mem="$(free -h | awk '/^Mem:/ {printf "%s / %s", $3, $2}')"
+        disk="$(df -h / | awk 'NR==2 {printf "%s / %s (%s)", $3, $2, $5}')"
+        _notify "󰍛 System" "<b>Uptime:</b> <small>${uptime_s}</small>\n<b>Load:</b> <small>${load}</small>\n<b>RAM:</b> <small>${mem}</small>\n<b>Disk /:</b> <small>${disk}</small>" "utilities-system-monitor" ;;
+
+    volume)
+        if command -v wpctl >/dev/null; then
+            vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2}')"
+            pct="$(awk -v v="$vol" 'BEGIN {printf "%d", v*100}')"
+            muted_label=""
+            wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && muted_label=" <i>(muted)</i>"
+            dots notify "󰕾 Volume" "<b>${pct}%</b>${muted_label}" -a notice -i audio-volume-medium -t 1500 \
+                -h "string:x-canonical-private-synchronous:volume" -h "int:value:$pct"
+        else
+            _notify "Volume" "<i>wpctl not found</i>" "audio-volume-muted"
+        fi ;;
+
+    brightness)
+        if command -v brightnessctl >/dev/null; then
+            pct="$(brightnessctl -m | cut -d, -f4 | tr -d '%')"
+            dots notify "󰃞 Brightness" "<b>${pct}%</b>" -a notice -i display-brightness -t 1500 \
+                -h "string:x-canonical-private-synchronous:brightness" -h "int:value:$pct"
+        else
+            _notify "Brightness" "<i>brightnessctl not found</i>" "dialog-error"
+        fi ;;
+
+    help|"")
+        cat <<EOF
+dots notice — on-demand info notifications
+
+Usage: dots notice <topic>
+
+Topics:
+  date        calendar + clock (pango markup)
+  weather     wttr.in (city: \$WEATHER_CITY, default: $WEATHER_CITY)
+  battery     charge % + status + ETA (urgency=critical if ≤15%)
+  network     active connections + Wi-Fi RSSI
+  system      uptime + load + RAM + disk
+  volume      PipeWire sink % (OSD-style with progress bar)
+  brightness  backlight % (OSD-style with progress bar)
+EOF
+        ;;
+
+    *) _notify "notice: unknown topic" "<i>Try: dots notice help</i>" "dialog-error"; exit 1 ;;
+esac

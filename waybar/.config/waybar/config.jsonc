@@ -3,7 +3,7 @@
 // Left:   Apps button + workspaces
 // Center: weekday + date + time (clickable → calendar tooltip)
 // Right:  ai-usage, mpris, system stats (cpu/mem/gpu/net), peripherals
-//         (bluetooth, audio, brightness), battery, tray, power-menu
+//         (bluetooth, audio, brightness), battery, tray, power
 //
 // Catppuccin Mocha via theme.css (managed by `theme set <name>`).
 
@@ -110,12 +110,12 @@
     },
 
     "custom/updates": {
-        "exec":         "update check",
+        "exec":         "dots update check",
         "return-type":  "json",
         "interval":     3600,
         "format":       "󰚰 {}",
         "tooltip":      true,
-        "on-click":     "alacritty -e bash -c 'update; read -p Done...'"
+        "on-click":     "alacritty -e bash -c 'dots update; read -p Done...'"
     },
 
     // ─── Right: system stats (mimics GNOME's System Monitor extension) ─────
@@ -124,7 +124,7 @@
     "memory":      { "format": "󰾆 {percentage}%",    "interval": 10 },
 
     "custom/gpu": {
-        "exec":         "waybar-gpu",
+        "exec":         "dots gpu",
         "return-type":  "json",
         "interval":     5,
         "format":       "󰢮 {}"
@@ -203,7 +203,7 @@
 
     "custom/power": {
         "format":   "󰐥",
-        "on-click": "power-menu",
+        "on-click": "dots power menu",
         "tooltip":  false
     }
 }

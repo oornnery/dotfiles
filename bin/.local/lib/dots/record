@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# dots:summary=Screen recording via wf-recorder
+# dots:args=(toggle)|region|stop|status
+set -euo pipefail
+
+OUT_DIR="${RECORD_DIR:-$HOME/Videos/recordings}"
+PID_FILE="${XDG_RUNTIME_DIR:-/tmp}/wf-recorder.pid"
+mkdir -p "$OUT_DIR"
+
+command -v wf-recorder >/dev/null || { dots notify "Record" "wf-recorder not installed" -a record -i dialog-error; exit 1; }
+
+_active_pid() {
+    [[ -f "$PID_FILE" ]] || return 1
+    local pid; pid="$(cat "$PID_FILE")"
+    kill -0 "$pid" 2>/dev/null || { rm -f "$PID_FILE"; return 1; }
+    echo "$pid"
+}
+_start() {
+    local file geo
+    file="$OUT_DIR/$(date +%Y%m%d-%H%M%S).mp4"; geo="${1:-}"
+    if [[ -n "$geo" ]]; then wf-recorder -g "$geo" -f "$file" & else wf-recorder -f "$file" & fi
+    echo $! > "$PID_FILE"
+    dots notify "Recording" "$file" -a record -i media-record -t 2500
+}
+_stop() {
+    local pid
+    if pid="$(_active_pid)"; then
+        kill -INT "$pid"; wait "$pid" 2>/dev/null || true; rm -f "$PID_FILE"
+        dots notify "Stopped" "Saved in $OUT_DIR" -a record -i media-playback-stop -t 2500
+    else
+        dots notify "Record" "nothing was recording" -a record -t 2000
+    fi
+}
+
+case "${1:-toggle}" in
+    toggle|"") if _active_pid >/dev/null; then _stop; else _start; fi ;;
+    region)    _active_pid >/dev/null && _stop; _start "$(slurp)" ;;
+    stop)      _stop ;;
+    status)    if pid="$(_active_pid)"; then echo "Recording (pid $pid)"; else echo "Not recording"; fi ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots record: unknown action: $1" >&2; exit 1 ;;
+esac

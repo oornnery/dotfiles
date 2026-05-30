@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# dots:summary=Hibernation setup/check/remove (swap file = RAM)
+# dots:args=setup|available|remove
+set -euo pipefail
+
+SWAPFILE="/swapfile"
+
+_setup() {
+    [[ $EUID -ne 0 ]] && { echo "Run as root: sudo dots hibernation setup" >&2; exit 1; }
+    local ram_gb root_fs offset uuid
+    ram_gb=$(awk '/^MemTotal/ {print int(($2/1024/1024)+1); exit}' /proc/meminfo)
+    echo "RAM detected: ${ram_gb} GB"; echo "Will create $SWAPFILE = ${ram_gb} GiB"
+    [[ -f $SWAPFILE ]] && { echo "Swap file already exists" >&2; exit 1; }
+    root_fs=$(findmnt -no FSTYPE /)
+    if [[ "$root_fs" == "btrfs" ]]; then
+        echo "btrfs detected — creating no-cow swap file"
+        btrfs filesystem mkswapfile --size "${ram_gb}g" --uuid clear "$SWAPFILE"
+    else
+        fallocate -l "${ram_gb}G" "$SWAPFILE"; chmod 600 "$SWAPFILE"; mkswap "$SWAPFILE"
+    fi
+    swapon "$SWAPFILE"
+    grep -q "$SWAPFILE" /etc/fstab || echo "$SWAPFILE none swap defaults 0 0" >> /etc/fstab
+    if [[ "$root_fs" != "btrfs" ]]; then
+        offset=$(filefrag -v "$SWAPFILE" | awk 'NR==4 {gsub(/\./,""); print $4; exit}')
+        uuid=$(findmnt -no UUID /)
+        echo "Add to bootloader: resume=UUID=$uuid resume_offset=$offset"
+    fi
+    systemctl enable systemd-hibernate.target 2>/dev/null || true
+    echo "Hibernation setup OK. Test with: systemctl hibernate"
+}
+
+_available() {
+    local ram_kb swap_kb can
+    ram_kb=$(awk '/^MemTotal/ {print $2; exit}' /proc/meminfo)
+    swap_kb=$(awk '/^SwapTotal/ {print $2; exit}' /proc/meminfo)
+    (( swap_kb < ram_kb )) && { echo "swap (${swap_kb} kB) < RAM (${ram_kb} kB)" >&2; exit 1; }
+    pgrep -x systemd-logind >/dev/null || { echo "systemd-logind not running" >&2; exit 1; }
+    if systemctl --quiet is-enabled systemd-hibernate.target 2>/dev/null; then echo "hibernation: ENABLED"; exit 0; fi
+    if command -v systemd-inhibit >/dev/null; then
+        can=$(systemd-inhibit --list 2>&1 | grep -ci hibernate || true)
+        (( can > 0 )) && { echo "hibernation: AVAILABLE (not enabled)"; exit 0; }
+    fi
+    echo "hibernation: not detected" >&2; exit 1
+}
+
+_remove() {
+    [[ $EUID -ne 0 ]] && { echo "Run as root: sudo dots hibernation remove" >&2; exit 1; }
+    [[ -f "$SWAPFILE" ]] && swapoff "$SWAPFILE" 2>/dev/null || true
+    [[ -f "$SWAPFILE" ]] && rm -f "$SWAPFILE"
+    sed -i "\|$SWAPFILE|d" /etc/fstab
+    systemctl disable systemd-hibernate.target 2>/dev/null || true
+    echo "Hibernation removed. Also clear resume= from bootloader kernel args."
+}
+
+case "${1:-}" in
+    setup)     _setup ;;
+    available) _available ;;
+    remove)    _remove ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "Usage: dots hibernation <setup|available|remove>" >&2; exit 1 ;;
+esac

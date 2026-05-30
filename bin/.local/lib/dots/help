@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# dots:summary=Cheatsheets — pick one, or render a topic (tmux/vim/nvim/…)
+# dots:args=[topic | --no-pager <topic> | --list | (picker)]
+#
+# Single source of truth: docs/cheatsheets/*.md. Renders via `dots view`
+# (pager in terminal, floating window in WM). `--no-pager` dumps raw markdown
+# (used by :Helpme in vim/nvim and the tmux popup).
+set -uo pipefail
+
+DOCS_DIR="${CHEATSHEET_DIR:-$HOME/dotfiles/docs/cheatsheets}"
+declare -A ALIAS=( [nvim]=neovim [vi]=vim )
+
+_resolve() { local t="${ALIAS[$1]:-$1}"; printf '%s/%s.md' "$DOCS_DIR" "$t"; }
+_sheets()  { [[ -d "$DOCS_DIR" ]] && find "$DOCS_DIR" -maxdepth 1 -name '*.md' -printf '%f\n' | sed 's/\.md$//' | sort; }
+
+_zsh_aliases() {
+    [[ -f "$HOME/.zshrc" ]] || return
+    awk '/^[[:space:]]*alias / { sub(/^[[:space:]]*alias /, ""); print }' "$HOME/.zshrc" | sort
+}
+_zsh_functions() {
+    [[ -f "$HOME/.zsh_functions" ]] || return
+    awk '
+        /^[[:space:]]*#/ { last=$0; next }
+        /^[a-zA-Z_][a-zA-Z0-9_-]*\(\)/ { name=$1; sub(/\(\).*/,"",name); printf "%-20s  %s\n", name, last; last="" }
+    ' "$HOME/.zsh_functions"
+}
+_browse() {
+    local title="$1" content pick
+    content="$(cat)"
+    pick="$(printf '← Back\n%s' "$content" | dots menu "$title:")"
+    case "$pick" in
+        ''|'← Back') return 0 ;;
+        *) printf '%s' "$pick" | wl-copy 2>/dev/null && dots notify "Cheatsheet" "Copied" -g "" -t 2000 || printf '%s\n' "$pick" ;;
+    esac
+}
+
+# Raw markdown to stdout (for :Helpme / tmux popup capture).
+if [[ "${1:-}" == "--no-pager" ]]; then
+    shift; topic="${1:-all}"
+    case "$topic" in
+        all) for s in tmux vim neovim; do [[ -f "$DOCS_DIR/$s.md" ]] && { cat "$DOCS_DIR/$s.md"; echo; }; done ;;
+        *)   f="$(_resolve "$topic")"; [[ -f "$f" ]] && cat "$f" || { echo "no cheatsheet: $topic" >&2; exit 1; } ;;
+    esac
+    exit 0
+fi
+
+case "${1:-}" in
+    --list|list) _sheets ;;
+    -h|--help)   sed -n '2,3p' "$0" ;;
+    all)
+        tmp="$(mktemp --suffix=.md)"
+        { for s in tmux vim neovim; do [[ -f "$DOCS_DIR/$s.md" ]] && { cat "$DOCS_DIR/$s.md"; echo; }; done; } > "$tmp"
+        dots view "$tmp" "cheatsheets"; rm -f "$tmp" ;;
+    "")
+        pick="$( { _sheets | sed 's/^/󰈙  /'; printf '󰒓  zsh aliases (live)\nƒ  shell functions (live)\n'; } | dots menu 'Cheatsheet:')" || exit 0
+        [[ -z "$pick" ]] && exit 0
+        case "$pick" in
+            '󰒓  '*) _zsh_aliases   | _browse "Zsh aliases" ;;
+            'ƒ  '*) _zsh_functions | _browse "Shell functions" ;;
+            '󰈙  '*) name="${pick#󰈙  }"; f="$DOCS_DIR/$name.md"
+                   [[ -f "$f" ]] && dots view "$f" "$name" || dots notify "Cheatsheet" "Not found: $name" -g "⚠" ;;
+        esac ;;
+    *)
+        f="$(_resolve "$1")"
+        [[ -f "$f" ]] && dots view "$f" "$1" || { echo "no cheatsheet: $1 (try: dots help --list)" >&2; exit 1; } ;;
+esac

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# dots:summary=Render a markdown file (pager in terminal, floating window in WM)
+# dots:args=<file.md|-> [title]
+# dots:hidden=true
+#
+# Terminal: render inline (glow|bat|less). WM (no tty): floating alacritty with
+# the same render (class floating-md → window rule sizes it reading-friendly).
+# Override the renderer with DOTS_MD_VIEWER=glow|bat|less|auto.
+
+set -uo pipefail
+
+file="${1:?usage: dots view <file.md|-> [title]}"
+title="${2:-}"
+
+cleanup=""
+if [[ "$file" == "-" ]]; then
+    tmp="$(mktemp --suffix=.md)"; cat >"$tmp"; file="$tmp"; cleanup="$tmp"
+fi
+trap '[[ -n "$cleanup" ]] && rm -f "$cleanup"' EXIT
+
+[[ -f "$file" ]] || { echo "dots view: no such file: $file" >&2; exit 1; }
+[[ -z "$title" ]] && title="$(basename "$file" .md)"
+
+viewer="${DOTS_MD_VIEWER:-auto}"
+if [[ "$viewer" == auto ]]; then
+    if   command -v glow >/dev/null 2>&1; then viewer=glow
+    elif command -v bat  >/dev/null 2>&1; then viewer=bat
+    else viewer=less; fi
+fi
+
+_render() {   # prints the shell command that renders + pages "$1"
+    case "$viewer" in
+        glow) printf 'glow -s dark -w 90 %q | less -R -i --mouse --use-color' "$1" ;;
+        bat)  printf 'bat -l md --style=plain --color=always --paging=always %q' "$1" ;;
+        *)    printf 'less -R %q' "$1" ;;
+    esac
+}
+
+if { : </dev/tty; } 2>/dev/null; then
+    # Controlling terminal present → render inline (pager).
+    sh -c "$(_render "$file")"
+else
+    # WM/keybind context (no tty) → floating window.
+    alacritty --class floating-md --title " $title" \
+        -o font.size=12 -o window.padding.x=20 -o window.padding.y=14 \
+        -e sh -c "$(_render "$file")"
+fi

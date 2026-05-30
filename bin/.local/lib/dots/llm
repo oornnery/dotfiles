@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# dots:summary=Pick an LLM CLI and open it in a floating terminal
+# dots:args=[claude|codex|gemini|aichat|llm|ollama]
+set -euo pipefail
+
+declare -A LLMS=(
+    [claude]="Claude Code (Anthropic)"
+    [codex]="Codex (OpenAI)"
+    [gemini]="Gemini CLI (Google)"
+    [aichat]="aichat (multi-model)"
+    [llm]="Simon Willison's llm CLI"
+    [ollama]="ollama (local models)"
+)
+
+_available() {
+    for cli in "${!LLMS[@]}"; do
+        command -v "$cli" >/dev/null 2>&1 && printf '%s\t%s\n' "$cli" "${LLMS[$cli]}"
+    done | sort
+}
+
+case "${1:-}" in
+    -h|--help|help) sed -n '2,3p' "$0"; exit 0 ;;
+    "") : ;;
+    *)  command -v "$1" >/dev/null 2>&1 || { dots notify "LLM" "Not installed: $1" -a llm -u critical; exit 1; }
+        exec dots tui "$@" ;;
+esac
+
+available="$(_available)"
+[[ -z "$available" ]] && { dots notify "LLM" "No LLM CLI detected. Install one of: ${!LLMS[*]}" -a llm -u critical; exit 1; }
+
+pick="$(printf '%s' "$available" | dots menu 'LLM:')" || exit 0
+[[ -z "$pick" ]] && exit 0
+exec dots tui "${pick%%$'\t'*}"

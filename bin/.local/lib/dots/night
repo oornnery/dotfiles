@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# dots:summary=Blue-light filter (hyprsunset)
+# dots:args=toggle|on|off|status
+set -euo pipefail
+
+TEMP="${NIGHT_MODE_TEMP:-3500}"   # kelvin
+
+_on()  { pgrep -x hyprsunset >/dev/null || { hyprsunset -t "$TEMP" & disown; }
+         dots notify "Night mode on" "${TEMP}K" -a night-mode -i weather-clear-night -t 2000; }
+_off() { pkill -x hyprsunset 2>/dev/null || true
+         dots notify "Night mode off" "Color temperature reset" -a night-mode -i weather-clear -t 2000; }
+
+case "${1:-toggle}" in
+    on)  _on ;;
+    off) _off ;;
+    status)    pgrep -x hyprsunset >/dev/null && echo on || echo off ;;
+    toggle|"") if pgrep -x hyprsunset >/dev/null; then _off; else _on; fi ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots night: unknown action: $1" >&2; exit 1 ;;
+esac

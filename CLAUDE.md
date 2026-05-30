@@ -41,7 +41,7 @@ or has been deleted from the tree (e.g. nvidia-gpu.sh, luks.sh).
 │   ├── zsh/ bash/ tmux/ vim/ alacritty/      shell + terminal
 │   ├── nvim/ nvim-lazy/                      editor distros (mutex)
 │   ├── hyprland/ waybar/ wofi/ mako/         Wayland WM stack
-│   ├── bin/                                  ~/.local/bin/ helpers (24 scripts)
+│   ├── bin/                                  dots CLI (bin/dots + lib/dots/*)
 │   ├── git/ editor/ fabric/ vscode/          dev workflow
 │   ├── greetd/ gdm/ iwd/ wsl/ zram/          /etc/ configs via stow_system
 │   └── themes/                               catppuccin-mocha, tokyo-night, latte
@@ -181,37 +181,43 @@ System stow packages (via individual modules):
 For boundaries on what's safe to stow into `/etc/`, see
 [docs/configuration/08-system-stow.md](docs/configuration/08-system-stow.md).
 
-## bin/ scripts (24 total)
+## bin/ — the `dots` CLI
 
-Live at `~/.local/bin/` after stowing `bin/`. Catalog in
-[docs/applications/09-bin-scripts.md](docs/applications/09-bin-scripts.md).
+One executable on `$PATH`: `dots`. Everything is `dots <group> <action>`
+(e.g. `dots theme set tokyo-night`, `dots volume raise`, `dots help tmux`).
+Full reference: [docs/applications/09-bin-scripts.md](docs/applications/09-bin-scripts.md).
 
-Notable:
-- `theme` — switch alacritty/waybar/wofi/mako/starship palette
-- `notice` — date/weather/battery/network/system notifications
-- `screenshot`, `record`, `ocr`, `color-picker`
-- `volume`, `brightness`, `magnify` — replace swayosd-client
-- `power-profile`, `power-menu`, `dnd`, `night-mode`, `update`
-- `floating-tui` — wrapper for `alacritty --class floating -e <tui>`
-- `web-app` — firefoxpwa launcher
-- `clipboard`, `wallpaper`, `emoji`, `unicode`, `window-finder`, `scratch`
+Layout (both in the `bin/` stow package):
+- `bin/.local/bin/dots` — the only PATH entry; a dispatcher that resolves
+  `../lib/dots/<group>` and execs it. No-arg → context-aware picker.
+- `bin/.local/lib/dots/<group>` — ~40 modules, one file per group. NOT on PATH.
+
+Conventions:
+- Modules are standalone bash and **compose by calling `dots <group>`** (e.g.
+  `dots notify`, `dots menu`, `dots state`, `dots view`) — never `source`.
+- Header metadata drives discovery: `# dots:summary=`, `# dots:args=`,
+  `# dots:hidden=true`.
+- Context-aware primitives: `dots menu` (walker/wofi in WM, fzf/`fzf --tmux` in
+  terminal; `DOTS_MENU=` override), `dots view` (glow|less vs floating alacritty),
+  `dots notify` (notify-send wrapper, forwards `-i/-r/-h` for OSD bars).
+- `~/.local/lib/dots/askpass` is the `SUDO_ASKPASS` target (set in `zsh/.zshrc`).
 
 ## Theming
 
-5 surfaces themed: alacritty, waybar, wofi, mako, starship.
+5 surfaces themed: alacritty, waybar, wofi, mako, starship (+ ags/walker/tmux/…).
 3 themes: `catppuccin-mocha` (default), `tokyo-night`, `catppuccin-latte`.
 
 Switch:
 
 ```bash
-theme list
-theme set tokyo-night
-theme cycle              # Hyprland: Super + Ctrl + Alt + Y
+dots theme list
+dots theme set tokyo-night
+dots theme cycle         # Hyprland: Super + Ctrl + Alt + Y
 ```
 
-Files in `themes/<name>/` are copied to `~/.config/<app>/theme.*`,
-which the live config files import. Adding a theme = `cp -r` an
-existing one, edit colors, `theme set` it. See
+`dots theme set` copies `themes/<name>/<app>.*` → `~/.config/<app>/theme.*` then
+runs `dots reload all` (mako/waybar/tmux/ags/fabric). Adding a theme = `cp -r` an
+existing one, edit colors, `dots theme set` it. See
 [docs/configuration/07-theming.md](docs/configuration/07-theming.md).
 
 ## Common tasks
@@ -247,14 +253,18 @@ cp /etc/mything/config.conf mypkg/etc/mything/config.conf
 Only safe for late-boot configs. See system-stow doc for the
 hard-blockers (fstab, sudoers, mkinitcpio.conf, bootloader, etc.).
 
-### Add a bin/ script
+### Add a `dots` command
 
 ```bash
-$EDITOR bin/.local/bin/foo
-chmod +x bin/.local/bin/foo
-stow -R -t ~ bin
+$EDITOR bin/.local/lib/dots/foo               # new group module (case "$1" in …)
+chmod +x bin/.local/lib/dots/foo
+# header: # dots:summary=…  # dots:args=…  (# dots:hidden=true to hide)
+stow -R -t ~ bin                              # or: dots stow bin
 $EDITOR docs/applications/09-bin-scripts.md   # add to catalog
 ```
+
+Reach `dots foo` automatically (dispatcher discovers `lib/dots/*`). Compose with
+`dots notify`, `dots menu`, `dots state`, `dots view` — never `source`.
 
 ## Things to never do
 
@@ -262,8 +272,9 @@ $EDITOR docs/applications/09-bin-scripts.md   # add to catalog
   pacman/systemctl is the convention. Earlier attempts were removed.
 - Don't stow into `/etc/fstab`, `/etc/sudoers*`, `/etc/mkinitcpio.conf`,
   bootloader paths, or `/etc/passwd*`. Read system-stow doc.
-- Don't replace `bin/` scripts with library-based ones — they're
-  standalone on purpose (POSIX-friendly, no `source common.sh`).
+- Don't add a sourced `common.sh` to `bin/` — `dots` modules stay standalone
+  bash and compose by calling `dots <group>` (PATH/exec), never by `source`.
+  Don't scatter new executables onto `$PATH`: add a `lib/dots/<group>` module.
 - Don't blow away `scripts/templates/` — it's gone, configs live at root.
 - Don't add nvidia-gpu / intel-gpu / luks modules — deleted on purpose
   for this hardware. `git log` recovers them if a new machine needs them.
@@ -296,11 +307,13 @@ ddb8729 docs: explain system-stow approach
 - **"add a new tool X"** → think: is it pacman / AUR / curl?
   Add to `dev/tools.sh` (general CLI) or new `dev/X.sh` (deserves a
   module) or `core/X.sh` (system-level).
-- **"new bin script"** → write at `bin/.local/bin/<name>`, chmod +x,
-  add to `09-bin-scripts.md` catalog.
+- **"new bin script / dots command"** → write `bin/.local/lib/dots/<group>`
+  (chmod +x, `# dots:` header), add to `09-bin-scripts.md`. Reach it as
+  `dots <group>`.
 - **"change theme"** → edit `themes/<name>/<app>` files or create
-  new theme dir.
-- **"bind X to Y"** → edit `hyprland/.config/hypr/bindings.conf`.
+  new theme dir; apply with `dots theme set`.
+- **"bind X to Y"** → edit `hyprland/.config/hypr/lua/bindings.lua`
+  (`kb(keys, exec("dots …"), "desc")`).
 - **"update arch.conf"** → keep the "default uncommented, alternatives
   commented below" pattern.
 - **commit/push** → only if explicitly asked (per user prefs).

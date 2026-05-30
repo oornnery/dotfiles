@@ -31,3 +31,6 @@ theme.scss
 windows/yasb/*.log
 
 *.log
+
+# starship binary (install via pacman/bootstrap, not committed)
+bin/.local/bin/starship

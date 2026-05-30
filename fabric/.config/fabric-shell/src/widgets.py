@@ -1223,7 +1223,7 @@ class UpdatesWidget(PollLabel):
             return "0"
 
 
-# ─── Power (button only, no popup — opens power-menu) ─────────────────────
+# ─── Power (button only, no popup — opens dots power menu) ─────────────────────
 
 class PowerWidget(Button):
     def __init__(self, monitor: int = 0):
@@ -1231,7 +1231,7 @@ class PowerWidget(Button):
             name="power-widget",
             child=Label(label="", name="power-widget-icon"),
             on_clicked=lambda *_: subprocess.Popen(
-                ["power-menu"],
+                ["dots", "power", "menu"],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             ),
         )

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# dots:summary=Backlight brightness control with OSD
+# dots:args=raise|lower|set <0-100>|get|status [--json]
+set -euo pipefail
+
+STEP="${BRIGHTNESS_STEP:-5}"
+
+command -v brightnessctl >/dev/null || { dots notify "Brightness" "brightnessctl missing" -i dialog-error -u critical; exit 1; }
+
+_pct() { brightnessctl -m | awk -F, '{gsub("%","",$4); print $4}'; }
+_osd() {
+    dots notify "Brightness" "${1}%" -a brightness -i display-brightness -t 1500 \
+        -h "string:x-canonical-private-synchronous:brightness" -h "int:value:$1"
+}
+
+case "${1:-get}" in
+    raise) brightnessctl set "${STEP}%+" >/dev/null; _osd "$(_pct)" ;;
+    lower) brightnessctl set "${STEP}%-" >/dev/null; _osd "$(_pct)" ;;
+    set)
+        [[ -z "${2:-}" ]] && { echo "Usage: dots brightness set <0-100>" >&2; exit 1; }
+        brightnessctl set "${2}%" >/dev/null; _osd "$(_pct)" ;;
+    get) _pct ;;
+    status)
+        if [[ "${2:-}" == --json ]]; then printf '{"brightness":%s}\n' "$(_pct)"
+        else printf 'brightness %s%%\n' "$(_pct)"; fi ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots brightness: unknown action: $1" >&2; exit 1 ;;
+esac
