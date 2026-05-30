@@ -52,14 +52,18 @@ case "${1:-}" in
         { for s in tmux vim neovim; do [[ -f "$DOCS_DIR/$s.md" ]] && { cat "$DOCS_DIR/$s.md"; echo; }; done; } > "$tmp"
         dots view "$tmp" "cheatsheets"; rm -f "$tmp" ;;
     "")
-        pick="$( { _sheets | sed 's/^/󰈙  /'; printf '󰒓  zsh aliases (live)\nƒ  shell functions (live)\n'; } | dots menu 'Cheatsheet:')" || exit 0
-        [[ -z "$pick" ]] && exit 0
-        case "$pick" in
-            '󰒓  '*) _zsh_aliases   | _browse "Zsh aliases" ;;
-            'ƒ  '*) _zsh_functions | _browse "Shell functions" ;;
-            '󰈙  '*) name="${pick#󰈙  }"; f="$DOCS_DIR/$name.md"
-                   [[ -f "$f" ]] && dots view "$f" "$name" || dots notify "Cheatsheet" "Not found: $name" -g "⚠" ;;
-        esac ;;
+        # Loop: after viewing/browsing a sheet, return to the picker. Esc (menu
+        # returns non-zero) or an empty pick exits.
+        while :; do
+            pick="$( { _sheets | sed 's/^/󰈙  /'; printf '󰒓  zsh aliases (live)\nƒ  shell functions (live)\n'; } | dots menu 'Cheatsheet:')" || exit 0
+            [[ -z "$pick" ]] && exit 0
+            case "$pick" in
+                '󰒓  '*) _zsh_aliases   | _browse "Zsh aliases" ;;
+                'ƒ  '*) _zsh_functions | _browse "Shell functions" ;;
+                '󰈙  '*) name="${pick#󰈙  }"; f="$DOCS_DIR/$name.md"
+                       [[ -f "$f" ]] && dots view "$f" "$name" || dots notify "Cheatsheet" "Not found: $name" -g "⚠" ;;
+            esac
+        done ;;
     *)
         f="$(_resolve "$1")"
         [[ -f "$f" ]] && dots view "$f" "$1" || { echo "no cheatsheet: $1 (try: dots help --list)" >&2; exit 1; } ;;
