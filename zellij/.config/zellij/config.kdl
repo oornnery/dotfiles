@@ -1,0 +1,163 @@
+// Zellij config — vim-flavored keybindings + Catppuccin Mocha
+// Managed via stow: ~/dotfiles/zellij/.config/zellij/config.kdl
+// Manual run only (no zsh auto-start).
+// Theme defined in themes/catppuccin-mocha.kdl
+
+theme: "catppuccin-mocha"
+
+pane_frames: false
+simplified_ui: true
+default_shell: "zsh"
+scroll_buffer_size: 10000
+copy_on_select: true
+mirror_session: true
+auto_layout: false
+
+// Remove default keybinds so only ours apply
+keybinds clear-defaults=true {
+    locked {
+        bind "Ctrl g" { SwitchToMode "normal"; }
+    }
+
+    // "Normal" mode — most keys pass through to terminal.
+    // Ctrl+b opens pane mode (instead of Ctrl+p which conflicts with opencode).
+    normal {
+        bind "Ctrl b" { SwitchToMode "pane"; }
+        bind "Ctrl r" { SwitchToMode "resize"; }
+        bind "Ctrl t" { SwitchToMode "tab"; }
+        bind "Ctrl m" { SwitchToMode "move"; }
+        bind "Ctrl s" { SwitchToMode "scroll"; }
+        bind "Ctrl n" { SwitchToMode "normal"; }
+        bind "Ctrl x" { CloseFocus; SwitchToMode "normal"; }
+        bind "Ctrl z" { UndoRenamePane; SwitchToMode "normal"; }
+        bind "Ctrl f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "Ctrl w" { ToggleFloatingPanes; SwitchToMode "normal"; }
+        bind "Ctrl g" { SwitchToMode "locked"; }
+        bind "Ctrl o" { SwitchToMode "session"; }
+    }
+
+    // Pane mode — hjkl vim movement. Ctrl+b to exit back to normal.
+    pane {
+        bind "h" { MoveFocus "left"; }
+        bind "j" { MoveFocus "down"; }
+        bind "k" { MoveFocus "up"; }
+        bind "l" { MoveFocus "right"; }
+        bind "H" { MoveFocus "left"; }
+        bind "J" { MoveFocus "down"; }
+        bind "K" { MoveFocus "up"; }
+        bind "L" { MoveFocus "right"; }
+        bind "left" { MoveFocus "left"; }
+        bind "down" { MoveFocus "down"; }
+        bind "up" { MoveFocus "up"; }
+        bind "right" { MoveFocus "right"; }
+        bind "p" { SwitchFocus; }
+        bind "n" { NewPane; SwitchToMode "normal"; }
+        bind "d" { NewPane "down"; SwitchToMode "normal"; }
+        bind "r" { NewPane "right"; SwitchToMode "normal"; }
+        bind "s" { NewPane "stacked"; SwitchToMode "normal"; }
+        bind "e" { TogglePaneEmbedOrFloating; SwitchToMode "normal"; }
+        bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "w" { ToggleFloatingPanes; SwitchToMode "normal"; }
+        bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
+        bind "x" { CloseFocus; SwitchToMode "normal"; }
+        bind "i" { TogglePanePinned; SwitchToMode "normal"; }
+        bind "c" { SwitchToMode "renamepane"; PaneNameInput 0; }
+        bind "Esc" { SwitchToMode "normal"; }
+        bind "Ctrl b" { SwitchToMode "normal"; }
+    }
+
+    // Tab mode — hjkl to navigate tabs
+    tab {
+        bind "h" { GoToPreviousTab; }
+        bind "j" { GoToNextTab; }
+        bind "k" { GoToPreviousTab; }
+        bind "l" { GoToNextTab; }
+        bind "left" { GoToPreviousTab; }
+        bind "down" { GoToNextTab; }
+        bind "up" { GoToPreviousTab; }
+        bind "right" { GoToNextTab; }
+        bind "n" { NewTab; SwitchToMode "normal"; }
+        bind "x" { CloseTab; SwitchToMode "normal"; }
+        bind "r" { SwitchToMode "renametab"; TabNameInput 0; }
+        bind "s" { ToggleActiveSyncTab; SwitchToMode "normal"; }
+        bind "b" { BreakPane; SwitchToMode "normal"; }
+        bind "[" { BreakPaneLeft; SwitchToMode "normal"; }
+        bind "]" { BreakPaneRight; SwitchToMode "normal"; }
+        bind "tab" { ToggleTab; }
+        bind "Esc" { SwitchToMode "normal"; }
+        bind "1" { GoToTab 1; SwitchToMode "normal"; }
+        bind "2" { GoToTab 2; SwitchToMode "normal"; }
+        bind "3" { GoToTab 3; SwitchToMode "normal"; }
+        bind "4" { GoToTab 4; SwitchToMode "normal"; }
+        bind "5" { GoToTab 5; SwitchToMode "normal"; }
+        bind "6" { GoToTab 6; SwitchToMode "normal"; }
+        bind "7" { GoToTab 7; SwitchToMode "normal"; }
+        bind "8" { GoToTab 8; SwitchToMode "normal"; }
+        bind "9" { GoToTab 9; SwitchToMode "normal"; }
+        bind "Ctrl t" { SwitchToMode "normal"; }
+    }
+
+    // Resize mode — hjkl to resize panes
+    resize {
+        bind "h" { Resize "Increase left"; }
+        bind "j" { Resize "Increase down"; }
+        bind "k" { Resize "Increase up"; }
+        bind "l" { Resize "Increase right"; }
+        bind "H" { Resize "Decrease left"; }
+        bind "J" { Resize "Decrease down"; }
+        bind "K" { Resize "Decrease up"; }
+        bind "L" { Resize "Decrease right"; }
+        bind "+" { Resize "Increase"; }
+        bind "=" { Resize "Increase"; }
+        bind "-" { Resize "Decrease"; }
+        bind "Esc" { SwitchToMode "normal"; }
+        bind "Ctrl r" { SwitchToMode "normal"; }
+    }
+
+    // Move mode — hjkl to move panes
+    move {
+        bind "h" { MovePane "left"; }
+        bind "j" { MovePane "down"; }
+        bind "k" { MovePane "up"; }
+        bind "l" { MovePane "right"; }
+        bind "H" { MovePane "left"; }
+        bind "J" { MovePane "down"; }
+        bind "K" { MovePane "up"; }
+        bind "L" { MovePane "right"; }
+        bind "left" { MovePane "left"; }
+        bind "down" { MovePane "down"; }
+        bind "up" { MovePane "up"; }
+        bind "right" { MovePane "right"; }
+        bind "n" { MovePane; }
+        bind "tab" { MovePane; }
+        bind "Esc" { SwitchToMode "normal"; }
+        bind "Ctrl m" { SwitchToMode "normal"; }
+    }
+
+    // Scroll mode — j/k to scroll, vim-style
+    scroll {
+        bind "j" { ScrollDown; }
+        bind "k" { ScrollUp; }
+        bind "h" { PageScrollUp; }
+        bind "l" { PageScrollDown; }
+        bind "up" { ScrollUp; }
+        bind "down" { ScrollDown; }
+        bind "Ctrl u" { PageScrollUp; }
+        bind "Ctrl d" { PageScrollDown; }
+        bind "Ctrl b" { PageScrollUp; }
+        bind "Ctrl f" { PageScrollDown; }
+        bind "g" { ScrollToTop; }
+        bind "G" { ScrollToBottom; }
+        bind "Esc" { SwitchToMode "normal"; }
+        bind "Ctrl s" { SwitchToMode "normal"; }
+    }
+
+    // Session mode
+    session {
+        bind "Ctrl o" { SwitchToMode "normal"; }
+        bind "Ctrl s" { SwitchToMode "normal"; }
+        bind "d" { Detach; SwitchToMode "normal"; }
+        bind "w" { SwitchToMode "normal"; }
+        bind "s" { SwitchToMode "normal"; }
+    }
+}
