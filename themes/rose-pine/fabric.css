@@ -1,0 +1,21 @@
+/* themes/rose-pine/fabric.css — copied to ~/.config/fabric-shell/src/theme.css */
+
+:vars {
+    --bg:        #191724;
+    --bg-alt:    #1f1d2e;
+    --bg-darker: #161320;
+    --fg:        #e0def4;
+    --muted:     #6e6a86;
+    --border:    alpha(#ebbcba, 0.18);
+
+    --accent:    #ebbcba;
+    --mauve:     #c4a7e7;
+    --blue:      #31748f;
+    --sky:       #9ccfd8;
+    --yellow:    #f6c177;
+    --peach:     #ebbcba;
+    --green:     #31748f;
+    --teal:      #9ccfd8;
+    --sapphire:  #9ccfd8;
+    --red:       #eb6f92;
+}

@@ -1,0 +1,45 @@
+# AppX/MSIX patterns to remove. One per line. Glob-style (Get-AppxPackage -Name).
+# Lines starting with # are comments.
+
+# === Microsoft consumer/ads ===
+Microsoft.Windows.DevHome
+Microsoft.YourPhone
+Microsoft.StartExperiencesApp
+MicrosoftWindows.CrossDevice
+MicrosoftWindows.Client.WebExperience
+Microsoft.WidgetsPlatformRuntime
+Clipchamp.Clipchamp
+Microsoft.ApplicationCompatibilityEnhancements
+
+# === Already removed but listed for re-runs / fresh installs ===
+Microsoft.Teams
+Microsoft.OneDrive
+Microsoft.OneDriveSync
+Microsoft.BingNews
+Microsoft.BingSearch
+Microsoft.BingWeather
+Microsoft.GetHelp
+Microsoft.OutlookForWindows
+Microsoft.PowerAutomateDesktop
+Microsoft.Todos
+Microsoft.WindowsFeedbackHub
+MicrosoftCorporationII.QuickAssist
+Microsoft.MicrosoftOfficeHub
+Microsoft.MicrosoftSolitaireCollection
+Microsoft.People
+Microsoft.MixedReality.Portal
+Microsoft.SkypeApp
+Microsoft.WindowsMaps
+Microsoft.3DBuilder
+Microsoft.WindowsCommunicationsApps
+
+# === Xbox stack (no Xbox-app gaming — keep IdentityProvider + GamingOverlay only) ===
+Microsoft.GamingApp
+Microsoft.Xbox.TCUI
+Microsoft.XboxSpeechToTextOverlay
+Microsoft.XboxApp
+
+# === Misc utilities I don't use ===
+Microsoft.MicrosoftStickyNotes
+Microsoft.WindowsAlarms
+Microsoft.WindowsSoundRecorder

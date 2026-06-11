@@ -1,0 +1,544 @@
+@use "theme" as *;
+
+/* GTK4 auto-adiciona class `.background` em windows com bg do tema.
+   Specificity de `window.bar.background` (2 classes + 1 elem) > `.background` (Adwaita). */
+window.bar,
+window.bar.background {
+  background: none;
+  background-color: transparent;
+  color: $fg;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  font-weight: 600;
+}
+
+window.bar > decoration {
+  background: none;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+window.bar > centerbox {
+  background: none;
+  background-color: transparent;
+  border: none;
+  padding: 0 6px;
+  min-height: 26px;
+}
+
+/* Slot boxes (start/center/end) — just layout, no chrome. */
+window.bar > centerbox > box {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+}
+
+/* Pills com bg (modules). Bar window/centerbox transparent — só os pills aparecem. */
+apps, workspaces, calendar, music, updates,
+cpu, memory, gpu, temperature, ai-usage,
+wifi, bluetooth, volume, brightness, battery,
+kb-layout, power {
+  padding: 2px 7px;
+  margin: 2px 1px;
+  background: rgba($bg-alt, 0.7);
+  border-radius: 6px;
+  min-height: 18px;
+}
+
+/* Menubutton-based modules: kill the inner GTK button chrome so the pill
+   draws once on the outer named node. */
+calendar > button, volume > button, brightness > button,
+bluetooth > button, wifi > button, battery > button,
+cpu > button, memory > button, gpu > button, temperature > button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+}
+
+/* Bluetooth pill - widen so single glyph isn't cramped */
+bluetooth {
+  min-width: 28px;
+}
+
+/* Workspaces — botões com bg/border próprio pra distinguir do pill. */
+workspaces > button {
+  padding: 0 8px;
+  margin: 0 2px;
+  background: rgba($bg-darker, 0.55);
+  border: 1px solid rgba($muted, 0.25);
+  color: $muted;
+  border-radius: 4px;
+  min-width: 16px;
+  min-height: 0;
+  font-weight: 700;
+}
+workspaces > button.active {
+  color: $bg;
+  background: $accent;
+  border-color: $accent;
+}
+workspaces > button:hover:not(.active) {
+  background: rgba($accent, 0.18);
+  border-color: rgba($accent, 0.5);
+  color: $accent;
+}
+
+/* Glyph spacing — Nerd Font glyphs have no right-bearing, give them air. */
+.glyph {
+  margin-right: 2px;
+  font-size: 13px;
+}
+
+/* Music inline controls — buttons sit directly inside the music pill. */
+music {
+  padding: 2px 8px;
+}
+music > button {
+  padding: 2px 6px;
+  margin: 0 1px;
+  background: rgba($bg-darker, 0.55);
+  border: 1px solid rgba($muted, 0.25);
+  border-radius: 4px;
+  min-width: 22px;
+  min-height: 22px;
+  color: $fg;
+}
+music > button:hover {
+  background: rgba($accent, 0.2);
+  border-color: rgba($accent, 0.5);
+  color: $accent;
+}
+music > button > label {
+  font-size: 13px;
+}
+
+/* Per-module colors. */
+calendar           { color: $mauve; }
+music              { color: $green; }
+volume             { color: $yellow; }
+brightness         { color: $peach; }
+bluetooth          { color: $sky; }
+wifi               { color: $blue; }
+battery            { color: $green; }
+battery.warning    { color: $yellow; }
+battery.critical   { color: $red; }
+cpu                { color: $teal; }
+memory             { color: $sapphire; }
+temperature        { color: $peach; }
+gpu                { color: $sky; }
+gpu.warning        { color: $yellow; }
+gpu.critical       { color: $red; }
+power-profile      { color: $accent; }
+kb-layout          { color: $teal; }
+updates            { color: $sapphire; }
+ai-usage           { color: $mauve; }
+apps               { color: $accent; }
+power              { color: $red; }
+power:hover        { background: $red; color: $bg; }
+
+/* Generic hover on the pills (excluding menubutton internals). */
+apps:hover, updates:hover, kb-layout:hover {
+  background: rgba($bg-alt, 0.95);
+}
+
+/* Popovers — the dropdown panels. */
+popover > contents {
+  background: $bg-darker;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 12px;
+  color: $fg;
+  min-width: 240px;
+}
+popover label.title {
+  color: $muted;
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+popover label.muted {
+  color: $muted;
+  font-size: 11px;
+}
+popover button {
+  padding: 6px 10px;
+  margin: 1px 0;
+  background: transparent;
+  border-radius: 6px;
+  border: none;
+}
+popover button:hover {
+  background: rgba($accent, 0.15);
+}
+
+/* GTK4 Scale (slider) inside popovers — proper thin track + circular thumb. */
+popover scale {
+  min-width: 220px;
+  padding: 6px 4px;
+}
+popover scale > contents > trough {
+  background: rgba($bg-alt, 0.8);
+  border-radius: 999px;
+  min-height: 5px;
+}
+popover scale > contents > trough > highlight,
+popover scale > contents > trough > fill {
+  background: $accent;
+  border-radius: 999px;
+  min-height: 5px;
+}
+popover scale > contents > trough > slider {
+  background: $fg;
+  min-width: 14px;
+  min-height: 14px;
+  margin: -6px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+popover .device, popover .ap {
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 1px 0;
+}
+
+/* CPU per-core text bars — colored, monospace. */
+popover .cpu-bar {
+  color: $accent;
+  font-family: "JetBrainsMono Nerd Font";
+  letter-spacing: -1px;
+}
+popover .device.active, popover .ap.active {
+  background: rgba($accent, 0.22);
+  color: $accent;
+}
+
+/* Switch styling inside popovers — force natural compact size, no stretch */
+popover switch {
+  min-width: 48px;
+  min-height: 24px;
+  font-size: 0;   /* hide Adwaita's default ON/OFF labels */
+  padding: 2px;
+}
+popover switch > slider {
+  background: $fg;
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 50%;
+}
+popover switch:checked {
+  background: $accent;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   SIDEBAR — solid dark cards, mono caps headers, big numbers, monochrome
+   pills with brightness-shift on active state (no accent tint). Cards sit
+   on a transparent wrapper so they float over the wallpaper like the bar
+   pills (same aesthetic, deeper depth: cards use $bg-darker vs bar pills $bg-alt).
+   ════════════════════════════════════════════════════════════════════════ */
+
+window.sidebar,
+window.sidebar.background {
+  background: none;
+  background-color: transparent;
+  color: $fg;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+}
+
+window.sidebar > decoration {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Wrapper: transparent so each card stands on its own (like bar pills). */
+.sidebar-inner {
+  background: transparent;
+  padding: 0;
+}
+
+/* ─── Shared tokens ──────────────────────────────────────────────────── */
+
+.sidebar-inner label.section-title {
+  color: $muted;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.sidebar-inner label.muted {
+  color: $muted;
+  font-size: 11px;
+}
+
+/* Solid card — base look for every section. SOLID bg (not rgba) → reads
+   crisp, like the reference screenshot. Subtle border to delimit edges. */
+%card {
+  background: $bg-darker;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+/* Monochrome pill — outlined by default; active = slightly lighter bg + bold. */
+%pill {
+  background: $bg;
+  border: 1px solid rgba($fg, 0.12);
+  border-radius: 10px;
+  padding: 8px 14px;
+  color: $fg;
+  font-weight: 500;
+  min-height: 0;
+}
+%pill-hover {
+  background: $bg-alt;
+  border-color: rgba($fg, 0.2);
+}
+%pill-active {
+  background: $bg-alt;
+  border-color: rgba($fg, 0.28);
+  color: $fg;
+  font-weight: 700;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  min-width: 0;
+  min-height: 0;
+  color: $muted;
+}
+.icon-btn:hover {
+  background: rgba($fg, 0.08);
+  color: $fg;
+}
+
+/* ─── Notifications ──────────────────────────────────────────────────── */
+
+.sidebar-notifs { @extend %card; }
+.sidebar-notifs > box > button { @extend .icon-btn; }
+.notif-empty { padding: 16px 8px; font-style: italic; }
+.notif-scroll { background: transparent; border: none; }
+
+.notif-row {
+  background: $bg;
+  border: 1px solid rgba($fg, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.notif-row .notif-summary { color: $fg; font-weight: 700; font-size: 12px; }
+.notif-row .notif-body    { color: $muted; font-size: 11px; }
+.notif-close {
+  background: transparent;
+  border: none;
+  color: $muted;
+  padding: 2px 6px;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 4px;
+}
+.notif-close:hover { background: rgba($fg, 0.08); color: $fg; }
+
+/* ─── Quick toggles ──────────────────────────────────────────────────── */
+
+.sidebar-toggles button.toggle {
+  background: $bg;
+  border: 1px solid rgba($fg, 0.1);
+  border-radius: 10px;
+  padding: 12px 4px;
+  min-width: 50px;
+  min-height: 64px;
+  color: $muted;
+}
+.sidebar-toggles button.toggle:hover {
+  background: $bg-alt;
+  color: $fg;
+}
+.sidebar-toggles button.toggle.active {
+  background: $bg-alt;
+  border-color: rgba($fg, 0.25);
+  color: $fg;
+}
+.sidebar-toggles button.toggle label.glyph {
+  font-size: 18px;
+  color: inherit;
+}
+.sidebar-toggles button.toggle label.toggle-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ─── Sliders ───────────────────────────────────────────────────────── */
+
+.slider-row {
+  @extend %card;
+  padding: 12px 16px;
+  min-height: 36px;
+}
+.slider-row .slider-icon { background: transparent; border: none; padding: 0; min-width: 22px; }
+.slider-row .slider-icon label.glyph { font-size: 16px; color: $fg; }
+.slider-row .slider-pct {
+  color: $fg;
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 44px;
+}
+.slider-row scale { padding: 4px 2px; }
+.slider-row scale > contents > trough {
+  background: rgba($fg, 0.1);
+  border-radius: 999px;
+  min-height: 5px;
+}
+.slider-row scale > contents > trough > highlight,
+.slider-row scale > contents > trough > fill {
+  background: $fg;
+  border-radius: 999px;
+  min-height: 5px;
+}
+.slider-row scale > contents > trough > slider {
+  background: $fg;
+  min-width: 14px;
+  min-height: 14px;
+  margin: -5px;
+  border-radius: 50%;
+}
+
+/* ─── Battery panel (the Omarchy reference look) ─────────────────────── */
+
+.battery-panel { @extend %card; padding: 20px 22px; }
+
+.battery-panel label.bat-icon  { color: $fg; font-size: 20px; }
+.battery-panel label.bat-label {
+  color: $muted;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+}
+.battery-panel label.bat-pct {
+  color: $fg;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.battery-panel levelbar.bat-bar { min-height: 6px; padding: 0; }
+.battery-panel levelbar.bat-bar trough {
+  background: rgba($fg, 0.1);
+  border-radius: 999px;
+  min-height: 6px;
+  border: none;
+}
+.battery-panel levelbar.bat-bar block {
+  background: $fg;
+  border-radius: 999px;
+  min-height: 6px;
+}
+.battery-panel levelbar.bat-bar block.empty {
+  background: rgba($fg, 0.08);
+}
+
+.bat-stats { margin-top: 6px; }
+.bat-stats label.stat-key { color: $muted; font-size: 12px; }
+.bat-stats label.stat-val { color: $fg;    font-size: 12px; font-weight: 600; }
+
+.bat-sep { background: rgba($fg, 0.1); min-height: 1px; margin: 4px 0; }
+
+.bat-profiles button.profile-btn { @extend %pill; padding: 10px 12px; }
+.bat-profiles button.profile-btn:hover  { @extend %pill-hover;  }
+.bat-profiles button.profile-btn.active { @extend %pill-active; }
+.bat-profiles button.profile-btn label.glyph { font-size: 13px; color: inherit; }
+
+/* ─── Player ──────────────────────────────────────────────────────── */
+
+.sidebar-player { @extend %card; }
+.sidebar-player .player-title {
+  color: $fg;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+}
+.sidebar-player .player-artist { color: $muted; font-size: 11px; }
+.sidebar-player button {
+  @extend %pill;
+  padding: 6px 14px;
+  min-height: 28px;
+  font-size: 13px;
+}
+.sidebar-player button:hover { @extend %pill-hover; }
+
+/* ─── Theme picker (label + menubutton dropdown) ──────────────────── */
+
+.theme-picker {
+  @extend %card;
+  padding: 14px 16px;
+  min-height: 48px;
+}
+
+/* Select control inside the row */
+.theme-picker .select {
+  background: $bg;
+  border: 1px solid rgba($fg, 0.12);
+  border-radius: 10px;
+  padding: 6px 12px;
+  min-height: 30px;
+  color: $fg;
+}
+.theme-picker .select:hover {
+  background: $bg-alt;
+  border-color: rgba($fg, 0.2);
+}
+.theme-picker .select label.select-value {
+  font-weight: 600;
+  font-size: 12px;
+}
+.theme-picker .select label.select-chevron {
+  color: $muted;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* Dropdown popover */
+popover.select-popover > contents,
+popover.select-popover > arrow {
+  background: $bg-darker;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 10px;
+  padding: 4px;
+}
+.select-list { min-width: 180px; }
+.select-list .select-item {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: $fg;
+  font-weight: 500;
+}
+.select-list .select-item:hover { background: $bg-alt; }
+.select-list .select-item.active { background: $bg-alt; font-weight: 700; }
+.select-list .select-item label.select-check {
+  color: $muted;
+  font-size: 10px;
+  min-width: 14px;
+}
+.select-list .select-item.active label.select-check { color: $fg; }
+
+/* ─── Footer ─────────────────────────────────────────────────────── */
+
+.sidebar-footer {
+  padding-top: 6px;
+}
+.sidebar-footer label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: $muted;
+}

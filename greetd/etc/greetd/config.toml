@@ -1,0 +1,18 @@
+# /etc/greetd/config.toml — managed via stow (dotfiles/greetd).
+#
+# Edit this file directly in the repo. `theme set` doesn't touch it.
+# Change the session command by editing `--cmd <session>` below.
+
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --remember-session --asterisks --cmd Hyprland"
+user = "greeter"
+
+# Alternatives for the --cmd arg above:
+#   gnome-session       (GNOME on Wayland)
+#   sway
+#   startplasma-wayland (KDE Plasma)
+#
+# Re-apply after editing: sudo systemctl restart greetd

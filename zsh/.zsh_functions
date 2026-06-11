@@ -1,0 +1,151 @@
+# ~/.zsh_functions — shared shell functions (sourced from .zshrc).
+#
+# Conventions:
+#   - All functions are idempotent and emit usage on missing args.
+#   - Destructive operations (dd, mkfs) require typed confirmation.
+#   - Prefer modern tools (zstd over gzip, ip over ifconfig).
+
+# ─── Archive helpers ────────────────────────────────────────────────────────
+
+# compress <path> [path …]  → <name>.tar.zst (multi-threaded zstd).
+compress() {
+    if (( $# == 0 )); then
+        echo "Usage: compress <path> [path…]" >&2
+        return 1
+    fi
+    local out="${1%/}.tar.zst"
+    tar --use-compress-program='zstd -T0 -19' -cf "$out" "$@"
+    echo "→ $out ($(du -h "$out" | cut -f1))"
+}
+
+# decompress <archive>  → auto-detects format (tar.zst, tar.gz, tar.xz, zip, 7z).
+decompress() {
+    local f="$1"
+    [[ -z "$f" ]] && { echo "Usage: decompress <archive>" >&2; return 1; }
+    [[ -f "$f" ]] || { echo "decompress: file not found: $f" >&2; return 1; }
+    case "$f" in
+        *.tar.zst|*.tzst) tar --use-compress-program='zstd -T0' -xf "$f" ;;
+        *.tar.gz|*.tgz)   tar -xzf "$f" ;;
+        *.tar.bz2|*.tbz2) tar -xjf "$f" ;;
+        *.tar.xz|*.txz)   tar -xJf "$f" ;;
+        *.tar)            tar -xf  "$f" ;;
+        *.zip)            unzip "$f" ;;
+        *.7z)             7z x "$f" ;;
+        *.rar)            unrar x "$f" ;;
+        *.gz)             gunzip "$f" ;;
+        *.bz2)            bunzip2 "$f" ;;
+        *.xz)             unxz "$f" ;;
+        *) echo "decompress: unknown format: $f" >&2; return 1 ;;
+    esac
+}
+
+# ─── Disk helpers (destructive — typed confirmation) ────────────────────────
+
+# iso2sd <iso> <device>   → dd with progress bar after typed confirmation.
+iso2sd() {
+    local iso="$1" dev="$2"
+    if [[ -z "$iso" || -z "$dev" ]]; then
+        echo "Usage: iso2sd <iso> <device>     (e.g. iso2sd archlinux.iso /dev/sdb)" >&2
+        return 1
+    fi
+    [[ -f "$iso" ]] || { echo "iso2sd: ISO not found: $iso" >&2; return 1; }
+    [[ -b "$dev" ]] || { echo "iso2sd: not a block device: $dev" >&2; return 1; }
+    echo "ABOUT TO WIPE: $dev"
+    lsblk "$dev"
+    printf 'Type the device path to confirm: '
+    read -r ack
+    [[ "$ack" == "$dev" ]] || { echo "iso2sd: aborted." >&2; return 1; }
+    sudo dd if="$iso" of="$dev" bs=4M status=progress oflag=sync
+    sync
+    echo "✓ Done. You can unplug $dev now."
+}
+
+# format-drive <device> [fstype]   → mkfs.<fstype>, defaults to ext4.
+format-drive() {
+    local dev="$1" fs="${2:-ext4}"
+    if [[ -z "$dev" ]]; then
+        echo "Usage: format-drive <device> [fstype]" >&2
+        echo "       fstype: ext4 | btrfs | xfs | exfat | ntfs | vfat" >&2
+        return 1
+    fi
+    [[ -b "$dev" ]] || { echo "format-drive: not a block device: $dev" >&2; return 1; }
+    echo "ABOUT TO FORMAT: $dev  →  $fs"
+    lsblk "$dev"
+    printf 'Type the device path to confirm: '
+    read -r ack
+    [[ "$ack" == "$dev" ]] || { echo "format-drive: aborted." >&2; return 1; }
+    case "$fs" in
+        ext4)  sudo mkfs.ext4 "$dev" ;;
+        btrfs) sudo mkfs.btrfs -f "$dev" ;;
+        xfs)   sudo mkfs.xfs -f "$dev" ;;
+        exfat) sudo mkfs.exfat "$dev" ;;
+        ntfs)  sudo mkfs.ntfs -F "$dev" ;;
+        vfat|fat32) sudo mkfs.vfat -F32 "$dev" ;;
+        *) echo "format-drive: unsupported fstype: $fs" >&2; return 1 ;;
+    esac
+}
+
+# ─── Network helpers (no args) ──────────────────────────────────────────────
+
+# fip   → LAN IPv4 of the default outbound interface.
+fip() {
+    ip -4 -o addr show \
+        | awk '$2 !~ /^(lo|docker|br-|vboxnet|tun|tap|veth)/ && $3 == "inet" {split($4,a,"/"); print $2, a[1]}'
+}
+
+# dip   → default route gateway IP.
+dip() {
+    ip route show default \
+        | awk '/^default/ { for (i=1;i<=NF;i++) if ($i=="via") print $(i+1) }'
+}
+
+# lip   → IPv6 link-local addresses (fe80::/10) per interface.
+lip() {
+    ip -6 -o addr show scope link \
+        | awk '{split($4,a,"/"); print $2, a[1]}'
+}
+
+# ─── Tmux layouts ───────────────────────────────────────────────────────────
+
+# tdl [name]    Tmux Dev Layout — 3 panes: editor (60%) + shell + log (or attach
+#               to a session with the same name).
+tdl() {
+    local name="${1:-dev}"
+    if tmux has-session -t "$name" 2>/dev/null; then
+        tmux attach-session -t "$name"
+        return
+    fi
+    tmux new-session -d -s "$name" -c "$PWD"
+    tmux send-keys -t "$name:1" 'nvim' C-m
+    tmux split-window -t "$name:1" -h -p 40 -c "$PWD"
+    tmux split-window -t "$name:1.2" -v -p 50 -c "$PWD"
+    tmux select-pane -t "$name:1.1"
+    tmux attach-session -t "$name"
+}
+
+# tsl [n=2]     Tmux Split Layout — inside a tmux pane, create N equal vertical
+#               splits running $SHELL.
+tsl() {
+    [[ -z "${TMUX:-}" ]] && { echo "tsl: not inside tmux" >&2; return 1; }
+    local n="${1:-2}"
+    local i
+    for (( i = 1; i < n; i++ )); do
+        tmux split-window -h -c "$PWD"
+    done
+    tmux select-layout even-horizontal
+}
+
+# ─── SSH port forwarding ────────────────────────────────────────────────────
+
+# rfwd <local-port> <remote-host> [remote-port]
+#   → ssh -R remote-port:localhost:local-port (remote forward, for testing
+#     a local dev server from a remote host).
+rfwd() {
+    local lp="$1" host="$2" rp="${3:-$1}"
+    if [[ -z "$lp" || -z "$host" ]]; then
+        echo "Usage: rfwd <local-port> <remote-host> [remote-port=local-port]" >&2
+        return 1
+    fi
+    echo "Forwarding remote $host:$rp → localhost:$lp"
+    ssh -N -R "$rp:localhost:$lp" "$host"
+}

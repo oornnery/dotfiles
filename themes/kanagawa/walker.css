@@ -1,0 +1,7 @@
+/* themes/kanagawa/walker.css */
+
+@define-color text          #dcd7ba;
+@define-color base          #1f1f28;
+@define-color border        rgba(149, 127, 184, 0.4);
+@define-color selected-text #957fb8;
+@define-color background    #1f1f28;

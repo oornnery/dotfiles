@@ -1,0 +1,16 @@
+[global]
+# Keep default rules and add opt-in table formatting rule
+extend-enable = ["MD060"]
+
+# Ignore line-length warnings for markdown docs
+disable = ["MD013"]
+
+# Lint/format only project docs
+include = ["README.md", "docs/**/*.md"]
+
+# Relaxed line length for documentation
+line_length = 120
+
+[MD060]
+enabled = true
+style = "aligned"

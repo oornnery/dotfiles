@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# emoji — pick an emoji via wofi and copy to clipboard.
+#
+# First use downloads a list from unicode.org and caches it in
+# $XDG_CACHE_HOME/emoji.list. Refresh with `emoji refresh`.
+
+set -euo pipefail
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/emoji.list"
+SRC="https://unicode.org/Public/emoji/latest/emoji-test.txt"
+
+_refresh() {
+    mkdir -p "$(dirname "$CACHE")"
+    curl -fsSL --max-time 10 "$SRC" \
+        | awk '/; fully-qualified/ {
+            sub(/^.*# /, "");
+            sub(/^([^ ]+) E[0-9]+\.[0-9]+ /, "\\1 ");
+            print
+          }' > "$CACHE"
+}
+
+cmd="${1:-pick}"
+
+case "$cmd" in
+    refresh)
+        _refresh
+        echo "Refreshed: $CACHE ($(wc -l < "$CACHE") entries)"
+        ;;
+    pick|"")
+        [[ -f "$CACHE" ]] || _refresh
+        pick="$(wofi --dmenu --prompt 'Emoji:' --width 480 < "$CACHE" || true)"
+        [[ -z "$pick" ]] && exit 0
+        # First field is the emoji glyph.
+        glyph="${pick%% *}"
+        printf '%s' "$glyph" | wl-copy -n
+        notify-send -a emoji -t 2000 "Emoji copied" "$pick"
+        ;;
+    -h|--help|help)
+        sed -n '2,7p' "$0"
+        ;;
+    *)
+        echo "emoji: unknown command: $cmd" >&2
+        exit 1
+        ;;
+esac

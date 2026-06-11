@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# dots:summary=Run a bootstrap module (bridge to scripts/arch + wsl/debian)
+# dots:args=<module>|<section>/<module>|arch-wsl|debian-wsl|all|--list
+set -euo pipefail
+
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+ARCH="$DOTFILES/scripts/arch/arch.sh"
+
+target="${1:-}"
+[[ -z "$target" ]] && { echo "Usage: dots setup <module>|<section>/<module>|arch-wsl|debian-wsl|all|--list" >&2; exit 1; }
+shift || true
+
+case "$target" in
+    --list|list)
+        [[ -x "$ARCH" ]] && bash "$ARCH" --help || echo "arch.sh not found at $ARCH"
+        printf '\npresets:\n  arch-wsl     scripts/wsl.sh\n  debian-wsl   scripts/debian-wsl.sh\n  all          curated arch preset\n' ;;
+    arch-wsl)   exec sudo bash "$DOTFILES/scripts/wsl.sh" "$@" ;;
+    debian-wsl) exec sudo bash "$DOTFILES/scripts/debian-wsl.sh" "$@" ;;
+    all|*/*)    exec bash "$ARCH" "$target" "$@" ;;
+    *)
+        found=""
+        for sec in core desktop dev game; do
+            [[ -f "$DOTFILES/scripts/arch/$sec/$target.sh" ]] && { found="$sec/$target"; break; }
+        done
+        [[ -z "$found" ]] && { echo "dots setup: module not found: $target (try: dots setup --list)" >&2; exit 1; }
+        exec bash "$ARCH" "$found" "$@" ;;
+esac

@@ -1,0 +1,18 @@
+{
+  "export_version": 3,
+  "packages": [
+    { "Id": "Anthropic.Claude",                "Name": "Claude (desktop)",      "Source": "winget",  "ManagerName": "Winget" },
+    { "Id": "Anthropic.ClaudeCode",            "Name": "Claude Code (CLI)",     "Source": "winget",  "ManagerName": "Winget" },
+    { "Id": "OpenAI.Codex",                    "Name": "Codex (CLI)",           "Source": "winget",  "ManagerName": "Winget" },
+    { "Id": "9PLM9XGG6VKS",                    "Name": "Codex (desktop)",       "Source": "msstore", "ManagerName": "Winget" },
+    { "Id": "Google.AntigravityIDE",           "Name": "Antigravity IDE",       "Source": "winget",  "ManagerName": "Winget" },
+    { "Id": "rullerzhou-afk.clawd-on-desk",    "Name": "Clawd on Desk",         "Source": "winget",  "ManagerName": "Winget" },
+    { "Id": "ElementLabs.LMStudio",            "Name": "LM Studio",             "Source": "winget",  "ManagerName": "Winget" },
+    { "Id": "Ollama.Ollama",                   "Name": "Ollama",                "Source": "winget",  "ManagerName": "Winget" }
+  ],
+  "incompatible_packages_info": "OmniRoute desktop is installed by scripts/win/dev/llms.ps1 directly from GitHub releases (no winget manifest). Google.Antigravity (standalone orchestrator, separate from IDE) is opt-in via ENABLE_ANTIGRAVITY_ORCH=1.",
+  "incompatible_packages": [
+    { "Id": "diegosouzapw.OmniRoute",          "Name": "OmniRoute (GitHub release)",  "Source": "github",  "ManagerName": "Manual" },
+    { "Id": "Google.Antigravity",              "Name": "Antigravity 2.0 (orchestrator, opt-in)", "Source": "winget", "ManagerName": "Winget" }
+  ]
+}

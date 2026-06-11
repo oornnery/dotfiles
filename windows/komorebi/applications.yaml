@@ -1,0 +1,65 @@
+# komorebi per-app rules — analog to hyprland/.config/hypr/lua/windowrules.lua.
+#
+# Schema: https://raw.githubusercontent.com/LGUG2Z/komorebi/master/komorebi-application-specific-configuration/schema.json
+# This file is auto-merged with komorebi.json's float/ignore arrays.
+
+- name: ShareX
+  identifier:
+    kind: Exe
+    id: ShareX.exe
+  options: [object_name_change, layered]
+  float_identifiers:
+    - { kind: Title, matching_strategy: Equals, id: "After Capture Tasks" }
+
+- name: Settings
+  identifier:
+    kind: Exe
+    id: SystemSettings.exe
+  options: [float]
+
+- name: Calculator
+  identifier:
+    kind: Title
+    id: Calculator
+  options: [float]
+
+- name: Snipping Tool
+  identifier:
+    kind: Exe
+    id: SnippingTool.exe
+  options: [float]
+
+- name: Picture-in-Picture
+  identifier:
+    kind: Title
+    matching_strategy: Contains
+    id: Picture-in-Picture
+  options: [float]
+
+- name: Browser dialogs (Open/Save/Print)
+  identifier:
+    kind: Title
+    matching_strategy: Regex
+    id: "^(Open|Save|Print|File Upload|Sign in).*"
+  options: [float]
+
+- name: Flow Launcher
+  identifier:
+    kind: Exe
+    id: Flow.Launcher.exe
+  options: [float, no_titlebar]
+
+- name: Steam — friends/chat
+  identifier:
+    kind: Class
+    id: SDL_app
+  float_identifiers:
+    - { kind: Title, matching_strategy: Contains, id: "Friends List" }
+
+- name: Discord — float settings/popouts
+  identifier:
+    kind: Exe
+    id: Discord.exe
+  float_identifiers:
+    - { kind: Title, matching_strategy: Equals, id: "User Settings" }
+    - { kind: Title, matching_strategy: Contains, id: "Picture-in-Picture" }

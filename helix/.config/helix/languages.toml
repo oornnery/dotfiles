@@ -1,0 +1,123 @@
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+
+[language-server.typescript-language-server]
+command = "typescript-language-server"
+args = ["--stdio"]
+
+[language-server.pyright]
+command = "pyright-langserver"
+args = ["--stdio"]
+
+[language-server.vscode-html-language-server]
+command = "vscode-html-language-server"
+args = ["--stdio"]
+
+[language-server.vscode-css-language-server]
+command = "vscode-css-language-server"
+args = ["--stdio"]
+
+[language-server.json-language-server]
+command = "vscode-json-language-server"
+args = ["--stdio"]
+
+[[language]]
+name = "rust"
+scope = "source.rust"
+injection-regex = "rust"
+file-types = ["rs"]
+language-servers = ["rust-analyzer"]
+auto-format = true
+
+[[language]]
+name = "python"
+scope = "source.python"
+injection-regex = "py"
+file-types = ["py", "pyi", "pyc", "pyd", "pyx", "pyw"]
+language-servers = ["pyright"]
+auto-format = true
+formatter = { command = "ruff", args = ["format", "--stdin-filename", "dummy.py", "--output-format=concise", "-"] }
+
+[[language]]
+name = "typescript"
+scope = "source.ts"
+injection-regex = "ts"
+file-types = ["ts", "mts", "cts"]
+language-servers = ["typescript-language-server"]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+
+[[language]]
+name = "tsx"
+scope = "source.tsx"
+injection-regex = "tsx"
+file-types = ["tsx"]
+language-servers = ["typescript-language-server"]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+
+[[language]]
+name = "javascript"
+scope = "source.js"
+injection-regex = "js"
+file-types = ["js", "mjs", "cjs"]
+language-servers = ["typescript-language-server"]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name = "jsx"
+scope = "source.jsx"
+injection-regex = "jsx"
+file-types = ["jsx"]
+language-servers = ["typescript-language-server"]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name = "html"
+scope = "text.html"
+injection-regex = "html"
+file-types = ["html", "htm", "xhtml"]
+language-servers = ["vscode-html-language-server"]
+auto-format = true
+
+[[language]]
+name = "css"
+scope = "source.css"
+injection-regex = "css"
+file-types = ["css"]
+language-servers = ["vscode-css-language-server"]
+auto-format = true
+
+[[language]]
+name = "scss"
+scope = "source.scss"
+injection-regex = "scss"
+file-types = ["scss", "sass"]
+language-servers = ["vscode-css-language-server"]
+auto-format = true
+
+[[language]]
+name = "json"
+scope = "source.json"
+injection-regex = "json"
+file-types = ["json", "jsonc"]
+language-servers = ["json-language-server"]
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "json"] }
+
+[[language]]
+name = "toml"
+scope = "source.toml"
+injection-regex = "toml"
+file-types = ["toml"]
+auto-format = true
+formatter = { command = "taplo", args = ["format", "-"] }
+
+[[language]]
+name = "yaml"
+scope = "source.yaml"
+injection-regex = "yaml"
+file-types = ["yaml", "yml"]
+auto-format = true

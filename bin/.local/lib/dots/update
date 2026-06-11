@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# dots:summary=Cross-distro system + ecosystem updater
+# dots:args=(run)|check|list|status [--json]
+#
+# Detects pacman/paru (Arch) OR apt/nala (Debian); always runs the language
+# ecosystems: flatpak, npm -g, cargo, pipx, uv. `check` emits waybar JSON.
+set -uo pipefail
+
+CACHE="${XDG_RUNTIME_DIR:-/tmp}/update-check.json"
+_have() { command -v "$1" >/dev/null 2>&1; }
+
+_count_pacman()  { _have checkupdates && { checkupdates 2>/dev/null | wc -l || true; } || echo 0; }
+_count_aur()     { _have paru && { paru -Qua 2>/dev/null | wc -l || true; } || echo 0; }
+_count_apt()     { _have apt-get && ! _have pacman && { apt-get -s upgrade 2>/dev/null | grep -c '^Inst' || true; } || echo 0; }
+_count_flatpak() { _have flatpak && { flatpak remote-ls --updates 2>/dev/null | wc -l || true; } || echo 0; }
+_count_npm()     { _have npm && { npm outdated -g --parseable 2>/dev/null | wc -l || true; } || echo 0; }
+_count_cargo()   { _have cargo-install-update && { cargo install-update -l 2>/dev/null | grep -c '^Yes ' || true; } || echo 0; }
+_count_pipx()    { _have pipx && { pipx list --json 2>/dev/null | jq -r '.venvs | keys | length' 2>/dev/null || true; } || echo 0; }
+_count_uv()      { _have uv && { uv tool list 2>/dev/null | grep -c '^' || true; } || echo 0; }
+
+_check() {
+    local p a d f n c x u total
+    p=$(_count_pacman) a=$(_count_aur) d=$(_count_apt) f=$(_count_flatpak)
+    n=$(_count_npm) c=$(_count_cargo) x=$(_count_pipx) u=$(_count_uv)
+    total=$(( p + a + d + f + n + c ))
+    cat <<EOF
+{
+  "count": $total,
+  "pacman": $p, "aur": $a, "apt": $d, "flatpak": $f,
+  "npm": $n, "cargo": $c, "pipx": $x, "uv": $u,
+  "text": "$total",
+  "tooltip": "pacman: $p, AUR: $a, apt: $d, flatpak: $f, npm: $n, cargo: $c, pipx: $x, uv: $u",
+  "class": "$([ "$total" -gt 0 ] && echo updates || echo clean)"
+}
+EOF
+}
+
+_list() {
+    _have checkupdates && { echo "── pacman ──"; checkupdates 2>/dev/null | sed 's/^/  /'; echo; }
+    _have paru         && { echo "── AUR ──";    paru -Qua    2>/dev/null | sed 's/^/  /'; echo; }
+    _have apt-get && ! _have pacman && { echo "── apt ──"; apt-get -s upgrade 2>/dev/null | grep '^Inst' | sed 's/^/  /'; echo; }
+    _have flatpak      && { echo "── flatpak ──"; flatpak remote-ls --updates 2>/dev/null | sed 's/^/  /'; echo; }
+    _have npm          && { echo "── npm -g ──"; npm outdated -g --parseable 2>/dev/null | sed 's/^/  /'; echo; }
+    _have cargo-install-update && { echo "── cargo ──"; cargo install-update -l 2>/dev/null | sed 's/^/  /'; echo; }
+}
+
+_run() {
+    local user="${SUDO_USER:-$USER}" _as_user
+    if [[ $EUID -eq 0 && "$user" != "root" ]]; then _as_user=(sudo -u "$user" -H); else _as_user=(); fi
+
+    if _have snapper && findmnt -no FSTYPE / 2>/dev/null | grep -qx btrfs; then
+        printf '\n── snapper snapshot ──\n'
+        sudo snapper -c root create -t single -d "pre-update $(date +%F)" || echo "  (snapper failed — continuing)"
+    fi
+
+    if   _have paru;   then printf '\n── paru -Syu ──\n';   "${_as_user[@]}" paru -Syu
+    elif _have pacman; then printf '\n── pacman -Syu ──\n'; sudo pacman -Syu
+    elif _have nala;   then printf '\n── nala upgrade ──\n'; sudo nala upgrade -y
+    elif _have apt;    then printf '\n── apt upgrade ──\n';  sudo apt update && sudo apt upgrade -y
+    fi
+
+    _have flatpak              && { printf '\n── flatpak update ──\n'; flatpak update -y || true; }
+    _have npm                  && { printf '\n── npm -g ──\n'; "${_as_user[@]}" npm update -g || true; }
+    _have cargo-install-update && { printf '\n── cargo install-update ──\n'; "${_as_user[@]}" cargo install-update -a || true; }
+    _have pipx                 && { printf '\n── pipx upgrade-all ──\n'; "${_as_user[@]}" pipx upgrade-all || true; }
+    _have uv                   && { printf '\n── uv tool upgrade ──\n'; "${_as_user[@]}" uv tool upgrade --all || true; }
+
+    _check > "$CACHE" || true
+    dots notify "Update complete" "All ecosystems refreshed" -a update -i system-software-update -t 5000
+}
+
+_status() {
+    if [[ "${1:-}" == --json ]]; then _check; return; fi
+    if _have jq; then _check | jq -r '"\(.count) updates — \(.tooltip)"'; else _check; fi
+}
+
+case "${1:-run}" in
+    ""|run) _run ;;
+    check)  _check ;;
+    list)   _list ;;
+    status) _status "${2:-}" ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots update: unknown action: $1" >&2; exit 1 ;;
+esac

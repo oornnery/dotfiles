@@ -1,0 +1,21 @@
+/* themes/kanagawa/fabric.css — copied to ~/.config/fabric-shell/src/theme.css */
+
+:vars {
+    --bg:        #1f1f28;
+    --bg-alt:    #2a2a37;
+    --bg-darker: #16161d;
+    --fg:        #dcd7ba;
+    --muted:     #727169;
+    --border:    alpha(#957fb8, 0.18);
+
+    --accent:    #957fb8;
+    --mauve:     #957fb8;
+    --blue:      #7e9cd8;
+    --sky:       #7fb4ca;
+    --yellow:    #c0a36e;
+    --peach:     #ffa066;
+    --green:     #76946a;
+    --teal:      #6a9589;
+    --sapphire:  #7e9cd8;
+    --red:       #c34043;
+}

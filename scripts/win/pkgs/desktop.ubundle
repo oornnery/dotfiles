@@ -1,0 +1,12 @@
+{
+  "export_version": 3,
+  "packages": [
+    { "Id": "Microsoft.WindowsTerminal",  "Name": "Windows Terminal",       "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Microsoft.PowerShell",       "Name": "PowerShell 7",           "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Starship.Starship",          "Name": "Starship prompt",        "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "JanDeDobbeleer.OhMyPosh",    "Name": "Oh My Posh",             "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Microsoft.PowerToys",        "Name": "Microsoft PowerToys",    "Source": "winget", "ManagerName": "Winget" }
+  ],
+  "incompatible_packages_info": "Komorebi, whkd, yasb and JetBrainsMono Nerd Font are installed via scoop (komorebi-bucket / nerd-fonts bucket) - run scripts/win/win.ps1 desktop to set them up.",
+  "incompatible_packages": []
+}

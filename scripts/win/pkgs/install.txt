@@ -1,0 +1,80 @@
+# winget packages, grouped to match the .ubundle files in this directory.
+# Format: <group>|<winget-id>
+# Lines starting with # are comments. Groups: core / desktop / dev / work / game / llms.
+# Mirrors core.ubundle / desktop.ubundle / dev.ubundle / work.ubundle / game.ubundle / llms.ubundle.
+
+# === core (base utilities, runtime libs, system tools) ===
+core|MartiCliment.UniGetUI
+core|flick9000.WinScript
+core|9P8LTPGCBZXD                   # Wintoys (msstore)
+core|9PM860492SZD                   # Microsoft PC Manager (msstore)
+core|RamenSoftware.Windhawk
+core|Microsoft.PowerToys
+core|Microsoft.VCRedist.2013.x64
+core|Microsoft.VCRedist.2013.x86
+core|Microsoft.VCRedist.2015+.x64
+core|Microsoft.VCRedist.2015+.x86
+core|7zip.7zip
+core|ShareX.ShareX
+
+# === desktop (terminal + shell + WM-adjacent) ===
+desktop|Microsoft.WindowsTerminal
+desktop|Microsoft.PowerShell
+desktop|Starship.Starship
+desktop|JanDeDobbeleer.OhMyPosh
+
+# === dev (coding stack) ===
+dev|Git.Git
+dev|GitHub.cli
+dev|GitHub.GitHubDesktop
+dev|Microsoft.VisualStudioCode
+dev|Microsoft.VisualStudioCode.CLI
+dev|ZedIndustries.Zed
+dev|Neovim.Neovim
+dev|Notepad++.Notepad++
+dev|Docker.DockerDesktop
+dev|OpenJS.NodeJS.LTS
+dev|Python.Python.3.14
+dev|astral-sh.uv
+dev|GoLang.Go
+dev|Rustlang.Rustup
+dev|Oven-sh.Bun
+dev|Kitware.CMake
+dev|SQLite.SQLite
+dev|OnOff.Onlook
+dev|Microsoft.WSL
+
+# === work (browsers + productivity + media) ===
+work|Brave.Brave
+work|Zen-Team.Zen-Browser
+work|Perplexity.Comet
+work|Notion.Notion
+work|Obsidian.Obsidian
+work|qBittorrent.qBittorrent
+work|VideoLAN.VLC
+work|TheDocumentFoundation.LibreOffice
+work|Google.GoogleDrive
+work|Audacity.Audacity
+work|GIMP.GIMP.3
+work|KDE.Kdenlive
+work|WiresharkFoundation.Wireshark
+
+# === game (launchers + controller stack) ===
+game|Valve.Steam
+game|EpicGames.EpicGamesLauncher
+game|ElectronicArts.EADesktop
+game|RiotGames.LeagueOfLegends.BR
+game|Mojang.MinecraftLauncher
+game|RockstarGames.Launcher
+game|Overwolf.CurseForge
+game|Blitz.Blitz
+game|Ryochan7.DS4Windows
+game|Nefarius.HidHide
+game|ViGEm.ViGEmBus
+
+# === llms (AI clis + agents) ===
+llms|Anthropic.Claude
+llms|Anthropic.ClaudeCode
+llms|9PLM9XGG6VKS                   # Codex (msstore)
+llms|ElementLabs.LMStudio
+llms|Ollama.Ollama

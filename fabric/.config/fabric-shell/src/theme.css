@@ -1,0 +1,28 @@
+/* theme.css — palette variables for the active theme.
+ *
+ * Overwritten by `theme set <name>` (copies themes/<name>/fabric.css here).
+ * Default values below match catppuccin-mocha so the bar boots OK even
+ * before `theme set` runs.
+ *
+ * Imported by style.css.
+ */
+
+:vars {
+    --bg:        #1e1e2e;
+    --bg-alt:   #313244;
+    --bg-darker: #181825;
+    --fg:        #cdd6f4;
+    --muted:     #6c7086;
+    --border:    alpha(#cba6f7, 0.20);
+
+    --accent:    #cba6f7;
+    --mauve:     #cba6f7;
+    --blue:      #89b4fa;
+    --sky:       #89dceb;
+    --yellow:    #f9e2af;
+    --peach:     #fab387;
+    --green:     #a6e3a1;
+    --teal:      #94e2d5;
+    --sapphire:  #74c7ec;
+    --red:       #f38ba8;
+}

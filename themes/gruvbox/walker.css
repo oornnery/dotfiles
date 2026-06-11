@@ -1,0 +1,7 @@
+/* themes/gruvbox/walker.css */
+
+@define-color text          #ebdbb2;
+@define-color base          #282828;
+@define-color border        rgba(254, 128, 25, 0.45);
+@define-color selected-text #fe8019;
+@define-color background    #282828;

@@ -1,0 +1,361 @@
+{
+  "export_version": 3,
+  "packages": [
+    {
+      "Id": "7zip.7zip",
+      "Name": "7-Zip",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "VideoLAN.VLC",
+      "Name": "VLC media player",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "TheDocumentFoundation.LibreOffice",
+      "Name": "LibreOffice",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Google.GoogleDrive",
+      "Name": "Google Drive",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Notion.Notion",
+      "Name": "Notion",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "flick9000.WinScript",
+      "Name": "WinScript",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "MartiCliment.UniGetUI",
+      "Name": "UniGetUI",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "9P8LTPGCBZXD",
+      "Name": "Wintoys",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "9PM860492SZD",
+      "Name": "Microsoft PC Manager",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "RamenSoftware.Windhawk",
+      "Name": "Windhawk",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "qBittorrent.qBittorrent",
+      "Name": "qBittorrent",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Zen-Team.Zen-Browser",
+      "Name": "Zen Browser",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Brave.Brave",
+      "Name": "Brave",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.VCRedist.2013.x64",
+      "Name": "Microsoft Visual C++ 2013 Redistributable (x64)",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.VCRedist.2013.x86",
+      "Name": "Microsoft Visual C++ 2013 Redistributable (x86)",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.VCRedist.2015+.x64",
+      "Name": "Microsoft Visual C++ 2015+ Redistributable (x64)",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.VCRedist.2015+.x86",
+      "Name": "Microsoft Visual C++ 2015+ Redistributable (x86)",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Ryochan7.DS4Windows",
+      "Name": "DS4Windows",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Nefarius.HidHide",
+      "Name": "HidHide",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "ViGEm.ViGEmBus",
+      "Name": "ViGEmBus",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "EpicGames.EpicGamesLauncher",
+      "Name": "Epic Games Launcher",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "RockstarGames.Launcher",
+      "Name": "Rockstar Games Launcher",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Mojang.MinecraftLauncher",
+      "Name": "Minecraft Launcher",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "ElectronicArts.EADesktop",
+      "Name": "EA app",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Blitz.Blitz",
+      "Name": "Blitz",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Overwolf.CurseForge",
+      "Name": "CurseForge",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "RiotGames.LeagueOfLegends.BR",
+      "Name": "League of Legends (BR)",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Valve.Steam",
+      "Name": "Steam",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.WSL",
+      "Name": "Windows Subsystem for Linux",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Git.Git",
+      "Name": "Git",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "GitHub.cli",
+      "Name": "GitHub CLI",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.PowerShell",
+      "Name": "PowerShell",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.WindowsTerminal",
+      "Name": "Windows Terminal",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "JanDeDobbeleer.OhMyPosh",
+      "Name": "Oh My Posh",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "GitHub.GitHubDesktop",
+      "Name": "GitHub Desktop",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.VisualStudioCode",
+      "Name": "Visual Studio Code",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.VisualStudioCode.CLI",
+      "Name": "Visual Studio Code CLI",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "ZedIndustries.Zed",
+      "Name": "Zed",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Docker.DockerDesktop",
+      "Name": "Docker Desktop",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "OpenJS.NodeJS.LTS",
+      "Name": "Node.js LTS",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "astral-sh.uv",
+      "Name": "uv",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "SQLite.SQLite",
+      "Name": "SQLite",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "OnOff.Onlook",
+      "Name": "Onlook",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Anthropic.ClaudeCode",
+      "Name": "Claude Code",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Anthropic.Claude",
+      "Name": "Claude",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "9PLM9XGG6VKS",
+      "Name": "Codex",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Perplexity.Comet",
+      "Name": "Comet",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "ElementLabs.LMStudio",
+      "Name": "LM Studio",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Ollama.Ollama",
+      "Name": "Ollama",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "WiresharkFoundation.Wireshark",
+      "Name": "Wireshark",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Audacity.Audacity",
+      "Name": "Audacity",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "GIMP.GIMP.3",
+      "Name": "GIMP",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "KDE.Kdenlive",
+      "Name": "Kdenlive",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "ShareX.ShareX",
+      "Name": "ShareX",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Obsidian.Obsidian",
+      "Name": "Obsidian",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Neovim.Neovim",
+      "Name": "Neovim",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Notepad++.Notepad++",
+      "Name": "Notepad++",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Microsoft.PowerToys",
+      "Name": "Microsoft PowerToys",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    },
+    {
+      "Id": "Python.Python.3.14",
+      "Name": "Python 3.14",
+      "Source": "winget",
+      "ManagerName": "Winget"
+    }
+  ],
+  "incompatible_packages_info": "Incompatible packages cannot be installed from UniGetUI, either because they came from a local source (for example Local PC) or because the package manager was unavailable. Nevertheless, they have been listed here for logging purposes.",
+  "incompatible_packages": []
+}

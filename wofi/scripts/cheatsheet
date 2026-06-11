@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+# cheatsheet — pure-wofi picker for keybind / command references.
+#
+# Two-level navigation entirely in wofi:
+#   1. Category picker (Hyprland, Tmux, Vim, Zsh, …)
+#   2. Per-category line list with "← Back" entry — Enter copies the
+#      highlighted line to the clipboard and notifies.
+#
+# Live sources (parsed from your actual configs, always current):
+#   Hyprland binds      ← ~/.config/hypr/bindings.conf
+#   Tmux binds          ← ~/.tmux.conf
+#   Vim / Neovim binds  ← ~/.vimrc + ~/.config/nvim/plugin/*.lua
+#   Zsh aliases         ← `alias`
+#   Shell functions     ← ~/.zsh_functions
+#
+# Static sources:
+#   docs/cheatsheets/*.md   ← every per-tool reference (eza, bat, fzf, …)
+#
+# Bound to Super+F1 in hyprland/bindings.conf.
+
+set -uo pipefail
+
+DOCS_DIR="${CHEATSHEET_DIR:-$HOME/dotfiles/docs/cheatsheets}"
+WOFI_OPTS=(--dmenu --insensitive --width 900 --height 600 --allow-markup)
+
+_wofi() { wofi "${WOFI_OPTS[@]}" "$@"; }
+
+# ─── Source builders (one per category) ────────────────────────────────────
+
+_src_hyprland() {
+    # Compact format: "MODKEY+KEY  →  command"
+    # Parses lines like `bind = $mainMod SHIFT, H, exec, cheatsheet`
+    # shellcheck disable=SC2016  # sed/awk handle literal $mainMod
+    grep -E '^(bind|bindel|bindl|bindm)' \
+        "$HOME/.config/hypr/bindings.conf" 2>/dev/null \
+    | awk -F, '
+        {
+            # field 1: "bind = MODS"
+            sub(/^bind[elm]? *= */, "", $1)
+            gsub(/\$mainMod/, "Super", $1)
+            gsub(/  */, " ", $1)
+            sub(/^ /, "", $1); sub(/ $/, "", $1)
+            mods = $1
+
+            # field 2: key
+            key = $2; gsub(/^ +| +$/, "", key)
+
+            # combine: prefer mod+key with +, else just key
+            if (mods == "" || mods == " ") combo = key
+            else { gsub(/ /, "+", mods); combo = mods "+" key }
+
+            # action: rest of line after key
+            action = ""
+            for (i = 3; i <= NF; i++) action = action (action ? "," : "") $i
+            sub(/^ *exec, */, "", action)
+            sub(/^ */, "", action); sub(/ *$/, "", action)
+            # strip trailing inline comment
+            sub(/ *#.*$/, "", action)
+
+            printf "%-28s  →  %s\n", combo, action
+        }
+    '
+}
+
+_src_tmux() {
+    grep -E '^(bind|set|setw)' "$HOME/.tmux.conf" 2>/dev/null
+}
+
+_src_vim() {
+    [[ -f "$HOME/.vimrc" ]] && \
+        grep -E '^(let mapleader|nnoremap|vnoremap|inoremap|map\b)' "$HOME/.vimrc"
+    for f in "$HOME"/.config/nvim/plugin/*.lua \
+             "$HOME"/.config/nvim/lua/config/keymaps.lua; do
+        [[ -f "$f" ]] || continue
+        grep -E 'vim\.keymap\.set|map\(' "$f" 2>/dev/null \
+            | sed "s|^|${f##*/}: |"
+    done
+}
+
+_src_zsh_aliases() {
+    # `alias` in non-interactive shell returns empty; ask interactive zsh.
+    zsh -ic 'alias' 2>/dev/null | sort
+}
+
+_src_zsh_functions() {
+    [[ -f "$HOME/.zsh_functions" ]] || return
+    # Pick up function names and their first-line comment if present.
+    awk '
+        /^[[:space:]]*#/        { last_comment = $0; next }
+        /^[a-zA-Z_][a-zA-Z0-9_-]*\(\)/ {
+            name = $1; sub(/\(\).*/, "", name)
+            printf "%-20s  %s\n", name, last_comment
+            last_comment = ""
+        }
+    ' "$HOME/.zsh_functions"
+}
+
+_show_doc() {
+    # Render an .md cheatsheet with glow in a floating alacritty.
+    # Synchronous (no &): we wait for the terminal to exit, then the
+    # main loop reopens the wofi picker. Inside glow:
+    #   /pattern     search forward
+    #   n / N        next / previous match
+    #   q / Esc      quit
+    local file="$1" title="$2"
+    if command -v glow >/dev/null 2>&1; then
+        alacritty --class floating --title "$title" \
+            -e glow -p "$file"
+    else
+        # Fallback to bat if glow is missing.
+        alacritty --class floating --title "$title" \
+            -e bat --paging=always --language=md "$file"
+    fi
+}
+
+# ─── Inner menu: list lines + Back + Copy on Enter ─────────────────────────
+
+_browse() {
+    local title="$1"
+    local content
+    content="$(cat)"
+    local pick
+    pick="$(printf '← Back\n%s' "$content" \
+            | _wofi --prompt "$title:" )"
+
+    case "$pick" in
+        ''|'← Back') return 10 ;;   # signal: go back to main
+        *)
+            printf '%s' "$pick" | wl-copy
+            notify-send -a cheatsheet "Copied" "$pick"
+            ;;
+    esac
+}
+
+# ─── Main menu ─────────────────────────────────────────────────────────────
+
+_main_menu() {
+    printf '󰌌  Hyprland keybindings (live)\n'
+    printf '  Tmux keybindings (live)\n'
+    printf '  Vim / Neovim keybindings (live)\n'
+    printf '󰒓  Zsh aliases (live)\n'
+    printf 'ƒ  Shell functions (live)\n'
+    if [[ -d "$DOCS_DIR" ]]; then
+        for f in "$DOCS_DIR"/*.md; do
+            [[ -f "$f" ]] || continue
+            printf '󰈙  %s\n' "$(basename "$f" .md)"
+        done
+    fi
+}
+
+# ─── Loop until user dismisses main menu ───────────────────────────────────
+
+while :; do
+    pick="$(_main_menu | _wofi --prompt 'Cheatsheet:')"
+    [[ -z "$pick" ]] && exit 0
+
+    case "$pick" in
+        *Hyprland*)        _src_hyprland       | _browse "Hyprland" ;;
+        *Tmux*)            _src_tmux           | _browse "Tmux" ;;
+        *Vim*|*Neovim*)    _src_vim            | _browse "Vim/Neovim" ;;
+        *Zsh*aliases*)     _src_zsh_aliases    | _browse "Zsh aliases" ;;
+        *Shell*functions*) _src_zsh_functions  | _browse "Shell functions" ;;
+        *)
+            name="${pick##*  }"   # strip "󰈙  " prefix
+            file="$DOCS_DIR/$name.md"
+            if [[ -f "$file" ]]; then
+                _show_doc "$file" "$name"
+                continue            # always reopen main menu after glow exits
+            else
+                notify-send -a cheatsheet "cheatsheet" "Not found: $name"
+            fi
+            ;;
+    esac
+    # _browse returns 10 to mean "back to main", anything else exits the loop
+    [[ $? -eq 10 ]] || exit 0
+done

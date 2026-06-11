@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# dots:summary=Reload WM daemons / shells after a config or theme change
+# dots:args=[all|mako|waybar|tmux|ags|fabric|hypr|gtk|zsh|bash]
+set -uo pipefail
+
+_mako()   { command -v makoctl >/dev/null && makoctl reload 2>/dev/null || true; }
+_waybar() { pkill -SIGUSR2 waybar 2>/dev/null || true; }
+_tmux()   { command -v tmux >/dev/null && tmux has-session 2>/dev/null && tmux source-file "$HOME/.tmux.conf" 2>/dev/null || true; }
+_hypr()   { command -v hyprctl >/dev/null && hyprctl reload 2>/dev/null || true; }
+
+_ags() {
+    command -v ags >/dev/null || return 0
+    ags quit 2>/dev/null || true
+    sleep 0.3
+    pkill -TERM -f 'gjs.*ags' 2>/dev/null || true
+    setsid -f ags run --log-file /tmp/ags-bar.log >/tmp/ags-stderr.log 2>&1 || (nohup ags run >/dev/null 2>&1 &)
+}
+
+_fabric() {
+    pgrep -fl 'fabric-shell/.*/main\.py' >/dev/null 2>&1 || return 0
+    pkill -TERM -f 'fabric-shell/.*/main\.py' 2>/dev/null || true
+    sleep 0.3
+    local dir="$HOME/.config/fabric-shell"
+    [[ -d "$HOME/dotfiles/fabric/.config/fabric-shell" ]] && dir="$HOME/dotfiles/fabric/.config/fabric-shell"
+    [[ -f "$dir/src/main.py" ]] && (cd "$dir" && nohup uv run src/main.py >/dev/null 2>&1 &)
+}
+
+_gtk() {
+    # Best-effort nudge so GTK apps re-read the theme (toggle and restore).
+    command -v gsettings >/dev/null || return 0
+    local t; t="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'")" || return 0
+    [[ -n "$t" ]] || return 0
+    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface gtk-theme "$t" 2>/dev/null || true
+}
+
+_shell() {
+    # A subprocess cannot re-source its parent's interactive shell. Tell the
+    # user how (a `reload` alias doing `exec $SHELL` is the usual trick).
+    echo "reload $1: run  exec $1 -l   (or  source ~/.${1}rc) in your shell" >&2
+}
+
+case "${1:-all}" in
+    all)    _mako; _waybar; _tmux; _ags; _fabric ;;   # theme-set behaviour (no hypr reload)
+    mako)   _mako ;;
+    waybar) _waybar ;;
+    tmux)   _tmux ;;
+    hypr)   _hypr ;;
+    ags)    _ags ;;
+    fabric) _fabric ;;
+    gtk)    _gtk ;;
+    zsh)    _shell zsh ;;
+    bash)   _shell bash ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots reload: unknown target: $1" >&2; exit 1 ;;
+esac

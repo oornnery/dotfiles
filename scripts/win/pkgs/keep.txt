@@ -1,0 +1,31 @@
+# AppX/MSIX patterns to NEVER remove. Anything matching this is skipped by
+# debloat-appx.ps1 even if it appears in remove.txt.
+
+Microsoft.Windows.Photos
+Microsoft.WindowsCamera
+Microsoft.ZuneMusic                   # new Media Player (rebranded; kept the old package id)
+Microsoft.WindowsCalculator
+Microsoft.WindowsNotepad
+Microsoft.Paint
+Microsoft.ScreenSketch                # Snipping Tool
+Microsoft.WindowsStore
+Microsoft.WindowsTerminal
+Microsoft.SecHealthUI                 # Windows Security UI
+Microsoft.XboxIdentityProvider        # Steam/Epic/EA auth dependency on some titles
+Microsoft.XboxGamingOverlay           # Game Bar (FPS / capture overlay)
+Microsoft.GamingServices
+Microsoft.VCLibs.*
+Microsoft.UI.Xaml.*
+Microsoft.NET.Native.*
+Microsoft.WindowsAppRuntime.*
+Microsoft.DesktopAppInstaller
+Microsoft.AV1VideoExtension
+Microsoft.AVCEncoderVideoExtension
+Microsoft.HEIFImageExtension
+Microsoft.HEVCVideoExtension
+Microsoft.MPEG2VideoExtension
+Microsoft.VP9VideoExtensions
+Microsoft.WebMediaExtensions
+Microsoft.WebpImageExtension
+Microsoft.RawImageExtension
+Microsoft.MicrosoftEdge.Stable

@@ -1,0 +1,43 @@
+[manager]
+prepend_keymap = [
+    # Vim-style navigation
+    { on = [ "h" ], run = "leave", desc = "Go back" },
+    { on = [ "j" ], run = "arrow -1", desc = "Move down" },
+    { on = [ "k" ], run = "arrow 1", desc = "Move up" },
+    { on = [ "l" ], run = "enter", desc = "Enter directory / open file" },
+
+    # Quick commands
+    { on = [ "g", "g" ], run = "arrow -99999", desc = "Go to top" },
+    { on = [ "G" ], run = "arrow 99999", desc = "Go to bottom" },
+    { on = [ "~" ], run = "cd /home/oornnery", desc = "Go home" },
+    { on = [ "/" ], run = "filter", desc = "Filter files" },
+    { on = [ ":" ], run = "shell", desc = "Shell command" },
+    { on = [ "e" ], run = 'open --hovered', desc = "Open with editor" },
+    { on = [ "r" ], run = "rename", desc = "Rename" },
+    { on = [ "d" ], run = "remove", desc = "Delete" },
+    { on = [ "y" ], run = "copy", desc = "Copy" },
+    { on = [ "p" ], run = "paste", desc = "Paste" },
+    { on = [ "c" ], run = "create", desc = "Create" },
+    { on = [ "x" ], run = "cut", desc = "Cut" },
+    { on = [ "Y" ], run = "copy_absolute_path", desc = "Copy absolute path" },
+    { on = [ "." ], run = "toggle_hidden", desc = "Toggle hidden files" },
+    { on = [ "q" ], run = "quit", desc = "Quit" },
+
+    # Tabs
+    { on = [ "t" ], run = "tab_create", desc = "Create tab" },
+    { on = [ "1" ], run = "tab_switch 1", desc = "Switch to tab 1" },
+    { on = [ "2" ], run = "tab_switch 2", desc = "Switch to tab 2" },
+    { on = [ "3" ], run = "tab_switch 3", desc = "Switch to tab 3" },
+    { on = [ "4" ], run = "tab_switch 4", desc = "Switch to tab 4" },
+    { on = [ "5" ], run = "tab_switch 5", desc = "Switch to tab 5" },
+    { on = [ "tab" ], run = "tab_switch", desc = "Next tab" },
+    { on = [ "s" ], run = "tab_switch -1", desc = "Previous tab" },
+    { on = [ "Q" ], run = "close", desc = "Close tab / quit" },
+
+    # Parents
+    { on = [ "esc" ], run = "escape", desc = "Escape" },
+
+    # Visual mode
+    { on = [ "v" ], run = "visual_mode", desc = "Enter visual mode" },
+    { on = [ "V" ], run = "visual_mode_all", desc = "Select all" },
+]

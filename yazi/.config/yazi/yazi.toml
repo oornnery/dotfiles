@@ -1,0 +1,28 @@
+[manager]
+show_hidden = false
+sort_dir_first = true
+layout = "default"
+ratio = [1, 4, 3]
+
+[preview]
+tab_size = 4
+max_width = 600
+max_height = 900
+cache_dir = "/tmp/yazi-cache"
+
+[opener]
+edit = [
+    { run = "helix %s", block = true, desc = "Helix", for = "unix" },
+]
+open = [
+    { run = "xdg-open %s", desc = "Open", for = "unix" },
+]
+
+[open]
+rules = [
+    { url = "*.{md,txt,json,yaml,toml,py,js,ts,rs,c,cpp,h,hpp,go,java,html,css,scss,sass,sh,bash,zsh}", use = "edit" },
+    { mime = "image/*", use = "open" },
+    { mime = "audio/*", use = "open" },
+    { mime = "video/*", use = "open" },
+    { mime = "application/pdf", use = "open" },
+]

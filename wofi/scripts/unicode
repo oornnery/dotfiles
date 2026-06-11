@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# unicode — pick a common Unicode symbol via wofi and copy.
+
+set -euo pipefail
+
+# Curated list of useful symbols/glyphs (kept small on purpose).
+read -r -d '' LIST <<'EOF' || true
+→  rightwards arrow
+←  leftwards arrow
+↑  upwards arrow
+↓  downwards arrow
+↳  downwards right arrow
+↪  rightwards arrow with hook
+⇨  rightwards arrow double
+⇒  rightwards double arrow
+⇐  leftwards double arrow
+⇔  left right double arrow
+⇡  upwards arrow short
+⇣  downwards arrow short
+✓  check mark
+✗  cross mark
+✱  asterisk
+✚  heavy plus sign
+•  bullet
+◦  white bullet
+▪  small black square
+▫  small white square
+─  box drawings horizontal
+│  box drawings vertical
+┌  box drawings down right
+┐  box drawings down left
+└  box drawings up right
+┘  box drawings up left
+═  box drawings double horizontal
+║  box drawings double vertical
+█  full block
+░  light shade
+▒  medium shade
+▓  dark shade
+∞  infinity
+≈  almost equal
+≠  not equal
+≤  less or equal
+≥  greater or equal
+±  plus or minus
+×  multiplication
+÷  division
+°  degree
+∑  sum
+∂  partial differential
+√  square root
+λ  lambda
+π  pi
+μ  micro / mu
+α  alpha
+β  beta
+δ  delta
+ε  epsilon
+λ  lambda
+Σ  sigma
+Ω  omega
+©  copyright
+®  registered
+™  trademark
+§  section
+¶  paragraph
+†  dagger
+‡  double dagger
+…  ellipsis
+—  em dash
+–  en dash
+'  apostrophe (curly)
+"  quote (curly)
+❯  chevron right
+❮  chevron left
+❤  heart
+★  black star
+☆  white star
+☑  ballot box checked
+☐  ballot box
+✘  heavy ballot x
+☼  sun
+☾  moon
+☁  cloud
+☂  umbrella
+☎  phone
+✉  envelope
+⚙  gear
+⚠  warning
+EOF
+
+pick="$(printf '%s\n' "$LIST" | wofi --dmenu --prompt 'Unicode:' --width 480 || true)"
+[[ -z "$pick" ]] && exit 0
+
+glyph="${pick%% *}"
+printf '%s' "$glyph" | wl-copy -n
+notify-send -a unicode -t 2000 "Copied" "$pick"

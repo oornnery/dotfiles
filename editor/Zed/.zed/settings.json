@@ -1,0 +1,139 @@
+{
+  "agent": {
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-sonnet-4-6",
+      "enable_thinking": true,
+      "effort": "high"
+    },
+
+    "context": {
+      "include_open_buffers": true
+    }
+  },
+
+  "icon_theme": "Material Icon Theme",
+
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Tokyo Night"
+  },
+
+  "soft_wrap": "editor_width",
+  "inline_completions": true,
+
+  "indent_guides": {
+    "enabled": true
+  },
+
+  "line_numbers": true,
+  "highlight_active_line": true,
+
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.venv",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/.ruff_cache",
+    "**/.mypy_cache",
+    "**/node_modules",
+    "**/dist",
+    "**/build"
+  ],
+
+  "languages": {
+    "Python": {
+      "formatter": "ruff",
+      "format_on_save": true
+    },
+
+    "TypeScript": {
+      "formatter": "prettier",
+      "format_on_save": true
+    },
+
+    "TSX": {
+      "formatter": "prettier",
+      "format_on_save": true
+    },
+
+    "JavaScript": {
+      "formatter": "prettier",
+      "format_on_save": true
+    },
+
+    "HTML": {
+      "formatter": "prettier"
+    },
+
+    "CSS": {
+      "formatter": "prettier"
+    }
+  },
+
+  "language_servers": {
+
+    "pyright": {
+      "enabled": true,
+      "settings": {
+        "typeCheckingMode": "strict"
+      }
+    },
+
+    "ruff": {
+      "enabled": true
+    },
+
+    "ty": {
+      "enabled": true
+    },
+
+    "typescript-language-server": {
+      "enabled": true
+    },
+
+    "tailwindcss-language-server": {
+      "enabled": true
+    },
+
+    "eslint": {
+      "enabled": true
+    }
+  },
+
+  "context_servers": {
+
+    "shadcn-mcp-server": {
+      "enabled": true
+    },
+
+    "mcp-server-context7": {
+      "enabled": true
+    },
+
+    "mcp-server-github": {
+      "enabled": true
+    },
+
+    "filesystem": {
+      "enabled": true
+    },
+
+    "python-docs": {
+      "enabled": true
+    },
+
+    "fastapi-docs": {
+      "enabled": true
+    }
+  },
+
+  "terminal": {
+    "font_size": 14,
+    "cursor_blink": true
+  }
+}

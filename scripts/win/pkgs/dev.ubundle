@@ -1,0 +1,26 @@
+{
+  "export_version": 3,
+  "packages": [
+    { "Id": "Git.Git",                         "Name": "Git",                       "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "GitHub.cli",                      "Name": "GitHub CLI",                "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "GitHub.GitHubDesktop",            "Name": "GitHub Desktop",            "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Microsoft.VisualStudioCode",      "Name": "Visual Studio Code",        "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Microsoft.VisualStudioCode.CLI",  "Name": "Visual Studio Code CLI",    "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "ZedIndustries.Zed",               "Name": "Zed",                       "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Neovim.Neovim",                   "Name": "Neovim",                    "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Notepad++.Notepad++",             "Name": "Notepad++",                 "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Docker.DockerDesktop",            "Name": "Docker Desktop",            "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "OpenJS.NodeJS.LTS",               "Name": "Node.js LTS",               "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Python.Python.3.14",              "Name": "Python 3.14",               "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "astral-sh.uv",                    "Name": "uv (Python toolchain)",     "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "GoLang.Go",                       "Name": "Go",                        "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Rustlang.Rustup",                 "Name": "Rustup (Rust toolchain)",   "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Oven-sh.Bun",                     "Name": "Bun",                       "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Kitware.CMake",                   "Name": "CMake",                     "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "SQLite.SQLite",                   "Name": "SQLite",                    "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "OnOff.Onlook",                    "Name": "Onlook",                    "Source": "winget", "ManagerName": "Winget" },
+    { "Id": "Microsoft.WSL",                   "Name": "Windows Subsystem for Linux","Source": "winget", "ManagerName": "Winget" }
+  ],
+  "incompatible_packages_info": "CLI tools (bat/eza/fzf/ripgrep/lazygit/topgrade/...) and build deps (gcc/make/tree-sitter) are installed via scoop - run scripts/win/win.ps1 dev to set them up.",
+  "incompatible_packages": []
+}
