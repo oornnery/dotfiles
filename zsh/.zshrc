@@ -3,21 +3,11 @@
 # Put aliases, completions, plugins, keybindings, prompt, and interactive UX here.
 
 # -------------------------------
-# tmux auto-start
+# Zellij (manual start — no auto-attach)
 # -------------------------------
-# Attach to (or create) the "main" tmux session for interactive terminals.
-# Runs first so plugins/theme load once — inside tmux $TMUX is set and this is
-# skipped. Skips VSCode's terminal, bare/dumb TERMs, and when
-# DISABLE_TMUX_AUTOSTART=1 (set that to opt a terminal out).
-if [[ -z "${TMUX:-}" ]] \
-   && [[ -o interactive ]] \
-   && [[ "${DISABLE_TMUX_AUTOSTART:-0}" != 1 ]] \
-   && [[ "${TERM_PROGRAM:-}" != "vscode" ]] \
-   && [[ -z "${VSCODE_INJECTION:-}" ]] \
-   && [[ "$TERM" != "dumb" && "$TERM" != "linux" ]] \
-   && command -v tmux >/dev/null 2>&1; then
-  exec tmux new-session -A -s main
-fi
+# Zellij is available but not auto-started.
+# Run `zellij` manually when you want the multiplexer.
+# Install with: sudo pacman -S zellij
 
 # -------------------------------
 # Antigen + Oh My Zsh
@@ -95,9 +85,9 @@ if (( $+widgets[history-substring-search-up] )); then
   bindkey -M vicmd 'j' history-substring-search-down
 fi
 
-# Export zsh-vi-mode state to the active tmux pane so the statusline can show it.
-_dotfiles_tmux_set_vi_mode() {
-  [[ -n "${TMUX:-}" ]] || return 0
+# Zellij statusline vi-mode support (when inside Zellij)
+_dotfiles_zellij_set_vi_mode() {
+  [[ -n "${ZELLIJ:-}" ]] || return 0
 
   local mode="${ZVM_MODE:-}" label="INSERT"
   if [[ -n "${ZVM_MODE_NORMAL:-}" && "$mode" == "$ZVM_MODE_NORMAL" ]]; then
@@ -112,13 +102,13 @@ _dotfiles_tmux_set_vi_mode() {
     label="NORMAL"
   fi
 
-  command tmux set-option -pq @dotfiles-zle-mode "$label" 2>/dev/null || true
+  command zellij action write-chars " $label " 2>/dev/null || true
 }
 
 if (( $+parameters[zvm_after_select_vi_mode_commands] )); then
-  zvm_after_select_vi_mode_commands+=(_dotfiles_tmux_set_vi_mode)
+  zvm_after_select_vi_mode_commands+=(_dotfiles_zellij_set_vi_mode)
 fi
-_dotfiles_tmux_set_vi_mode
+_dotfiles_zellij_set_vi_mode
 
 # -------------------------------
 # Completion and navigation
@@ -220,10 +210,10 @@ alias ....='cd ../../..'
 alias reload='exec zsh'
 
 # Quick editor shortcuts
-alias editz='nvim ~/.zshrc'
-alias edit-zenv='nvim ~/.zshenv'
-alias edit-zprofile='nvim ~/.zprofile'
-alias edit-zlogin='nvim ~/.zlogin'
+alias editz='hx ~/.zshrc'
+alias edit-zenv='hx ~/.zshenv'
+alias edit-zprofile='hx ~/.zprofile'
+alias edit-zlogin='hx ~/.zlogin'
 
 # Arch package management
 alias update='sudo pacman -Syu'
@@ -234,7 +224,7 @@ alias clean='sudo pacman -Sc'
 
 # Modern tooling
 alias py='python'
-alias v='nvim'
+alias v='hx'
 alias g='git'
 alias lg='lazygit'
 alias ld='lazydocker'
@@ -275,7 +265,12 @@ mkcd() {
 # option instead of an exported env var — an exported var gets captured into
 # tmux's global environment and would then suppress fastfetch in every pane.
 if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
-  if [[ -n "${TMUX:-}" ]]; then
+  if [[ -n "${ZELLIJ:-}" ]]; then
+    if [[ "$(zellij action query-swap-layout 2>/dev/null)" != "" ]] || true; then
+      # inside zellij — fastfetch once per session
+      [[ -z "${ZELLIJ_FASTFETCH_SHOWN:-}" ]] && export ZELLIJ_FASTFETCH_SHOWN=1 && fastfetch
+    fi
+  elif [[ -n "${TMUX:-}" ]]; then
     if [[ "$(tmux show-options -wqv @fastfetch_shown 2>/dev/null)" != 1 ]]; then
       tmux set-option -w @fastfetch_shown 1 2>/dev/null
       fastfetch
@@ -336,3 +331,6 @@ else
     command -v mise   >/dev/null && eval "$(mise activate zsh)"
     command -v direnv >/dev/null && eval "$(direnv hook zsh)"
 fi
+
+# opencode
+export PATH=/home/oornnery/.opencode/bin:$PATH
