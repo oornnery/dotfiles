@@ -51,3 +51,18 @@ bin/.local/bin/python*
 # Skills CLI cache and lockfile (managed by `npx skills`, not user scripts)
 .agents/
 skills-lock.json
+
+# OpenCode local state, caches, and generated files
+.config/opencode/node_modules/
+.config/opencode/package.json
+.config/opencode/package-lock.json
+.config/opencode/.git/
+.config/opencode/.gitignore
+.config/opencode/*.backup-*
+.config/opencode/.ktx/
+.config/opencode/ktx.yaml
+.config/opencode/.omo/
+.config/opencode/plugins/
+.config/opencode/raw-sources/
+.config/opencode/semantic-layer/
+.config/opencode/wiki/
