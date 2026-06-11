@@ -1,0 +1,10 @@
+hide_search=true
+hide_scroll=true
+insensitive=true
+width=1
+eight=10
+show=dmenu
+lines=5
+location=centre
+x=800
+y=400

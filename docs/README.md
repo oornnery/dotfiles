@@ -21,6 +21,9 @@ but tailored to this hardware and workflow.
 - [Shell Tools](applications/03-shell-tools.md) — fzf, zoxide, eza, bat, fd, ripgrep
 - [Shell Functions](applications/04-shell-functions.md) — `compress`, `iso2sd`, `fip`, …
 - [TUIs](applications/05-tuis.md) — lazygit, lazydocker, btop, bluetui, impala
+- [Zellij](applications/zellij.md) — terminal multiplexer (tmux replacement)
+- [KTX](applications/ktx.md) — open-source context layer for data agents
+- [Headroom](applications/headroom.md) — intelligent context compression for AI
 - [Web Apps](applications/06-web-apps.md) — firefoxpwa + `web-app` wrapper
 - [Gaming](applications/07-gaming.md) — Steam, wine, gamemode, mangohud
 - [Windows VM](applications/08-windows-vm.md) — dockur/windows on Docker
@@ -56,6 +59,7 @@ Per-tool quick references — paste-ready commands, no narrative.
 - [zsh](cheatsheets/zsh.md)
 - [bash](cheatsheets/bash.md)
 - [tmux](cheatsheets/tmux.md)
+- [zellij](cheatsheets/zellij.md) — vim-flavored multiplexer
 - [fastfetch](cheatsheets/fastfetch.md)
 
 ### File / text

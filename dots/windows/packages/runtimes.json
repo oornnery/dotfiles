@@ -1,0 +1,85 @@
+{
+    "export_version": 3,
+    "packages": [
+        {
+            "Id": "Microsoft.VCRedist.2005.x64",
+            "Name": "Microsoft Visual C++ 2005 Redistributable (x64)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2005.x86",
+            "Name": "Microsoft Visual C++ 2005 Redistributable (x86)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2008.x64",
+            "Name": "Microsoft Visual C++ 2008 Redistributable (x64)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2008.x86",
+            "Name": "Microsoft Visual C++ 2008 Redistributable (x86)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2010.x64",
+            "Name": "Microsoft Visual C++ 2010 Redistributable (x64)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2010.x86",
+            "Name": "Microsoft Visual C++ 2010 Redistributable (x86)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2012.x64",
+            "Name": "Microsoft Visual C++ 2012 Redistributable (x64)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2012.x86",
+            "Name": "Microsoft Visual C++ 2012 Redistributable (x86)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2013.x64",
+            "Name": "Microsoft Visual C++ 2013 Redistributable (x64)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2013.x86",
+            "Name": "Microsoft Visual C++ 2013 Redistributable (x86)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2015+.arm64",
+            "Name": "Microsoft Visual C++ 2015-2022 Redistributable (ARM64)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2015+.x64",
+            "Name": "Microsoft Visual C++ 2015-2022 Redistributable (x64)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.VCRedist.2015+.x86",
+            "Name": "Microsoft Visual C++ 2015-2022 Redistributable (x86)",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        }
+    ],
+    "incompatible_packages_info": "Incompatible packages cannot be installed from UniGetUI, either because they came from a local source (for example Local PC) or because the package manager was unavailable. Nevertheless, they have been listed here for logging purposes.",
+    "incompatible_packages": []
+}

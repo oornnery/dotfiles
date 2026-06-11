@@ -1,0 +1,8 @@
+
+# target                 title     bg    text    indicator  border
+client.focused           #f5c2e7 #1e1e2e #cdd6f4  #f5e0dc #c6d0f5
+client.focused_inactive  #cba6f7 #1e1e2e #cdd6f4  #f5e0dc #cba6f7
+client.unfocused         #cba6f7 #1e1e2e #cdd6f4  #f5e0dc #cba6f7
+client.urgent            #fab387 #1e1e2e #fab387  #6c7086 #fab387
+client.placeholder       #6c7086 #1e1e2e #cdd6f4  #6c7086 #6c7086
+client.background        #1e1e2e

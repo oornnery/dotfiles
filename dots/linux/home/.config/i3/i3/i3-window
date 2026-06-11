@@ -1,0 +1,4 @@
+for_window [class="Lutris"] floating enable
+for_window [class="Wine"] floating enable
+for_window [class="League of Legends"] floating enable
+for_window [class="Client"] floating enable

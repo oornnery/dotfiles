@@ -1,0 +1,8 @@
+logseq
+obsidian
+pi-hole
+firefly
+nginx
+appflowy
+outline
+anki

@@ -1,0 +1,97 @@
+{
+    "export_version": 3,
+    "packages": [
+        {
+            "Id": "7zip.7zip",
+            "Name": "7-Zip",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "MartiCliment.UniGetUI",
+            "Name": "UniGetUI",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.WindowsTerminal",
+            "Name": "Windows Terminal",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "flick9000.WinScript",
+            "Name": "WinScript",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "9PM860492SZD",
+            "Name": "Microsoft PC Manager",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "9P8LTPGCBZXD",
+            "Name": "Wintoys",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Spotify.Spotify",
+            "Name": "Spotify",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Zen-Team.Zen-Browser",
+            "Name": "Zen Browser",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Microsoft.Edge",
+            "Name": "Microsoft Edge",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Bitwarden.Bitwarden",
+            "Name": "Bitwarden",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "TheDocumentFoundation.LibreOffice",
+            "Name": "LibreOffice",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "VideoLAN.VLC",
+            "Name": "VLC",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "Audacity.Audacity",
+            "Name": "Audacity",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "GIMP.GIMP",
+            "Name": "GIMP",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        },
+        {
+            "Id": "calibre.calibre",
+            "Name": "Calibre",
+            "Source": "winget",
+            "ManagerName": "Winget"
+        }
+    ],
+    "incompatible_packages_info": "Incompatible packages cannot be installed from UniGetUI, either because they came from a local source (for example Local PC) or because the package manager was unavailable. Nevertheless, they have been listed here for logging purposes.",
+    "incompatible_packages": []
+}
