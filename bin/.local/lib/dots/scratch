@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# dots:summary=Quake-style scratchpad terminal toggle
+# dots:args=(toggle)
+set -euo pipefail
+
+WS="special:scratch"; CLASS="scratch"
+
+if hyprctl clients -j | jq -e --arg c "$CLASS" '.[] | select(.class == $c)' >/dev/null; then
+    hyprctl dispatch togglespecialworkspace scratch >/dev/null
+else
+    hyprctl dispatch exec "[workspace $WS silent;float;size 80% 60%;center] alacritty --class $CLASS" >/dev/null
+    sleep 0.15
+    hyprctl dispatch togglespecialworkspace scratch >/dev/null
+fi

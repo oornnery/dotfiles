@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# dots:summary=Switch visual theme across all surfaces (alacritty/waybar/mako/…)
+# dots:args=list|get|set [name]|cycle|status
+set -euo pipefail
+
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+THEMES_DIR="$DOTFILES_DIR/themes"
+STATE_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/active-theme"
+mkdir -p "$(dirname "$STATE_FILE")"
+
+_themes()  { [[ -d "$THEMES_DIR" ]] || return; find "$THEMES_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort; }
+_current() { [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" || echo "catppuccin-mocha"; }
+_install() { [[ -f "$1" ]] || return 0; install -D -m 644 "$1" "$2"; }
+
+_pick() {
+    local cur sel; cur="$(_current)"
+    sel="$(while IFS= read -r t; do [[ "$t" == "$cur" ]] && printf '* %s\n' "$t" || printf '  %s\n' "$t"; done < <(_themes) | dots menu 'theme>')" || exit 0
+    sel="${sel#\* }"; sel="${sel#  }"
+    [[ -n "$sel" ]] || exit 0
+    printf '%s\n' "$sel"
+}
+
+_apply() {
+    local name="$1" src="$THEMES_DIR/$name"
+    [[ -d "$src" ]] || { echo "dots theme: no such theme: $name" >&2; exit 1; }
+    _install "$src/alacritty.toml" "$HOME/.config/alacritty/theme.toml"
+    _install "$src/waybar.css"     "$HOME/.config/waybar/theme.css"
+    _install "$src/wofi.css"       "$HOME/.config/wofi/theme.css"
+    _install "$src/mako.config"    "$HOME/.config/mako/theme.config"
+    _install "$src/starship.toml"  "$HOME/.config/starship.toml"
+    _install "$src/ags.scss"       "$HOME/.config/ags/theme.scss"
+    _install "$src/walker.css"     "$HOME/.config/walker/themes/default/theme.css"
+    _install "$src/fabric.css"     "$HOME/.config/fabric-shell/src/theme.css"
+    _install "$src/tmux.conf"      "$HOME/.config/tmux/theme.conf"
+    _install "$src/vim.vim"        "$HOME/.vim/theme.vim"
+    _install "$src/zsh.zsh"        "$HOME/.config/zsh/theme.zsh"
+    # Neovim reads the active theme from STATE_FILE on next startup (lua/theme.lua),
+    # kept stow-managed so switching nvim distros leaves no stale generated file.
+    echo "$name" > "$STATE_FILE"
+    dots reload all
+    dots notify "Theme" "→ $name" -a theme -i preferences-desktop-theme -t 3000
+}
+
+case "${1:-help}" in
+    list)
+        cur="$(_current)"
+        while IFS= read -r t; do [[ "$t" == "$cur" ]] && printf '* %s\n' "$t" || printf '  %s\n' "$t"; done < <(_themes) ;;
+    get) _current ;;
+    set) name="${2:-}"; [[ -n "$name" ]] || name="$(_pick)"; _apply "$name" ;;
+    cycle)
+        mapfile -t themes < <(_themes); cur="$(_current)"
+        for i in "${!themes[@]}"; do
+            [[ "${themes[i]}" == "$cur" ]] && { _apply "${themes[(i+1) % ${#themes[@]}]}"; exit 0; }
+        done
+        _apply "${themes[0]}" ;;
+    status)
+        if [[ "${2:-}" == --json ]]; then printf '{"theme":"%s"}\n' "$(_current)"; else printf 'theme %s\n' "$(_current)"; fi ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots theme: unknown action: $1" >&2; exit 1 ;;
+esac

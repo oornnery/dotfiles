@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# dots:summary=Context-aware picker (tmux/fzf in terminal, walker/wofi in WM)
+# dots:args=<title> < lines
+# dots:hidden=true
+#
+# Reads newline-separated candidates on stdin, prints the chosen line.
+# Backend auto-detected; override with DOTS_MENU=walker|wofi|fzf|gum|float|plain.
+#
+# Detection note: we test whether /dev/tty is openable (a controlling terminal
+# exists) rather than -t 0/-t 1, because callers usually pipe stdin AND capture
+# stdout via $(...) — both would look non-tty even in a real terminal. fzf/gum
+# drive their UI through /dev/tty and print only the selection to stdout.
+
+set -uo pipefail
+
+title="${1:-Pick}"
+_have() { command -v "$1" >/dev/null 2>&1; }
+_tty()  { { : </dev/tty; } 2>/dev/null; }
+
+backend="${DOTS_MENU:-auto}"
+if [[ "$backend" == auto ]]; then
+    if   [[ -n "${TMUX:-}" ]] && _have fzf;        then backend=fzf-tmux
+    elif _tty && _have fzf;                         then backend=fzf
+    elif _tty && _have gum;                         then backend=gum
+    elif [[ -n "${WAYLAND_DISPLAY:-}${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && _have walker; then backend=walker
+    elif _have wofi;                               then backend=wofi
+    elif _have walker;                             then backend=walker
+    else backend=plain; fi
+fi
+
+case "$backend" in
+    walker) walker --dmenu --placeholder "$title" 2>/dev/null ;;
+    wofi)   wofi --dmenu --prompt "$title" 2>/dev/null ;;
+    fzf-tmux)
+        if fzf --help 2>/dev/null | grep -q -- '--tmux'; then
+            fzf --tmux center,80% --reverse --prompt "$title> "
+        elif _have fzf-tmux; then
+            fzf-tmux -p 80% -- --reverse --prompt "$title> "
+        else
+            fzf --reverse --height 40% --prompt "$title> "
+        fi
+        ;;
+    fzf)  fzf --reverse --height 40% --prompt "$title> " ;;
+    gum)  gum filter --placeholder "$title" --prompt "$title> " ;;
+    float)
+        # Floating terminal running fzf; selection round-trips through tempfiles.
+        tin="$(mktemp)"; tout="$(mktemp)"; cat >"$tin"
+        alacritty --class floating-tui --title " $title" \
+            -e sh -c "fzf --reverse <'$tin' >'$tout'" 2>/dev/null || true
+        cat "$tout"; rm -f "$tin" "$tout"
+        ;;
+    plain) cat ;;
+esac

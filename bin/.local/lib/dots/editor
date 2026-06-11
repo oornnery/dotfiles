@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# dots:summary=Switch nvim/vim variant (unstow inactive, stow chosen)
+# dots:args=nvim native|mini|lazy | vim native|plug | status
+#
+# For switching between ALREADY-stowed variants. First-time setup still goes
+# through scripts/arch/dev/stow.sh (which backs up real-file conflicts).
+set -euo pipefail
+
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+editor="${1:-}"; variant="${2:-}"
+
+if [[ "$editor" == status ]]; then
+    for e in nvim vim; do
+        for v in native mini lazy plug; do
+            dots state check "editor-$e-$v" 2>/dev/null && echo "$e → $v"
+        done
+    done
+    exit 0
+fi
+
+[[ -z "$editor" || -z "$variant" ]] && { echo "Usage: dots editor <nvim native|mini|lazy | vim native|plug | status>" >&2; exit 1; }
+
+case "$editor" in
+    nvim)
+        group=(nvim nvim.mini nvim.lazy); variants=(native mini lazy)
+        case "$variant" in native) pkg=nvim ;; mini) pkg=nvim.mini ;; lazy) pkg=nvim.lazy ;; *) echo "nvim: native|mini|lazy" >&2; exit 2 ;; esac ;;
+    vim)
+        group=(vim vim.plug); variants=(native plug)
+        case "$variant" in native) pkg=vim ;; plug) pkg=vim.plug ;; *) echo "vim: native|plug" >&2; exit 2 ;; esac ;;
+    *) echo "Usage: dots editor <nvim|vim> <variant>" >&2; exit 2 ;;
+esac
+
+command -v stow >/dev/null || { echo "dots editor: stow not installed" >&2; exit 1; }
+
+for p in "${group[@]}"; do
+    [[ -d "$DOTFILES/$p" ]] || continue
+    stow -d "$DOTFILES" -t "$HOME" -D "$p" 2>/dev/null || true
+done
+stow -d "$DOTFILES" -t "$HOME" -R "$pkg"
+
+for v in "${variants[@]}"; do dots state clear "editor-$editor-$v"; done
+dots state set "editor-$editor-$variant"
+dots notify "Editor" "$editor → $variant" -a editor -g "" 2>/dev/null || true
+echo "$editor → $variant (stowed $pkg)"

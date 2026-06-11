@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# dots:summary=Run a command with sudo using a TUI password prompt
+# dots:args=<command> [args…]
+set -euo pipefail
+
+ASKPASS="${SUDO_ASKPASS:-$HOME/.local/lib/dots/askpass}"
+[[ -x "$ASKPASS" ]] || { echo "dots sudo: $ASKPASS not executable" >&2; exit 1; }
+export SUDO_ASKPASS="$ASKPASS"
+
+if command -v faillock >/dev/null 2>&1; then
+    fails="$(faillock --user "${USER:-$LOGNAME}" 2>/dev/null | awk '/^When/ {found=1; next} found && NF {n++} END {print n+0}')"
+    (( fails >= 2 )) && printf 'dots sudo: %d recent sudo failure(s) for %s — if locked: sudo faillock --user %s --reset\n' \
+        "$fails" "${USER:-$LOGNAME}" "${USER:-$LOGNAME}" >&2 || true
+fi
+
+exec sudo -A "$@"

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# dots:summary=Open a TUI in a floating terminal
+# dots:args=<command> [args…]
+set -euo pipefail
+
+cmd="${1:-}"
+[[ -z "$cmd" ]] && { echo "Usage: dots tui <command> [args…]" >&2; exit 1; }
+
+command -v "$cmd" >/dev/null || { dots notify "tui" "$cmd not found" -a tui -i dialog-error; exit 1; }
+
+shift || true
+exec alacritty --class floating-tui -e "$cmd" "$@"

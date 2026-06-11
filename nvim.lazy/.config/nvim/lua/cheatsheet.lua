@@ -3,21 +3,21 @@ local M = {}
 local topics = { "tmux", "vim", "nvim", "all" }
 
 local function helper_command()
-  local path = vim.fn.expand("~/.local/bin/helpme")
+  local path = vim.fn.expand("~/.local/bin/dots")
   if vim.fn.executable(path) == 1 then
     return path
   end
-  return "helpme"
+  return "dots"
 end
 
 local function open_plain(topic)
-  local lines = vim.fn.systemlist({ helper_command(), "--no-pager", topic })
+  local lines = vim.fn.systemlist({ helper_command(), "help", "--no-pager", topic })
   if vim.v.shell_error ~= 0 then
     lines = {
-      "Could not run helpme.",
+      "Could not run dots help.",
       "",
       "Try from a shell:",
-      "  helpme " .. topic,
+      "  dots help " .. topic,
     }
   end
 
@@ -38,10 +38,10 @@ function M.open(topic)
   vim.cmd("tabnew")
   local buf = vim.api.nvim_get_current_buf()
   vim.bo[buf].bufhidden = "wipe"
-  vim.bo[buf].filetype = "helpme"
+  vim.bo[buf].filetype = "markdown"
   vim.bo[buf].swapfile = false
 
-  local ok, job = pcall(vim.fn.termopen, { helper_command(), topic }, {
+  local ok, job = pcall(vim.fn.termopen, { helper_command(), "help", topic }, {
     on_exit = function(_, code)
       if code == 0 then
         vim.schedule(function()

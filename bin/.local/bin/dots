@@ -1,250 +1,88 @@
 #!/usr/bin/env bash
-# dots — master CLI for dotfiles helpers.
+# dots — unified dotfiles CLI.
 #
-# Two routing modes:
-#   1. ALIASES table below: `dots <verb>` execs the mapped script. Used to
-#      surface legacy scripts (theme, screenshot, etc) under `dots <verb>`.
-#   2. Real dots-* files on PATH: any executable named `dots-X` is also
-#      dispatched as `dots X`.
+#   dots                     context-aware picker (walker in WM, fzf in terminal)
+#   dots <group> [args…]     run ~/.local/lib/dots/<group> with args
+#   dots help [topic]        cheatsheets (the `help` module)
+#   dots commands            list group names
+#   dots --help              this usage
 #
-# Metadata convention (top of each dots-* script OR target of alias):
-#   # dots:summary=<one-line description>
-#   # dots:args=<usage hint>
-#   # dots:hidden=true (omit from help listing)
+# Modules live in ../lib/dots/ (one file per group) and compose by calling each
+# other through `dots` (e.g. `dots notify`, `dots menu`). Metadata header per
+# module: `# dots:summary=…`  `# dots:args=…`  `# dots:hidden=true`.
 
 set -uo pipefail
 
-BIN_DIR="${HOME}/.local/bin"
-PREFIX="dots-"
+# ─── Locate the module dir (sibling ../lib/dots, resolved through the symlink) ─
+_self="$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")"
+if [[ -n "${DOTS_LIBEXEC:-}" ]]; then
+    LIBEXEC="$DOTS_LIBEXEC"
+else
+    _d="$(dirname "$_self")/../lib/dots"
+    if [[ -d "$_d" ]]; then LIBEXEC="$(cd "$_d" && pwd)"; else LIBEXEC="$HOME/.local/lib/dots"; fi
+fi
+export DOTS_LIBEXEC="$LIBEXEC"
+# Make sure `dots` itself is reachable for module re-dispatch.
+export PATH="$(dirname "$_self"):$PATH"
 
-# ─── Aliases: dots <verb> → legacy script ──────────────────────────────────
-# Keeps legacy script names (theme, screenshot, etc.) usable as
-# `dots <verb>` without polluting the repo with symlinks.
-declare -A ALIASES=(
-    [theme]=theme
-    [update]=update
-    [wallpaper]=wallpaper
-    [magnify]=magnify
-    [scratch]=scratch
-    [helpme]=helpme
-    [obsidian]=obsidian-note
-    [webapp]=web-app
+# Short aliases: verb → module.
+declare -A ALIASES=( [vol]=volume [shot]=screenshot [bright]=brightness )
 
-    # power family
-    [power-menu]=power-menu
-    [power-profile]=power-profile
-
-    # capture family
-    [capture-screenshot]=screenshot
-    [capture-record]=record
-    [capture-ocr]=ocr
-    [capture-color]=color-picker
-
-    # toggle family
-    [toggle-dnd]=dnd
-    [toggle-gamemode]=gamemode-toggle
-    [toggle-night-mode]=night-mode
-    [toggle-gaps]=hypr-gaps-toggle
-    [toggle-transparency]=hypr-transparency-toggle
-    [toggle-layout]=hypr-layout-toggle
-
-    # monitor family
-    [monitor-mirror]=hypr-monitor-mirror
-    [monitor-scale]=hypr-scale
-)
-
-_meta() {
-    # Read `dots:<key>=<value>` from header of script (first 80 lines).
-    local file="$1" key="$2"
-    head -80 "$file" 2>/dev/null | awk -v key="$key" '
+_meta() {  # _meta <file> <key>  → value of `# dots:<key>=` from the header
+    awk -v k="$2" '
+        NR>40 { exit }
         /^# dots:/ {
-            line = substr($0, 8)
-            n = index(line, "=")
-            if (n > 0) {
-                k = substr(line, 1, n-1)
-                v = substr(line, n+1)
-                if (k == key) { print v; exit }
-            }
-        }
-    '
+            l = substr($0, 8); n = index(l, "=")
+            if (n && substr(l, 1, n-1) == k) { print substr(l, n+1); exit }
+        }' "$1" 2>/dev/null
 }
 
-_list_real_dots() {
-    # Real files (or symlinks) named dots-* on PATH.
-    find -L "$BIN_DIR" -maxdepth 1 -type f -name "${PREFIX}*" -executable 2>/dev/null \
-        | sort -u
+_modules() { find "$LIBEXEC" -maxdepth 1 -type f -perm -u+x -printf '%f\n' 2>/dev/null | sort; }
+
+_rows() {  # visible modules → "group<TAB>args<TAB>summary"
+    local g f
+    while IFS= read -r g; do
+        [[ -z "$g" ]] && continue
+        f="$LIBEXEC/$g"
+        [[ "$(_meta "$f" hidden)" == "true" ]] && continue
+        printf '%s\t%s\t%s\n' "$g" "$(_meta "$f" args)" "$(_meta "$f" summary)"
+    done < <(_modules)
 }
 
-_collect_rows() {
-    # Print command metadata as unit-separated: verb, args, summary
-    declare -A SEEN
-
-    # 1. Aliases
-    for verb in "${!ALIASES[@]}"; do
-        local target="${ALIASES[$verb]}"
-        local file="$BIN_DIR/$target"
-        local args hidden summary
-        hidden="$(_meta "$file" hidden)"
-        [[ "$hidden" == "true" ]] && continue
-        args="$(_meta "$file" args)"
-        summary="$(_meta "$file" summary)"
-        printf '%s\037%s\037%s\n' "$verb" "${args:-}" "${summary:-(no summary)}"
-        SEEN[$verb]=1
+_usage() {
+    printf '\033[1;32mdots\033[0m — dotfiles CLI\n\n'
+    printf 'Usage:\n'
+    printf '  dots                     open the picker\n'
+    printf '  dots <group> [args…]     run a command\n'
+    printf '  dots commands            list groups\n\n'
+    printf 'Commands:\n'
+    _rows | while IFS=$'\t' read -r g a s; do
+        printf '  \033[1;32m%-16s\033[0m \033[2m%-24s\033[0m %s\n' "$g" "$a" "$s"
     done
-
-    # 2. Real dots-* files (only those not already aliased)
-    while IFS= read -r file; do
-        local cmd="${file##*/}"
-        cmd="${cmd#$PREFIX}"
-        [[ -n "${SEEN[$cmd]:-}" ]] && continue
-        local args hidden summary
-        hidden="$(_meta "$file" hidden)"
-        [[ "$hidden" == "true" ]] && continue
-        args="$(_meta "$file" args)"
-        summary="$(_meta "$file" summary)"
-        printf '%s\037%s\037%s\n' "$cmd" "${args:-}" "${summary:-(no summary)}"
-    done < <(_list_real_dots)
 }
 
-_has_gum_tty() {
-    [[ -t 0 && -t 1 && -r /dev/tty && -w /dev/tty ]] && command -v gum >/dev/null 2>&1
+_picker() {
+    [[ -x "$LIBEXEC/menu" ]] || { _usage; return 0; }
+    local sel
+    sel="$(_rows | awk -F'\t' '{ printf "%-16s %s\n", $1, $3 }' | "$LIBEXEC/menu" "dots>")" || exit 0
+    sel="${sel%% *}"
+    [[ -n "$sel" && -x "$LIBEXEC/$sel" ]] || exit 0
+    exec "$LIBEXEC/$sel"
 }
 
-_print_help_plain() {
-    local color_g='\033[1;32m' color_b='\033[1;34m' color_dim='\033[2m' rs='\033[0m'
-    printf "${color_g}dots${rs} — dotfiles command dispatcher\n\n"
-    printf "Usage:\n"
-    printf "  dots                          open command picker when gum is available\n"
-    printf "  dots help                     show this help\n"
-    printf "  dots commands                 list command names\n"
-    printf "  dots <command> [args...]      run a subcommand\n\n"
-    printf "Available commands:\n"
-
-    # Sort + group by first segment (verb prefix before -)
-    local last_group=""
-    while IFS=$'\037' read -r verb args summary; do
-        local group="${verb%%-*}"
-        if [[ "$group" != "$last_group" ]]; then
-            printf "\n${color_b}%s${rs}\n" "$group"
-            last_group="$group"
-        fi
-        if [[ -n "$args" ]]; then
-            printf "  ${color_g}%-30s${rs} ${color_dim}%-24s${rs} %s\n" "$verb" "$args" "$summary"
-        else
-            printf "  ${color_g}%-30s${rs} ${color_dim}%-24s${rs} %s\n" "$verb" "" "$summary"
-        fi
-    done < <(_collect_rows | sort -t $'\037' -k1,1)
-    echo
-}
-
-_print_help_gum() {
-    printf 'command\targs\tsummary\n'
-    _collect_rows | sort -t $'\037' -k1,1 | awk -F $'\037' '{ printf "%s\t%s\t%s\n", $1, $2, $3 }'
-}
-
-_print_help() {
-    if _has_gum_tty; then
-        gum style \
-            --border rounded \
-            --border-foreground 212 \
-            --padding "1 2" \
-            --margin "0 0 1 0" \
-            --bold \
-            "dots" "dotfiles command dispatcher"
-
-        _print_help_gum | gum table \
-            -s $'\t' \
-            -p \
-            --border rounded \
-            --border.foreground 240 \
-            --header.foreground 212 \
-            --cell.foreground 252 \
-            --widths 28,26,86
-        printf '\n'
-        gum style --foreground 240 'Run `dots` without args to open the interactive picker.'
-    else
-        _print_help_plain
-    fi
-}
-
-_print_commands() {
-    _collect_rows | sort -t $'\037' -k1,1 | cut -d $'\037' -f 1
-}
-
-_interactive_picker() {
-    _has_gum_tty || { _print_help_plain; return 0; }
-
-    gum style \
-        --border rounded \
-        --border-foreground 212 \
-        --padding "1 2" \
-        --margin "0 0 1 0" \
-        --bold \
-        "dots" "Type to filter, Enter to run, Esc to cancel."
-
-    local selected verb
-    selected="$(
-        _collect_rows \
-            | sort -t $'\037' -k1,1 \
-            | awk -F $'\037' '{ printf "%s\t%s\t%s\n", $1, $2, $3 }' \
-            | gum filter \
-                --height 18 \
-                --prompt "dots> " \
-                --placeholder "theme, helpme, screenshot, update..." \
-                --indicator ">" \
-                --header "command    args    summary" \
-                --header.foreground 212 \
-                --match.foreground 212 \
-                --indicator.foreground 212
-    )" || exit 0
-
-    [[ -n "$selected" ]] || exit 0
-    verb="${selected%%$'\t'*}"
-    verb="${verb//[[:space:]]/}"
-    [[ -n "$verb" ]] || exit 0
-    _dispatch "$verb"
-}
-
-_dispatch() {
-    local verb="$1" target candidate
-    shift
-
-    # 1. Alias table
-    if [[ -n "${ALIASES[$verb]:-}" ]]; then
-        target="${ALIASES[$verb]}"
-        if [[ -x "$BIN_DIR/$target" ]]; then
-            exec "$BIN_DIR/$target" "$@"
-        fi
-        exec "$target" "$@"
-    fi
-
-    # 2. Real dots-* file
-    candidate="${PREFIX}${verb}"
-    if command -v "$candidate" >/dev/null 2>&1; then
-        exec "$candidate" "$@"
-    fi
-
-    printf '\033[1;31merror:\033[0m unknown command: %s\n' "$verb" >&2
-    printf 'Run "dots help" to see available commands.\n' >&2
+_run() {
+    local group="$1"; shift
+    group="${ALIASES[$group]:-$group}"
+    local mod="$LIBEXEC/$group"
+    if [[ -x "$mod" ]]; then exec "$mod" "$@"; fi
+    printf '\033[1;31merror:\033[0m unknown command: %s\n' "$group" >&2
+    printf 'Run "dots --help" to list commands.\n' >&2
     exit 127
 }
 
-# ─── Dispatch ──────────────────────────────────────────────────────────────
-
-if [[ $# -eq 0 ]]; then
-    _interactive_picker
-    exit 0
-fi
-
-if [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "help" ]]; then
-    _print_help
-    exit 0
-fi
-
-if [[ "${1:-}" == "commands" ]] || [[ "${1:-}" == "--commands" ]]; then
-    _print_commands
-    exit 0
-fi
-
-verb="$1"; shift
-_dispatch "$verb" "$@"
+case "${1:-}" in
+    '')             _picker ;;
+    -h|--help)      _usage ;;
+    commands)       _rows | cut -f1 ;;
+    *)              _run "$@" ;;
+esac

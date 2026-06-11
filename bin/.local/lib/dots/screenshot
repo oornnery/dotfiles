@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# dots:summary=Capture screen region/full/window (grim + slurp + satty)
+# dots:args=region [--copy]|full|window|active|delay <sec>
+set -euo pipefail
+
+OUT_DIR="${SCREENSHOT_DIR:-$HOME/Pictures/screenshots}"
+mkdir -p "$OUT_DIR"
+
+_filename()    { printf '%s/%s.png' "$OUT_DIR" "$(date +%Y%m%d-%H%M%S)"; }
+_notify()      { dots notify "Screenshot" "Saved $(basename "$1")" -a screenshot -i "$1" -t 4000 -h "string:image-path:$1"; }
+_focused_geo() { hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'; }
+
+cmd="${1:-region}"; shift || true
+
+case "$cmd" in
+    region)
+        file="$(_filename)"
+        if [[ "${1:-}" == "--copy" ]]; then
+            grim -g "$(slurp)" - | wl-copy
+            dots notify "Screenshot" "Region → clipboard" -a screenshot
+        else
+            geo="$(slurp)"
+            grim -g "$geo" - \
+                | tee >(wl-copy --type image/png) \
+                | satty --filename - --output-filename "$file" \
+                        --copy-command 'wl-copy --type image/png' --early-exit
+            _notify "$file"
+        fi ;;
+    full)          file="$(_filename)"; grim "$file"; _notify "$file" ;;
+    window|active) file="$(_filename)"; grim -g "$(_focused_geo)" "$file"; _notify "$file" ;;
+    delay)         secs="${1:-5}"; sleep "$secs"; file="$(_filename)"; grim "$file"; _notify "$file" ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots screenshot: unknown action: $cmd" >&2; exit 1 ;;
+esac

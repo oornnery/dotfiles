@@ -34,6 +34,7 @@ packages=(
     bin
     hyprland waybar wofi walker mako
     astal
+    helix yazi zellij
 )
 
 # Vim: native config or vim-plug config — mutually exclusive.

@@ -21,7 +21,7 @@ sort=-time
 group-by=app-name
 
 # History buffer — `makoctl restore` pulls back the last expired notif
-# (used by `dots-notifications restore` and the MS+Backspace bind).
+# (used by `dots notifications restore` and the MS+Backspace bind).
 max-history=50
 
 # ─── Typography & rendering ────────────────────────────────────────────────
@@ -101,17 +101,17 @@ group-by=
 # Update available: persistent so user notices.
 [summary="Update System"]
 default-timeout=0
-on-button-left=dismiss;exec alacritty -e bash -c 'update; read -p Done...'
+on-button-left=dismiss;exec alacritty -e bash -c 'dots update; read -p Done...'
 
 # Network/Bluetooth setup nudges from notice/onboarding.
 [summary="Setup Wi-Fi"]
-on-button-left=dismiss;exec floating-tui impala
+on-button-left=dismiss;exec dots tui impala
 
 [summary="Setup Bluetooth"]
-on-button-left=dismiss;exec floating-tui bluetui
+on-button-left=dismiss;exec dots tui bluetui
 
 [summary="Learn Keybindings"]
-on-button-left=dismiss;exec dots-cheatsheet
+on-button-left=dismiss;exec dots help
 
 # Hyprland-emitted events (monitor plug/unplug, screenshare, etc.) — info tier.
 [app-name=hyprland]

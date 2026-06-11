@@ -4,8 +4,8 @@
 # Use it for environment variables that must always exist.
 
 # Preferred editor
-export EDITOR="nvim"
-export VISUAL="nvim"
+export EDITOR="hx"
+export VISUAL="hx"
 
 # Locale
 export LANG="en_US.UTF-8"
@@ -52,3 +52,4 @@ if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null \
 fi
 
 export PATH
+. "$HOME/.cargo/env"

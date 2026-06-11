@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# AI coding tools for Arch / WSL.
+# AI coding tools for Arch / WSL. Always (re)installs; disable a tool with its
+# ENABLE_* flag, e.g. `ENABLE_RTK=0 ./scripts/llms.sh`.
 
 USER_NAME="${USER_NAME:-${SUDO_USER:-${USER}}}"
 
@@ -23,57 +24,56 @@ PYDANTIC_SKILLS_REPO="${PYDANTIC_SKILLS_REPO:-pydantic/skills}"
 FASTAPI_SKILL_REPO="${FASTAPI_SKILL_REPO:-microsoft/skills}"
 FASTAPI_SKILL_NAME="${FASTAPI_SKILL_NAME:-fastapi-router-py}"
 
-log() { printf '\n==> %s\n' "$*"; }
+log()  { printf '\n==> %s\n' "$*"; }
 warn() { printf 'WARN: %s\n' "$*" >&2; }
 
-root() {
-  if [[ $EUID -eq 0 ]]; then "$@"; else sudo "$@"; fi
-}
+# Run as root (sudo only if we aren't already).
+root() { if [[ $EUID -eq 0 ]]; then "$@"; else sudo "$@"; fi; }
 
+# Run a command as $USER_NAME with the user's install dirs on PATH.
 u() {
-  local cmd="$1"
   local path='export PATH="$HOME/.local/bin:$HOME/.local/npm/bin:$HOME/.cargo/bin:$HOME/.codex/bin:$HOME/.opencode/bin:$PATH";'
-
   if [[ "$(id -un)" == "$USER_NAME" ]]; then
-    bash -lc "$path $cmd"
+    bash -lc "$path $1"
   else
-    sudo -u "$USER_NAME" -H bash -lc "$path $cmd"
+    sudo -u "$USER_NAME" -H bash -lc "$path $1"
   fi
 }
 
-has() {
-  u "command -v $1 >/dev/null 2>&1"
-}
+has() { u "command -v $1 >/dev/null 2>&1"; }
 
+# Ensure Node/npm — only does real work the first time it's called.
+_NODE_READY=0
 node() {
+  [[ "$_NODE_READY" == 1 ]] && return 0
   command -v pacman >/dev/null 2>&1 && root pacman -S --needed --noconfirm nodejs npm
   has npm || { warn "npm not found"; return 1; }
   u 'mkdir -p "$HOME/.local/npm/bin" && npm config set prefix "$HOME/.local/npm" >/dev/null'
+  _NODE_READY=1
 }
 
+# Install a skills.sh repo to every agent in one non-interactive shot:
+# -y/-g skip the confirm+scope prompts, --skill '*' grabs all skills in a repo,
+# and --agent is variadic so it must stay last.
 skill() {
-  local repo="$1" skill="${2:-}" agents agent cmd
-
+  local repo="$1" name="${2:-}"
   node || return 0
-  IFS=',' read -r -a agents <<<"$SKILL_AGENTS"
-
-  for agent in "${agents[@]}"; do
-    agent="${agent// /}"
-    [[ -z "$agent" ]] && continue
-
-    cmd="npx -y skills add $repo -a $agent"
-    [[ -n "$skill" ]] && cmd="npx -y skills add $repo --skill $skill -a $agent"
-
-    u "$cmd" || warn "skill failed: $repo${skill:+/$skill} for $agent"
-  done
+  u "npx -y skills add '$repo' -y -g --skill '${name:-*}' --agent ${SKILL_AGENTS//,/ } </dev/null" \
+    || warn "skill failed: $repo${name:+/$name}"
 }
 
 claude_plugin() {
   local plugin="$1" marketplace="${2:-}"
-
   has claude || { warn "claude not found; skipping $plugin"; return 0; }
   [[ -n "$marketplace" ]] && u "claude plugin marketplace add $marketplace >/dev/null 2>&1 || true"
   u "claude plugin install $plugin" || warn "plugin failed: $plugin"
+}
+
+# run <enabled> <label> "<cmds>" — skip unless enabled, else log then run.
+run() {
+  [[ "$1" == 1 ]] || return 0
+  log "$2"
+  eval "$3" || warn "$2 failed"
 }
 
 id "$USER_NAME" >/dev/null 2>&1 || { warn "user not found: $USER_NAME"; exit 1; }
@@ -83,75 +83,51 @@ if command -v pacman >/dev/null 2>&1; then
   root pacman -S --needed --noconfirm ca-certificates curl git
 fi
 
-if [[ "$ENABLE_OPENCODE" -eq 1 ]]; then
-  log "OpenCode CLI"
-  has opencode || u 'curl -fsSL https://opencode.ai/install | bash'
-fi
+run "$ENABLE_OPENCODE"          "OpenCode CLI" \
+  "u 'curl -fsSL https://opencode.ai/install | bash' || warn 'opencode install failed'"
 
-if [[ "$ENABLE_CLAUDE_CODE" -eq 1 ]]; then
-  log "Claude Code CLI"
-  has claude || u 'curl -fsSL https://claude.ai/install.sh | bash'
-fi
+run "$ENABLE_CLAUDE_CODE"       "Claude Code CLI" \
+  "u 'curl -fsSL https://claude.ai/install.sh | bash' || warn 'claude install failed'"
 
-if [[ "$ENABLE_CODEX" -eq 1 ]]; then
-  log "OpenAI Codex CLI"
-  has codex || u 'curl -fsSL https://chatgpt.com/codex/install.sh | sh' || true
-  has codex || { node && u 'npm install -g @openai/codex@latest'; } || warn "codex install failed"
-fi
+run "$ENABLE_CODEX"             "OpenAI Codex CLI" \
+  "u 'curl -fsSL https://chatgpt.com/codex/install.sh | sh' \
+     || { node && u 'npm install -g @openai/codex@latest'; } \
+     || warn 'codex install failed'"
 
-if [[ "$ENABLE_RTK" -eq 1 ]]; then
-  log "RTK"
-  has rtk || u 'curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh'
-  has rtk && u 'rtk init --global' || warn "rtk global init failed"
-  has rtk && u 'rtk init -g --codex' || warn "rtk codex init failed"
-fi
+run "$ENABLE_RTK"               "RTK" \
+  "u 'curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh' || warn 'rtk install failed'; \
+   u 'rtk init --global'  || warn 'rtk global init failed'; \
+   u 'rtk init -g --codex' || warn 'rtk codex init failed'"
 
-if [[ "$ENABLE_SECURITY_GUIDANCE" -eq 1 ]]; then
-  log "Claude security-guidance"
-  claude_plugin "security-guidance@claude-plugins-official"
-fi
+run "$ENABLE_SECURITY_GUIDANCE" "Claude security-guidance" \
+  "claude_plugin security-guidance@claude-plugins-official"
 
-if [[ "$ENABLE_FRONTEND_DESIGN" -eq 1 ]]; then
-  log "Claude frontend-design"
-  claude_plugin "frontend-design@claude-plugins-official"
-fi
+run "$ENABLE_FRONTEND_DESIGN"   "Claude frontend-design" \
+  "claude_plugin frontend-design@claude-plugins-official"
 
-if [[ "$ENABLE_CAVEMAN" -eq 1 ]]; then
-  log "Caveman"
-  skill "JuliusBrussee/caveman"
-fi
+run "$ENABLE_CAVEMAN"           "Caveman" \
+  "skill JuliusBrussee/caveman"
 
-if [[ "$ENABLE_CAVEKIT" -eq 1 ]]; then
-  log "Cavekit"
-  skill "JuliusBrussee/cavekit"
-  claude_plugin "ck@cavekit-marketplace" "JuliusBrussee/cavekit"
-fi
+run "$ENABLE_CAVEKIT"           "Cavekit" \
+  "skill JuliusBrussee/cavekit; claude_plugin ck@cavekit-marketplace JuliusBrussee/cavekit"
 
-if [[ "$ENABLE_CLAUDE_MEM" -eq 1 ]]; then
-  log "Claude-Mem"
-  node && u 'npx -y claude-mem install --ide claude-code' || warn "claude-mem Claude setup failed"
-  has opencode && u 'npx -y claude-mem install --ide opencode' || true
-  has codex && u 'npx -y claude-mem install --ide codex-cli' || true
-fi
+# </dev/null forces non-TTY so claude-mem reinstalls instead of prompting.
+run "$ENABLE_CLAUDE_MEM"        "Claude-Mem" \
+  "node && u 'npx -y claude-mem install --ide claude-code </dev/null' || warn 'claude-mem claude setup failed'; \
+   has opencode && u 'npx -y claude-mem install --ide opencode </dev/null' || true; \
+   has codex && u 'npx -y claude-mem install --ide codex-cli </dev/null' || true"
 
-if [[ "$ENABLE_IMPECCABLE" -eq 1 ]]; then
-  log "Impeccable"
-  skill "pbakaus/impeccable"
-  claude_plugin "impeccable@impeccable" "pbakaus/impeccable"
-fi
+run "$ENABLE_IMPECCABLE"        "Impeccable" \
+  "skill pbakaus/impeccable; claude_plugin impeccable@impeccable pbakaus/impeccable"
 
-if [[ "$ENABLE_PYDANTIC_SKILLS" -eq 1 ]]; then
-  log "Pydantic / Pydantic AI"
-  claude_plugin "pydantic-ai@claude-plugins-official"
-  claude_plugin "ai@pydantic-skills" "$PYDANTIC_SKILLS_REPO"
-  claude_plugin "logfire@pydantic-skills" "$PYDANTIC_SKILLS_REPO"
-  skill "$PYDANTIC_SKILLS_REPO"
-  has codex && u "codex plugin marketplace add $PYDANTIC_SKILLS_REPO" || true
-fi
+run "$ENABLE_PYDANTIC_SKILLS"   "Pydantic / Pydantic AI" \
+  "claude_plugin pydantic-ai@claude-plugins-official; \
+   claude_plugin ai@pydantic-skills $PYDANTIC_SKILLS_REPO; \
+   claude_plugin logfire@pydantic-skills $PYDANTIC_SKILLS_REPO; \
+   skill $PYDANTIC_SKILLS_REPO; \
+   has codex && u \"codex plugin marketplace add $PYDANTIC_SKILLS_REPO\" || true"
 
-if [[ "$ENABLE_FASTAPI_SKILL" -eq 1 ]]; then
-  log "FastAPI skill"
-  skill "$FASTAPI_SKILL_REPO" "$FASTAPI_SKILL_NAME"
-fi
+run "$ENABLE_FASTAPI_SKILL"     "FastAPI skill" \
+  "skill $FASTAPI_SKILL_REPO $FASTAPI_SKILL_NAME"
 
 log "AI/LLM setup completed"

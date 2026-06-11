@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# dots:summary=Stow a dotfiles package (backs up conflicting real files first)
+# dots:args=<pkg> [--system]
+set -euo pipefail
+
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+pkg="${1:-}"; mode="${2:-}"
+[[ -z "$pkg" ]] && { echo "Usage: dots stow <pkg> [--system]" >&2; exit 1; }
+[[ -d "$DOTFILES/$pkg" ]] || { echo "dots stow: no package: $DOTFILES/$pkg" >&2; exit 1; }
+command -v stow >/dev/null || { echo "dots stow: stow not installed" >&2; exit 1; }
+
+if [[ "$mode" == "--system" ]]; then target="/"; SUDO=(sudo); else target="$HOME"; SUDO=(); fi
+ts="$(date +%Y%m%d-%H%M%S)"
+
+# Dry-run to find conflicts; back up any real (non-symlink) file before stowing.
+while IFS= read -r line; do
+    f="$(printf '%s' "$line" | grep -oE '[^[:space:]]+$' || true)"
+    [[ -n "$f" ]] || continue
+    [[ "$f" == /* ]] && full="$f" || full="$target/$f"
+    if [[ -e "$full" && ! -L "$full" ]]; then
+        echo "backup: $full → $full.bak.$ts"
+        "${SUDO[@]}" mv "$full" "$full.bak.$ts"
+    fi
+done < <("${SUDO[@]}" stow -n -d "$DOTFILES" -t "$target" -R "$pkg" 2>&1 | grep -i 'existing target' || true)
+
+"${SUDO[@]}" stow -d "$DOTFILES" -t "$target" -R "$pkg"
+dots notify "Stow" "$pkg → $target" -a stow 2>/dev/null || true
+echo "stowed $pkg → $target"

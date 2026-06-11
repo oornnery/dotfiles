@@ -2,7 +2,7 @@
 -- render-markdown.nvim: pretty inline rendering of headings, tables, code blocks,
 -- lists, checkboxes, etc. — directly in the buffer while editing.
 --
--- Pairs well with the user's heavy MD usage (docs/cheatsheets, obsidian-note).
+-- Pairs well with the user's heavy MD usage (docs/cheatsheets, dots obsidian).
 
 return {
   {

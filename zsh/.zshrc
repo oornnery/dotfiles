@@ -3,6 +3,13 @@
 # Put aliases, completions, plugins, keybindings, prompt, and interactive UX here.
 
 # -------------------------------
+# Zellij (manual start — no auto-attach)
+# -------------------------------
+# Zellij is available but not auto-started.
+# Run `zellij` manually when you want the multiplexer.
+# Install with: sudo pacman -S zellij
+
+# -------------------------------
 # Antigen + Oh My Zsh
 # -------------------------------
 
@@ -38,15 +45,35 @@ if [[ -f "$ANTIGEN_HOME/antigen.zsh" ]]; then
   antigen bundle zsh-users/zsh-completions
   antigen bundle zsh-users/zsh-autosuggestions
   antigen bundle Aloxaf/fzf-tab
+  # forgit: antigen's auto-clone is flaky here (leaves an empty dir → "Error!
+  # Activate logging" every shell). Pre-clone so antigen just sources it.
+  [[ -f "$ANTIGEN_HOME/bundles/wfxr/forgit/forgit.plugin.zsh" ]] \
+    || { rm -rf "$ANTIGEN_HOME/bundles/wfxr/forgit"; git clone --depth 1 -q https://github.com/wfxr/forgit "$ANTIGEN_HOME/bundles/wfxr/forgit" 2>/dev/null; }
   antigen bundle wfxr/forgit
   antigen bundle zdharma-continuum/fast-syntax-highlighting
   antigen bundle zsh-users/zsh-history-substring-search
 
-  # Oh My Zsh theme managed by Antigen.
-  antigen theme "$ANTIGEN_THEME"
+  # Prompt: Starship drives it when installed (see the Starship block below);
+  # otherwise fall back to the Antigen/Oh-My-Zsh theme.
+  command -v starship >/dev/null 2>&1 || antigen theme "$ANTIGEN_THEME"
   antigen apply
 else
   print -P "%F{yellow}Antigen not found at $ANTIGEN_HOME/antigen.zsh%f"
+fi
+
+# -------------------------------
+# Starship prompt
+# -------------------------------
+# Borderless prompt with git/lang icons, themed per palette via
+# ~/.config/starship.toml (linked by `dots theme set`). Deferred through
+# zsh-vi-mode's init hook so vi-mode can't clobber it; immediate when zvm absent.
+if command -v starship >/dev/null 2>&1; then
+  _dotfiles_starship_init() { eval "$(starship init zsh)"; }
+  if (( $+parameters[zvm_after_init_commands] )); then
+    zvm_after_init_commands+=(_dotfiles_starship_init)
+  else
+    _dotfiles_starship_init
+  fi
 fi
 
 # zsh-history-substring-search: bind ↑/↓ to substring search after a query.
@@ -58,9 +85,9 @@ if (( $+widgets[history-substring-search-up] )); then
   bindkey -M vicmd 'j' history-substring-search-down
 fi
 
-# Export zsh-vi-mode state to the active tmux pane so the statusline can show it.
-_dotfiles_tmux_set_vi_mode() {
-  [[ -n "${TMUX:-}" ]] || return 0
+# Zellij statusline vi-mode support (when inside Zellij)
+_dotfiles_zellij_set_vi_mode() {
+  [[ -n "${ZELLIJ:-}" ]] || return 0
 
   local mode="${ZVM_MODE:-}" label="INSERT"
   if [[ -n "${ZVM_MODE_NORMAL:-}" && "$mode" == "$ZVM_MODE_NORMAL" ]]; then
@@ -75,13 +102,13 @@ _dotfiles_tmux_set_vi_mode() {
     label="NORMAL"
   fi
 
-  command tmux set-option -pq @dotfiles-zle-mode "$label" 2>/dev/null || true
+  command zellij action write-chars " $label " 2>/dev/null || true
 }
 
 if (( $+parameters[zvm_after_select_vi_mode_commands] )); then
-  zvm_after_select_vi_mode_commands+=(_dotfiles_tmux_set_vi_mode)
+  zvm_after_select_vi_mode_commands+=(_dotfiles_zellij_set_vi_mode)
 fi
-_dotfiles_tmux_set_vi_mode
+_dotfiles_zellij_set_vi_mode
 
 # -------------------------------
 # Completion and navigation
@@ -146,8 +173,8 @@ alias rm='rm -i'
 # gum prompt fires consistently for interactive commands AND for any
 # helper that wraps sudo. Bash scripts still get the plain prompt
 # (they don't inherit zsh functions); use `sudo -A` explicitly there.
-if [[ -x "$HOME/.local/bin/sudo-askpass" ]]; then
-    export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass"
+if [[ -x "$HOME/.local/lib/dots/askpass" ]]; then
+    export SUDO_ASKPASS="$HOME/.local/lib/dots/askpass"
     sudo() { command sudo -A "$@" }
 fi
 
@@ -183,10 +210,10 @@ alias ....='cd ../../..'
 alias reload='exec zsh'
 
 # Quick editor shortcuts
-alias editz='nvim ~/.zshrc'
-alias edit-zenv='nvim ~/.zshenv'
-alias edit-zprofile='nvim ~/.zprofile'
-alias edit-zlogin='nvim ~/.zlogin'
+alias editz='hx ~/.zshrc'
+alias edit-zenv='hx ~/.zshenv'
+alias edit-zprofile='hx ~/.zprofile'
+alias edit-zlogin='hx ~/.zlogin'
 
 # Arch package management
 alias update='sudo pacman -Syu'
@@ -197,7 +224,7 @@ alias clean='sudo pacman -Sc'
 
 # Modern tooling
 alias py='python'
-alias v='nvim'
+alias v='hx'
 alias g='git'
 alias lg='lazygit'
 alias ld='lazydocker'
@@ -233,11 +260,25 @@ mkcd() {
 # Prompt / UI extras
 # -------------------------------
 
-# Show fastfetch only once per login/session tree.
-# This avoids visual noise in every subshell.
-if [[ -o interactive ]] && [[ -z "${FASTFETCH_SHOWN:-}" ]]; then
-  export FASTFETCH_SHOWN=1
-  command -v fastfetch >/dev/null 2>&1 && fastfetch
+# Show fastfetch once per "terminal": once per tmux window (not on every split
+# pane), else once per non-tmux shell tree. Inside tmux we key off a *window*
+# option instead of an exported env var — an exported var gets captured into
+# tmux's global environment and would then suppress fastfetch in every pane.
+if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
+  if [[ -n "${ZELLIJ:-}" ]]; then
+    if [[ "$(zellij action query-swap-layout 2>/dev/null)" != "" ]] || true; then
+      # inside zellij — fastfetch once per session
+      [[ -z "${ZELLIJ_FASTFETCH_SHOWN:-}" ]] && export ZELLIJ_FASTFETCH_SHOWN=1 && fastfetch
+    fi
+  elif [[ -n "${TMUX:-}" ]]; then
+    if [[ "$(tmux show-options -wqv @fastfetch_shown 2>/dev/null)" != 1 ]]; then
+      tmux set-option -w @fastfetch_shown 1 2>/dev/null
+      fastfetch
+    fi
+  elif [[ -z "${FASTFETCH_SHOWN:-}" ]]; then
+    export FASTFETCH_SHOWN=1
+    fastfetch
+  fi
 fi
 
 # -------------------------------
@@ -290,3 +331,6 @@ else
     command -v mise   >/dev/null && eval "$(mise activate zsh)"
     command -v direnv >/dev/null && eval "$(direnv hook zsh)"
 fi
+
+# opencode
+export PATH=/home/oornnery/.opencode/bin:$PATH

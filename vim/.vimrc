@@ -232,14 +232,14 @@ function! s:TrimTrailingWhitespace() abort
 endfunction
 
 function! s:OpenHelpme(topic) abort
-  let l:helper = expand('~/.local/bin/helpme')
+  let l:helper = expand('~/.local/bin/dots')
   if !executable(l:helper)
-    let l:helper = 'helpme'
+    let l:helper = 'dots'
   endif
 
   tabnew
   setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted filetype=markdown
-  silent execute 'read !' . shellescape(l:helper) . ' --no-pager ' . shellescape(a:topic)
+  silent execute 'read !' . shellescape(l:helper) . ' help --no-pager ' . shellescape(a:topic)
   silent! 1delete _
   setlocal nomodifiable
   nnoremap <silent> <buffer> q :close<CR>
