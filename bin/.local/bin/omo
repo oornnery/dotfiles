@@ -1,0 +1,10 @@
+#!/bin/sh
+# OMO_GENERATED_RUNTIME_WRAPPER
+export CODEX_HOME="${CODEX_HOME:-/home/oornnery/.codex}"
+export OMO_SPARKSHELL_APP_SERVER_SOCKET="${OMO_SPARKSHELL_APP_SERVER_SOCKET:-$CODEX_HOME/app-server-control/app-server-control.sock}"
+BUN_BINARY="${BUN_BINARY:-bun}"
+if [ "$1" = "ulw-loop" ] && [ -x "/home/oornnery/.local/bin/omo-ulw-loop" ]; then
+  shift
+  exec "/home/oornnery/.local/bin/omo-ulw-loop" "$@"
+fi
+exec "$BUN_BINARY" "/tmp/bunx-1000-oh-my-openagent@latest/node_modules/oh-my-openagent/dist/cli/index.js" "$@"
