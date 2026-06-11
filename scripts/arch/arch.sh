@@ -67,6 +67,9 @@ declare -A MODULES_DESC=(
     [dev/git]="git + github-cli + git-delta + stow git config"
     [dev/vscodium]="VSCodium + marketplace + features (AUR) + share settings with Code"
     [dev/stow]="Stow all dotfiles packages in one shot"
+    [dev/helix]="Helix editor + LSPs (ts, pyright, rust-analyzer) + stow config"
+    [dev/yazi]="Yazi file manager — stow config (installed by dev/tools)"
+    [dev/zellij]="Zellij terminal multiplexer + stow config"
     [dev/languages]="Language toolchains (python, rust, node, go, …)"
     [dev/docker]="Docker + Podman + lazydocker"
     [dev/llms]="AI tools (Claude Code, Codex, Ollama, LM Studio, RTK, .agents)"
@@ -94,7 +97,7 @@ SECTION_desktop=(hyprland gdm greetd sddm ly gnome gnome-rice gnome-extensions)
 # shellcheck disable=SC2034
 SECTION_dev=(
     tools apps
-    zsh bash tmux vim nvim alacritty git vscodium
+    zsh bash tmux vim nvim helix yazi zellij alacritty git vscodium
     languages docker llms
     stow
 )
@@ -130,6 +133,9 @@ _compose_all_preset() {
         dev/stow
         dev/tools
         dev/languages
+        dev/helix
+        dev/yazi
+        dev/zellij
         dev/docker
         core/paru
         core/ufw
