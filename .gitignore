@@ -34,3 +34,13 @@ windows/yasb/*.log
 
 # starship binary (install via pacman/bootstrap, not committed)
 bin/.local/bin/starship
+
+# AI agent tool binaries — installed by their own toolchains, not user scripts.
+# claude, codex, rtk: version-managed symlinks/binary blobs
+bin/.local/bin/claude
+bin/.local/bin/codex
+bin/.local/bin/rtk
+
+# oh-my-openagent (omo) — generated runtime, not user scripts
+bin/.local/bin/omo
+bin/.local/bin/omo-*
