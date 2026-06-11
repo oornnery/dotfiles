@@ -44,3 +44,10 @@ bin/.local/bin/rtk
 # oh-my-openagent (omo) — generated runtime, not user scripts
 bin/.local/bin/omo
 bin/.local/bin/omo-*
+
+# Python runtime binaries (installed by system/pipx, not user scripts)
+bin/.local/bin/python*
+
+# Skills CLI cache and lockfile (managed by `npx skills`, not user scripts)
+.agents/
+skills-lock.json
