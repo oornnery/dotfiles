@@ -112,4 +112,11 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# ─── Starship prompt ─────────────────────────────────────────────────────────
+# Config: ~/.config/starship.toml (stowed via starship/ package, overwritten
+# by `dots theme set`).
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi
+
 . "$HOME/.local/bin/env"

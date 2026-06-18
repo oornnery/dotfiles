@@ -50,7 +50,8 @@ small. Install on demand — instructions in [Security](03-security.md).
 
 ## Where is the prompt configured?
 
-`zsh/.config/starship.toml`. See [Prompt](../configuration/03-prompt.md).
+`starship/.config/starship.toml` (overwritten by `dots theme set`).
+See [Prompt](../configuration/03-prompt.md).
 
 ## What's in `~/.local/bin`?
 

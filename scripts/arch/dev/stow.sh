@@ -28,7 +28,7 @@ fi
 
 # Packages to stow. Order doesn't matter; stow_safe is idempotent.
 packages=(
-    bash zsh tmux
+    bash zsh starship tmux
     git editor fabric
     alacritty
     bin

@@ -10,8 +10,9 @@ See also [docs/stow.md](../cheatsheets/stow.md) for the tool cheatsheet.
 
 | Package         | Targets                                       |
 | --------------- | --------------------------------------------- |
-| `zsh/`          | `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, `~/.zlogin`, `~/.zsh_functions`, `~/.config/starship.toml` |
+| `zsh/`          | `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, `~/.zlogin`, `~/.zsh_functions` |
 | `bash/`         | `~/.bashrc`                                   |
+| `starship/`     | `~/.config/starship.toml`                     |
 | `tmux/`         | `~/.tmux.conf`                                |
 | `alacritty/`    | `~/.config/alacritty/alacritty.toml`          |
 | `hyprland/`     | `~/.config/hypr/{hyprland,hypridle,hyprlock,bindings,monitors}.conf` |
