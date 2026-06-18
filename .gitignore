@@ -62,7 +62,7 @@ skills-lock.json
 .config/opencode/.ktx/
 .config/opencode/ktx.yaml
 .config/opencode/.omo/
-.config/opencode/plugins/
+opencode/.config/opencode/plugins/
 .config/opencode/raw-sources/
 .config/opencode/semantic-layer/
 .config/opencode/wiki/
