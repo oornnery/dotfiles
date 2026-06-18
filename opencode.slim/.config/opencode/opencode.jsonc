@@ -1,12 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
-
   "plugin": [
-    "oh-my-opencode-slim",
     "openrtk",
-    "@tarquinen/opencode-dcp@latest"
+    "@tarquinen/opencode-dcp@latest",
+    "oh-my-opencode-slim"
   ],
-
   "provider": {
     "ollama-cloud": {
       "npm": "@ai-sdk/openai-compatible",
@@ -53,5 +51,14 @@
         }
       }
     }
-  }
+  },
+  "agent": {
+    "explore": {
+      "disable": true
+    },
+    "general": {
+      "disable": true
+    }
+  },
+  "lsp": true
 }

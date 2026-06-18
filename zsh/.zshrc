@@ -334,3 +334,14 @@ fi
 
 # opencode
 export PATH=/home/oornnery/.opencode/bin:$PATH
+
+# >>> oh-my-opencode-slim background subagents >>>
+export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+# <<< oh-my-opencode-slim background subagents <<<
+
+# Bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Rust/Cargo
+export PATH="$HOME/.cargo/bin:$PATH"
