@@ -1,0 +1,50 @@
+{
+  $schema: "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+
+  logo: {
+    type: "auto",
+    padding: { right: 3 },
+    color: {
+      1: "#f38ba8",  2: "#f5c2e7",  3: "#cba6f7",
+      4: "#89b4fa",  5: "#94e2d5",  6: "#a6e3a1",
+      7: "#f9e2af",  8: "#fab387",  9: "#74c7ec",
+    },
+  },
+
+  display: {
+    separator: "  ",
+    color: { keys: "mauve", title: "pink", output: "text", separator: "overlay0" },
+    key: { width: 14, paddingLeft: 2 },
+    bar: {
+      width: 10,
+      char: { elapsed: "■", total: "·" },
+      color: { elapsed: "sky", total: "surface1" },
+    },
+  },
+
+  modules: [
+    "title",
+    { type: "separator", string: "", outputColor: "overlay0", times: 40 },
+    { type: "os", key: "   os" },
+    { type: "host", key: " 󰌢  host" },
+    { type: "kernel", key: "   kernel" },
+    { type: "uptime", key: "   uptime" },
+    { type: "packages", key: " 󰏖  pkgs", disabled: ["apk"] },
+    { type: "shell", key: "   shell" },
+    { type: "de", key: "   de" },
+    { type: "wm", key: "   wm" },
+    { type: "theme", key: " 󰉼  theme" },
+    { type: "icons", key: "   icons" },
+    { type: "terminal", key: "   terminal" },
+    { type: "terminalfont", key: "   font" },
+    { type: "cpu", key: "   cpu", temp: true },
+    { type: "gpu", key: " 󰾲  gpu", temp: true },
+    { type: "memory", key: "   memory" },
+    { type: "disk", key: "   disk", hideFolders: "/efi:/boot" },
+    { type: "localip", key: " 󰩟  local", showIpv4: true, showIpv6: false },
+    { type: "battery", key: "   battery" },
+    { type: "locale", key: "   locale" },
+    { type: "separator", string: "", outputColor: "overlay0", times: 40 },
+    { type: "colors", key: "  ", paddingLeft: 2, symbol: "block", block: { width: 3, range: [0, 15] } },
+  ],
+}

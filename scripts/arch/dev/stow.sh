@@ -29,12 +29,14 @@ fi
 # Packages to stow. Order doesn't matter; stow_safe is idempotent.
 packages=(
     bash zsh starship tmux
+    atuin btop fastfetch bat lazygit
     git editor fabric
     alacritty
     bin
     hyprland waybar wofi walker mako
     astal
     helix yazi zellij
+    mpv lazydocker
 )
 
 # Vim: native config or vim-plug config — mutually exclusive.

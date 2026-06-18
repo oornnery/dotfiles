@@ -2,7 +2,8 @@
 
 Themes live under [`themes/`](../../themes/) and are switched with one
 command. They cover the visible day-to-day surfaces: alacritty, waybar,
-wofi, mako, starship when present, tmux, Vim, Neovim and Zsh.
+wofi, mako, starship, bat, fastfetch, lazygit, btop, tmux, Vim,
+Neovim and Zsh.
 
 Hyprland borders are themed by editing `hyprland.conf` directly — kept
 stable across themes to avoid churn.

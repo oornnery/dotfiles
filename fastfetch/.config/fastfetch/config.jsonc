@@ -1,0 +1,81 @@
+{
+  $schema: "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+
+  logo: {
+    type: "auto",
+    padding: { right: 3 },
+    color: {
+      1: "#f38ba8",  // red
+      2: "#f5c2e7",  // pink
+      3: "#cba6f7",  // mauve
+      4: "#89b4fa",  // blue
+      5: "#94e2d5",  // teal
+      6: "#a6e3a1",  // green
+      7: "#f9e2af",  // yellow
+      8: "#fab387",  // peach
+      9: "#74c7ec",  // sapphire
+    },
+  },
+
+  display: {
+    separator: "  ",
+    color: {
+      keys: "mauve",
+      title: "pink",
+      output: "text",
+      separator: "overlay0",
+    },
+    key: { width: 14, type: "string", paddingLeft: 2 },
+    size: { binaryPrefix: "iec" },
+    temp: { unit: "C", color: { green: "green", yellow: "yellow", red: "red" } },
+    percent: { type: ["num-color", "bar"], ndigits: 0, color: { green: "green", yellow: "yellow", red: "red" } },
+    bar: {
+      width: 10,
+      char: { elapsed: "■", total: "·" },
+      border: { left: "", right: "" },
+      color: { elapsed: "sky", total: "surface1" },
+    },
+  },
+
+  modules: [
+    "title",
+    {
+      type: "separator",
+      string: "",
+      outputColor: "overlay0",
+      times: 40,
+    },
+    { type: "os", key: "   os", keyIcon: "" },
+    { type: "host", key: " 󰌢  host", keyIcon: "󰌢" },
+    { type: "kernel", key: "   kernel", keyIcon: "" },
+    { type: "uptime", key: "   uptime", keyIcon: "" },
+    { type: "packages", key: " 󰏖  pkgs", keyIcon: "󰏖", disabled: ["apk"] },
+    { type: "shell", key: "   shell", keyIcon: "" },
+    { type: "de", key: "   de", keyIcon: "" },
+    { type: "wm", key: "   wm", keyIcon: "" },
+    { type: "theme", key: " 󰉼  theme", keyIcon: "󰉼" },
+    { type: "icons", key: "   icons", keyIcon: "" },
+    { type: "terminal", key: "   terminal", keyIcon: "" },
+    { type: "terminalfont", key: "   font", keyIcon: "" },
+    { type: "cpu", key: "   cpu", keyIcon: "", temp: true, showPeCoreCount: false },
+    { type: "gpu", key: " 󰾲  gpu", keyIcon: "󰾲", temp: true },
+    { type: "memory", key: "   memory", keyIcon: "" },
+    { type: "disk", key: "   disk", keyIcon: "", showSubvolumes: false, hideFolders: "/efi:/boot" },
+    { type: "localip", key: " 󰩟  local", keyIcon: "󰩟", showIpv4: true, showIpv6: false },
+    { type: "battery", key: "   battery", keyIcon: "" },
+    { type: "locale", key: "   locale", keyIcon: "" },
+    {
+      type: "separator",
+      string: "",
+      outputColor: "overlay0",
+      times: 40,
+    },
+    {
+      type: "colors",
+      key: " ",
+      paddingLeft: 2,
+      symbol: "block",
+      block: { width: 3, range: [0, 15] },
+    },
+  ],
+}

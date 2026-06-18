@@ -1,0 +1,27 @@
+# atuin/.config/atuin/config.toml
+# Shell history database. Stowed + overwritten by `dots theme set`.
+
+enter_accept = true
+search_mode = "fuzzy"
+filter_mode = "directory"
+style = "compact"
+show_preview = true
+inline_height = 0
+show_tabs = false
+secrets_filter = true
+
+[sync]
+records = true
+
+[search]
+filters = ["global", "host", "session", "workspace", "directory"]
+
+[keys]
+scroll_exits = true
+
+[stats]
+common_prefix = ["sudo"]
+ignored_commands = ["cd", "ls", "ll", "la"]
+
+[ui]
+columns = ["duration", "time", "command"]

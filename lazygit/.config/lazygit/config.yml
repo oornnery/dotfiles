@@ -1,0 +1,88 @@
+# lazygit/.config/lazygit/config.yml
+# Stowed. Overwritten by `dots theme set`.
+
+gui:
+  showIcons: true
+  nerdFontsVersion: "3"
+  border: rounded
+  animateExplosion: true
+  language: auto
+  showRandomTip: false
+  showCommandLog: false
+  skipDiscardChangeWarning: false
+  skipRewordInEditorWarning: false
+  scrollHeight: 2
+  scrollPastBottom: true
+  expandFocusedSidePanel: false
+  mainPanelSplitMode: flexible
+  enlargedSideViewLocation: left
+  showFileIcons: true
+  showFileTree: true
+  showNumstatInFilesView: false
+  showBottomLine: true
+  showPanelJumps: false
+  commitAuthorShortLength: 6
+
+  # Catppuccin Mocha palette
+  theme:
+    activeBorderColor:
+      - "#cba6f7"
+      - bold
+    inactiveBorderColor:
+      - "#6c7086"
+    searchingActiveBorderColor:
+      - "#89b4fa"
+      - bold
+    optionsTextColor:
+      - "#89b4fa"
+    selectedLineBgColor:
+      - "#313244"
+    inactiveViewSelectedLineBgColor:
+      - "#45475a"
+    cherryPickedCommitFgColor:
+      - "#a6e3a1"
+    cherryPickedCommitBgColor:
+      - "#313244"
+    markedBaseCommitFgColor:
+      - "#f9e2af"
+    markedBaseCommitBgColor:
+      - "#313244"
+    unstagedChangesColor:
+      - "#f38ba8"
+    defaultFgColor:
+      - "#cdd6f4"
+
+git:
+  paging:
+    colorArg: always
+    useConfig: true
+  commit:
+    signOff: false
+    autoWrapCommitMessage: true
+    autoWrapWidth: 72
+  merging:
+    manualCommit: false
+    squashMergeMessage: "Squash merge {{selectedRef}} into {{currentBranch}}"
+  mainBranches:
+    - master
+    - main
+  autoFetch: true
+  autoRefresh: true
+  fetchAll: true
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --"
+  allBranchesLogCmds:
+    - "git log --graph --all --color=always --abbrev-commit --decorate --date=relative --pretty=medium"
+  log:
+    order: topo-order
+    showGraph: always
+  disableForcePushing: false
+  parseEmoji: false
+
+update:
+  method: background
+  days: 14
+
+confirmOnQuit: false
+disableStartupPopups: false
+notARepository: prompt
+promptToReturnFromSubprocess: true

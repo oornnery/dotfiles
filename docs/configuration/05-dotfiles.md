@@ -10,10 +10,19 @@ See also [docs/stow.md](../cheatsheets/stow.md) for the tool cheatsheet.
 
 | Package         | Targets                                       |
 | --------------- | --------------------------------------------- |
+| Package         | Targets                                       |
+| --------------- | --------------------------------------------- |
 | `zsh/`          | `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, `~/.zlogin`, `~/.zsh_functions` |
 | `bash/`         | `~/.bashrc`                                   |
 | `starship/`     | `~/.config/starship.toml`                     |
 | `tmux/`         | `~/.tmux.conf`                                |
+| `atuin/`        | `~/.config/atuin/config.toml`                 |
+| `btop/`         | `~/.config/btop/btop.conf` + `themes/`        |
+| `fastfetch/`    | `~/.config/fastfetch/config.jsonc`            |
+| `bat/`          | `~/.config/bat/config`                        |
+| `lazygit/`      | `~/.config/lazygit/config.yml`                |
+| `lazydocker/`   | `~/.config/lazydocker/config.yml`             |
+| `mpv/`          | `~/.config/mpv/mpv.conf`                      |
 | `alacritty/`    | `~/.config/alacritty/alacritty.toml`          |
 | `hyprland/`     | `~/.config/hypr/{hyprland,hypridle,hyprlock,bindings,monitors}.conf` |
 | `nvim/`         | `~/.config/nvim/` (native, no plugins)        |

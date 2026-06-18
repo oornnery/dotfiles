@@ -1,0 +1,43 @@
+# lazydocker/.config/lazydocker/config.yml
+# Stow-managed lazydocker config.
+
+gui:
+  language: auto
+  scrollHeight: 2
+  border: rounded
+  showIcons: true
+  nerdFontsVersion: "3"
+  showCommandLog: false
+  showBottomLine: true
+  wrapMainPanel: true
+  returnImmediately: false
+  showPanelJumps: false
+  startRealTimeLogs: false
+  startHidden: false
+  expandFocusedSidePanel: false
+
+  theme:
+    activeBorderColor:
+      - "#cba6f7"
+      - bold
+    inactiveBorderColor:
+      - "#6c7086"
+    searchingActiveBorderColor:
+      - "#89b4fa"
+      - bold
+    optionsTextColor:
+      - "#89b4fa"
+    selectedLineBgColor:
+      - "#313244"
+
+command:
+  dockerCompose:
+    executable: docker
+    configPath: docker-compose.yml
+
+confirmOnQuit: true
+disableStartupPopups: false
+
+update:
+    method: background
+    days: 14
