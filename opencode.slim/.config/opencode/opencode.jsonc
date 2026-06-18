@@ -1,0 +1,57 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "plugin": [
+    "oh-my-opencode-slim",
+    "openrtk",
+    "@tarquinen/opencode-dcp@latest"
+  ],
+
+  "provider": {
+    "ollama-cloud": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama Cloud",
+      "options": {
+        "baseURL": "https://ollama.com/v1",
+        "apiKey": "{file:~/.secrets/ollama-api-key}"
+      },
+      "models": {
+        "glm-5.2:cloud": {
+          "name": "GLM 5.2 Cloud",
+          "limit": {
+            "context": 976000,
+            "output": 65536
+          }
+        },
+        "glm-5.1:cloud": {
+          "name": "GLM 5.1 Cloud",
+          "limit": {
+            "context": 198000,
+            "output": 65536
+          }
+        },
+        "kimi-k2.7-code:cloud": {
+          "name": "Kimi K2.7 Code Cloud",
+          "limit": {
+            "context": 256000,
+            "output": 65536
+          }
+        },
+        "deepseek-v4-pro:cloud": {
+          "name": "DeepSeek V4 Pro Cloud",
+          "limit": {
+            "context": 1000000,
+            "output": 32768
+          }
+        },
+        "deepseek-v4-flash:cloud": {
+          "name": "DeepSeek V4 Flash Cloud",
+          "limit": {
+            "context": 1000000,
+            "output": 32768
+          }
+        }
+      }
+    }
+  }
+}
