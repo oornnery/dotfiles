@@ -1,9 +1,0 @@
-# bat config — catppuccin-mocha theme
---theme="Catppuccin Mocha"
---number
---paging=never
---style=plain
---wrap=auto
---italic-text=always
---tabs=4
---diff-context=5

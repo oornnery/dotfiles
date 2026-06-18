@@ -1,8 +1,8 @@
 # Prompt
 
-[Starship](https://starship.rs) is the prompt. Config lives in
-[`starship/.config/starship.toml`](../../../starship/.config/starship.toml) (separate
-stow package; overwritten by `dots theme set`).
+[Starship](https://starship.rs) is the prompt. Config is theme-owned:
+`themes/<name>/starship.toml` is written to `~/.config/starship.toml`
+by `dots theme set`. No stow package.
 
 ## Philosophy
 
@@ -28,7 +28,7 @@ command -v starship >/dev/null && eval "$(starship init zsh)"
 ```
 
 `starship` reads `$XDG_CONFIG_HOME/starship.toml` (= `~/.config/starship.toml`),
-which is stowed via the `starship/` package and overwritten by `dots theme set`.
+written by `dots theme set` from `themes/<active-theme>/starship.toml`.
 
 ## Test changes without restarting
 

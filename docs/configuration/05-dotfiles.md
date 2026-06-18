@@ -10,11 +10,8 @@ See also [docs/stow.md](../cheatsheets/stow.md) for the tool cheatsheet.
 
 | Package         | Targets                                       |
 | --------------- | --------------------------------------------- |
-| Package         | Targets                                       |
-| --------------- | --------------------------------------------- |
 | `zsh/`          | `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, `~/.zlogin`, `~/.zsh_functions` |
 | `bash/`         | `~/.bashrc`                                   |
-| `starship/`     | `~/.config/starship.toml`                     |
 | `tmux/`         | `~/.tmux.conf`                                |
 | `atuin/`        | `~/.config/atuin/config.toml`                 |
 | `btop/`         | `~/.config/btop/btop.conf` + `themes/`        |

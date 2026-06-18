@@ -1,9 +1,0 @@
-# bat config — tokyo-night theme
---theme="tokyo-night"
---number
---paging=never
---style=plain
---wrap=auto
---italic-text=always
---tabs=4
---diff-context=5

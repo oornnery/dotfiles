@@ -28,7 +28,7 @@ fi
 
 # Packages to stow. Order doesn't matter; stow_safe is idempotent.
 packages=(
-    bash zsh starship tmux
+    bash zsh tmux
     atuin btop fastfetch bat lazygit
     git editor fabric
     alacritty
@@ -100,11 +100,11 @@ for pkg in "${packages[@]}"; do
 done
 
 # Apply active theme on top (writes ~/.config/<app>/theme.* files).
-if [[ -n "${THEME:-}" ]] && command -v theme >/dev/null 2>&1; then
+if [[ -n "${THEME:-}" ]] && command -v dots >/dev/null 2>&1; then
     if [[ $EUID -eq 0 && "$USER_NAME" != "root" ]]; then
-        sudo -u "$USER_NAME" -H theme set "$THEME" || log::warn "theme set failed"
+        sudo -u "$USER_NAME" -H dots theme set "$THEME" || log::warn "dots theme set failed"
     else
-        theme set "$THEME" || log::warn "theme set failed"
+        dots theme set "$THEME" || log::warn "dots theme set failed"
     fi
 fi
 
