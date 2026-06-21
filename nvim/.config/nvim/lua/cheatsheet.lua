@@ -1,89 +1,62 @@
 local M = {}
 
-local topics = { "tmux", "vim", "nvim", "all" }
-
-local function helper_command()
-  local path = vim.fn.expand("~/.local/bin/dots")
-  if vim.fn.executable(path) == 1 then
-    return path
+local function config_root()
+  local source = debug.getinfo(1, "S").source
+  if source:sub(1, 1) == "@" then
+    return vim.fn.fnamemodify(source:sub(2), ":p:h:h")
   end
-  return "dots"
+  return vim.fn.stdpath("config")
 end
 
-local function open_plain(topic)
-  local lines = vim.fn.systemlist({ helper_command(), "help", "--no-pager", topic })
-  if vim.v.shell_error ~= 0 then
-    lines = {
-      "Could not run dots help.",
-      "",
-      "Try from a shell:",
-      "  dots help " .. topic,
-    }
-  end
+local function cheatsheet_path()
+  return config_root() .. "/docs/cheatsheet.md"
+end
 
+local function open_buffer(lines)
   vim.cmd("tabnew")
   local buf = vim.api.nvim_get_current_buf()
+
+  -- Make the cheatsheet read like a doc page, not an editable buffer.
+  vim.wo.colorcolumn = ""
+  vim.wo.cursorline = false
+  vim.wo.foldcolumn = "0"
+  vim.wo.list = false
+  vim.wo.number = false
+  vim.wo.relativenumber = false
+  vim.wo.signcolumn = "no"
+  vim.wo.spell = false
+  vim.wo.wrap = true
+
   vim.bo[buf].buftype = "nofile"
   vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].swapfile = false
   vim.bo[buf].filetype = "markdown"
+
+  -- FileType autocmds may reset window-local markdown defaults.
+  vim.wo.colorcolumn = ""
+  vim.wo.cursorline = false
+  vim.wo.list = false
+  vim.wo.number = false
+  vim.wo.relativenumber = false
+  vim.wo.signcolumn = "no"
+  vim.wo.spell = false
+
+  pcall(vim.api.nvim_buf_set_name, buf, "nvim-cheatsheet.md")
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.bo[buf].modifiable = false
   vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, silent = true, desc = "Close cheatsheet" })
 end
 
-function M.open(topic)
-  topic = topic or "nvim"
-
-  vim.cmd("tabnew")
-  local buf = vim.api.nvim_get_current_buf()
-  vim.bo[buf].bufhidden = "wipe"
-  vim.bo[buf].filetype = "markdown"
-  vim.bo[buf].swapfile = false
-
-  local ok, job = pcall(vim.fn.termopen, { helper_command(), "help", topic }, {
-    on_exit = function(_, code)
-      if code == 0 then
-        vim.schedule(function()
-          if not vim.api.nvim_buf_is_valid(buf) then
-            return
-          end
-          for _, win in ipairs(vim.fn.win_findbuf(buf)) do
-            pcall(vim.api.nvim_win_close, win, true)
-          end
-        end)
-      end
-    end,
-  })
-
-  if not ok or job <= 0 then
-    pcall(vim.api.nvim_buf_delete, buf, { force = true })
-    open_plain(topic)
-    return
-  end
-
-  vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, silent = true, desc = "Close cheatsheet" })
-  vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { buffer = buf, silent = true, desc = "Terminal normal mode" })
-  vim.cmd("startinsert")
+function M.open()
+  open_buffer(vim.fn.readfile(cheatsheet_path()))
 end
 
 function M.setup()
-  local function open_from_opts(opts)
-    M.open(opts.args ~= "" and opts.args or "nvim")
-  end
-
-  local command_opts = {
-    nargs = "?",
-    complete = function()
-      return topics
-    end,
-  }
-
-  vim.api.nvim_create_user_command("Helpme", open_from_opts, command_opts)
-  vim.api.nvim_create_user_command("Cheatsheet", open_from_opts, command_opts)
+  vim.api.nvim_create_user_command("Helpme", M.open, {})
+  vim.api.nvim_create_user_command("Cheatsheet", M.open, {})
 
   vim.keymap.set("n", "<leader>?", function()
-    M.open("nvim")
+    M.open()
   end, { desc = "Open keybinding cheatsheet" })
 end
 
