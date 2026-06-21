@@ -24,6 +24,7 @@ but tailored to this hardware and workflow.
 - [Zellij](applications/zellij.md) — terminal multiplexer (tmux replacement)
 - [KTX](applications/ktx.md) — open-source context layer for data agents
 - [Headroom](applications/headroom.md) — intelligent context compression for AI
+- [Herdr](applications/herdr.md) — terminal agent multiplexer (tmux for coding agents)
 - [Web Apps](applications/06-web-apps.md) — firefoxpwa + `web-app` wrapper
 - [Gaming](applications/07-gaming.md) — Steam, wine, gamemode, mangohud
 - [Windows VM](applications/08-windows-vm.md) — dockur/windows on Docker

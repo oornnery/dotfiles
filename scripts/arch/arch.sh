@@ -73,6 +73,7 @@ declare -A MODULES_DESC=(
     [dev/languages]="Language toolchains (python, rust, node, go, …)"
     [dev/docker]="Docker + Podman + lazydocker"
     [dev/llms]="AI tools (Claude Code, Codex, Ollama, LM Studio, RTK, .agents)"
+    [dev/herdr]="Herdr — terminal agent multiplexer (tmux for coding agents)"
 
     # game/
     [game/gaming]="Steam + wine + gamemode + mangohud"
@@ -98,7 +99,7 @@ SECTION_desktop=(hyprland gdm greetd sddm ly gnome gnome-rice gnome-extensions)
 SECTION_dev=(
     tools apps
     zsh bash tmux vim nvim helix yazi zellij alacritty git vscodium
-    languages docker llms
+    languages docker llms herdr
     stow
 )
 # shellcheck disable=SC2034
@@ -136,6 +137,7 @@ _compose_all_preset() {
         dev/helix
         dev/yazi
         dev/zellij
+        dev/herdr
         dev/docker
         core/paru
         core/ufw
