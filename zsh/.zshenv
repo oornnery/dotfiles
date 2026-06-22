@@ -4,8 +4,8 @@
 # Use it for environment variables that must always exist.
 
 # Preferred editor
-export EDITOR="hx"
-export VISUAL="hx"
+export EDITOR="nvim"
+export VISUAL="code"
 
 # Locale
 export LANG="en_US.UTF-8"

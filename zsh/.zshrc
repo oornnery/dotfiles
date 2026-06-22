@@ -85,6 +85,25 @@ if (( $+widgets[history-substring-search-up] )); then
   bindkey -M vicmd 'j' history-substring-search-down
 fi
 
+# -------------------------------
+# Extra keybindings (insert mode)
+# -------------------------------
+
+# Word navigation
+bindkey '^[[1;5D' backward-word   # Ctrl+Left
+bindkey '^[[1;5C' forward-word    # Ctrl+Right
+
+# Line navigation
+bindkey '^A' beginning-of-line    # Ctrl+A: home
+bindkey '^E' end-of-line          # Ctrl+E: end
+
+# Delete words
+bindkey '^W' backward-kill-word   # Ctrl+W: delete word behind
+bindkey '^[d' kill-word           # Alt+D: delete word ahead
+
+# History search
+bindkey '^R' history-incremental-search-backward # Ctrl+R: fuzzy history
+
 # Zellij statusline vi-mode support (when inside Zellij)
 _dotfiles_zellij_set_vi_mode() {
   [[ -n "${ZELLIJ:-}" ]] || return 0
@@ -122,7 +141,12 @@ fi
 
 # Better completion styling
 zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' special-dirs true
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' completer _expand _complete _ignored _approximate
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --color=always $realpath'
 zstyle ':fzf-tab:complete:*' use-fzf-default-opts yes
 
@@ -136,13 +160,14 @@ HISTSIZE=10000
 SAVEHIST=10000
 
 # History behavior
-setopt APPEND_HISTORY
+setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_SAVE_NO_DUPS
 setopt HIST_FIND_NO_DUPS
 setopt HIST_REDUCE_BLANKS
+setopt HIST_VERIFY
 setopt EXTENDED_HISTORY
 
 # -------------------------------
@@ -152,8 +177,15 @@ setopt EXTENDED_HISTORY
 # Auto change into a directory by typing its name
 setopt AUTO_CD
 
+# Complete in the middle of words
+setopt COMPLETE_IN_WORD
+
 # Correct minor spelling mistakes in commands
 #setopt CORRECT
+#setopt CORRECT_ALL
+
+# Notify of background job completion immediately
+setopt NOTIFY
 
 # Enable recursive globbing with **
 setopt EXTENDED_GLOB
@@ -202,18 +234,32 @@ alias catp='bat -p'
 
 # Nice-to-have CLI shortcuts
 alias grep='grep --color=auto'
+alias diff='diff --color=auto'
+alias -g G='| grep'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+
+# Network (classic names, modern tools)
+alias ip='ip -c'
+alias ifconfig='ip -c a'
+alias netstat='ip -s'
+alias ping='ping -c 4'
+alias traceroute='traceroute -m 15'
+
+# System info
+alias uptime='uptime -p'
+alias free='free -h'
+alias list='pacman -Q'
 
 # Reload shell config quickly
 alias reload='exec zsh'
 
 # Quick editor shortcuts
-alias editz='hx ~/.zshrc'
-alias edit-zenv='hx ~/.zshenv'
-alias edit-zprofile='hx ~/.zprofile'
-alias edit-zlogin='hx ~/.zlogin'
+alias editz='$EDITOR ~/.zshrc'
+alias edit-zenv='$EDITOR ~/.zshenv'
+alias edit-zprofile='$EDITOR ~/.zprofile'
+alias edit-zlogin='$EDITOR ~/.zlogin'
 
 # Arch package management
 alias update='sudo pacman -Syu'
@@ -224,7 +270,7 @@ alias clean='sudo pacman -Sc'
 
 # Modern tooling
 alias py='python'
-alias v='hx'
+alias v='nvim'
 alias g='git'
 alias lg='lazygit'
 alias ld='lazydocker'
@@ -254,6 +300,40 @@ fi
 # Create a directory and enter it
 mkcd() {
   mkdir -p "$1" && cd "$1"
+}
+
+# Extract archives with auto-detection
+extract() {
+  if [ -f "$1" ] ; then
+    has_command() { command -v "$1" &>/dev/null; }
+    case "$1" in
+      *.tar.bz2|*.tbz2) has_command tar && tar xjf "$1" || echo "tar not found" ;;
+      *.tar.gz|*.tgz)   has_command tar && tar xzf "$1" || echo "tar not found" ;;
+      *.bz2)            has_command bunzip2 && bunzip2 "$1" || echo "bunzip2 not found" ;;
+      *.rar)            has_command unrar && unrar x "$1" || echo "unrar not found" ;;
+      *.gz)             has_command gunzip && gunzip "$1" || echo "gunzip not found" ;;
+      *.tar)            has_command tar && tar xf "$1" || echo "tar not found" ;;
+      *.zip)            has_command unzip && unzip "$1" || echo "unzip not found" ;;
+      *.Z)              has_command uncompress && uncompress "$1" || echo "uncompress not found" ;;
+      *) echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# Quick directory jump with fzf
+z() {
+  local dir
+  dir=$(find "${1:-$HOME}" -type d 2>/dev/null | fzf)
+  [[ -n "$dir" ]] && cd "$dir"
+}
+
+# Find file and open in editor
+fe() {
+  local file
+  file=$(find . -type f -name "*$1*" 2>/dev/null | fzf)
+  [[ -n "$file" ]] && ${EDITOR:-nvim} "$file"
 }
 
 # -------------------------------
@@ -333,7 +413,7 @@ else
 fi
 
 # opencode
-export PATH=/home/oornnery/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # >>> oh-my-opencode-slim background subagents >>>
 export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
