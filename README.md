@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Stow on Linux.
+Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 
 ## Table of contents
 
@@ -17,19 +17,17 @@ Personal terminal, editor, and Windows/WSL setup, managed primarily with GNU Sto
 ## What is included
 
 - `bash/` → `.bashrc`
-- `zsh/` → `.zshrc` (Oh My Zsh + plugins)
-- `nvim/` → native Neovim configuration
-- `nvim.lazy/` → native Neovim base plus lazy.nvim plugin extras
-- `nvim.mini/` → mini.nvim-based Neovim distro
+- `zsh/` → `.zshrc`, `.zshenv`, Antigen plugins, and `zsh/setup.sh`
+- `nvim/` → Neovim configuration and `nvim/setup.sh`
+- `nvim.lazy/`, `nvim.mini/` → older Neovim variants kept for now
 - `editor/` → VS Code and Zed settings for the Windows setup
 - `docs/` → Full reference (basics, applications, configuration, cheatsheets)
 - `scripts/debian.sh` → Debian bootstrap script
-- `scripts/zsh.sh` → Oh My Zsh and plugin setup
-- `scripts/arch.sh` → Arch Linux bootstrap (native + WSL + VMs, hardware-aware: AMD/Intel/NVIDIA GPU, Vaio/Dell DMI quirks, VM guest tools)
+- `scripts/arch/arch.sh` → Arch Linux bootstrap (native + WSL + VMs, hardware-aware)
 - `tmux/` → `.tmux.conf`
-- `wsl/` → WSL configuration (`.wslconfig`, `etc/wsl.conf` template for `arch.sh`)
-- `system/` → System config templates consumed by `scripts/arch.sh` (zram, NetworkManager iwd backend)
-- `git/` → `.gitconfig` (stowed; `arch.sh` detects and skips re-prompting)
+- `wsl/` → WSL configuration (`.wslconfig`, `etc/wsl.conf`)
+- `gdm/`, `greetd/`, `iwd/`, `zram/` → system stow packages handled by Arch modules
+- `git/` → `.gitconfig`
 - `hyprland/` → Hyprland config
 
 ## Quick install
@@ -47,12 +45,13 @@ cd ~/dotfiles
 bash scripts/debian.sh
 ```
 
-This script installs base packages (build tools, git, zsh, tmux, fzf, ripgrep, fd, eza, bat, node, go, rust, etc), installs Neovim, and sets up dotfiles with `stow`.
+This script installs base Debian packages, developer tools, language runtimes, and desktop helpers. It does not replace the focused package setup scripts below.
 
-### 3) Other setup scripts
+### 3) Focused setup scripts
 
-- `bash scripts/zsh.sh` to install Oh My Zsh and the shell plugins used in this setup.
-- `sudo bash scripts/arch.sh` to bootstrap an Arch Linux environment. Auto-detects WSL, VM (qemu/kvm/vbox/vmware/hyper-v), bare-metal laptop, CPU vendor (Intel/AMD), GPU vendor (AMD/Intel/NVIDIA), and DMI vendor (Vaio/Dell). Flags: `--unattended` (CI), `--dry-run` (show plan only). Env overrides: `USER_NAME`, `TIMEZONE`, `MIRROR_COUNTRY`, `GIT_NAME`, `GIT_EMAIL`, `LOG_FILE`. Run AFTER archinstall.
+- `bash zsh/setup.sh` installs/configures the zsh stack on Arch or Debian.
+- `bash nvim/setup.sh` installs Neovim dependencies and stows the main `nvim/` config.
+- `./scripts/arch/arch.sh` bootstraps an Arch Linux environment. Run after `archinstall`.
 
 ## Windows and WSL
 
@@ -71,7 +70,7 @@ editor/README.md
 
 ## Stow usage (manual)
 
-If you want to apply modules manually:
+If you want to apply packages manually:
 
 ```bash
 stow -v -t ~ zsh
@@ -88,10 +87,10 @@ stow -D -v -t ~ zsh
 
 ## Neovim
 
-- `nvim/` is the native base: no plugin manager, built-in features only.
-- `nvim.lazy/` loads `nvim/` first, then adds lazy.nvim plugins.
-- `nvim.mini/` is a separate mini.nvim distro.
-- All three target `~/.config/nvim`, so stow only one at a time.
+- `nvim/` is the main config.
+- `nvim.lazy/` and `nvim.mini/` are older variants kept for now.
+- All variants target `~/.config/nvim`, so stow only one at a time.
+- Use `bash nvim/setup.sh` for the main config.
 
 ## What I use (stack)
 
@@ -153,7 +152,7 @@ stow -D -v -t ~ zsh
 
 ## Notes
 
-- The `scripts/debian.sh` script asks for confirmation before applying each module with `stow`.
+- `scripts/debian.sh` installs broad Debian packages; focused setup lives in package-local `setup.sh` files.
 - The Windows side is intentionally separate from the Linux `stow` flow and is documented under `editor/`.
 - `wsl/.wslconfig` is machine-level configuration and should be adapted to the RAM/CPU available on the host.
 - If a destination file already exists (for example `~/.zshrc`), back it up first to avoid conflicts.

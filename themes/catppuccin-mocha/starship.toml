@@ -144,6 +144,8 @@ symbol  = " "
 format  = "[$symbol(\\($virtualenv\\) )]($style)"
 style   = "yellow"
 python_binary = ["python", "python3"]
+detect_files = ["pyproject.toml", "requirements.txt", "Pipfile", "setup.py", "tox.ini", ".python-version"]
+detect_extensions = ["py"]
 
 [nodejs]
 symbol       = " "

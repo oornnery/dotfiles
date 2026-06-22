@@ -102,6 +102,8 @@ symbol_threshold = 1
 symbol  = " "
 format  = "[$symbol(\\($virtualenv\\) )]($style)"
 style   = "yellow"
+detect_files = ["pyproject.toml", "requirements.txt", "Pipfile", "setup.py", "tox.ini", ".python-version"]
+detect_extensions = ["py"]
 
 [nodejs]
 symbol       = " "

@@ -20,7 +20,10 @@ export XDG_STATE_HOME="$HOME/.local/state"
 path=(
   "$HOME/.local/bin"
   "$HOME/bin"
+  "$HOME/.npm-global/bin"
   "$HOME/.local/npm/bin"
+  "$HOME/.local/share/fnm"
+  "$HOME/.atuin/bin"
   "$HOME/.cargo/bin"
   "$HOME/go/bin"
   $path
@@ -52,4 +55,4 @@ if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null \
 fi
 
 export PATH
-. "$HOME/.cargo/env"
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"

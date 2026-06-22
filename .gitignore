@@ -52,6 +52,11 @@ bin/.local/bin/python*
 .agents/
 skills-lock.json
 
+# Local downloads and app runtime state
+antigen.zsh
+herdr/.config/herdr/session.json
+herdr/.config/herdr/*.log
+
 # OpenCode local state, caches, and generated files
 .config/opencode/node_modules/
 .config/opencode/package.json
@@ -66,3 +71,18 @@ opencode/.config/opencode/plugins/
 .config/opencode/raw-sources/
 .config/opencode/semantic-layer/
 .config/opencode/wiki/
+opencode.slim/.config/opencode/node_modules/
+opencode.slim/.config/opencode/package.json
+opencode.slim/.config/opencode/package-lock.json
+opencode.slim/.config/opencode/.git/
+opencode.slim/.config/opencode/.gitignore
+opencode.slim/.config/opencode/*.backup-*
+opencode.slim/.config/opencode/.ktx/
+opencode.slim/.config/opencode/ktx.yaml
+opencode.slim/.config/opencode/.omo/
+opencode.slim/.config/opencode/raw-sources/
+opencode.slim/.config/opencode/semantic-layer/
+opencode.slim/.config/opencode/wiki/
+opencode.slim/.config/opencode/plugins/caveman/package.json
+opencode.slim/.config/opencode/plugins/caveman/package-lock.json
+opencode.slim/.config/opencode/plugins/caveman/node_modules/

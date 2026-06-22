@@ -8,8 +8,8 @@ set -euo pipefail
 # to bottom. Comment out sections you don't want.
 #
 # After this finishes:
-#   ./scripts/stow.sh   # link dotfiles into ~
-#   ./scripts/zsh.sh    # Oh My Zsh + plugins
+#   bash zsh/setup.sh    # zsh stack + stow package
+#   bash nvim/setup.sh   # Neovim deps + stow package
 
 # ─── Bootstrap nala ─────────────────────────────────────────────────────────
 
@@ -272,8 +272,9 @@ echo
 echo "==> Debian setup finished."
 echo
 echo "Next steps:"
-echo "  ./scripts/stow.sh                 # link dotfiles into \$HOME"
-echo "  ./scripts/zsh.sh                  # Oh My Zsh + plugins + chsh"
+echo "  bash zsh/setup.sh                 # zsh stack + stow package"
+echo "  bash nvim/setup.sh                # Neovim deps + stow package"
+echo "  stow -R -t \$HOME <package>        # manually link another dotfile package"
 echo "  fprintd-enroll                    # if you have a fingerprint reader"
 echo "  sudo sensors-detect --auto        # populate /etc/modules-load.d for lm-sensors"
 echo "  flatpak install flathub <app-id>  # install GUI apps via flathub"

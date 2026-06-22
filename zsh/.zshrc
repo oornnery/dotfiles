@@ -21,6 +21,15 @@ export ANTIGEN_HOME="${ANTIGEN_HOME:-$HOME/.antigen}"
 # Fresh Antigen installs may not have created the directory yet.
 export ZSH_CACHE_DIR="${ZSH_CACHE_DIR:-$ANTIGEN_HOME/bundles/robbyrussell/oh-my-zsh/cache}"
 mkdir -p "$ZSH_CACHE_DIR/completions" 2>/dev/null || true
+export ZSH_COMPDUMP="${ZSH_COMPDUMP:-$ZSH_CACHE_DIR/.zcompdump-${HOST:-host}-${ZSH_VERSION}}"
+
+# Debian/Arch package changes can leave stale compinit dumps pointing at removed
+# vendor completions (common: /usr/share/zsh/vendor-completions/_docker).
+if [[ -f "$ZSH_COMPDUMP" ]] \
+  && grep -q '/usr/share/zsh/vendor-completions/_docker' "$ZSH_COMPDUMP" 2>/dev/null \
+  && [[ ! -e /usr/share/zsh/vendor-completions/_docker ]]; then
+  rm -f "$ZSH_COMPDUMP" "$ZSH_COMPDUMP.zwc" 2>/dev/null || true
+fi
 
 # Active theme drop-in written by the `theme` command.
 # It may set ANTIGEN_THEME and terminal-tool color variables before plugins load.
@@ -30,8 +39,22 @@ mkdir -p "$ZSH_CACHE_DIR/completions" 2>/dev/null || true
 #   ANTIGEN_THEME=agnoster zsh
 export ANTIGEN_THEME="${ANTIGEN_THEME:-robbyrussell}"
 
-if [[ -f "$ANTIGEN_HOME/antigen.zsh" ]]; then
-  source "$ANTIGEN_HOME/antigen.zsh"
+# Try multiple antigen locations (dots default, manual download, system install)
+_antigen_found=
+for _antigen_path in \
+  "$ANTIGEN_HOME/antigen.zsh" \
+  "$HOME/antigen.zsh" \
+  "$HOME/dotfiles/antigen.zsh" \
+  "/usr/share/antigen/antigen.zsh" \
+  "$HOME/.local/share/antigen/antigen.zsh"; do
+  if [[ -f "$_antigen_path" ]]; then
+    _antigen_found="$_antigen_path"
+    break
+  fi
+done
+
+if [[ -n "$_antigen_found" ]]; then
+  source "$_antigen_found"
 
   antigen use oh-my-zsh
 
@@ -136,7 +159,14 @@ _dotfiles_zellij_set_vi_mode
 # fzf shell integration
 # This enables keybindings and fuzzy completion features.
 if command -v fzf >/dev/null 2>&1; then
-  source <(fzf --zsh)
+  # Try modern --zsh flag first, fallback to legacy source
+  if fzf --zsh 2>/dev/null 1>/dev/null; then
+    source <(fzf --zsh)
+  else
+    # Legacy fzf (<0.48): source system-installed files
+    [[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
+    [[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
+  fi
 fi
 
 # Better completion styling
@@ -147,7 +177,7 @@ zstyle ':completion:*' special-dirs true
 zstyle ':completion:*' rehash true
 zstyle ':completion:*' completer _expand _complete _ignored _approximate
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --color=always $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'if command -v eza >/dev/null 2>&1; then eza --tree --color=always $realpath; else ls -la --color=auto $realpath; fi'
 zstyle ':fzf-tab:complete:*' use-fzf-default-opts yes
 
 # -------------------------------
@@ -217,20 +247,37 @@ sudo-unlock() {
     sudo faillock --user "${1:-$USER}" --reset
 }
 
-# Better listing with eza
-alias ls='eza --icons=always'
-alias ll='eza -la --icons=always --git'
-alias la='eza -la --icons=always'
-alias lsa='eza -la --icons=always'
-alias lt='eza --tree --icons=always'
-alias lta='eza --tree -la --icons=always'
+# Better listing — eza if available, else classic ls
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --icons=always'
+  alias ll='eza -la --icons=always --git'
+  alias la='eza -la --icons=always'
+  alias lsa='eza -la --icons=always'
+  alias lt='eza --tree --icons=always'
+  alias lta='eza --tree -la --icons=always'
+else
+  alias ls='ls --color=auto -hv'
+  alias ll='ls -lh'
+  alias la='ls -lha'
+fi
 
-# fzf with bat preview (omarchy-style)
-alias ff='fzf --preview "bat --style=numbers --color=always {} 2>/dev/null || cat {}"'
+# fzf with bat preview (fallback to cat if bat missing)
+if command -v bat >/dev/null 2>&1; then
+  alias ff='fzf --preview "bat --style=numbers --color=always {} 2>/dev/null || cat {}"'
+elif command -v batcat >/dev/null 2>&1; then
+  alias ff='fzf --preview "batcat --style=numbers --color=always {} 2>/dev/null || cat {}"'
+else
+  alias ff='fzf --preview "cat {}"'
+fi
 
-# Better cat with bat
-alias cat='bat'
-alias catp='bat -p'
+# Better cat with bat (or batcat on Debian)
+if command -v bat >/dev/null 2>&1; then
+  alias cat='bat'
+  alias catp='bat -p'
+elif command -v batcat >/dev/null 2>&1; then
+  alias cat='batcat'
+  alias catp='batcat -p'
+fi
 
 # Nice-to-have CLI shortcuts
 alias grep='grep --color=auto'
@@ -299,7 +346,7 @@ fi
 
 # Create a directory and enter it
 mkcd() {
-  mkdir -p "$1" && cd "$1"
+  mkdir -p "$1" && builtin cd "$1"
 }
 
 # Extract archives with auto-detection
@@ -326,7 +373,7 @@ extract() {
 z() {
   local dir
   dir=$(find "${1:-$HOME}" -type d 2>/dev/null | fzf)
-  [[ -n "$dir" ]] && cd "$dir"
+  [[ -n "$dir" ]] && builtin cd "$dir"
 }
 
 # Find file and open in editor
@@ -366,11 +413,15 @@ fi
 # -------------------------------
 
 # Tool initializations (each gated by `command -v` so missing tools are no-ops).
-# --cmd cd: zoxide replaces the `cd` builtin entirely.
-# - `cd foo/bar` (valid path) → cd as usual
-# - `cd <fragment>` → jump to most-frecent matching dir
-# - `cdi` → interactive picker with fzf
-command -v zoxide   >/dev/null && eval "$(zoxide init zsh --cmd cd)"
+# Default keeps builtin `cd` untouched. Set DOTFILES_ZOXIDE_CD=1 if you want
+# zoxide to replace `cd`; some distro/plugin combinations recurse with --cmd cd.
+if command -v zoxide >/dev/null 2>&1; then
+  if [[ "${DOTFILES_ZOXIDE_CD:-0}" == "1" ]]; then
+    eval "$(zoxide init zsh --cmd cd)"
+  else
+    eval "$(zoxide init zsh)"
+  fi
+fi
 
 # Bare-word fallback: typing just `ve-tools` (no `cd` prefix) → if it's not
 # a command AND not a subdir of $PWD AND zoxide has a frecent match, rewrite
@@ -388,7 +439,7 @@ if command -v zoxide >/dev/null 2>&1; then
       if ! command -v "$word" >/dev/null 2>&1 && [[ ! -d "$word" ]]; then
         local target
         if target="$(zoxide query "$word" 2>/dev/null)" && [[ -n "$target" ]]; then
-          BUFFER="cd ${(q)word}"
+          BUFFER="builtin cd ${(q)target}"
         fi
       fi
     fi
