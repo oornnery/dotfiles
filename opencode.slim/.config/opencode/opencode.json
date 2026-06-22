@@ -1,6 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
+    "opencode-tui-utils",
     "./plugins/caveman/plugin.js",
     "@tarquinen/opencode-dcp@latest",
     "oh-my-opencode-slim"
@@ -11,6 +12,71 @@
     },
     "general": {
       "disable": true
+    }
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "glm-5.2": {
+          "id": "glm-5.2",
+          "name": "GLM 5.2",
+          "modalities": { "input": ["text"], "output": ["text"] },
+          "temperature": true,
+          "tool_call": true,
+          "cost": { "input": 0, "output": 0 },
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "deepseek-v4-pro": {
+          "id": "deepseek-v4-pro",
+          "name": "DeepSeek V4 Pro",
+          "modalities": { "input": ["text"], "output": ["text"] },
+          "temperature": true,
+          "tool_call": true,
+          "cost": { "input": 0, "output": 0 },
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "deepseek-v4-flash": {
+          "id": "deepseek-v4-flash",
+          "name": "DeepSeek V4 Flash",
+          "modalities": { "input": ["text"], "output": ["text"] },
+          "temperature": true,
+          "tool_call": true,
+          "cost": { "input": 0, "output": 0 },
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "kimi-k2.7-code": {
+          "id": "kimi-k2.7-code",
+          "name": "Kimi K2.7 Code",
+          "modalities": { "input": ["text"], "output": ["text"] },
+          "temperature": true,
+          "tool_call": true,
+          "cost": { "input": 0, "output": 0 },
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "qwen3.7-plus": {
+          "id": "qwen3.7-plus",
+          "name": "Qwen 3.7 Plus",
+          "modalities": { "input": ["text"], "output": ["text"] },
+          "temperature": true,
+          "tool_call": true,
+          "cost": { "input": 0, "output": 0 },
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "mimo-v2.5-pro": {
+          "id": "mimo-v2.5-pro",
+          "name": "Mimo V2.5 Pro",
+          "modalities": { "input": ["text"], "output": ["text"] },
+          "temperature": true,
+          "tool_call": true,
+          "cost": { "input": 0, "output": 0 },
+          "limit": { "context": 131072, "output": 32768 }
+        }
+      }
     }
   },
   "lsp": true
