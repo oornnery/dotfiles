@@ -12,7 +12,7 @@ ENABLE_OPENCODE="${ENABLE_OPENCODE:-1}"
 ENABLE_RTK="${ENABLE_RTK:-1}"
 ENABLE_CAVEMAN="${ENABLE_CAVEMAN:-1}"
 ENABLE_CAVEKIT="${ENABLE_CAVEKIT:-1}"
-ENABLE_CLAUDE_MEM="${ENABLE_CLAUDE_MEM:-${ENABLE_CAVEMEM:-1}}"
+ENABLE_CAVEMEM="${ENABLE_CAVEMEM:-1}"
 ENABLE_SECURITY_GUIDANCE="${ENABLE_SECURITY_GUIDANCE:-1}"
 ENABLE_FRONTEND_DESIGN="${ENABLE_FRONTEND_DESIGN:-1}"
 ENABLE_IMPECCABLE="${ENABLE_IMPECCABLE:-1}"
@@ -23,6 +23,7 @@ SKILL_AGENTS="${SKILL_AGENTS:-opencode,codex,claude-code}"
 PYDANTIC_SKILLS_REPO="${PYDANTIC_SKILLS_REPO:-pydantic/skills}"
 FASTAPI_SKILL_REPO="${FASTAPI_SKILL_REPO:-microsoft/skills}"
 FASTAPI_SKILL_NAME="${FASTAPI_SKILL_NAME:-fastapi-router-py}"
+NODE_VERSION="${NODE_VERSION:-22.23.0}"
 
 log()  { printf '\n==> %s\n' "$*"; }
 warn() { printf 'WARN: %s\n' "$*" >&2; }
@@ -32,7 +33,7 @@ root() { if [[ $EUID -eq 0 ]]; then "$@"; else sudo "$@"; fi; }
 
 # Run a command as $USER_NAME with the user's install dirs on PATH.
 u() {
-  local path='export PATH="$HOME/.local/bin:$HOME/.local/npm/bin:$HOME/.cargo/bin:$HOME/.codex/bin:$HOME/.opencode/bin:$PATH";'
+  local path='export PATH="$HOME/.fnm:$HOME/.fnm/aliases/default/bin:$HOME/.npm-global/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.codex/bin:$HOME/.opencode/bin:$PATH";'
   if [[ "$(id -un)" == "$USER_NAME" ]]; then
     bash -lc "$path $1"
   else
@@ -46,9 +47,10 @@ has() { u "command -v $1 >/dev/null 2>&1"; }
 _NODE_READY=0
 node() {
   [[ "$_NODE_READY" == 1 ]] && return 0
-  command -v pacman >/dev/null 2>&1 && root pacman -S --needed --noconfirm nodejs npm
-  has npm || { warn "npm not found"; return 1; }
-  u 'mkdir -p "$HOME/.local/npm/bin" && npm config set prefix "$HOME/.local/npm" >/dev/null'
+  has fnm || u 'curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell'
+  u "fnm install '$NODE_VERSION' && fnm default '$NODE_VERSION'"
+  has npm || { warn "npm not found after fnm setup"; return 1; }
+  u 'mkdir -p "$HOME/.npm-global/bin" && npm config set prefix "$HOME/.npm-global" >/dev/null'
   _NODE_READY=1
 }
 
@@ -111,11 +113,10 @@ run "$ENABLE_CAVEMAN"           "Caveman" \
 run "$ENABLE_CAVEKIT"           "Cavekit" \
   "skill JuliusBrussee/cavekit; claude_plugin ck@cavekit-marketplace JuliusBrussee/cavekit"
 
-# </dev/null forces non-TTY so claude-mem reinstalls instead of prompting.
-run "$ENABLE_CLAUDE_MEM"        "Claude-Mem" \
-  "node && u 'npx -y claude-mem install --ide claude-code </dev/null' || warn 'claude-mem claude setup failed'; \
-   has opencode && u 'npx -y claude-mem install --ide opencode </dev/null' || true; \
-   has codex && u 'npx -y claude-mem install --ide codex-cli </dev/null' || true"
+run "$ENABLE_CAVEMEM"           "Cavemem" \
+  "node && u 'npm install -g cavemem@0.2.1 @xenova/transformers@2.17.2' || warn 'cavemem install failed'; \
+   has claude && u 'claude mcp remove --scope user cavemem >/dev/null 2>&1 || true; claude mcp add --scope user cavemem -- \"$HOME/.fnm/aliases/default/bin/node\" \"$HOME/.npm-global/lib/node_modules/cavemem/dist/index.js\" mcp' || true; \
+   has codex && u 'codex mcp remove cavemem >/dev/null 2>&1 || true; codex mcp add cavemem -- \"$HOME/.fnm/aliases/default/bin/node\" \"$HOME/.npm-global/lib/node_modules/cavemem/dist/index.js\" mcp' || true"
 
 run "$ENABLE_IMPECCABLE"        "Impeccable" \
   "skill pbakaus/impeccable; claude_plugin impeccable@impeccable pbakaus/impeccable"

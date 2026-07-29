@@ -447,6 +447,19 @@ if command -v zoxide >/dev/null 2>&1; then
   }
   zle -N accept-line _zoxide_accept_line
 fi
+# Make the fnm default available before deferred shell integrations run.
+# `fnm env --use-on-cd` can still override this for project-local versions.
+export FNM_DIR="$HOME/.fnm"
+export PATH="$FNM_DIR:$FNM_DIR/aliases/default/bin:$PATH"
+
+# WSL sessions without systemd may export an unavailable runtime directory.
+# fnm needs a private writable location for its multishell links.
+if [[ -z "${XDG_RUNTIME_DIR:-}" || ! -d "$XDG_RUNTIME_DIR" ]]; then
+    export XDG_RUNTIME_DIR="$HOME/.cache/runtime"
+    mkdir -p "$XDG_RUNTIME_DIR"
+    chmod 700 "$XDG_RUNTIME_DIR"
+fi
+
 # Everything else deferred to AFTER the first prompt via zsh-defer if loaded.
 # Shaves ~200ms off shell startup by moving fnm/atuin/mise/direnv off the hot
 # path. They become active a few hundred ms later (you won't notice unless

@@ -1,0 +1,98 @@
+---
+name: plan
+description: Create a structured implementation plan or design document. Use when the user wants a SPEC, ARCH, or SDD before implementation.
+---
+
+# Plan
+
+Produce plan document, not code. Plan should make impl, testing, rollout concrete without over-specifying code.
+
+## When to use
+
+Use this command for:
+
+- new features with multiple moving parts
+- architecture or layering decisions
+- ambiguous requests needing phased execution
+- work benefiting from SPEC, ARCH, or SDD output
+
+## Process
+
+### 1. Clarify the request
+
+Identify:
+
+- goal and scope
+- explicit constraints
+- non-goals
+- affected users or systems
+- success criteria
+
+### 2. Inspect the current system
+
+Read only enough to answer:
+
+- what architecture already in use
+- which files or modules likely affected
+- where boundaries already exist
+- what validations and tests prove success
+
+Load supporting skills only when needed:
+
+- `project-state` for SPEC.md, ARCHITECTURE.md, DESIGN.md, ROADMAP.md, .state, or .mem updates
+- `verification` for validation plan and check selection
+- `python` or `typescript` for impl and toolchain constraints
+- `security` for trust boundaries and risk
+- `docs` for ADR or design-doc formatting
+
+### 3. Design the change
+
+Define:
+
+- architecture changes
+- boundaries and interfaces
+- ordered phases
+- data flow or request flow
+- risks and mitigations
+- testing strategy
+
+Use diagrams only when they add clarity.
+
+### 4. Write the plan
+
+Use this shape:
+
+```text
+# Implementation Plan: [Feature]
+
+## Overview
+
+## Architecture Changes
+
+## Phases
+
+## Testing Strategy
+
+## Risks and Mitigations
+
+## Success Criteria
+```
+
+When the plan is intended to persist across sessions, write or update `SPEC.md`
+and `.state/current.md` using the `project-state` skill.
+
+### 5. Keep it implementation-ready
+
+Each phase independently verifiable and specific about:
+
+- file paths or affected components
+- contracts or interfaces
+- migration or rollout concerns
+- how to validate completion
+
+## Constraints
+
+- do not implement during planning
+- prefer extending current architecture over rewriting it
+- do not hide uncertainty; surface assumptions and risks
+- avoid speculative abstractions

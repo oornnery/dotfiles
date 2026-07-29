@@ -82,9 +82,9 @@ echo "==> Cavekit"
 npx -y skills add JuliusBrussee/cavekit -g -a opencode -y || npx -y skills add JuliusBrussee/cavekit
 
 echo "==> Cavemem"
-npm install -g cavemem || true
+npm install -g cavemem@0.2.1 @xenova/transformers@2.17.2 || true
 if command -v cavemem >/dev/null 2>&1; then
-  cavemem install --ide opencode || true
+  echo "Cavemem MCP is declared in opencode.json."
 else
   echo "Cavemem did not install. Check that node -v is v22.x."
 fi
