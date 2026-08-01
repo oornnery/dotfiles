@@ -1,5 +1,40 @@
 {
   "plugin": [
-    "@tarquinen/opencode-dcp@latest"
+    "@tarquinen/opencode-dcp@latest",
+    [
+      "oc-plugin-gitgud",
+      {
+        "enabled": true,
+        "workflow": "auto",
+        "replace_sidebar_files": true,
+        "confirm_push": true,
+        "confirm_stage_all_on_commit": true,
+        "commit_agent": "",
+        "commit_model": "",
+        "commit_system_instructions": "",
+        "keybinds": {
+          "open_status": "<leader>v",
+          "stage_all": "<leader>A",
+          "unstage_all": "<leader>U",
+          "commit": "<leader>C",
+          "push": "<leader>P",
+          "graphite_create": "none",
+          "graphite_modify": "none",
+          "graphite_submit_stack": "none",
+          "graphite_sync": "none",
+          "graphite_up": "none",
+          "graphite_down": "none",
+          "refresh": "f5"
+        }
+      }
+    ],
+    [
+      "opencode-statusline",
+      {
+        "enabled": true
+      }
+    ],
+    "opencode-worktree-manager",
+    "opencode-project-panel"
   ]
 }

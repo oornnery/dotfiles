@@ -192,6 +192,14 @@ Only works when a language server is attached.
 | `<leader>at` in visual      | generate tests for selection       |
 | `<leader>am`                | AI command helper                  |
 | `<leader>ao` / `<leader>aO` | OpenCode float / vertical terminal |
+| `<C-a>` in n/x             | ask OpenCode about cursor/selection (`@this`) |
+| `<C-x>` in n/x             | pick OpenCode prompt, command or server |
+| `go` (operator)            | send range to OpenCode (`@this`) |
+| `goo`                      | send current line to OpenCode |
+| `<S-C-u>` / `<S-C-d>`      | scroll OpenCode session up / down half page |
+| `da` / `dr` in diff        | accept / reject an OpenCode edit |
+| `dp` / `do` in diff        | accept / reject only the hunk under the cursor |
+| `]c` / `[c` in diff        | next / previous change in OpenCode diff |
 | `<leader>as`                | toggle Minuet inline AI completion |
 | `<leader>aS`                | toggle Minuet in completion menu   |
 | `<leader>aM`                | pick/change Minuet model           |
@@ -203,6 +211,8 @@ Only works when a language server is attached.
 | `<C-]>` in insert           | dismiss Minuet suggestion          |
 
 Minuet default is local-first. If `ollama` exists, it uses `http://localhost:11434/v1/completions` with `qwen2.5-coder:7b`.
+
+opencode.nvim needs the `opencode` CLI on PATH. First use starts a server in a vertical split (`opencode --port`); when it proposes edits you review them in a diffpatch tab. Save your files before asking — OpenCode reads them from disk.
 
 Useful overrides:
 

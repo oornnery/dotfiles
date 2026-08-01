@@ -52,6 +52,11 @@ bin/.local/bin/python*
 .agents/
 skills-lock.json
 
+# Personal OpenCode skills are part of the active Stow package.
+!opencode/.agents/
+!opencode/.agents/skills/
+!opencode/.agents/skills/**
+
 # Local downloads and app runtime state
 antigen.zsh
 herdr/.config/herdr/session.json
@@ -67,7 +72,6 @@ herdr/.config/herdr/*.log
 .config/opencode/.ktx/
 .config/opencode/ktx.yaml
 .config/opencode/.omo/
-opencode/.config/opencode/plugins/
 .config/opencode/raw-sources/
 .config/opencode/semantic-layer/
 .config/opencode/wiki/
@@ -86,3 +90,13 @@ opencode.slim/.config/opencode/wiki/
 opencode.slim/.config/opencode/plugins/caveman/package.json
 opencode.slim/.config/opencode/plugins/caveman/package-lock.json
 opencode.slim/.config/opencode/plugins/caveman/node_modules/
+
+# Active OpenCode Stow package: keep config, ignore generated state.
+opencode/.config/opencode/node_modules/
+opencode/.config/opencode/.opencode/
+opencode/.config/opencode/backups/
+opencode/.config/opencode/thoughts/
+opencode/.config/opencode/opencode-notifier-state.json
+opencode/.config/opencode/.caveman-active
+opencode/.config/opencode/opencode.jsonc.bak-*
+opencode/.config/opencode/package-lock.json

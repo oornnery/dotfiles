@@ -1,55 +1,78 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "lsp": true,
   "plugin": [
-    "oh-my-openagent",
+    "@franlol/opencode-md-table-formatter@latest",
+    "@tarquinen/opencode-dcp@latest",
+    "@mohak34/opencode-notifier@latest",
+    "@plannotator/opencode@latest",
+    "opencode-scheduler@latest",
+    "micode@latest",
+    "opencode-worktree-manager",
+    "@vheins/opencode-9router@latest",
+    "./plugins/caveman/plugin.js",
     "openrtk",
-    "@tarquinen/opencode-dcp@latest"
+    "@dietrichgebert/ponytail",
+    "@bybrawe/opencode-loop",
+    "opencode-subagent-statusline"
   ],
+  "model": "openai/gpt-5.6-sol",
+  "small_model": "opencode-go/gpt-5.6-luna",
+  "agent": {
+    "python-engineer": { "model": "opencode-go/kimi-k2.7-code" },
+    "typescript-engineer": { "model": "opencode-go/kimi-k2.7-code" },
+    "security-engineer": { "model": "opencode-go/deepseek-v4-pro" },
+    "verifier": { "model": "opencode-go/qwen3.7-max" }
+  },
+  "instructions": [
+    "instructions/opencode.md",
+    "instructions/engineering.md"
+  ],
+  "references": {
+    "opencode-setup": {
+      "path": "~/.config/opencode/README.md",
+      "description": "This machine's OpenCode setup documentation: installed plugins, CLI commands, troubleshooting"
+    },
+    "opencode-cheatsheet": {
+      "path": "~/.config/opencode/cheatsheet.md",
+      "description": "OpenCode cheatsheet: TUI shortcuts, keybinds, CLI flags, config"
+    }
+  },
   "provider": {
-    "ollama-cloud": {
+    "9router": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama Cloud",
+      "name": "9Router VPS",
       "options": {
-        "baseURL": "https://ollama.com/v1",
-        "apiKey": "{file:~/.secrets/ollama-api-key}"
-      },
-      "models": {
-        "glm-5.2:cloud": {
-          "name": "GLM 5.2 Cloud",
-          "limit": {
-            "context": 976000,
-            "output": 65536
-          }
+        "baseURL": "{env:NINE_ROUTER_URL}",
+        "apiKey": "{env:NINE_ROUTER_API_KEY}",
+        "headers": {
+          "CF-Access-Client-Id": "{env:CF_ACCESS_CLIENT_ID}",
+          "CF-Access-Client-Secret": "{env:CF_ACCESS_CLIENT_SECRET}"
         },
-        "glm-5.1:cloud": {
-          "name": "GLM 5.1 Cloud",
-          "limit": {
-            "context": 198000,
-            "output": 65536
-          }
-        },
-        "kimi-k2.7-code:cloud": {
-          "name": "Kimi K2.7 Code Cloud",
-          "limit": {
-            "context": 256000,
-            "output": 65536
-          }
-        },
-        "deepseek-v4-pro:cloud": {
-          "name": "DeepSeek V4 Pro Cloud",
-          "limit": {
-            "context": 1000000,
-            "output": 32768
-          }
-        },
-        "deepseek-v4-flash:cloud": {
-          "name": "DeepSeek V4 Flash Cloud",
-          "limit": {
-            "context": 1000000,
-            "output": 32768
-          }
-        }
+        "cache": true,
+        "discoveryTimeout": 30000
+      }
+    }
+  },
+  "mcp": {
+    "cavemem": {
+      "type": "local",
+      "command": ["/home/oornnery/.fnm/node-versions/v22.23.2/installation/bin/node", "/home/oornnery/.npm-global/lib/node_modules/cavemem/dist/index.js", "mcp"],
+      "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PAT}"
       }
     }
   }
+
 }

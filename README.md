@@ -29,6 +29,7 @@ Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 - `gdm/`, `greetd/`, `iwd/`, `zram/` → system stow packages handled by Arch modules
 - `git/` → `.gitconfig`
 - `hyprland/` → Hyprland config
+- `opencode/` → Active OpenCode config, agents, commands, skills, and templates
 
 ## Quick install
 
@@ -77,6 +78,7 @@ stow -v -t ~ zsh
 stow -v -t ~ bash
 stow -v -t ~ nvim
 stow -v -t ~ tmux
+stow --no-folding -v -t ~ opencode
 ```
 
 To remove symlinks for a module:

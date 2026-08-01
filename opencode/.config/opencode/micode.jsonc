@@ -1,0 +1,12 @@
+{
+  "agents": {
+    "commander": { "model": "openai/gpt-5.6-sol" },
+    "brainstormer": { "model": "openai/gpt-5.6-terra" },
+    "planner": { "model": "openai/gpt-5.6-terra" },
+    "executor": { "model": "openai/gpt-5.6-sol" },
+    "implementer": { "model": "opencode-go/kimi-k2.7-code" },
+    "reviewer": { "model": "opencode-go/deepseek-v4-pro" },
+    "codebase-analyzer": { "model": "opencode-go/glm-5.2" },
+    "pattern-finder": { "model": "opencode-go/qwen3.7-max" }
+  }
+}
