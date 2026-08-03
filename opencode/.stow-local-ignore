@@ -1,6 +1,8 @@
 ^/\.config/opencode/\.caveman-active$
 ^/\.config/opencode/\.gitignore$
 ^/\.config/opencode/\.ponytail-active$
+^/\.config/opencode/artifact-index
 ^/\.config/opencode/bun\.lock$
 ^/\.config/opencode/node_modules
+^/\.config/opencode/opencode-notifier-state\.json$
 ^/\.config/opencode/package-lock\.json$
