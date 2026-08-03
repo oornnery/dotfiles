@@ -1,6 +1,6 @@
 ---
 description: Synchronize documentation with verified code, config, and commands without changing application logic.
-agent: commander
+agent: build
 ---
 
 Synchronize docs: $ARGUMENTS

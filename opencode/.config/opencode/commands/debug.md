@@ -1,6 +1,6 @@
 ---
 description: Reproduce, isolate, fix, and verify a bug using evidence rather than guesswork.
-agent: commander
+agent: build
 ---
 
 Debug: $ARGUMENTS

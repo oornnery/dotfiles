@@ -14,48 +14,94 @@ plugin does, and how to use it. Tracked config lives in
   - `opencode.jsonc` → **server** plugins (tools the agent uses).
   - `tui.json` → **TUI** plugins (panels/sidebar/keybinds in the interface).
 
+## Runtime prerequisites
+
+The Arch bootstrap installs these through `scripts/arch/dev/languages.sh` and
+`scripts/arch/core/base-utils.sh`. For another Linux setup, provide them before
+starting OpenCode:
+
+| Requirement | Why it is needed | Verify |
+| ----------- | ---------------- | ------ |
+| Bun (`bun`, `bunx`) | OpenCode's npm-plugin tooling resolves pinned packages into `~/.cache/opencode/packages/`; first use of a new version may download it | `bun --version && bunx --version` |
+| fnm + Node 22 | Cavemem runs under a Node 22 selected at launch; no username, fnm storage path, or patch version is hardcoded | `fnm exec --using=22 -- node --version` |
+| Cavemem | Provides the local `cavemem` MCP executable | `fnm exec --using=22 -- cavemem --version` |
+| `xdg-utils` | Supplies `xdg-open`, used by Linux commands/plugins that hand a URL to the default browser | `command -v xdg-open` |
+
+Arch setup commands:
+
+```sh
+sudo pacman -S --needed fnm bun xdg-utils
+fnm install 22
+fnm default 22
+fnm exec --using=22 -- npm install --global cavemem
+```
+
+The MCP command is `fnm exec --using=22 -- cavemem mcp`. Upgrading to another
+Node 22 patch needs no config edit. Keep Node 26 out of this path until
+Cavemem's native `better-sqlite3` dependency supports its V8 ABI.
+
 ## Config files
 
 | File                         | What it is                                                      |
 | ---------------------------- | --------------------------------------------------------------- |
 | `opencode.jsonc`             | Main config (server): LSP + server plugin list                  |
-| `micode.jsonc`               | Per-role model overrides for micode agents                      |
 | `tui.json`                   | TUI plugins (sidebar, keybinds, panels)                         |
 | `sidebar.json`               | opencode-statusline items (branch, diff, current folder)        |
 | `dcp.jsonc`                  | DCP config (schema only — defaults)                             |
 | `opencode-notifier-state.json` | Notifier internal state (do not edit)                         |
-| `package.json`               | Local deps (`@opencode-ai/plugin`) — used by plugins            |
+| `package.json`               | Local deps for plugin types and the Ponytail wrapper             |
 | `instructions/`              | Always-loaded agent contracts: `opencode.md` (RTK) + `engineering.md` |
-| `agents/`                    | Custom engineering agents plus Caveman cavecrew agents            |
+| `agents/`                    | Read-only reviewer/verifier plus Caveman cavecrew agents           |
 | `commands/`                  | Custom slash-command workflows plus Caveman commands              |
 | `templates/project/`         | Optional project `AGENTS.md`, `.spec/`, and `.mem/` templates     |
 | `backups/`                   | Manual snapshots taken before config restructures                 |
+
+## Shell permissions
+
+Normal development commands run without confirmation: RTK, Git/GitHub CLI,
+standard read/query tools (`rg`, `fd`, `find`, `jq`, `sed -n`, `awk`, and
+coreutils), shell syntax checks, network/query tools (`ip`, `fuser`, and
+`timeout`), system diagnostics (`ss`, `ps`, `pgrep`, `free`, `df`,
+`du`, `stat`, and `file`), fnm, uv/Python, npm/Node, pnpm, Yarn, Bun, Rust, Go,
+Make/CMake/Ninja, ShellCheck, shfmt, OpenCode, and Stow. Unknown commands still
+ask first. Credential-printing and arbitrary network-transfer commands also ask.
+Destructive local Git commands keep confirmation enabled; pushes and package
+publishing inherit their normal command allow rules.
+
+Creating/switching/finishing worktrees, changing scheduled jobs, global cleanup,
+and skill installation require confirmation. Safety Net independently blocks
+semantically destructive shell commands, including wrapped variants.
+
+The read-only `planner` denies shell. `reviewer` permits only Git
+`status`/`diff`/`log` (direct or through RTK) so it can inspect current changes;
+all other shell commands and unlisted tools stay denied. Both deny `.env*`.
 
 ## Server plugins (`opencode.jsonc`)
 
 | Plugin | What it does | How to use |
 | ------ | ------------ | ---------- |
 | `@franlol/opencode-md-table-formatter` | Formats Markdown tables in agent responses (aligned columns) | Automatic |
-| `@tarquinen/opencode-dcp` | **Dynamic Context Pruning** — reduces tokens by compressing stale conversation content (smarter than native compaction: only compresses closed sections, with technical summaries; also removes repeated tool calls and failed tool inputs) | `/dcp`, `/dcp context`, `/dcp stats`, `/dcp sweep [n]`, `/dcp compress [focus]`, `/dcp manual [on\|off]`, `/dcp decompress [id]`, `/dcp recompress [id]` |
+| `@tarquinen/opencode-dcp` | **Dynamic Context Pruning** — reduces tokens by compressing stale conversation content and removing redundant tool noise | `/dcp`, `/dcp-compress` |
 | `@mohak34/opencode-notifier` | Desktop notification (notify-send) when the agent finishes a response | Automatic |
-| `@plannotator/opencode` | Generates Markdown implementation plans before executing complex tasks | Automatic (agent calls it) |
 | `opencode-scheduler` | Schedules recurring jobs (cron → systemd) — e.g. run a prompt daily at 9am | `schedule_job`/`list_jobs`/`job_logs` (agent tools) |
-| `micode` | micode agent system (commander, brainstormer, planner, executor, reviewer, etc.) + artifacts/ledgers | Automatic (agents available in session) |
 | `opencode-worktree-manager` | **Git worktrees**: create/switch/list worktrees via tools (agent does it) | Tools: `worktree_create`, `worktree_list`, `worktree_switch`, `worktree_status`, `worktree_finish` |
 | `@bybrawe/opencode-loop` | **Claude Code-style loop/goal**: `/loop` with heartbeat scheduler, idle-safe loops, scheduled commands, compact scheduling; goal mode with checkpoints and verification | `/loop`, `/goal` (plugin commands); `opencode-loopd` daemon |
-| `@vheins/opencode-9router` | **9Router provider** (VPS behind Cloudflare Tunnel + Access): model auto-discovery via `GET {baseURL}/v1/models` (3h cache, stale fallback) | `9router` provider registered with baseURL/key via env vars (see section below) |
 | `./plugins/caveman/plugin.js` | **Caveman** — terse caveman-style responses (cuts prose: articles, filler, hedging). Local plugin installed via official installer | Automatic (default `full`); `/caveman [lite\|full\|ultra\|off]`, `/caveman-stats`, `/caveman-review` |
+| `cc-safety-net` | Semantically blocks destructive Git and filesystem commands, including shell wrappers and interpreter one-liners | Automatic; `npx cc-safety-net doctor` for diagnostics |
 | `openrtk` | **RTK proxy for shell commands** — rewrites `git status` → `rtk git status` etc. in `tool.execute.before` (60-90% fewer tokens in dev command output) | Automatic; model instructions in `instructions/opencode.md` (referenced in `instructions` config) |
-| `@dietrichgebert/ponytail` | **Ponytail** — "lazy senior dev mode": cuts unnecessary code (YAGNI, reuse, stdlib first). Complements caveman (caveman cuts prose, ponytail cuts code) | Automatic (default `full`); `/ponytail [lite\|full\|ultra\|off]`, `/ponytail-review`, `/ponytail-audit` |
-| `opencode-subagent-statusline` | Shows subagent session status in the TUI statusline (useful with micode's multi-agent workflows) | Automatic |
+| `./plugins/ponytail.js` | **Ponytail** — local default-export wrapper around pinned `@dietrichgebert/ponytail`; cuts unnecessary code without triggering OpenCode's named-export loader bug | Automatic (default `full`); `/ponytail [lite\|full\|ultra\|off]`, `/ponytail-review`, `/ponytail-audit` |
+| `opencode-update-notifier` | Checks pinned plugins every 6 hours and shows one TUI toast when updates exist; never auto-updates | Automatic |
+
+All npm plugins use exact versions. The update notifier reports newer releases;
+upgrades remain explicit config diffs and require an OpenCode restart.
 
 ## MCP servers (`opencode.jsonc` → `mcp`)
 
 | Server | What it does | Notes |
 | ------ | ------------ | ----- |
-| `cavemem` | Persistent cross-session memory (local SQLite) | Runs with node 22 (see stack section) |
-| `playwright` | Browser automation: E2E tests, scraping, visual debugging | `npx -y @playwright/mcp` (downloads on first use) |
-| `github` | GitHub issues, PRs, code review native in the agent | Remote server; auth via `GITHUB_PAT` env var (auto-filled from `gh auth token` in `.zshrc`) |
+| `cavemem` | Persistent cross-session memory (local SQLite) | `fnm exec --using=22 -- cavemem mcp` (see prerequisites) |
+| `context7` | Current, version-specific library documentation | Remote `https://mcp.context7.com/mcp`; anonymous rate limits apply |
+| `playwright` | Browser automation: E2E tests, scraping, visual debugging | Pinned `npx -y @playwright/mcp@0.0.78` |
 
 ## TUI plugins (`tui.json`)
 
@@ -66,37 +112,7 @@ plugin does, and how to use it. Tracked config lives in
 | `opencode-worktree-manager` | **Worktrees panel** in the sidebar (which is active, dirty files, commits ahead) | Automatic + server tools |
 | `opencode-project-panel` | **File manager in the TUI**: browse the folder, preview and edit files straight from the terminal | `F1` file manager · `F2` rename · `F7` create · `Delete` remove · `Ctrl+G` go to path · `Ctrl+R` back to root · `F3` permissions panel (skills/tools/MCP) |
 | `@tarquinen/opencode-dcp` | DCP panel in the TUI (context stats, manual controls) | `/dcp` |
-
-## 9Router (remote provider via Cloudflare Tunnel)
-
-9Router runs on the VPS behind Cloudflare Tunnel + Access (Service Token). The
-`@vheins/opencode-9router` plugin registers the provider and auto-discovers
-models via `GET {baseURL}/v1/models`.
-
-**Required env vars** (export in the shell before starting opencode):
-
-```sh
-export NINE_ROUTER_URL=https://YOUR-DOMAIN/v1      # tunnel endpoint
-export NINE_ROUTER_API_KEY=sk-...                  # API key from the 9Router dashboard
-export CF_ACCESS_CLIENT_ID=...                     # Cloudflare Access Service Token
-export CF_ACCESS_CLIENT_SECRET=...
-```
-
-**Cloudflare Zero Trust setup:** `/v1/models` needs a bypass in the Access
-policy (the plugin's model discovery does not send the Service Token headers —
-upstream PR open to fix). `/v1/chat/completions` still requires the Service
-Token via `options.headers`.
-
-**Configured provider model:** `9router/auto` routes automatically across tiers.
-It is currently optional rather than the global default: model discovery returns
-no 9Router models until real environment values and the Access policy are set.
-The global default is `openai/gpt-5.6-sol`; specialized agents use strong
-OpenAI and OpenCode Go models. Select `9router/auto` after `opencode models`
-lists it. OpenCode has no native failure-based model chain; automatic failover
-comes from 9Router when that provider is active.
-
-**Verify:** `opencode models | grep 9router` → should list `9router/auto` and
-the provider's models.
+| `opencode-subagent-statusline` | Shows native and custom delegated-session status in the TUI statusline | Automatic |
 
 ## Efficiency stack (caveman + rtk + cavemem)
 
@@ -114,106 +130,94 @@ the provider's models.
 - **Ponytail** — npm plugin that cuts unnecessary code (YAGNI/reuse).
   Complements caveman. `/ponytail [lite|full|ultra|off]`.
 - **Cavemem** — persistent cross-session memory via MCP (local SQLite,
-  `~/.cavemem/`), 3 tools (`remember`/`recall`/`forget`-like). Runs with
-  **node 22** (`~/.fnm/node-versions/v22.23.2/...`) — **do not** use node 26
-  (better-sqlite3 does not compile with the new V8). MCP configured in
-  `opencode.jsonc`.
+  `~/.cavemem/`). Search with `cavemem_search`, expand hits with
+  `cavemem_get_observations`, and navigate sessions with
+  `cavemem_list_sessions`/`cavemem_timeline`. Runs with
+  **Node 22** selected by `fnm exec --using=22`; the command contains no
+  machine-specific Node path. **Do not** use Node 26 until the native
+  `better-sqlite3` dependency supports its V8 ABI. MCP configured in
+  `opencode.jsonc`; installation and checks are in Runtime prerequisites.
 - **Cavekit** — skills installed via `npx skills add JuliusBrussee/cavekit -g
   -a opencode -y` → `~/.agents/skills/` (auto-loaded).
 
-## Agent system (micode / octto)
+## Native agent system
 
-`micode` embeds the octto system: one orchestrator (`commander`) that
-delegates to specialized subagents. Subagents are invisible in the TUI agent
-selector (`mode: subagent`) — only `commander` and `brainstormer` are
-`primary` and directly selectable.
+This setup uses OpenCode's native agents and `task` delegation. `micode` and
+its `micode.jsonc` role map are not installed. Its embedded octto WebSocket and
+browser question flow are therefore absent.
 
-**Your 2 decisions:**
+| Native agent | Use |
+| ------------ | --- |
+| `build` | Default implementation, debugging, and repository work |
+| `plan` | Built-in planning mode; may write Markdown plans |
+| `planner` | Permission-enforced read-only planning for `/project-plan` |
+| `general` | Complex delegated work, including independent parallel units |
+| `explore` | Fast read-only codebase search and mapping |
 
-| You want...                      | Do this                                                   |
-| -------------------------------- | --------------------------------------------------------- |
-| Normal task (code, bug, research) | Nothing — stay on `commander` (default)                   |
-| Vague idea, needs design         | Select `brainstormer` in the TUI (`Ctrl+X+a` → brainstormer) |
+Native `task` calls can launch independent subagents in parallel; use that for
+research, locating code, or separate checks. Keep edits to the same files
+sequential. For genuinely independent edit streams, create separate worktrees
+with `opencode-worktree-manager` first.
 
-**What `commander` decides automatically:**
-
-| Agent                                        | When it's invoked                               | Typical trigger                    |
-| -------------------------------------------- | ----------------------------------------------- | ---------------------------------- |
-| `planner`                                    | Request is clear enough to plan, but not to code | "build feature X with these 3 parts" |
-| `executor` → `implementer` + `reviewer`      | Plan is ready, time to code                     | "implement the plan"               |
-| `codebase-locator` / `codebase-analyzer` / `pattern-finder` | Questions about existing code   | "how does auth work here?"         |
-| `ledger-creator` / `artifact-searcher`       | Session end/start (continuity)                  | automatic between sessions         |
-| `mm-orchestrator`                            | Generate/update `.mindmodel/`                   | on demand, rare                    |
-| `octto` / `bootstrapper` / `probe`           | Internally by `brainstormer`, to build questions | automatic inside brainstorm        |
-
-**Workflows:**
-
-1. **Bug**: "login is broken" → `commander` → `codebase-locator` finds file →
-   `implementer` fixes → `reviewer` verifies. **You: 1 sentence.**
-2. **Medium feature**: "add CSV export" → `commander` → `planner` makes plan →
-   `executor` implements. **You: 1 sentence.**
-3. **Vague idea**: "I want better performance" → **you switch to
-   `brainstormer`** → it asks design questions → design comes out → back to
-   `commander` → `planner` → `executor`. **You: answer questions.**
-
-90% of the time you only use `commander`. The only manual switch worth making
-is `brainstormer`, and only when the idea is still blurry.
+OpenCode confirmations, prompts, and selects render as native TUI dialogs.
+The plugin API exposes dialog primitives directly, so no modal package is
+required. `/project-plan` returns its plan directly in the current TUI.
 
 ### Model routing
 
-| Role | Model |
-| ---- | ----- |
-| Global default, `commander`, `executor` | `openai/gpt-5.6-sol` |
-| `brainstormer`, `planner` | `openai/gpt-5.6-terra` |
-| `implementer`, Python/TypeScript engineers | `opencode-go/kimi-k2.7-code` |
-| `reviewer`, security engineer | `opencode-go/deepseek-v4-pro` |
-| Codebase analysis | `opencode-go/glm-5.2` |
-| Pattern finding, independent verification | `opencode-go/qwen3.7-max` |
-| Titles and lightweight work (`small_model`) | `opencode-go/gpt-5.6-luna` |
-
-These are fixed role assignments, not a failure-based fallback chain. OpenCode
-Go is authenticated through `/connect`; 9Router owns automatic tier fallback
-when `9router/auto` is selected.
+Built-in agents inherit global `openai/gpt-5.6-sol`. Titles and lightweight
+internal work use `small_model` (`opencode-go/gpt-5.6-luna`). Review commands
+run through the permission-enforced read-only `reviewer`, select their models
+explicitly, and `verifier` keeps its own
+`opencode-go/qwen3.7-max` override. These are fixed assignments, not a
+failure-based fallback chain. OpenCode Go is authenticated through `/connect`.
 
 ## Personal engineering layer
 
 This layer adapts the useful parts of `github.com/oornnery/agents` to native
-OpenCode formats without duplicating micode, Cavekit, Caveman, or Ponytail.
+OpenCode formats without duplicating built-in agents, Cavekit, Caveman, or
+Ponytail.
 
 ### Agents
 
 | Agent | Mode | Purpose |
 | ----- | ---- | ------- |
-| `python-engineer` | `all` | Python implementation/debugging with project-native tooling |
-| `typescript-engineer` | `all` | TypeScript/JavaScript web, API, and Node work |
-| `security-engineer` | `subagent` | Read-only adversarial security review |
+| `planner` | `subagent` | Permission-enforced read-only planning for `/project-plan` |
+| `reviewer` | `subagent` | Generic permission-enforced read-only code review |
 | `verifier` | `subagent` | Independent evidence-backed PASS/FAIL/BLOCKED |
 
-The two `all` agents appear in the TUI and can also be delegated. Security and
-verification remain hidden subagents. Their models are assigned centrally in
-`opencode.jsonc`; no Claude-specific alias is embedded in agent files.
+Implementation stays on native `build`; specialized behavior comes from
+on-demand skills instead of duplicate language agents. `reviewer` receives its
+model from each invoking command; `verifier` keeps its model assigned centrally
+in `opencode.jsonc`. Both remain hidden subagents.
 
 ### On-demand skills
 
 Installed under `~/.agents/skills/`: `python`, `typescript-web`,
 `agent-harness`, `verification`, `security`, `project-state`, and `docs`.
-They complement Cavekit and load only when relevant.
+They complement Cavekit and load only when relevant. The engineering contract
+automatically routes Python work to `python`, TypeScript/JavaScript work to
+`typescript-web`, and trust-boundary work to `security`; no `/python` or `/ts`
+command is required.
 
 ### Commands
 
 | Command | Purpose |
 | ------- | ------- |
 | `/onboard` | Read-only repository map and quality-gate report |
-| `/project-plan` | Native `plan` agent + Plannotator approval; no implementation |
+| `/project-plan` | Read-only `planner` agent in the current TUI; no implementation |
 | `/project-bootstrap` | Approved project foundation only; no business features |
 | `/debug` | Reproduce → isolate → root cause → regression check |
 | `/verify` | Independent read-only verdict from `verifier` |
+| `/python-review` | Read-only Python review using `opencode-go/kimi-k2.7-code` |
+| `/typescript-review` | Read-only TypeScript/JavaScript review using `opencode-go/kimi-k2.7-code` |
+| `/security-review` | Adversarial read-only review using `opencode-go/deepseek-v4-pro` |
 | `/fix-checks` | Repair format/lint/type/test/build failures sequentially |
 | `/sync-docs` | Align docs with verified code/config without logic changes |
 | `/safe-commit` | Explicit staging, secret check, Conventional Commit; no push |
 
-No custom `/plan`, `/commit`, `/review`, or planner/executor agents were added:
-existing native, micode, Caveman, and Ponytail workflows already own those names.
+No custom `/plan`, `/commit`, `/review`, or executor agent was added: built-in
+OpenCode, Caveman, and Ponytail workflows already own those names.
 
 ### Project templates
 
@@ -241,13 +245,20 @@ opencode upgrade                 # update the CLI
 - **Installed a new plugin?** Restart the TUI (some only load at start).
 - **Changed agents, commands, skills, or instructions?** Restart the TUI; config
   is loaded once per process.
-- **9Router absent from `opencode models`?** Keep global fallback model active;
-  fill real env vars and fix `/v1/models` Access policy before selecting it.
 - **`rtk gain` rejects `gain`?** Wrong crates.io package is installed. Reinstall
   with `cargo install --git https://github.com/rtk-ai/rtk --locked --force`.
 - **Conversation scroll**: `End` or `Ctrl+Alt+G` = go to end · `Home`/`Ctrl+G` = top · `PageUp`/`PageDown` = page (configurable in `tui.json` → `tui.auto_scroll`/`scroll_speed`).
 - **"LSPs are disabled"** in the panel is not an error — it was the default; already enabled.
 - **Native "Modified Files" card broken** since v1.16.0 (known regression,
   issue #30877/#32852). That's why gitgud uses `replace_sidebar_files = true`.
+- **Worktrees says `No worktrees`?** Normal when no auxiliary worktree exists;
+  this panel is not a changed-files list. Open GitGud status with `<leader>v`
+  and use `F5` to refresh working-tree changes.
+- **Plugin asks to install on every start?** npm plugin specs are resolved via
+  Bun into `~/.cache/opencode/packages/`. Check cache ownership/write access and
+  network availability; this is separate from Cavemem's fnm/Node process.
+- **Cavemem reports `posix_spawn`/`ENOENT`?** Run both fnm/Cavemem checks from
+  Runtime prerequisites. The config intentionally contains no absolute Node or
+  npm-global path.
 - **Changed tracked OpenCode config?** Run
   `stow -R --no-folding -v -t ~ opencode` from `~/dotfiles`.

@@ -92,6 +92,8 @@ opencode.slim/.config/opencode/plugins/caveman/package-lock.json
 opencode.slim/.config/opencode/plugins/caveman/node_modules/
 
 # Active OpenCode Stow package: keep config, ignore generated state.
+/.opencode/
+/thoughts/
 opencode/.config/opencode/node_modules/
 opencode/.config/opencode/.opencode/
 opencode/.config/opencode/backups/

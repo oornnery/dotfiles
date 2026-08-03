@@ -1,6 +1,6 @@
 ---
 description: Create a reviewed Conventional Commit from intended changes without pushing.
-agent: commander
+agent: build
 ---
 
 Create a safe commit for: $ARGUMENTS

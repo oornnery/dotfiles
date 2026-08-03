@@ -1,40 +1,15 @@
 {
   "plugin": [
-    "@tarquinen/opencode-dcp@latest",
+    "@tarquinen/opencode-dcp@3.1.14",
     [
-      "oc-plugin-gitgud",
+      "oc-plugin-gitgud@0.1.8",
       {
-        "enabled": true,
-        "workflow": "auto",
-        "replace_sidebar_files": true,
-        "confirm_push": true,
-        "confirm_stage_all_on_commit": true,
-        "commit_agent": "",
-        "commit_model": "",
-        "commit_system_instructions": "",
-        "keybinds": {
-          "open_status": "<leader>v",
-          "stage_all": "<leader>A",
-          "unstage_all": "<leader>U",
-          "commit": "<leader>C",
-          "push": "<leader>P",
-          "graphite_create": "none",
-          "graphite_modify": "none",
-          "graphite_submit_stack": "none",
-          "graphite_sync": "none",
-          "graphite_up": "none",
-          "graphite_down": "none",
-          "refresh": "f5"
-        }
+        "replace_sidebar_files": true
       }
     ],
-    [
-      "opencode-statusline",
-      {
-        "enabled": true
-      }
-    ],
-    "opencode-worktree-manager",
-    "opencode-project-panel"
+    "opencode-statusline@2.0.4",
+    "opencode-worktree-manager@0.1.7",
+    "opencode-project-panel@0.1.4",
+    "opencode-subagent-statusline@1.2.1"
   ]
 }

@@ -484,15 +484,6 @@ if command -v opencode >/dev/null 2>&1; then
   source <(opencode completion zsh)
 fi
 
-# opencode GitHub MCP token (reuse gh CLI auth)
-export GITHUB_PAT="$(gh auth token 2>/dev/null)"
-
-# opencode 9Router provider (VPS behind Cloudflare Tunnel + Access)
-export NINE_ROUTER_URL="https://YOUR-DOMAIN/v1"   # TODO: your tunnel domain
-export NINE_ROUTER_API_KEY="sk-..."               # TODO: 9Router dashboard API key
-export CF_ACCESS_CLIENT_ID=""                     # TODO: Cloudflare Access Service Token
-export CF_ACCESS_CLIENT_SECRET=""                 # TODO: Cloudflare Access Service Token
-
 # >>> oh-my-opencode-slim background subagents >>>
 export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
 # <<< oh-my-opencode-slim background subagents <<<

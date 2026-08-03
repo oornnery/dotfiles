@@ -1,6 +1,6 @@
 ---
-description: Create an implementation plan from a request or brief, then open it in Plannotator for approval.
-agent: plan
+description: Create an implementation plan from a request or brief in the terminal TUI.
+agent: planner
 ---
 
 Plan only; do not implement.
@@ -12,6 +12,7 @@ patterns. Resolve obvious technical details from repository evidence. Ask only
 for decisions that materially change product behavior, security, or scope.
 
 Produce a dependency-ordered plan with:
+
 - goal and non-goals;
 - assumptions and constraints;
 - exact files/components affected;
@@ -20,5 +21,5 @@ Produce a dependency-ordered plan with:
 - verification and acceptance criteria;
 - rollback/recovery notes when risky.
 
-Use the `submit_plan` tool to present final plan in Plannotator. Stop after
-approval or requested revisions; implementation happens separately.
+Return the final plan directly in the current TUI conversation. Do not open a
+browser or external UI. Stop after the plan; implementation happens separately.

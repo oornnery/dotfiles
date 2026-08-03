@@ -1,6 +1,6 @@
 ---
 description: Apply an approved project-foundation plan without implementing business features.
-agent: commander
+agent: build
 ---
 
 Bootstrap project foundation from approved plan or brief: $ARGUMENTS
@@ -11,6 +11,7 @@ Do not implement business features, speculative abstractions, deployment, or
 credentials.
 
 Workflow:
+
 1. Inspect repository and active instructions.
 2. Preserve existing stack and conventions.
 3. Apply smallest foundation diff in dependency order.
