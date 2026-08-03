@@ -88,9 +88,9 @@ uvx ruff check .
 
 - Inspect status and diff before staging or committing.
 - Stage only intended paths; never use force-add or bypass hooks.
-- Never add AI attribution or AI co-author trailers to commits, including
-  `Co-Authored-By`, `Assisted-By`, or `Generated-By` entries for OpenCode,
-  Claude, or any other model/tool.
+- Let Git use its configured author identity and commit-signing settings; GitHub
+  attribution must come from that identity. Never override it or add AI trailers
+  such as `Co-Authored-By`, `Assisted-By`, or `Generated-By`.
 - Do not commit, push, reset, delete, deploy, or migrate unless requested or already
   approved by workflow.
 - Prefer reversible operations and preserve recovery path for risky changes.
