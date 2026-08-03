@@ -58,13 +58,14 @@ Cavemem's native `better-sqlite3` dependency supports its V8 ABI.
 
 ## Shell permissions
 
-Normal development commands run without confirmation: RTK, Git/GitHub CLI,
-standard read/query tools (`rg`, `fd`, `find`, `jq`, `sed -n`, `awk`, and
-coreutils), shell syntax checks, network/query tools (`ip`, `fuser`, and
-`timeout`), system diagnostics (`ss`, `ps`, `pgrep`, `free`, `df`,
-`du`, `stat`, and `file`), fnm, uv/Python, npm/Node, pnpm, Yarn, Bun, Rust, Go,
-Make/CMake/Ninja, ShellCheck, shfmt, OpenCode, and Stow. Unknown commands still
-ask first. Credential-printing and arbitrary network-transfer commands also ask.
+Normal development commands run without confirmation: RTK, Git/GitHub CLI;
+navigation, search, text, comparison, checksum, archive-inspection, temporary
+directory, and safe creation commands; shell syntax checks; network/query and
+system diagnostics; fnm, uv/Python, npm/Node, pnpm, Yarn, Bun, Rust, Go,
+Make/CMake/Ninja, ShellCheck, shfmt, OpenCode, and Stow. This includes bare and
+argument forms of common commands such as `wc`, plus `mkdir`, `mktemp`, `touch`,
+`ln -s`, and `chmod +x`. Unknown commands still ask first. Credential-printing
+and arbitrary network-transfer commands also ask.
 Destructive local Git commands keep confirmation enabled; pushes and package
 publishing inherit their normal command allow rules.
 
