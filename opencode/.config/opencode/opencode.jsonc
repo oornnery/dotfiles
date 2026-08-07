@@ -19,6 +19,13 @@
   "agent": {
     "verifier": { "model": "opencode-go/qwen3.7-max" }
   },
+  "command": {
+    "web": {
+      "description": "OpenCode web UI — localhost only. Set OPENCODE_SERVER_PASSWORD first for auth",
+      "type": "local",
+      "command": "opencode web --port 4096 --hostname 127.0.0.1"
+    }
+  },
   "instructions": [
     "instructions/opencode.md",
     "instructions/engineering.md"

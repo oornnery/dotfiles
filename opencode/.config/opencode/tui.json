@@ -1,4 +1,7 @@
 {
+  "keybinds": {
+    "session_interrupt": "escape,ctrl+c"
+  },
   "plugin": [
     "@tarquinen/opencode-dcp@3.1.14",
     [
