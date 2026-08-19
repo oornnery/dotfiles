@@ -57,6 +57,8 @@ radon
 xenon
 refurb
 pylint
+djlint
+rumdl
 taskipy
 ```
 
@@ -288,6 +290,31 @@ pylint src \
 Use it to discover structural improvements that Ruff or Refurb may not report.
 
 Do not enable the full Pylint ruleset merely to duplicate Ruff.
+
+## djlint
+
+Use djlint when the project has Django or Jinja templates (HTML):
+
+```bash
+djlint . --lint
+djlint . --reformat
+```
+
+Run it alongside Ruff on template files; skip when the project has no templates.
+
+## rumdl
+
+Use rumdl to lint and format Markdown (docs, README, ADRs).
+
+Install it as a dev dependency (`uv add --dev rumdl`) or run ad-hoc with
+`uvx rumdl`:
+
+```bash
+rumdl check .
+rumdl fmt .
+```
+
+Skip when the project has no Markdown files worth checking.
 
 ## Type checking
 
@@ -550,12 +577,16 @@ Example:
 
 format = """
 ruff format . &&
-ruff check . --fix
+ruff check . --fix &&
+djlint . --reformat &&
+rumdl fmt .
 """
 
 lint = """
 ruff format --check . &&
-ruff check .
+ruff check . &&
+djlint . --lint &&
+rumdl check .
 """
 
 type = """
