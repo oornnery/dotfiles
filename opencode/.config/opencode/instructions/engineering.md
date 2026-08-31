@@ -1,108 +1,106 @@
 # Engineering contract
 
-Apply these rules to engineering work. Project instructions and established
-repository conventions take precedence when more specific.
+Project instructions and established repository conventions take precedence.
 
-## Scope and truth
+## Truth and scope
 
 - Solve requested problem, not adjacent hypothetical problems.
 - State assumptions only when they affect implementation.
-- Never claim a command, test, build, deployment, or review ran unless it did.
-- Distinguish verified facts, code-reading conclusions, and unresolved risks.
-- Stop and report when credentials, user decisions, or destructive action are required.
+- Never claim a command, test, build, deployment, migration, or review ran unless it did.
+- Separate verified facts, code-reading conclusions, assumptions, and unresolved risk.
+- Stop for credentials, destructive actions, external publication, or product decisions
+  that cannot safely be inferred.
+- Preserve unrelated user changes.
 
 ## Before editing
 
-- Read project instructions, manifests, lockfiles, and relevant code paths.
-- Query `.mindmodel/` when present; follow its constraints and examples.
-- Trace callers and boundaries before fixing bugs; repair root cause at shared point.
-- Reuse local patterns and dependencies. Do not silently replace project stack.
-- Keep unrelated user changes intact.
+- Read project `AGENTS.md`, `.mindmodel/`, `.spec/`, manifests, lockfiles, nearby
+  code, callers, tests, and CI commands when present.
+- Reuse local patterns and dependencies. Do not silently replace the project stack.
+- Trace shared callers and boundaries before fixing bugs.
+- Prefer the smallest correct diff and fewest files.
+- Use a worktree for genuinely independent concurrent edit streams.
 
 ## Skill routing
 
-- For Python source, `pyproject.toml`, uv, pytest, Ruff, packaging, typing, or
-  async work, load `python` before implementation or review.
-- For TypeScript/JavaScript source, `package.json`, browser UI, Node.js, web API,
-  framework, typecheck, lint, or build work, load `typescript-web` first.
-- For authentication, authorization, secrets, injection, SSRF, PII,
-  cryptography, dependency risk, or other trust-boundary work, load `security`.
-  Also load `agent-harness` when agents, prompts, tools, or MCP are involved.
-- Load only skills relevant to current task; project instructions and existing
-  stack remain authoritative.
+Load only what current work requires:
+
+- Python, `pyproject.toml`, uv, pytest, Ruff, ty, packaging, typing, asyncio:
+  `python`.
+- FastAPI, Jinja2, HTMX, SQLModel, Alembic, server-rendered HTML:
+  `python-web` plus `python`.
+- TypeScript/JavaScript, browser UI, Node, Hono, JSX/TSX, React/Preact/Solid:
+  `typescript-web`.
+- Visual direction, UI systems, accessibility, CSS, frontend refactor:
+  `frontend-design`; add `design` for public contracts/BFF boundaries.
+- Layers, dependencies, modules, DDD, architecture decisions:
+  `arch`.
+- TDD, regression prevention, recurring failures, incident analysis:
+  `quality`; add `debugging` for active diagnosis.
+- Authentication, authorization, secrets, injection, SSRF, PII, cryptography,
+  dependency trust, filesystem/process boundaries: `security`.
+- Agent prompts, tools, MCP, memory, permissions, model output:
+  `agent-harness`; add `building-agents` for implementation.
+- Git history, staging, commit construction, branches, worktrees:
+  `git`.
+- CI workflows, cache, matrices, permissions, releases:
+  `cicd`.
+- Final evidence and acceptance gates: `verification`.
+- Durable SPEC/DESIGN/TODO/.spec/.mem updates: `project-state`.
+- Documentation changes: `docs`.
 
 ## Implementation
 
-- Prefer smallest correct diff and fewest files.
-- Preserve public behavior unless change explicitly requires otherwise.
-- Validate untrusted input at trust boundary.
-- Keep secrets, credentials, tokens, and personal data out of code, logs, fixtures,
-  patches, and documentation.
-- Make authorization server-side and deny by default.
-- Use comments for non-obvious reasons, constraints, and tradeoffs; not narration.
-- Do not add speculative abstractions, compatibility layers, or dependencies.
+- Preserve public behavior unless requested change requires otherwise.
+- Validate untrusted input at trust boundaries.
+- Keep authorization server-side and deny by default.
+- Keep secrets, tokens, credentials, PII, and private payloads out of code, logs,
+  fixtures, patches, and documentation.
+- Add dependencies only for a demonstrated requirement.
+- Avoid speculative abstractions, compatibility layers, and drive-by refactors.
+- Comments explain non-obvious reasons and constraints, not line-by-line narration.
+- New or changed non-trivial behavior needs the smallest durable regression check.
 
 ## Tool selection
 
-- Prefer OpenCode `read`, `glob`, and `grep` for file inspection and discovery.
-- Use Context7 when implementation depends on current, version-specific library
-  APIs. Prefer repository docs or direct official sources for everything else.
-- Prefer shell pipelines and existing CLI tools for repository checks and text or
-  JSON queries: `rtk git`, `rg`, `fd`/`find`, `jq`, `sed -n`, `awk`, `sort`,
-  `comm`, `cut`, `wc`, `head`, `tail`, and `test`. Use `ss -ltnp` for listening
-  TCP ports and `ps`/`pgrep` for process inspection.
-- Do not create Python/Node heredocs or `-c` one-liners when native tools or a
-  short shell pipeline express the same check clearly.
-- Use project scripts before inventing checks. For JavaScript, select Node with
-  `fnm` and use the package manager named by the lockfile (`bun`, `pnpm`, `yarn`,
-  or `npm`). For Python projects, use `uv run` and `uvx`; avoid bare `python`,
-  `pip`, and globally installed project tools.
-- Use a temporary script only when real parsing or branching would make shell
-  less clear or less reliable. State why, keep it minimal, and do not leave it
-  in the repository unless it is a requested durable check.
-
-Examples:
-
-```sh
-rtk git diff --check -- docs/PRD.md docs/SPEC.md TODO.md
-rg -n 'TODO|FIXME' src tests
-fd -e md . docs
-jq -e '.scripts.test and .scripts.lint' package.json
-sed -n '1,120p' docs/SPEC.md
-ss -ltnp
-ps aux
-fnm exec --using=22 -- npm test
-uv run pytest -q
-uvx ruff check .
-```
+- Prefer OpenCode `read`, `glob`, `grep`, `list`, and LSP for discovery.
+- Use Context7 only for current, version-specific library APIs.
+- Use repository docs and primary upstream sources before third-party summaries.
+- Use existing project scripts before inventing checks.
+- For Python, prefer the existing manager; when uv is present use `uv run`/`uvx`.
+- For JS/TS, use the package manager named by the lockfile.
+- Do not use Python/Node one-liners when native tools or a clear shell pipeline suffice.
+- Use temporary scripts only when parsing or branching would be clearer and safer.
 
 ## Validation
 
-- Match checks to blast radius: focused test first, then relevant typecheck/lint/build.
-- New or changed non-trivial behavior needs smallest durable regression check.
-- Test failure means investigate cause; never weaken checks to obtain green output.
-- Security-sensitive changes require explicit negative-path checks.
-- If a check cannot run, report exact reason and remaining uncertainty.
+Match checks to blast radius:
+
+1. focused reproduction or test;
+2. relevant suite;
+3. lint/format;
+4. type/LSP;
+5. build/package;
+6. browser/integration/security checks when affected.
+
+A failing check is evidence to investigate, not something to weaken. If a check
+cannot run, report exact reason and remaining uncertainty.
 
 ## Git and operations
 
 - Inspect status and diff before staging or committing.
-- Stage only intended paths; never use force-add or bypass hooks.
-- Let Git use its configured author identity and commit-signing settings; GitHub
-  attribution must come from that identity. Never override it or add AI trailers
-  such as `Co-Authored-By`, `Assisted-By`, or `Generated-By`.
-- Do not commit, push, reset, delete, deploy, or migrate unless requested or already
-  approved by workflow.
-- Prefer reversible operations and preserve recovery path for risky changes.
-- Never expose secret values while diagnosing environment configuration.
+- Stage only intended paths.
+- Never bypass hooks, force-add ignored secrets, or override Git identity.
+- Do not add AI attribution trailers.
+- Do not commit, push, reset, delete, deploy, publish, or migrate unless requested
+  or explicitly approved by active workflow.
+- Prefer reversible operations and preserve recovery paths.
 
-## Reporting
-
-Final report contains:
+## Final report
 
 1. What changed.
-2. Evidence: checks run and results.
-3. Remaining risk, blocked item, or required restart—only when present.
+2. Evidence: exact checks and results.
+3. Remaining risk, blocked item, or required restart only when present.
 
-Keep report concise. Caveman controls prose compression; Ponytail controls code
-minimalism. Do not duplicate their rules here.
+Caveman controls prose compression. Ponytail controls code minimalism. Do not
+duplicate those systems here.

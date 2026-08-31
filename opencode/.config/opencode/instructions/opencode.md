@@ -1,19 +1,40 @@
-# RTK - Rust Token Killer
+# OpenCode runtime
 
-**Usage**: Token-optimized CLI proxy (60-90% savings on dev operations)
+## RTK
 
-## Meta Commands (always use rtk directly)
+`openrtk` rewrites supported shell commands automatically. Run normal commands;
+do not manually prefix ordinary Git/test commands with `rtk`.
+
+Use RTK meta commands directly:
 
 ```bash
-rtk gain              # Show token savings analytics
-rtk gain --history    # Show command usage history with savings
-rtk discover          # Analyze history for missed optimization opportunities
-rtk proxy <cmd>       # Execute raw command without filtering (for debugging)
+rtk gain
+rtk gain --history
+rtk discover
+rtk proxy <cmd>
 ```
 
-## How It Works
+When compressed output omits evidence needed for diagnosis, use `rtk proxy` for
+that one command.
 
-All shell commands are automatically rewritten through RTK by the openrtk plugin.
-Example: `git status` becomes `rtk git status` transparently, producing compressed output.
+## Sessions and subagents
 
-No manual prefixing is needed. Just run commands normally.
+Read-only commands intentionally use child sessions. Navigation:
+
+```text
+Ctrl+Alt+J  first child
+Ctrl+Alt+L  next child
+Ctrl+Alt+H  previous child
+Ctrl+Alt+K  parent
+```
+
+Implementation commands set `subtask: false` so work remains in current session.
+
+## Model and agent checks
+
+```bash
+opencode models
+opencode agent list
+opencode debug agent <name>
+opencode debug skill <name>
+```

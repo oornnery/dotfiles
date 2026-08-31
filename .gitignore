@@ -57,6 +57,11 @@ skills-lock.json
 !opencode/.agents/skills/
 !opencode/.agents/skills/**
 
+# Cross-agent skills shared by OpenCode and Codex via GNU Stow.
+!agents/.agents/
+!agents/.agents/skills/
+!agents/.agents/skills/**
+
 # Local downloads and app runtime state
 antigen.zsh
 herdr/.config/herdr/session.json

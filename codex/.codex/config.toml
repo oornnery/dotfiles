@@ -1,0 +1,53 @@
+model = "gpt-5.6-sol"
+model_reasoning_effort = "low"
+approvals_reviewer = "auto_review"
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 4
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "medium"
+
+[mcp_servers.cavemem]
+command = "fnm"
+args = ["exec", "--using=22", "--", "cavemem", "mcp"]
+enabled = true
+default_tools_approval_mode = "writes"
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+enabled = true
+default_tools_approval_mode = "auto"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@0.0.78"]
+enabled = true
+default_tools_approval_mode = "writes"
+
+[projects."/home/oornnery/friday-os"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/voicelab"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/no-jinjax"]
+trust_level = "trusted"
+
+[projects."/home/oornnery"]
+trust_level = "trusted"
+
+[tui]
+status_line = ["model-with-reasoning", "current-dir", "model", "reasoning", "project-name", "git-branch"]
+status_line_use_colors = true
+
+[features]
+hooks = true
+
+[hooks.state]
+
+[hooks.state."/home/oornnery/.codex/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:375f1427ce7a98088c7435ee6fe75bf9bf780f8aaea85728eabc144d972e3acf"

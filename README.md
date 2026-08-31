@@ -30,6 +30,8 @@ Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 - `git/` → `.gitconfig`
 - `hyprland/` → Hyprland config
 - `opencode/` → Active OpenCode config, agents, commands, skills, and templates
+- `agents/` → Skills shared by OpenCode and Codex through `~/.agents/skills`
+- `codex/` → Codex config, global guidance, custom agents, and MCP definitions
 
 ## Quick install
 
@@ -79,6 +81,8 @@ stow -v -t ~ bash
 stow -v -t ~ nvim
 stow -v -t ~ tmux
 stow --no-folding -v -t ~ opencode
+stow --no-folding -v -t ~ agents
+stow --no-folding -v -t ~ codex
 ```
 
 To remove symlinks for a module:

@@ -1,6 +1,13 @@
 {
   "keybinds": {
-    "session_interrupt": "escape,ctrl+c"
+    "session_interrupt": "escape,ctrl+c",
+    "session_child_first": "<leader>down,ctrl+alt+j",
+    "session_child_cycle": "ctrl+alt+l",
+    "session_child_cycle_reverse": "ctrl+alt+h",
+    "session_parent": "ctrl+alt+k",
+    "agent_list": "<leader>a",
+    "agent_cycle": "tab",
+    "agent_cycle_reverse": "shift+tab"
   },
   "plugin": [
     "@tarquinen/opencode-dcp@3.1.14",
