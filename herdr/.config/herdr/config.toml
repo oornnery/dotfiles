@@ -32,31 +32,7 @@ command = "herdr-navigator.jump-back"
 description = "Jump back to previous workspace"
 
 [[keys.command]]
-key = "prefix+f"
-type = "plugin_action"
-command = "sessionizer.open"
-description = "Open project workspace"
-
-[[keys.command]]
-key = "prefix+up"
-type = "plugin_action"
-command = "sessionizer.worktree-open"
-description = "Open git worktree workspace"
-
-[[keys.command]]
-key = "prefix+r"
-type = "plugin_action"
-command = "persiyanov.reviewr.toggle"
-description = "Toggle code review pane"
-
-[[keys.command]]
 key = "prefix+m"
 type = "plugin_action"
 command = "nicosuave.memex.palette"
 description = "Search agent session history"
-
-[[keys.command]]
-key = "prefix+alt+t"
-type = "plugin_action"
-command = "tab-smart-rename.rename-now"
-description = "Rename current tab"

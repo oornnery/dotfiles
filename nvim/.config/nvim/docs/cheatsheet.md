@@ -180,44 +180,41 @@ Only works when a language server is attached.
 
 ## AI
 
-| Key                         | Action                             |
-| --------------------------- | ---------------------------------- |
-| `<leader>aa`                | CodeCompanion action palette       |
-| `<leader>ac`                | toggle AI chat                     |
-| `<leader>aC`                | open AI chat                       |
-| `<leader>ad` in visual      | add selection to chat              |
-| `<leader>ai`                | inline AI prompt                   |
-| `<leader>ae` in visual      | explain selection                  |
-| `<leader>af` in visual      | fix selection                      |
-| `<leader>at` in visual      | generate tests for selection       |
-| `<leader>am`                | AI command helper                  |
-| `<leader>ao` / `<leader>aO` | OpenCode float / vertical terminal |
-| `<C-a>` in n/x             | ask OpenCode about cursor/selection (`@this`) |
-| `<C-x>` in n/x             | pick OpenCode prompt, command or server |
-| `go` (operator)            | send range to OpenCode (`@this`) |
-| `goo`                      | send current line to OpenCode |
-| `<S-C-u>` / `<S-C-d>`      | scroll OpenCode session up / down half page |
-| `da` / `dr` in diff        | accept / reject an OpenCode edit |
-| `dp` / `do` in diff        | accept / reject only the hunk under the cursor |
-| `]c` / `[c` in diff        | next / previous change in OpenCode diff |
-| `<leader>as`                | toggle Minuet inline AI completion |
-| `<leader>aS`                | toggle Minuet in completion menu   |
-| `<leader>aM`                | pick/change Minuet model           |
-| `<leader>aP`                | change Minuet provider             |
-| `<A-y>` in completion menu  | request/accept Minuet completion   |
-| `<C-l>` in insert           | accept Minuet inline suggestion    |
-| `<C-j>` in insert           | accept Minuet inline line          |
-| `<A-n>` / `<A-p>` in insert | next / previous Minuet suggestion  |
-| `<C-]>` in insert           | dismiss Minuet suggestion          |
+| Key                         | Action                                         |
+| --------------------------- | ---------------------------------------------- |
+| `<leader>aa` in n/x         | ask OpenCode about cursor/selection (`@this`)  |
+| `<leader>ap` in n/x         | pick OpenCode prompt, command or server        |
+| `da` / `dr` in diff         | accept / reject an OpenCode edit               |
+| `dp` / `do` in diff         | accept / reject only the hunk under the cursor |
+| `]c` / `[c` in diff         | next / previous change in OpenCode diff        |
+| `<leader>as`                | toggle Minuet inline AI completion             |
+| `<leader>aM`                | pick/change Minuet model                       |
+| `<A-y>` in completion menu  | request/accept Minuet completion               |
+| `<C-l>` in insert           | accept Minuet inline suggestion                |
+| `<C-j>` in insert           | accept Minuet inline line                      |
+| `<A-n>` / `<A-p>` in insert | next / previous Minuet suggestion              |
+| `<C-]>` in insert           | dismiss Minuet suggestion                      |
 
-Minuet default is local-first. If `ollama` exists, it uses `http://localhost:11434/v1/completions` with `qwen2.5-coder:7b`.
+Minuet default is local-first. It uses Ollama at
+`http://localhost:11434/v1/completions` with `qwen2.5-coder:1.5b`.
+
+```sh
+ollama pull qwen2.5-coder:1.5b
+ollama serve
+```
+
+Available profiles:
+
+- `qwen2.5-coder:1.5b`: recommended CPU/WSL default; fastest.
+- `qwen2.5-coder:7b`: better completion quality; slower and heavier.
+- `deepseek-coder-v2:16b`: highest local cost; use only with adequate GPU/RAM.
 
 opencode.nvim needs the `opencode` CLI on PATH. First use starts a server in a vertical split (`opencode --port`); when it proposes edits you review them in a diffpatch tab. Save your files before asking — OpenCode reads them from disk.
 
 Useful overrides:
 
 ```sh
-MINUET_MODEL=deepseek-coder-v2:16b nvim
+MINUET_MODEL=qwen2.5-coder:7b nvim
 MINUET_ENDPOINT=http://localhost:11434/v1/completions nvim
 MINUET_PROVIDER=openai_compatible nvim
 ```
@@ -229,8 +226,6 @@ MINUET_PROVIDER=openai_compatible nvim
 | `<leader>tt` | floating terminal                    |
 | `<leader>tv` | vertical terminal                    |
 | `<leader>th` | horizontal terminal                  |
-| `<leader>ao` | OpenCode terminal float              |
-| `<leader>aO` | OpenCode terminal vertical           |
 | `<Esc><Esc>` | terminal normal mode                 |
 | `<C-\>`      | toggle terminal (toggleterm default) |
 

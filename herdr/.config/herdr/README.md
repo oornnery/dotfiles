@@ -23,61 +23,52 @@ paru -S --needed herdr-bin
 curl -fsSL https://github.com/herdrdev/herdr/releases/latest/download/herdr-linux-$(uname -m) -o ~/.local/bin/herdr
 chmod +x ~/.local/bin/herdr
 
-# Everything at once (herdr + plugins + stow): from the dotfiles repo
+# Everything at once (herdr + plugins + integrations + stow): from the dotfiles repo
 bash herdr/setup.sh
 ```
 
-Herdr ≥ 0.7.5 is required for the reviewr plugin.
+The setup installs only the integrations used on this machine: Claude, Codex,
+and OpenCode. Check them after a Herdr upgrade with `herdr integration status`;
+rerunning `herdr/setup.sh` updates them.
 
 ## Plugin prerequisites
 
-| Requirement | Why it is needed | Verify |
-| ----------- | ---------------- | ------ |
-| Bun | tab-smart-rename, sessionizer, window-title-sync plugins | `bun --version` |
-| fzf | sessionizer project/worktree pickers | `command -v fzf` |
-| `gh` | reviewr PR tab, ghzinga auth | `gh --version` |
-| cargo | ghzinga binary (`cargo install ghzinga`), spreader build | `cargo --version` |
-| zoxide | navigator zoxide source | `command -v zoxide` |
+| Requirement | Why it is needed         | Verify              |
+| ----------- | ------------------------ | ------------------- |
+| Bun         | window-title-sync plugin | `bun --version`     |
+| fzf         | navigator fuzzy picker   | `command -v fzf`    |
+| zoxide      | navigator zoxide source  | `command -v zoxide` |
 
 ## Config files
 
-| File | What it is |
-| ---- | ---------- |
-| `config.toml` | Main herdr config + `[[keys.command]]` plugin keybindings |
-| `plugins/config/<id>/` | Per-plugin config (theme, scope, pickers) |
-| `plugins/config/tab-smart-rename/provider.env` | Optional OpenAI-compatible key for AI tab renaming |
-| `release-notes.json` | Herdr runtime file (stow-ignored, do not edit) |
+| File                   | What it is                                                |
+| ---------------------- | --------------------------------------------------------- |
+| `config.toml`          | Main herdr config + `[[keys.command]]` plugin keybindings |
+| `plugins/config/<id>/` | Per-plugin config (theme, scope, pickers)                 |
+| `release-notes.json`   | Herdr runtime file (stow-ignored, do not edit)            |
 
 ## Plugins
 
-| Plugin | What it does | Keybinding |
-| ------ | ------------ | ---------- |
-| `persiyanov/reviewr` | Code review pane: diff, line comments to agent, file viewer, fuzzy search, PR tab | `prefix+r` |
-| `nicosuave/memex` | Local agent-session history search (Claude/Codex/OpenCode logs), BM25 + embeddings | `prefix+m` |
-| `osolmaz/ghzinga` | GitHub PR/issue TUI (comment, merge, close, reopen); Ctrl-click GitHub URLs in herdr | URL click |
-| `thanhdat77/herdr-navigator` | Fuzzy nav over workspaces/agents/projects/sessions/remotes/zoxide | `prefix+t`, `prefix+shift+t`, `prefix+l` |
-| `yuk1ty/herdr-spreader` | Declarative YAML workspace layouts (tmuxinator-style) | `herdr-spreader.apply` action |
-| `iurysza/herdr-tab-smart-rename` | Tab renaming (deterministic without API key, AI names with key) | `prefix+alt+t` |
-| `andrewchng/herdr-sessionizer` | Fuzzy pickers for projects and git worktrees, workspace layout | `prefix+f`, `prefix+up` |
-| `rjyo/herdr-window-title-sync` | Sync terminal window title to focused workspace/tab/agent | auto |
+| Plugin                         | What it does                                                                       | Keybinding                               |
+| ------------------------------ | ---------------------------------------------------------------------------------- | ---------------------------------------- |
+| `nicosuave/memex`              | Local agent-session history search (Claude/Codex/OpenCode logs), BM25 + embeddings | `prefix+m`                               |
+| `thanhdat77/herdr-navigator`   | Fuzzy nav over workspaces/agents/projects/sessions/remotes/zoxide                  | `prefix+t`, `prefix+shift+t`, `prefix+l` |
+| `rjyo/herdr-window-title-sync` | Sync terminal window title to focused workspace/tab/agent                          | auto                                     |
 
-`herdr-file-viewer` was deliberately skipped — reviewr already includes a file
-viewer, search, and find-in-file.
+This intentionally small set covers navigation, session recall, and terminal titles.
+GitHub review, declarative layouts, sessionizers, and AI tab naming stay outside Herdr;
+the coding agents and existing CLI tools already cover those workflows.
 
 ## Keybindings
 
 All commands live in `~/.config/herdr/config.toml` under `[[keys.command]]`:
 
-| Key | Command | Description |
-| --- | ------- | ----------- |
-| `prefix+t` | `herdr-navigator.open` | Navigate workspaces, sessions, projects |
-| `prefix+shift+t` | `herdr-navigator.open-side` | Open navigator in side pane |
-| `prefix+l` | `herdr-navigator.jump-back` | Jump back to previous workspace |
-| `prefix+f` | `sessionizer.open` | Open project workspace |
-| `prefix+up` | `sessionizer.worktree-open` | Open git worktree workspace |
-| `prefix+r` | `persiyanov.reviewr.toggle` | Toggle code review pane |
-| `prefix+m` | `nicosuave.memex.palette` | Search agent session history |
-| `prefix+alt+t` | `tab-smart-rename.rename-now` | Rename current tab |
+| Key              | Command                     | Description                             |
+| ---------------- | --------------------------- | --------------------------------------- |
+| `prefix+t`       | `herdr-navigator.open`      | Navigate workspaces, sessions, projects |
+| `prefix+shift+t` | `herdr-navigator.open-side` | Open navigator in side pane             |
+| `prefix+l`       | `herdr-navigator.jump-back` | Jump back to previous workspace         |
+| `prefix+m`       | `nicosuave.memex.palette`   | Search agent session history            |
 
 ## Usage
 
@@ -85,4 +76,5 @@ All commands live in `~/.config/herdr/config.toml` under `[[keys.command]]`:
 herdr                 # launch or attach to server
 herdr plugin list     # show installed plugins
 herdr plugin install <owner>/<repo>   # add a plugin
+herdr integration status              # verify agent hooks
 ```

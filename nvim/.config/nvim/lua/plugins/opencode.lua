@@ -8,7 +8,7 @@ return {
     version = "*",
     keys = {
       {
-        "<C-a>",
+        "<leader>aa",
         function()
           require("opencode").ask("@this: ")
         end,
@@ -16,44 +16,12 @@ return {
         desc = "Ask OpenCode about this",
       },
       {
-        "<C-x>",
+        "<leader>ap",
         function()
           require("opencode").select()
         end,
         mode = { "n", "x" },
         desc = "Select OpenCode prompt/command",
-      },
-      {
-        "go",
-        function()
-          return require("opencode").operator("@this ")
-        end,
-        mode = { "n", "x" },
-        expr = true,
-        desc = "Send range to OpenCode",
-      },
-      {
-        "goo",
-        function()
-          return require("opencode").operator("@this ") .. "_"
-        end,
-        mode = { "n" },
-        expr = true,
-        desc = "Send line to OpenCode",
-      },
-      {
-        "<S-C-u>",
-        function()
-          require("opencode").command("session.half.page.up")
-        end,
-        desc = "Scroll OpenCode up",
-      },
-      {
-        "<S-C-d>",
-        function()
-          require("opencode").command("session.half.page.down")
-        end,
-        desc = "Scroll OpenCode down",
       },
     },
     config = function()

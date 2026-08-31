@@ -6,7 +6,7 @@ Personal Neovim configuration. Modular, lazy-loaded, tuned for daily development
 
 - **lazy.nvim** specs: one file per area (`lua/plugins/*.lua`), each plugin lazy-loaded by keymap, event or command — startup stays fast.
 - **Pure Lua where it matters**: statusline and theme are hand-written (`lua/statusline.lua`, `lua/theme.lua`), no lualine/colorscheme dependency.
-- **AI-first but local-first**: Minuet defaults to local Ollama, CodeCompanion auto-detects the best adapter (OpenCode CLI, OpenAI, Anthropic, Gemini, Ollama, Copilot).
+- **Focused AI stack**: OpenCode handles agent work; Minuet provides local-first inline completion through Ollama.
 - **Single source of truth for keys**: `docs/cheatsheet.md` — open it inside nvim with `<leader>?` / `:Helpme`.
 
 ## Structure
@@ -56,8 +56,8 @@ return {
 
 ### Completion & LSP
 
-| Plugin                                                                       | What it does                                                                             |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Plugin                                                                       | What it does                                                                              |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | [blink.cmp](https://github.com/saghen/blink.cmp)                             | Completion engine with Rust fuzzy matcher. `version = "1.*"` → prebuilt binary, no cargo. |
 | [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)                   | LSP server configs via the nvim 0.11+ `vim.lsp.config()` / `vim.lsp.enable()` API.        |
 | [mason.nvim](https://github.com/williamboman/mason.nvim)                     | Install LSP servers, formatters, linters (`:Mason`).                                      |
@@ -65,7 +65,7 @@ return {
 | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)        | Syntax highlighting. Branch `main` (new API, nvim 0.12+), `build = ":TSUpdate"`.          |
 | [conform.nvim](https://github.com/stevearc/conform.nvim)                     | Format on save (`format_on_save`), per-filetype formatters.                               |
 | [lazydev.nvim](https://github.com/folke/lazydev.nvim)                        | Lua LSP completions for nvim config/plugin development (lua filetype only).               |
-| [friendly-snippets](https://github.com/rafamadriz/friendly-snippets)         | Snippet source for blink.cmp.                                                            |
+| [friendly-snippets](https://github.com/rafamadriz/friendly-snippets)         | Snippet source for blink.cmp.                                                             |
 
 Why: blink over nvim-cmp because it is fast, single-file-config and maintains its own LSP capabilities. The old `cmp.*` APIs that Noice documents are still bridged for backwards compat.
 
@@ -73,16 +73,30 @@ How: completion opens automatically on insert (`menu.auto_show`), ghost text on,
 
 ### AI
 
-| Plugin                                                                | What it does                                                                                                                      |
-| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim) | AI chat, inline edits, code actions. Adapter auto-detects OpenCode CLI → OpenAI → Anthropic → Gemini → Ollama → Copilot.           |
-| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim)      | AI inline completions (ghost text + in the blink menu). Provider auto-detects Ollama → OpenAI → Anthropic → Gemini.               |
-| [opencode.nvim](https://github.com/nickjvandyke/opencode.nvim)        | Native pairing with the OpenCode CLI: ask with `@this` context, built-in prompts, accept/reject edits via diffpatch.               |
-| [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim)         | Also runs the OpenCode TUI (`<leader>ao` / `<leader>aO`) — the terminal route, alternative to opencode.nvim.                       |
+| Plugin                                                           | What it does                                                                                                         |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions (ghost text + in the blink menu). Provider auto-detects Ollama → OpenAI → Anthropic → Gemini.  |
+| [opencode.nvim](https://github.com/nickjvandyke/opencode.nvim)   | Native pairing with the OpenCode CLI: ask with `@this` context, built-in prompts, accept/reject edits via diffpatch. |
 
-Why three tools? They cover different interaction styles: **CodeCompanion** = chat panel + `/`-commands (explain/fix/tests) with the best adapter fallback; **Minuet** = zero-friction inline completions that work offline with Ollama; **opencode.nvim** = same agent you already use in the terminal, driven from vim motions (`go` operator, contexts like `@this`). The toggleterm entries are kept as a terminal fallback.
+The split is deliberate: **OpenCode** owns chat, agent actions, edits, and review;
+**Minuet** only provides low-latency completion while typing.
 
-How: CodeCompanion is chat-only via the `opencode` CLI adapter when it exists on PATH (inlined/background actions use the HTTP adapter). Minuet defaults to `qwen2.5-coder:7b` on `http://localhost:11434` when Ollama is present. opencode.nvim needs `opencode` on PATH; first use spawns `opencode --port` in a vsplit; proposed edits open in a diffpatch tab (`da`/`dr` to accept/reject).
+How: Minuet defaults to `qwen2.5-coder:1.5b` on `http://localhost:11434`
+when Ollama is present. Install and start it with:
+
+```sh
+ollama pull qwen2.5-coder:1.5b
+ollama serve
+```
+
+Use `qwen2.5-coder:7b` for higher quality when latency is acceptable. The
+1.5B model is the better default for CPU-only WSL completion because first-token
+latency matters more than deep reasoning. Override per launch with
+`MINUET_MODEL=qwen2.5-coder:7b nvim`.
+
+opencode.nvim needs `opencode` on PATH; first use
+spawns `opencode --port` in a vsplit; proposed edits open in a diffpatch tab
+(`da`/`dr` to accept/reject).
 
 ### Navigation & search
 
@@ -90,7 +104,7 @@ How: CodeCompanion is chat-only via the `opencode` CLI adapter when it exists on
 | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | [fzf-lua](https://github.com/ibhagwan/fzf-lua)                                        | Fuzzy finder (files, grep, buffers, symbols, keymaps, help). Preset `fzf-vim`.   |
 | [flash.nvim](https://github.com/folke/flash.nvim)                                     | Jump to any visible word with labels (`s`), treesitter jump (`S`).               |
-| [mini.surround](https://github.com/echasnovski/mini.surround)                         | Add/delete/replace surrounding pairs (`gsa`, `gsd`, `gsr`).                       |
+| [mini.surround](https://github.com/echasnovski/mini.surround)                         | Add/delete/replace surrounding pairs (`gsa`, `gsd`, `gsr`).                      |
 | [mini.ai](https://github.com/echasnovski/mini.ai)                                     | Better text objects (`af`/`if`, `aa`/`ia`, …).                                   |
 | [indent-blankline.nvim](https://github.com/lukas-reineke/indent-blankline.nvim)       | Indentation guides + scope.                                                      |
 | [nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context) | Sticky header showing current function/class context (toggle with `<leader>tc`). |
@@ -99,9 +113,9 @@ Why: fzf over telescope because the `fzf` binary is already a dotfiles dependenc
 
 ### File explorers
 
-| Plugin                                                          | What it does                                                            |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim) | Sidebar file tree (branch `v3.x`). Sources: filesystem, buffers, git.   |
+| Plugin                                                          | What it does                                                                                             |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| [neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim) | Sidebar file tree (branch `v3.x`). Sources: filesystem, buffers, git.                                    |
 | [oil.nvim](https://github.com/stevearc/oil.nvim)                | Edit directories as buffers; `-` opens the parent. Default file explorer (netrw is disabled on purpose). |
 
 Why: neo-tree when you want a persistent tree with git status; oil when you want to manipulate files like text (rename/delete/move with undo). oil replaces netrw so `-` behaves as expected everywhere.
@@ -114,15 +128,15 @@ Why: neo-tree when you want a persistent tree with git status; oil when you want
 
 ### UI
 
-| Plugin                                                                               | What it does                                                         |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| Plugin                                                                               | What it does                                                          |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
 | [bufferline.nvim](https://github.com/akinsho/bufferline.nvim)                        | Top buffer tabs with diagnostics counts and offsets for explorer/oil. |
 | [noice.nvim](https://github.com/folke/noice.nvim)                                    | Modern cmdline popup, message history, LSP docs.                      |
 | [nvim-notify](https://github.com/rcarriga/nvim-notify)                               | Notification manager (noice renders on top).                          |
 | [which-key.nvim](https://github.com/folke/which-key.nvim)                            | Keymap discovery popup on `<leader>` prefix.                          |
-| [smear-cursor.nvim](https://github.com/sphamba/smear-cursor.nvim)                    | Animated cursor. Pure eye-candy, loaded at startup (`lazy = false`).   |
-| [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) | Inline markdown preview (headings, tables, code, checkboxes).          |
-| [nvim-autopairs](https://github.com/windwp/nvim-autopairs)                           | Auto-close brackets/quotes (treesitter-aware).                         |
+| [smear-cursor.nvim](https://github.com/sphamba/smear-cursor.nvim)                    | Animated cursor. Pure eye-candy, loaded at startup (`lazy = false`).  |
+| [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) | Inline markdown preview (headings, tables, code, checkboxes).         |
+| [nvim-autopairs](https://github.com/windwp/nvim-autopairs)                           | Auto-close brackets/quotes (treesitter-aware).                        |
 
 ### Diagnostics & TODOs
 
@@ -133,9 +147,9 @@ Why: neo-tree when you want a persistent tree with git status; oil when you want
 
 ### Terminal & sessions
 
-| Plugin                                                        | What it does                                       |
-| ------------------------------------------------------------- | -------------------------------------------------- |
-| [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim) | Floating/vertical/horizontal terminal, OpenCode TUI. |
+| Plugin                                                        | What it does                                         |
+| ------------------------------------------------------------- | ---------------------------------------------------- |
+| [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim) | Floating, vertical, and horizontal terminals.        |
 | [persistence.nvim](https://github.com/folke/persistence.nvim) | Per-project sessions (`<leader>ps`/`pl`/`pS`/`pd`).  |
 
 ## Keymaps
@@ -144,136 +158,129 @@ Leader is `<Space>` (localleader `\`). This is the full list; the same content l
 
 ### Core & windows
 
-| Key                     | Modes | Action                          |
-| ----------------------- | ----- | ------------------------------- |
-| `<leader>w` / `q` / `x` | n     | write / quit / write+quit       |
-| `<leader>bb` / `<leader>bd` | n  | switch / delete buffer          |
-| `[b` / `]b`             | n     | previous / next buffer          |
-| `<S-h>` / `<S-l>`       | n     | previous / next bufferline tab  |
-| `<leader>bp` / `<leader>bP` | n  | pick buffer / pick buffer to close |
-| `<leader>bo` / `br` / `bl` | n  | close others / right / left buffers |
-| `<C-h/j/k/l>`           | n     | move to window                  |
-| `<leader>sv` / `sh`     | n     | vertical / horizontal split     |
-| `<leader>=`             | n     | equalize windows                |
-| `<Esc><Esc>`            | n     | clear search highlight          |
-| `<Esc><Esc>`            | t     | terminal → normal mode          |
-| `<leader>tw` / `<leader>ts` | n  | toggle wrap / spell             |
-| `<` / `>`               | x     | indent and reselect             |
+| Key                         | Modes | Action                              |
+| --------------------------- | ----- | ----------------------------------- |
+| `<leader>w` / `q` / `x`     | n     | write / quit / write+quit           |
+| `<leader>bb` / `<leader>bd` | n     | switch / delete buffer              |
+| `[b` / `]b`                 | n     | previous / next buffer              |
+| `<S-h>` / `<S-l>`           | n     | previous / next bufferline tab      |
+| `<leader>bp` / `<leader>bP` | n     | pick buffer / pick buffer to close  |
+| `<leader>bo` / `br` / `bl`  | n     | close others / right / left buffers |
+| `<C-h/j/k/l>`               | n     | move to window                      |
+| `<leader>sv` / `sh`         | n     | vertical / horizontal split         |
+| `<leader>=`                 | n     | equalize windows                    |
+| `<Esc><Esc>`                | n     | clear search highlight              |
+| `<Esc><Esc>`                | t     | terminal → normal mode              |
+| `<leader>tw` / `<leader>ts` | n     | toggle wrap / spell                 |
+| `<` / `>`                   | x     | indent and reselect                 |
 
 ### Find & files (fzf-lua)
 
-| Key                | Action                 |
-| ------------------ | ---------------------- |
-| `<leader>ff` / `fg` / `fb` | files / live grep / buffers |
+| Key                        | Action                             |
+| -------------------------- | ---------------------------------- |
+| `<leader>ff` / `fg` / `fb` | files / live grep / buffers        |
 | `<leader>fo` / `fh` / `fk` | recent files / help tags / keymaps |
-| `<leader>fr`       | resume last picker     |
-| `<leader>fs` / `fS` | document / workspace symbols |
-| `<leader>fc`       | command history        |
+| `<leader>fr`               | resume last picker                 |
+| `<leader>fs` / `fS`        | document / workspace symbols       |
+| `<leader>fc`               | command history                    |
 
 ### Explorers
 
-| Key | Action |
-| --- | ------ |
-| `<leader>e` / `E` | Neo-tree sidebar / float reveal |
-| `<leader>ge` / `be` | Neo-tree git status / buffers source |
-| `-` / `<leader>o` / `<leader>O` | Oil parent / dir buffer / float |
+| Key                             | Action                               |
+| ------------------------------- | ------------------------------------ |
+| `<leader>e` / `E`               | Neo-tree sidebar / float reveal      |
+| `<leader>ge` / `be`             | Neo-tree git status / buffers source |
+| `-` / `<leader>o` / `<leader>O` | Oil parent / dir buffer / float      |
 
 ### LSP & diagnostics
 
 Only when a server is attached. (`gd`/`gr` are plain LSP, not fzf.)
 
-| Key | Action |
-| --- | ------ |
-| `gd` / `gr` / `gI` / `gy` | definition / references / implementation / type definition |
-| `K` | hover |
-| `<leader>ca` | code actions |
-| `<leader>crn` | rename |
-| `<leader>cf` | format (conform, falls back to LSP) |
-| `[d` / `]d` | previous / next diagnostic |
-| `<leader>qf` | diagnostics → location list |
-| `<leader>dd` / `dD` / `ds` / `dl` / `dq` | Trouble: diagnostics / buffer / symbols / refs / quickfix |
-| `]t` / `[t` | next / previous TODO comment |
-| `<leader>dt` / `dT` | TODOs in Trouble / quickfix |
+| Key                                      | Action                                                     |
+| ---------------------------------------- | ---------------------------------------------------------- |
+| `gd` / `gr` / `gI` / `gy`                | definition / references / implementation / type definition |
+| `K`                                      | hover                                                      |
+| `<leader>ca`                             | code actions                                               |
+| `<leader>crn`                            | rename                                                     |
+| `<leader>cf`                             | format (conform, falls back to LSP)                        |
+| `[d` / `]d`                              | previous / next diagnostic                                 |
+| `<leader>qf`                             | diagnostics → location list                                |
+| `<leader>dd` / `dD` / `ds` / `dl` / `dq` | Trouble: diagnostics / buffer / symbols / refs / quickfix  |
+| `]t` / `[t`                              | next / previous TODO comment                               |
+| `<leader>dt` / `dT`                      | TODOs in Trouble / quickfix                                |
 
 ### Git hunks (gitsigns)
 
-| Key | Action |
-| --- | ------ |
-| `[c` / `]c` | previous / next hunk |
-| `<leader>hs` / `hr` | stage / reset hunk (visual = range) |
-| `<leader>hS` / `hR` | stage / reset buffer |
+| Key                        | Action                                |
+| -------------------------- | ------------------------------------- |
+| `[c` / `]c`                | previous / next hunk                  |
+| `<leader>hs` / `hr`        | stage / reset hunk (visual = range)   |
+| `<leader>hS` / `hR`        | stage / reset buffer                  |
 | `<leader>hp` / `hb` / `hd` | preview hunk / blame line / diff this |
-| `ih` | select hunk (operator/visual) |
+| `ih`                       | select hunk (operator/visual)         |
 
 ### Movement & text objects
 
-| Key | Action |
-| --- | ------ |
-| `s` / `S` | flash jump / flash treesitter |
-| `r` (o) / `R` (o,x) | flash remote / treesitter search |
-| `<C-s>` (c) | toggle flash search |
-| `gsa` / `gsd` / `gsr` | surround add / delete / replace |
-| `af`/`if`, `aa`/`ia` | function / argument text objects |
+| Key                   | Action                           |
+| --------------------- | -------------------------------- |
+| `s` / `S`             | flash jump / flash treesitter    |
+| `r` (o) / `R` (o,x)   | flash remote / treesitter search |
+| `<C-s>` (c)           | toggle flash search              |
+| `gsa` / `gsd` / `gsr` | surround add / delete / replace  |
+| `af`/`if`, `aa`/`ia`  | function / argument text objects |
 
 ### Completion (blink.cmp)
 
-| Key | Action |
-| --- | ------ |
-| `<Tab>` / `<S-Tab>` | next / previous item (super-tab preset) |
-| `<C-space>` | show completion / docs |
-| `<C-e>` | hide menu |
-| `<A-y>` | request/accept Minuet completion from the menu |
+| Key                 | Action                                         |
+| ------------------- | ---------------------------------------------- |
+| `<Tab>` / `<S-Tab>` | next / previous item (super-tab preset)        |
+| `<C-space>`         | show completion / docs                         |
+| `<C-e>`             | hide menu                                      |
+| `<A-y>`             | request/accept Minuet completion from the menu |
 
 ### Markdown
 
-| Key | Action |
-| --- | ------ |
+| Key          | Action                                |
+| ------------ | ------------------------------------- |
 | `<leader>mp` | toggle render-markdown inline preview |
 
 ### AI
 
-| Key | Action |
-| --- | ------ |
-| `<leader>aa` / `ac` / `aC` | CodeCompanion actions / toggle chat / open chat |
-| `<leader>ad` (x) / `ai` | add selection to chat / inline prompt |
-| `<leader>ae` / `af` / `at` (x) | explain / fix / tests for selection |
-| `<leader>am` | AI command helper |
-| `<leader>as` / `aS` / `aM` / `aP` | Minuet: toggle inline / toggle in menu / model / provider |
-| `<C-l>` / `<C-j>` (i) | accept Minuet line / inline suggestion |
-| `<A-n>` / `<A-p>` (i) | next / previous Minuet suggestion |
-| `<C-]>` (i) | dismiss Minuet suggestion |
-| `<C-a>` (n,x) | ask OpenCode about cursor/selection (`@this`) |
-| `<C-x>` (n,x) | pick OpenCode prompt/command/server |
-| `go` / `goo` | send range / line to OpenCode (operator) |
-| `<S-C-u>` / `<S-C-d>` | scroll OpenCode session |
-| `<leader>ao` / `aO` | OpenCode TUI in float / vertical terminal (toggleterm) |
+| Key                   | Action                                          |
+| --------------------- | ----------------------------------------------- |
+| `<leader>aa` (n,x)    | ask OpenCode about cursor/selection (`@this`)   |
+| `<leader>ap` (n,x)    | OpenCode prompt/command/server picker           |
+| `<leader>as` / `aM`   | Minuet: toggle inline completion / choose model |
+| `<C-l>` / `<C-j>` (i) | accept Minuet line / inline suggestion          |
+| `<A-n>` / `<A-p>` (i) | next / previous Minuet suggestion               |
+| `<C-]>` (i)           | dismiss Minuet suggestion                       |
 
 ### Terminal, UI & sessions
 
-| Key | Action |
-| --- | ------ |
-| `<leader>tt` / `tv` / `th` | terminal float / vertical / horizontal |
-| `<C-\>` | toggle last terminal |
+| Key                                             | Action                                                |
+| ----------------------------------------------- | ----------------------------------------------------- |
+| `<leader>tt` / `tv` / `th`                      | terminal float / vertical / horizontal                |
+| `<C-\>`                                         | toggle last terminal                                  |
 | `<leader>nn` / `nl` / `ne` / `nd` / `np` / `nf` | Noice history / last / errors / dismiss / pick / find |
-| `<leader>nD` / `nE` | disable / enable Noice |
-| `<S-Enter>` (c) | redirect command output to popup |
-| `<C-f>` / `<C-b>` | scroll hover/signature docs |
-| `<leader>ps` / `pS` / `pl` / `pd` | session restore / pick / last / stop |
-| `<leader>?` | open this help |
+| `<leader>nD` / `nE`                             | disable / enable Noice                                |
+| `<S-Enter>` (c)                                 | redirect command output to popup                      |
+| `<C-f>` / `<C-b>`                               | scroll hover/signature docs                           |
+| `<leader>ps` / `pS` / `pl` / `pd`               | session restore / pick / last / stop                  |
+| `<leader>?`                                     | open this help                                        |
 
 ## User commands
 
-| Command | What it does |
-| ------- | ------------ |
-| `:Helpme` / `:Cheatsheet` | open the cheatsheet in a new tab |
-| `:Root` | cd to project root (`.git`, `pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Makefile`) |
-| `:Term` | bottom split terminal (14 lines) |
-| `:TrimWhitespace` | strip trailing whitespace (skip markdown/text/gitcommit) |
-| `:MkSession` / `:LoadSession` | save / restore `.session.vim` in the project |
-| `:Mason` | manage LSP servers/formatters |
-| `:Lazy` | plugin manager UI |
-| `:Minuet` | Minuet diagnostics |
-| `:TSUpdate` | rebuild treesitter parsers (see Troubleshooting) |
+| Command                       | What it does                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| `:Helpme` / `:Cheatsheet`     | open the cheatsheet in a new tab                                                                  |
+| `:Root`                       | cd to project root (`.git`, `pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Makefile`) |
+| `:Term`                       | bottom split terminal (14 lines)                                                                  |
+| `:TrimWhitespace`             | strip trailing whitespace (skip markdown/text/gitcommit)                                          |
+| `:MkSession` / `:LoadSession` | save / restore `.session.vim` in the project                                                      |
+| `:Mason`                      | manage LSP servers/formatters                                                                     |
+| `:Lazy`                       | plugin manager UI                                                                                 |
+| `:Minuet`                     | Minuet diagnostics                                                                                |
+| `:TSUpdate`                   | rebuild treesitter parsers (see Troubleshooting)                                                  |
 
 ## Theme
 
@@ -287,14 +294,14 @@ Switch with `dots theme set <name>` (from the dotfiles repo) — no nvim restart
 
 Managed by mason, auto-installed on first launch, enabled via `vim.lsp.enable`:
 
-| Language       | Server         | Notes                          |
-| -------------- | -------------- | ------------------------------ |
-| Lua            | lua_ls         | LuaJIT runtime, nvim globals   |
+| Language       | Server         | Notes                                                                          |
+| -------------- | -------------- | ------------------------------------------------------------------------------ |
+| Lua            | lua_ls         | LuaJIT runtime, nvim globals                                                   |
 | Python         | pyright + ruff | pyright basic type checking; ruff only for diagnostics (hover/format disabled) |
-| Rust           | rust_analyzer  |                                |
-| TypeScript/TSX | ts_ls          |                                |
-| Bash           | bashls         |                                |
-| Markdown       | marksman       |                                |
+| Rust           | rust_analyzer  |                                                                                |
+| TypeScript/TSX | ts_ls          |                                                                                |
+| Bash           | bashls         |                                                                                |
+| Markdown       | marksman       |                                                                                |
 
 To add more: install via `:Mason`, then add a `vim.lsp.config()` block + `vim.lsp.enable()` in `lua/plugins/lsp.lua`.
 
@@ -313,25 +320,25 @@ Format on save (`format_on_save`, 500 ms debounce, LSP fallback):
 
 ## Environment overrides
 
-| Variable            | Effect                                                          |
-| ------------------- | --------------------------------------------------------------- |
-| `OPENAI_API_KEY`    | CodeCompanion + Minuet use OpenAI                               |
-| `ANTHROPIC_API_KEY` | CodeCompanion + Minuet use Anthropic                            |
-| `GEMINI_API_KEY`    | CodeCompanion + Minuet use Gemini                               |
-| `OLLAMA_HOST`       | CodeCompanion + Minuet use Ollama (default `http://localhost:11434`) |
-| `MINUET_PROVIDER`   | Minuet provider override (`openai_compatible`, `openai`, `claude`, `gemini`, `ollama`) |
-| `MINUET_MODEL`      | Minuet model (default `qwen2.5-coder:7b`)                       |
-| `MINUET_ENDPOINT`   | Minuet API endpoint override                                    |
-| `MINUET_API_KEY` / `OPENROUTER_API_KEY` | key for `openai_compatible` provider |
-| `MINUET_TIMEOUT` / `MINUET_THROTTLE` / `MINUET_DEBOUNCE` | request timing |
-| `MINUET_CONTEXT` / `MINUET_COMPLETIONS` / `MINUET_MAX_TOKENS` / `MINUET_NAME` | request shape |
-| `DOTFILES_DIR`      | where theme files are read from (default `~/dotfiles`)          |
+| Variable                                                                      | Effect                                                                                 |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `OPENAI_API_KEY`                                                              | Minuet uses OpenAI                                                                     |
+| `ANTHROPIC_API_KEY`                                                           | Minuet uses Anthropic                                                                  |
+| `GEMINI_API_KEY`                                                              | Minuet uses Gemini                                                                     |
+| `OLLAMA_HOST`                                                                 | Minuet uses Ollama (default `http://localhost:11434`)                                  |
+| `MINUET_PROVIDER`                                                             | Minuet provider override (`openai_compatible`, `openai`, `claude`, `gemini`, `ollama`) |
+| `MINUET_MODEL`                                                                | Minuet model (default `qwen2.5-coder:1.5b`)                                            |
+| `MINUET_ENDPOINT`                                                             | Minuet API endpoint override                                                           |
+| `MINUET_API_KEY` / `OPENROUTER_API_KEY`                                       | key for `openai_compatible` provider                                                   |
+| `MINUET_TIMEOUT` / `MINUET_THROTTLE` / `MINUET_DEBOUNCE`                      | request timing                                                                         |
+| `MINUET_CONTEXT` / `MINUET_COMPLETIONS` / `MINUET_MAX_TOKENS` / `MINUET_NAME` | request shape                                                                          |
+| `DOTFILES_DIR`                                                                | where theme files are read from (default `~/dotfiles`)                                 |
 
 ## Requirements
 
 - **Neovim 0.12+** (blink.cmp and the new treesitter API require it)
 - `git`, `fzf`, a Nerd Font (icons)
-- `opencode` CLI — optional, powers opencode.nvim, `<leader>ao/aO` and CodeCompanion's preferred chat adapter
+- `opencode` CLI — optional, powers opencode.nvim
 - `ollama` — optional, Minuet's default local provider
 - `node` — only needed for prettierd (JS/TS formatting)
 - `cargo` — only if you switch blink.cmp away from `version = "1.*"` to build the fuzzy matcher from source
@@ -345,7 +352,7 @@ You get `noice.nvim xN: Query error … Invalid node type "tab"` (or similar) at
 
 Fix:
 
-```
+```text
 :TSUpdate
 ```
 

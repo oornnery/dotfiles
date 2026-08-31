@@ -10,7 +10,7 @@ export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
 has() { command -v "$1" >/dev/null 2>&1; }
 
-echo "==> Install herdr (>= 0.7.5 for reviewr)"
+echo "==> Install herdr"
 if has herdr; then
   version="$(herdr --version 2>/dev/null | awk '{print $2}' || true)"
   echo "herdr already installed: ${version:-unknown}"
@@ -30,12 +30,7 @@ if has pacman; then
 elif has apt; then
   sudo apt install -y fzf zoxide || true
 fi
-has bun || echo "WARNING: bun not found (needed by tab-smart-rename, sessionizer, window-title-sync)"
-has gh || echo "WARNING: gh not found (needed by reviewr PR tab, ghzinga)"
-has cargo && has ghzinga || echo "INFO: ghzinga binary not installed, installing via cargo..."
-if has cargo && ! has ghzinga; then
-  cargo install ghzinga || true
-fi
+has bun || echo "WARNING: bun not found (needed by window-title-sync)"
 
 echo "==> Stow herdr config"
 if [ -f "$HOME/.config/herdr/config.toml" ] && [ ! -L "$HOME/.config/herdr/config.toml" ]; then
@@ -47,13 +42,8 @@ stow -R -d "$DOTFILES_DIR" -t "$HOME" herdr
 
 echo "==> Install plugins"
 PLUGINS=(
-  persiyanov/herdr-reviewr
   nicosuave/memex
-  osolmaz/ghzinga/plugins/herdr
   thanhdat77/herdr-navigator
-  yuk1ty/herdr-spreader
-  iurysza/herdr-tab-smart-rename
-  andrewchng/herdr-sessionizer
   rjyo/herdr-window-title-sync
 )
 
@@ -71,6 +61,18 @@ for plugin in "${PLUGINS[@]}"; do
   herdr plugin install "$plugin" --yes || echo "FAILED: $plugin"
 done
 
+echo "==> Install agent integrations"
+INTEGRATIONS=(
+  claude
+  codex
+  opencode
+)
+for integration in "${INTEGRATIONS[@]}"; do
+  echo "install/update: $integration"
+  herdr integration install "$integration"
+done
+
 echo
 echo "==> Done."
 echo "Verify with: herdr plugin list"
+echo "Integration status: herdr integration status"
