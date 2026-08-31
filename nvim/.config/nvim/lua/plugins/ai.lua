@@ -59,7 +59,24 @@ return {
     keys = {
       { "<leader>as", "<cmd>Minuet virtualtext toggle<cr>", desc = "AI inline toggle" },
       { "<leader>aM", "<cmd>Minuet change_model<cr>", desc = "AI model picker" },
-      { "<leader>aP", "<cmd>Minuet change_preset<cr>", desc = "AI provider preset" },
+      {
+        "<leader>aP",
+        function()
+          local minuet = require("minuet")
+          local available = {}
+          for _, name in ipairs({ "opencode_go", "deepseek_free", "glm" }) do
+            if minuet.presets[name] then
+              table.insert(available, name)
+            end
+          end
+          vim.ui.select(available, { prompt = "Minuet provider preset" }, function(choice)
+            if choice then
+              minuet.change_preset(choice)
+            end
+          end)
+        end,
+        desc = "AI provider preset",
+      },
     },
     opts = function()
       local go_key = opencode_api_key("opencode-go", "OPENCODE_GO_API_KEY")
