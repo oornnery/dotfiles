@@ -251,7 +251,7 @@ Only when a server is attached. (`gd`/`gr` are plain LSP, not fzf.)
 | `<leader>aa` (n,x)    | ask OpenCode about cursor/selection (`@this`)   |
 | `<leader>ap` (n,x)    | OpenCode prompt/command/server picker           |
 | `<leader>as` / `aM`   | Minuet: toggle inline completion / choose model |
-| `<C-l>` / `<C-j>` (i) | accept Minuet line / inline suggestion          |
+| `<C-l>` / `<C-j>` (i) | accept Minuet suggestion / current line         |
 | `<A-n>` / `<A-p>` (i) | next / previous Minuet suggestion               |
 | `<C-]>` (i)           | dismiss Minuet suggestion                       |
 
