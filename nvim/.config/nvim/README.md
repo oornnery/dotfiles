@@ -81,6 +81,11 @@ How: completion opens automatically on insert (`menu.auto_show`), ghost text on,
 The split is deliberate: **OpenCode** owns chat, agent actions, edits, and review;
 **Minuet** only provides low-latency completion while typing.
 
+Automatic Minuet completion uses virtual-text ghost text only, avoiding duplicate
+requests and conflicts with the Blink menu. `<A-y>` remains available for a
+manual Minuet request in Blink. Cloud requests allow up to eight seconds, though
+GLM normally starts responding in about two seconds.
+
 How: Minuet reuses API credentials stored by OpenCode without copying secrets
 into dotfiles. It defaults to the working Z.AI `glm-5.3-flash` subscription.
 Use `<leader>ag` for GLM, `<leader>ao` for OpenCode Go, or `<leader>af` for the

@@ -168,12 +168,17 @@ return {
       return {
         provider = minuet_provider(use_go or use_zai),
         presets = presets,
-        request_timeout = tonumber(vim.env.MINUET_TIMEOUT) or 3,
-        throttle = tonumber(vim.env.MINUET_THROTTLE) or 1500,
-        debounce = tonumber(vim.env.MINUET_DEBOUNCE) or 600,
-        context_window = tonumber(vim.env.MINUET_CONTEXT) or 1024,
+        request_timeout = tonumber(vim.env.MINUET_TIMEOUT) or 8,
+        throttle = tonumber(vim.env.MINUET_THROTTLE) or 700,
+        debounce = tonumber(vim.env.MINUET_DEBOUNCE) or 300,
+        context_window = tonumber(vim.env.MINUET_CONTEXT) or 2048,
         n_completions = tonumber(vim.env.MINUET_COMPLETIONS) or 1,
         notify = "warn",
+        blink = {
+          -- Automatic requests come from virtual text only. <A-y> still
+          -- invokes Minuet manually inside blink.cmp when desired.
+          enable_auto_complete = false,
+        },
         virtualtext = {
           auto_trigger_ft = {
             "lua",
@@ -194,6 +199,7 @@ return {
             "toml",
           },
           auto_trigger_ignore_ft = { "help", "lazy", "mason", "neo-tree", "oil", "Trouble", "codecompanion" },
+          show_on_completion_menu = true,
           keymap = {
             accept = "<C-l>",
             accept_line = "<C-j>",

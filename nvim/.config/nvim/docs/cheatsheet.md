@@ -206,6 +206,11 @@ with readable names. It reads existing OpenCode credentials at runtime without
 tracking secrets. Without either subscription, the fallback is local Ollama at
 `http://localhost:11434/v1/completions` with `qwen2.5-coder:1.5b`.
 
+Automatic suggestions appear as ghost text after a short pause. Blink does not
+send a second automatic AI request; `<A-y>` explicitly requests Minuet through
+the completion menu. If no ghost text appears, `<A-n>` manually triggers the
+virtual-text completion.
+
 API keys may be placed in `~/.config/ai/env`; see
 `~/dotfiles/zsh/.config/ai/README.md`. The provider switch is manual because
 Minuet does not retry a failed request against another endpoint automatically.
