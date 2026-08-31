@@ -75,16 +75,16 @@ How: completion opens automatically on insert (`menu.auto_show`), ghost text on,
 
 | Plugin                                                           | What it does                                                                                                         |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions. Defaults to OpenCode Go/DeepSeek, with free DeepSeek and GLM presets.                         |
+| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions. Defaults to GLM, with direct OpenCode Go and free DeepSeek shortcuts.                         |
 | [opencode.nvim](https://github.com/nickjvandyke/opencode.nvim)   | Native pairing with the OpenCode CLI: ask with `@this` context, built-in prompts, accept/reject edits via diffpatch. |
 
 The split is deliberate: **OpenCode** owns chat, agent actions, edits, and review;
 **Minuet** only provides low-latency completion while typing.
 
 How: Minuet reuses API credentials stored by OpenCode without copying secrets
-into dotfiles. It prefers OpenCode Go with `deepseek-v4-flash`; if that login is
-absent at startup, Z.AI with `glm-5.3-flash` is selected. `<leader>aP` switches
-manually among `opencode_go`, `deepseek_free`, and `glm` presets. Minuet has no
+into dotfiles. It defaults to the working Z.AI `glm-5.3-flash` subscription.
+Use `<leader>ag` for GLM, `<leader>ao` for OpenCode Go, or `<leader>af` for the
+free DeepSeek endpoint; `<leader>aP` remains as a readable menu. Minuet has no
 automatic retry across providers.
 
 If neither subscription login exists, Minuet falls back to Ollama with
@@ -255,6 +255,8 @@ Only when a server is attached. (`gd`/`gr` are plain LSP, not fzf.)
 | `<leader>aa` (n,x)    | ask OpenCode about cursor/selection (`@this`)    |
 | `<leader>ap` (n,x)    | OpenCode prompt/command/server picker            |
 | `<leader>as` / `aM`   | Minuet: toggle inline completion / choose model  |
+| `<leader>ag` / `ao`   | Minuet: use GLM / OpenCode Go                    |
+| `<leader>af`          | Minuet: use free DeepSeek                        |
 | `<leader>aP`          | Minuet: OpenCode Go / free DeepSeek / GLM preset |
 | `<C-l>` / `<C-j>` (i) | accept Minuet suggestion / current line          |
 | `<A-n>` / `<A-p>` (i) | next / previous Minuet suggestion                |

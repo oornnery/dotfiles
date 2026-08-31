@@ -51,6 +51,21 @@ local function minuet_endpoint(path)
   return strip_trailing_slash(vim.env.OLLAMA_HOST or "http://localhost:11434") .. path
 end
 
+local preset_labels = {
+  opencode_go = "DeepSeek V4 Flash — OpenCode Go",
+  deepseek_free = "DeepSeek V4 Flash Free — OpenCode Zen",
+  glm = "GLM-5.3-Flash — Z.AI Coding Plan",
+}
+
+local function change_preset(name)
+  local minuet = require("minuet")
+  if not minuet.presets[name] then
+    vim.notify("Minuet credential unavailable for " .. preset_labels[name], vim.log.levels.WARN)
+    return
+  end
+  minuet.change_preset(name)
+end
+
 return {
   {
     "milanglacier/minuet-ai.nvim",
@@ -59,6 +74,9 @@ return {
     keys = {
       { "<leader>as", "<cmd>Minuet virtualtext toggle<cr>", desc = "AI inline toggle" },
       { "<leader>aM", "<cmd>Minuet change_model<cr>", desc = "AI model picker" },
+      { "<leader>ag", function() change_preset("glm") end, desc = "AI use GLM" },
+      { "<leader>ao", function() change_preset("opencode_go") end, desc = "AI use OpenCode Go" },
+      { "<leader>af", function() change_preset("deepseek_free") end, desc = "AI use DeepSeek free" },
       {
         "<leader>aP",
         function()
@@ -66,12 +84,15 @@ return {
           local available = {}
           for _, name in ipairs({ "opencode_go", "deepseek_free", "glm" }) do
             if minuet.presets[name] then
-              table.insert(available, name)
+              table.insert(available, { name = name, label = preset_labels[name] })
             end
           end
-          vim.ui.select(available, { prompt = "Minuet provider preset" }, function(choice)
+          vim.ui.select(available, {
+            prompt = "Minuet provider",
+            format_item = function(item) return item.label end,
+          }, function(choice)
             if choice then
-              minuet.change_preset(choice)
+              change_preset(choice.name)
             end
           end)
         end,
@@ -84,8 +105,8 @@ return {
       local zai_key = opencode_api_key("zai-coding-plan", "ZAI_API_KEY")
         or opencode_api_key("zai", "ZAI_API_KEY")
       local automatic = not env_set("MINUET_PROVIDER") and not env_set("MINUET_ENDPOINT")
-      local use_go = go_key ~= nil and automatic
-      local use_zai = not use_go and zai_key ~= nil and automatic
+      local use_zai = zai_key ~= nil and automatic
+      local use_go = not use_zai and go_key ~= nil and automatic
       local ollama_model = vim.env.MINUET_MODEL or "qwen2.5-coder:1.5b"
       local function compatible(key, name, endpoint, model)
         return {

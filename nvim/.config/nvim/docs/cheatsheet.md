@@ -189,6 +189,9 @@ Only works when a language server is attached.
 | `]c` / `[c` in diff         | next / previous change in OpenCode diff         |
 | `<leader>as`                | toggle Minuet inline AI completion              |
 | `<leader>aM`                | pick/change Minuet model                        |
+| `<leader>ag`                | use GLM-5.3-Flash (default)                     |
+| `<leader>ao`                | use DeepSeek V4 Flash on OpenCode Go            |
+| `<leader>af`                | use free DeepSeek endpoint                      |
 | `<leader>aP`                | choose OpenCode Go / free DeepSeek / GLM preset |
 | `<A-y>` in completion menu  | request/accept Minuet completion                |
 | `<C-l>` in insert           | accept Minuet inline suggestion                 |
@@ -196,18 +199,18 @@ Only works when a language server is attached.
 | `<A-n>` / `<A-p>` in insert | next / previous Minuet suggestion               |
 | `<C-]>` in insert           | dismiss Minuet suggestion                       |
 
-Minuet defaults to OpenCode Go with `deepseek-v4-flash`. `<leader>aP` switches
-manually to `deepseek-v4-flash-free` on OpenCode Zen or `glm-5.3-flash` on the
-Z.AI Coding Plan. It reads existing OpenCode credentials at runtime without
-tracking secrets. When the Go login is absent at startup, GLM is selected;
-without either subscription, the fallback is local Ollama at
+Minuet defaults to the working Z.AI Coding Plan with `glm-5.3-flash`. Direct
+shortcuts switch to `deepseek-v4-flash` on OpenCode Go or
+`deepseek-v4-flash-free` on OpenCode Zen; `<leader>aP` shows the same choices
+with readable names. It reads existing OpenCode credentials at runtime without
+tracking secrets. Without either subscription, the fallback is local Ollama at
 `http://localhost:11434/v1/completions` with `qwen2.5-coder:1.5b`.
 
 API keys may be placed in `~/.config/ai/env`; see
 `~/dotfiles/zsh/.config/ai/README.md`. The provider switch is manual because
 Minuet does not retry a failed request against another endpoint automatically.
 If Go reports a quota/balance error or the free model is temporarily
-unavailable, press `<leader>aP` and select `glm`.
+unavailable, press `<leader>ag` to return immediately to GLM.
 
 ```sh
 ollama pull qwen2.5-coder:1.5b

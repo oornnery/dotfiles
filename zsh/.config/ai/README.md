@@ -34,10 +34,10 @@ machine or for overriding a login.
 | `MINUET_MODEL`        | Force a model ID                                    |
 | `MINUET_ENDPOINT`     | Force the full completion endpoint                  |
 
-The Minuet presets are `opencode_go`, `deepseek_free`, and `glm`. Use
-`<leader>aP` inside Neovim to switch among credentials available at startup.
-This is a manual fallback: Minuet does not automatically retry a failed request
-against a different provider.
+The Minuet presets are `opencode_go`, `deepseek_free`, and `glm`. Inside Neovim,
+use `<leader>ag` for GLM, `<leader>ao` for OpenCode Go, `<leader>af` for free
+DeepSeek, or `<leader>aP` for the readable menu. This is a manual fallback:
+Minuet does not automatically retry a failed request against another provider.
 
 OpenCode may temporarily mark a free model unavailable. If Go reaches its quota
 or `deepseek_free` is unavailable, select `glm`; changing a preset does not
