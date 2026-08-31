@@ -7,9 +7,24 @@ local function strip_trailing_slash(value)
   return (value or ""):gsub("/+$", "")
 end
 
-local function minuet_provider()
+local function opencode_api_key(provider)
+  local data_home = vim.env.XDG_DATA_HOME or vim.fn.expand("~/.local/share")
+  local path = data_home .. "/opencode/auth.json"
+  local ok_read, lines = pcall(vim.fn.readfile, path)
+  if not ok_read then
+    return nil
+  end
+  local ok_decode, auth = pcall(vim.json.decode, table.concat(lines, "\n"))
+  local entry = ok_decode and auth[provider] or nil
+  return entry and entry.type == "api" and entry.key or nil
+end
+
+local function minuet_provider(has_zai)
   if env_set("MINUET_PROVIDER") then
     return vim.env.MINUET_PROVIDER
+  end
+  if has_zai then
+    return "openai_compatible"
   end
   if env_set("OLLAMA_HOST") or vim.fn.executable("ollama") == 1 then
     return "openai_fim_compatible"
@@ -43,9 +58,11 @@ return {
       { "<leader>aM", "<cmd>Minuet change_model<cr>", desc = "AI model picker" },
     },
     opts = function()
+      local zai_key = opencode_api_key("zai-coding-plan") or opencode_api_key("zai")
+      local use_zai = zai_key ~= nil and not env_set("MINUET_PROVIDER") and not env_set("MINUET_ENDPOINT")
       local ollama_model = vim.env.MINUET_MODEL or "qwen2.5-coder:1.5b"
       return {
-        provider = minuet_provider(),
+        provider = minuet_provider(use_zai),
         request_timeout = tonumber(vim.env.MINUET_TIMEOUT) or 3,
         throttle = tonumber(vim.env.MINUET_THROTTLE) or 1500,
         debounce = tonumber(vim.env.MINUET_DEBOUNCE) or 600,
@@ -92,10 +109,13 @@ return {
             },
           },
           openai_compatible = {
-            api_key = env_set("MINUET_API_KEY") and "MINUET_API_KEY" or "OPENROUTER_API_KEY",
-            name = vim.env.MINUET_NAME or "OpenAI-compatible",
-            end_point = minuet_endpoint("/v1/chat/completions"),
-            model = ollama_model,
+            api_key = use_zai and function()
+              return zai_key
+            end or (env_set("MINUET_API_KEY") and "MINUET_API_KEY" or "OPENROUTER_API_KEY"),
+            name = vim.env.MINUET_NAME or (use_zai and "Z.AI Coding Plan" or "OpenAI-compatible"),
+            end_point = use_zai and "https://api.z.ai/api/coding/paas/v4/chat/completions"
+              or minuet_endpoint("/v1/chat/completions"),
+            model = vim.env.MINUET_MODEL or (use_zai and "glm-5.3-flash" or ollama_model),
             optional = {
               max_tokens = tonumber(vim.env.MINUET_MAX_TOKENS) or 56,
               top_p = 0.9,

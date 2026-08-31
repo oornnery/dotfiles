@@ -195,7 +195,9 @@ Only works when a language server is attached.
 | `<A-n>` / `<A-p>` in insert | next / previous Minuet suggestion              |
 | `<C-]>` in insert           | dismiss Minuet suggestion                      |
 
-Minuet default is local-first. It uses Ollama at
+Minuet defaults to `glm-5.3-flash` through the existing Z.AI Coding Plan login
+stored by OpenCode. It reads the credential at runtime without tracking it in
+dotfiles. If that login is unavailable, the fallback is local Ollama at
 `http://localhost:11434/v1/completions` with `qwen2.5-coder:1.5b`.
 
 ```sh
@@ -203,7 +205,7 @@ ollama pull qwen2.5-coder:1.5b
 ollama serve
 ```
 
-Available profiles:
+Fallback local profiles:
 
 - `qwen2.5-coder:1.5b`: recommended CPU/WSL default; fastest.
 - `qwen2.5-coder:7b`: better completion quality; slower and heavier.

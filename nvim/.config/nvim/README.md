@@ -75,24 +75,24 @@ How: completion opens automatically on insert (`menu.auto_show`), ghost text on,
 
 | Plugin                                                           | What it does                                                                                                         |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions (ghost text + in the blink menu). Provider auto-detects Ollama → OpenAI → Anthropic → Gemini.  |
+| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions (ghost text + in the blink menu). Defaults to the existing Z.AI Coding Plan login.             |
 | [opencode.nvim](https://github.com/nickjvandyke/opencode.nvim)   | Native pairing with the OpenCode CLI: ask with `@this` context, built-in prompts, accept/reject edits via diffpatch. |
 
 The split is deliberate: **OpenCode** owns chat, agent actions, edits, and review;
 **Minuet** only provides low-latency completion while typing.
 
-How: Minuet defaults to `qwen2.5-coder:1.5b` on `http://localhost:11434`
-when Ollama is present. Install and start it with:
+How: Minuet reuses the `zai-coding-plan` API credential stored by OpenCode and
+defaults to `glm-5.3-flash` through the Z.AI coding endpoint. The secret remains
+outside the dotfiles. If that login is absent, Minuet falls back to Ollama with
+`qwen2.5-coder:1.5b`; install and start it with:
 
 ```sh
 ollama pull qwen2.5-coder:1.5b
 ollama serve
 ```
 
-Use `qwen2.5-coder:7b` for higher quality when latency is acceptable. The
-1.5B model is the better default for CPU-only WSL completion because first-token
-latency matters more than deep reasoning. Override per launch with
-`MINUET_MODEL=qwen2.5-coder:7b nvim`.
+Explicit `MINUET_PROVIDER`, `MINUET_ENDPOINT`, and `MINUET_MODEL` environment
+variables override automatic selection.
 
 opencode.nvim needs `opencode` on PATH; first use
 spawns `opencode --port` in a vsplit; proposed edits open in a diffpatch tab
