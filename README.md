@@ -32,6 +32,7 @@ Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 - `opencode/` → Active OpenCode config, agents, commands, skills, and templates
 - `agents/` → Skills shared by OpenCode and Codex through `~/.agents/skills`
 - `codex/` → Codex config, global guidance, custom agents, and MCP definitions
+- `zsh/.config/ai/` → shared, private API-key environment template and guide
 
 ## Quick install
 
@@ -85,6 +86,10 @@ stow --no-folding -v -t ~ agents
 stow --no-folding -v -t ~ codex
 ```
 
+API keys are kept outside Git in `~/.config/ai/env` and loaded by `.zshenv`.
+Start from `~/dotfiles/zsh/.config/ai/env.example`; the complete variable list
+and permissions are documented in `zsh/.config/ai/README.md`.
+
 To remove symlinks for a module:
 
 ```bash
@@ -104,7 +109,7 @@ stow -D -v -t ~ zsh
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | Shell                | [zsh](https://www.zsh.org/) + [Oh My Zsh](https://ohmyz.sh/)                                                                                                   | Main shell and terminal productivity   |
 | Shell fallback       | [bash](https://www.gnu.org/software/bash/)                                                                                                                     | Compatibility and scripting            |
-| Editor               | [Neovim](https://neovim.io/) with native/lazy.nvim/mini.nvim dotfile variants                                                                                   | Development and text editing           |
+| Editor               | [Neovim](https://neovim.io/) with native/lazy.nvim/mini.nvim dotfile variants                                                                                  | Development and text editing           |
 | GUI editors          | [VS Code](https://code.visualstudio.com/) + [Zed](https://zed.dev/)                                                                                            | Windows editor setup                   |
 | Multiplexer          | [tmux](https://github.com/tmux/tmux)                                                                                                                           | Terminal sessions and splits           |
 | Terminal UI          | [fastfetch](https://github.com/fastfetch-cli/fastfetch)                                                                                                        | System summary on terminal startup     |

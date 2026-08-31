@@ -1,5 +1,6 @@
 .*_cache/
 .env
+zsh/.config/ai/env
 
 # Bootstrap runtime log (lib/common.sh appends here).
 arch.log

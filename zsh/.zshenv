@@ -16,6 +16,9 @@ export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 
+# Private AI/API credentials. This file is local, chmod 600, and never tracked.
+[[ -r "$XDG_CONFIG_HOME/ai/env" ]] && source "$XDG_CONFIG_HOME/ai/env"
+
 # Local user binaries
 path=(
   "$HOME/.local/bin"

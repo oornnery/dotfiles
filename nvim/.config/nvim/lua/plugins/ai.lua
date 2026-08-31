@@ -7,7 +7,10 @@ local function strip_trailing_slash(value)
   return (value or ""):gsub("/+$", "")
 end
 
-local function opencode_api_key(provider)
+local function opencode_api_key(provider, env_name)
+  if env_name and env_set(env_name) then
+    return vim.env[env_name]
+  end
   local data_home = vim.env.XDG_DATA_HOME or vim.fn.expand("~/.local/share")
   local path = data_home .. "/opencode/auth.json"
   local ok_read, lines = pcall(vim.fn.readfile, path)
@@ -19,11 +22,11 @@ local function opencode_api_key(provider)
   return entry and entry.type == "api" and entry.key or nil
 end
 
-local function minuet_provider(has_zai)
+local function minuet_provider(has_subscription)
   if env_set("MINUET_PROVIDER") then
     return vim.env.MINUET_PROVIDER
   end
-  if has_zai then
+  if has_subscription then
     return "openai_compatible"
   end
   if env_set("OLLAMA_HOST") or vim.fn.executable("ollama") == 1 then
@@ -56,13 +59,77 @@ return {
     keys = {
       { "<leader>as", "<cmd>Minuet virtualtext toggle<cr>", desc = "AI inline toggle" },
       { "<leader>aM", "<cmd>Minuet change_model<cr>", desc = "AI model picker" },
+      { "<leader>aP", "<cmd>Minuet change_preset<cr>", desc = "AI provider preset" },
     },
     opts = function()
-      local zai_key = opencode_api_key("zai-coding-plan") or opencode_api_key("zai")
-      local use_zai = zai_key ~= nil and not env_set("MINUET_PROVIDER") and not env_set("MINUET_ENDPOINT")
+      local go_key = opencode_api_key("opencode-go", "OPENCODE_GO_API_KEY")
+      local zen_key = opencode_api_key("opencode", "OPENCODE_API_KEY") or go_key
+      local zai_key = opencode_api_key("zai-coding-plan", "ZAI_API_KEY")
+        or opencode_api_key("zai", "ZAI_API_KEY")
+      local automatic = not env_set("MINUET_PROVIDER") and not env_set("MINUET_ENDPOINT")
+      local use_go = go_key ~= nil and automatic
+      local use_zai = not use_go and zai_key ~= nil and automatic
       local ollama_model = vim.env.MINUET_MODEL or "qwen2.5-coder:1.5b"
+      local function compatible(key, name, endpoint, model)
+        return {
+          api_key = function()
+            return key
+          end,
+          name = name,
+          end_point = endpoint,
+          model = model,
+          optional = {
+            max_tokens = tonumber(vim.env.MINUET_MAX_TOKENS) or 56,
+            top_p = 0.9,
+            thinking = { type = "disabled" },
+          },
+        }
+      end
+
+      local presets = {}
+      if go_key then
+        presets.opencode_go = {
+          provider = "openai_compatible",
+          provider_options = {
+            openai_compatible = compatible(
+              go_key,
+              "OpenCode Go",
+              "https://opencode.ai/zen/go/v1/chat/completions",
+              "deepseek-v4-flash"
+            ),
+          },
+        }
+      end
+      if zen_key then
+        presets.deepseek_free = {
+          provider = "openai_compatible",
+          provider_options = {
+            openai_compatible = compatible(
+              zen_key,
+              "OpenCode Zen Free",
+              "https://opencode.ai/zen/v1/chat/completions",
+              "deepseek-v4-flash-free"
+            ),
+          },
+        }
+      end
+      if zai_key then
+        presets.glm = {
+          provider = "openai_compatible",
+          provider_options = {
+            openai_compatible = compatible(
+              zai_key,
+              "Z.AI Coding Plan",
+              "https://api.z.ai/api/coding/paas/v4/chat/completions",
+              "glm-5.3-flash"
+            ),
+          },
+        }
+      end
+
       return {
-        provider = minuet_provider(use_zai),
+        provider = minuet_provider(use_go or use_zai),
+        presets = presets,
         request_timeout = tonumber(vim.env.MINUET_TIMEOUT) or 3,
         throttle = tonumber(vim.env.MINUET_THROTTLE) or 1500,
         debounce = tonumber(vim.env.MINUET_DEBOUNCE) or 600,
@@ -109,16 +176,20 @@ return {
             },
           },
           openai_compatible = {
-            api_key = use_zai and function()
-              return zai_key
+            api_key = (use_go or use_zai) and function()
+              return use_go and go_key or zai_key
             end or (env_set("MINUET_API_KEY") and "MINUET_API_KEY" or "OPENROUTER_API_KEY"),
-            name = vim.env.MINUET_NAME or (use_zai and "Z.AI Coding Plan" or "OpenAI-compatible"),
-            end_point = use_zai and "https://api.z.ai/api/coding/paas/v4/chat/completions"
+            name = vim.env.MINUET_NAME
+              or (use_go and "OpenCode Go" or (use_zai and "Z.AI Coding Plan" or "OpenAI-compatible")),
+            end_point = use_go and "https://opencode.ai/zen/go/v1/chat/completions"
+              or (use_zai and "https://api.z.ai/api/coding/paas/v4/chat/completions")
               or minuet_endpoint("/v1/chat/completions"),
-            model = vim.env.MINUET_MODEL or (use_zai and "glm-5.3-flash" or ollama_model),
+            model = vim.env.MINUET_MODEL
+              or (use_go and "deepseek-v4-flash" or (use_zai and "glm-5.3-flash" or ollama_model)),
             optional = {
               max_tokens = tonumber(vim.env.MINUET_MAX_TOKENS) or 56,
               top_p = 0.9,
+              thinking = { type = "disabled" },
             },
           },
           openai = {

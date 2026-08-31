@@ -75,15 +75,19 @@ How: completion opens automatically on insert (`menu.auto_show`), ghost text on,
 
 | Plugin                                                           | What it does                                                                                                         |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions (ghost text + in the blink menu). Defaults to the existing Z.AI Coding Plan login.             |
+| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions. Defaults to OpenCode Go/DeepSeek, with free DeepSeek and GLM presets.                         |
 | [opencode.nvim](https://github.com/nickjvandyke/opencode.nvim)   | Native pairing with the OpenCode CLI: ask with `@this` context, built-in prompts, accept/reject edits via diffpatch. |
 
 The split is deliberate: **OpenCode** owns chat, agent actions, edits, and review;
 **Minuet** only provides low-latency completion while typing.
 
-How: Minuet reuses the `zai-coding-plan` API credential stored by OpenCode and
-defaults to `glm-5.3-flash` through the Z.AI coding endpoint. The secret remains
-outside the dotfiles. If that login is absent, Minuet falls back to Ollama with
+How: Minuet reuses API credentials stored by OpenCode without copying secrets
+into dotfiles. It prefers OpenCode Go with `deepseek-v4-flash`; if that login is
+absent at startup, Z.AI with `glm-5.3-flash` is selected. `<leader>aP` switches
+manually among `opencode_go`, `deepseek_free`, and `glm` presets. Minuet has no
+automatic retry across providers.
+
+If neither subscription login exists, Minuet falls back to Ollama with
 `qwen2.5-coder:1.5b`; install and start it with:
 
 ```sh
@@ -246,14 +250,15 @@ Only when a server is attached. (`gd`/`gr` are plain LSP, not fzf.)
 
 ### AI
 
-| Key                   | Action                                          |
-| --------------------- | ----------------------------------------------- |
-| `<leader>aa` (n,x)    | ask OpenCode about cursor/selection (`@this`)   |
-| `<leader>ap` (n,x)    | OpenCode prompt/command/server picker           |
-| `<leader>as` / `aM`   | Minuet: toggle inline completion / choose model |
-| `<C-l>` / `<C-j>` (i) | accept Minuet suggestion / current line         |
-| `<A-n>` / `<A-p>` (i) | next / previous Minuet suggestion               |
-| `<C-]>` (i)           | dismiss Minuet suggestion                       |
+| Key                   | Action                                           |
+| --------------------- | ------------------------------------------------ |
+| `<leader>aa` (n,x)    | ask OpenCode about cursor/selection (`@this`)    |
+| `<leader>ap` (n,x)    | OpenCode prompt/command/server picker            |
+| `<leader>as` / `aM`   | Minuet: toggle inline completion / choose model  |
+| `<leader>aP`          | Minuet: OpenCode Go / free DeepSeek / GLM preset |
+| `<C-l>` / `<C-j>` (i) | accept Minuet suggestion / current line          |
+| `<A-n>` / `<A-p>` (i) | next / previous Minuet suggestion                |
+| `<C-]>` (i)           | dismiss Minuet suggestion                        |
 
 ### Terminal, UI & sessions
 
@@ -327,7 +332,9 @@ Format on save (`format_on_save`, 500 ms debounce, LSP fallback):
 | `GEMINI_API_KEY`                                                              | Minuet uses Gemini                                                                     |
 | `OLLAMA_HOST`                                                                 | Minuet uses Ollama (default `http://localhost:11434`)                                  |
 | `MINUET_PROVIDER`                                                             | Minuet provider override (`openai_compatible`, `openai`, `claude`, `gemini`, `ollama`) |
-| `MINUET_MODEL`                                                                | Minuet model (default `qwen2.5-coder:1.5b`)                                            |
+| `OPENCODE_GO_API_KEY` / `OPENCODE_API_KEY`                                    | OpenCode Go / Zen credentials                                                          |
+| `ZAI_API_KEY`                                                                 | Z.AI/GLM Coding Plan credential                                                        |
+| `MINUET_MODEL`                                                                | Override the selected preset's model                                                   |
 | `MINUET_ENDPOINT`                                                             | Minuet API endpoint override                                                           |
 | `MINUET_API_KEY` / `OPENROUTER_API_KEY`                                       | key for `openai_compatible` provider                                                   |
 | `MINUET_TIMEOUT` / `MINUET_THROTTLE` / `MINUET_DEBOUNCE`                      | request timing                                                                         |
