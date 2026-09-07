@@ -125,6 +125,15 @@ local function hl(group, opts)
 end
 
 function M.setup_highlights()
+  if not vim.o.termguicolors then
+    for _, group in pairs(mode_groups) do
+      hl(group, { link = "StatusLine" })
+    end
+    for _, suffix in ipairs({ "File", "Git", "Info", "Muted", "Middle", "Error", "Warn", "Hint", "Accent" }) do
+      hl("DotfilesStatus" .. suffix, { link = "StatusLine" })
+    end
+    return
+  end
   local c = colors()
   local mode_fg = c.bg
 
@@ -257,6 +266,10 @@ local function percent()
 end
 
 function M.render()
+  if vim.g.dotfiles_basic_terminal then
+    return table.concat({ mode_block(), "%<", block("DotfilesStatusFile", filename()),
+      " %m%r%=", block("DotfilesStatusInfo", filetype()), " %l:%c %p%% " })
+  end
   return table.concat({
     mode_block(),
     block("DotfilesStatusFile", file_icon() .. " " .. filename()),

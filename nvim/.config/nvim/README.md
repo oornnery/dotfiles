@@ -34,6 +34,10 @@ Personal Neovim configuration. Modular, lazy-loaded, tuned for daily development
 
 ## First run
 
+For MobaXterm/SSH compatibility use `DOTFILES_TERMINAL=basic nvim`. For an offline,
+no-plugin baseline add `DOTFILES_NVIM_PLUGINS=0`. See the
+[terminal guide](../../../docs/applications/02-neovim.md) for behavior and checks.
+
 1. Install [Neovim 0.12+](https://github.com/neovim/neovim/releases) and a Nerd Font.
 2. Start `nvim` — lazy.nvim bootstraps itself, plugins install, treesitter parsers compile, mason installs the LSP servers (`lua_ls`, `rust_analyzer`, `ts_ls`, `pyright`, `ruff`, `bashls`, `marksman`).
 3. Optional but recommended: `fzf` binary (fzf-lua), `opencode` CLI (AI pairing), `ollama` (local completions).

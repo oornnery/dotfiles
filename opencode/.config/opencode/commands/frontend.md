@@ -1,11 +1,9 @@
 ---
-description: Implement or refactor frontend/UI with Qwen3.8 Max and browser-aware verification.
+description: Design or improve this UI using the relevant Impeccable playbook.
 agent: frontend
 subtask: false
 ---
 
-Frontend task: $ARGUMENTS
+Design or improve this UI using the relevant Impeccable playbook.
 
-Preserve product behavior. Improve visual system, responsiveness, accessibility, and
-states. Load `frontend-design` plus stack skill. Render/inspect when possible and run
-relevant checks.
+$ARGUMENTS

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # dots:summary=Pick an LLM CLI and open it in a floating terminal
-# dots:args=[claude|codex|gemini|aichat|llm|ollama]
+# dots:args=[codex|opencode|gemini|aichat|llm|ollama]
 set -euo pipefail
 
 declare -A LLMS=(
-    [claude]="Claude Code (Anthropic)"
+    [opencode]="OpenCode"
     [codex]="Codex (OpenAI)"
     [gemini]="Gemini CLI (Google)"
     [aichat]="aichat (multi-model)"

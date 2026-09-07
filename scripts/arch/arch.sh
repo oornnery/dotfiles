@@ -72,7 +72,7 @@ declare -A MODULES_DESC=(
     [dev/zellij]="Zellij terminal multiplexer + stow config"
     [dev/languages]="Language toolchains (python, rust, node, go, …)"
     [dev/docker]="Docker + Podman + lazydocker"
-    [dev/llms]="AI tools (Claude Code, Codex, Ollama, LM Studio, RTK, .agents)"
+    [dev/llms]="AI tools (Codex, OpenCode, Impeccable, Ollama, shared skills)"
     [dev/herdr]="Herdr — terminal agent multiplexer (tmux for coding agents)"
 
     # game/

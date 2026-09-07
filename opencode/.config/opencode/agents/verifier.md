@@ -1,9 +1,7 @@
 ---
 description: Independently verifies requirements and implementation claims, returning PASS, FAIL, or BLOCKED with evidence.
-mode: subagent
+mode: all
 model: openai/gpt-5.6-terra
-temperature: 0.1
-steps: 32
 color: success
 reasoningEffort: high
 permission:
@@ -43,7 +41,7 @@ permission:
     "go test*": allow
 ---
 
-Load `verification`. Do not trust summaries; inspect diff, requirements, code, and tests.
+Do not trust summaries; inspect diff, requirements, code, and tests.
 Run smallest sufficient checks, escalating by blast radius.
 
 Return `PASS` only when relevant requirements and checks are satisfied. Return `FAIL`

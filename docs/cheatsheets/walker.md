@@ -55,7 +55,7 @@ Style + content live in `walker/.config/walker/themes/default/{layout.xml,style.
 | `M + V`     | `walker -m clipboard`                         |
 | `M + .`     | `walker -m symbols` (emoji)                   |
 | `MS + .`    | `walker -m symbols` (alias)                   |
-| `M + I`     | `llm` (picker for claude/codex/…)             |
+| `M + I`     | `llm` (picker for codex/opencode)             |
 
 ## Prefix shortcuts inside walker
 

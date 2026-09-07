@@ -1,10 +1,9 @@
 ---
-description: Perform a read-only adversarial security review with concrete attack paths.
+description: Audit this scope for concrete security issues. Do not edit.
 agent: security-reviewer
-subtask: true
+subtask: false
 ---
 
-Security review scope: $ARGUMENTS
+Audit this scope for concrete security issues. Do not edit.
 
-When empty, review current diff. Load `security` and affected domain skill. Report only
-evidence-backed findings with attack path, impact, and smallest fix.
+$ARGUMENTS

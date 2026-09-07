@@ -7,6 +7,6 @@ description: Python package and library API design, compatibility, typing, packa
 
 Design from consumer perspective. Keep public surface small, typed, documented, and
 stable. Distinguish public/private modules, preserve import paths when required, and use
-deprecation before removal. Avoid leaking internal/vendor types. Test supported Python
-versions and built artifacts. Validate wheel/sdist contents, imports, entrypoints,
-extras, and version metadata.
+deprecation before removal. Avoid leaking internal/vendor types. For packaging or
+release changes, validate built artifacts, imports, entrypoints, extras and metadata
+on the supported Python versions. For ordinary code changes, check affected behavior.

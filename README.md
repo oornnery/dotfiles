@@ -32,6 +32,7 @@ Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 - `opencode/` → Active OpenCode config, agents, commands, skills, and templates
 - `agents/` → Skills shared by OpenCode and Codex through `~/.agents/skills`
 - `codex/` → Codex config, global guidance, custom agents, and MCP definitions
+- [AI setup](docs/configuration/ai-agents.md) → model tiers, OpenCode modes, Impeccable, migration and recovery
 - `zsh/.config/ai/` → shared, private API-key environment template and guide
 
 ## Quick install

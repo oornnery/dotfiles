@@ -11,7 +11,7 @@ export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.local/share/fnm:$HOME
 echo "==> Base packages"
 if command -v pacman >/dev/null 2>&1; then
   sudo pacman -Syu --needed \
-    neovim git curl unzip tar gzip make gcc \
+    neovim stow git curl unzip tar gzip make gcc \
     ripgrep fd fzf tree-sitter-cli \
     nodejs npm rustup stylua lua-language-server bash-language-server marksman \
     python python-pip python-ruff go
@@ -19,7 +19,7 @@ if command -v pacman >/dev/null 2>&1; then
 elif command -v apt >/dev/null 2>&1; then
   sudo apt update
   sudo apt install -y \
-    git curl unzip tar gzip build-essential cmake ninja-build gettext \
+    stow git curl unzip tar gzip build-essential cmake ninja-build gettext \
     ripgrep fd-find fzf tree-sitter-cli \
     nodejs npm cargo rustc \
     python3 python3-pip python3-venv golang-go
@@ -68,31 +68,31 @@ if command -v apt >/dev/null 2>&1; then
   fi
 
   if [[ "$need_build" -eq 1 ]]; then
-    rm -rf /tmp/neovim
-    git clone --depth 1 --branch stable https://github.com/neovim/neovim /tmp/neovim
+    build_dir="$(mktemp -d /tmp/dotfiles-neovim.XXXXXXXX)"
+    echo "Building Neovim in $build_dir"
+    git clone --depth 1 --branch stable https://github.com/neovim/neovim "$build_dir"
     (
-      cd /tmp/neovim
+      cd "$build_dir"
       make CMAKE_BUILD_TYPE=Release
       sudo make install
     )
-    rm -rf /tmp/neovim
+    rm -rf -- "$build_dir"
   fi
 fi
 
 echo "==> Stow nvim"
-for path in "$HOME/.config/nvim"; do
-  if [[ -e "$path" && ! -L "$path" ]]; then
-    backup="$path.bak.$(date +%Y%m%d%H%M%S)"
-    echo "Backing up $path -> $backup"
-    mv "$path" "$backup"
-  fi
-done
+nvim_config="$HOME/.config/nvim"
+if [[ -e "$nvim_config" && ! -L "$nvim_config" ]]; then
+  backup="$nvim_config.bak.$(date +%Y%m%d%H%M%S)"
+  echo "Backing up $nvim_config -> $backup"
+  mv "$nvim_config" "$backup"
+fi
 
 stow -R -d "$DOTFILES_DIR" -t "$HOME" nvim
 
 echo "==> Verify"
-nvim --headless "+Lazy! sync" +qa || true
-nvim --headless "+checkhealth vim.lsp" +qa || true
+nvim --headless "+Lazy! sync" +qa
+nvim --headless "+checkhealth vim.lsp" +qa
 
 echo
 echo "==> Done."

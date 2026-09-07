@@ -112,6 +112,14 @@ vim.api.nvim_create_user_command("Root", function()
 end, {})
 
 vim.api.nvim_create_user_command("TrimWhitespace", trim_trailing_whitespace, {})
+vim.api.nvim_create_user_command("Search", function(opts)
+  local ok, err = pcall(vim.cmd, "vimgrep /" .. vim.fn.escape(opts.args, [[/\]]) .. "/gj **/*")
+  if ok then
+    vim.cmd.copen()
+  else
+    vim.notify(tostring(err), vim.log.levels.WARN)
+  end
+end, { nargs = "+" })
 vim.api.nvim_create_user_command("Term", "botright split | resize 14 | terminal", {})
 vim.api.nvim_create_user_command("MkSession", "mksession! .session.vim", {})
 vim.api.nvim_create_user_command("LoadSession", "source .session.vim", {})

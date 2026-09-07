@@ -63,7 +63,6 @@ done
 
 echo "==> Install agent integrations"
 INTEGRATIONS=(
-  claude
   codex
   opencode
 )

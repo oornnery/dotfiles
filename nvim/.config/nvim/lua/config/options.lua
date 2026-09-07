@@ -6,7 +6,6 @@ opt.number = true
 opt.relativenumber = true
 opt.cursorline = true
 opt.signcolumn = "yes"
-opt.termguicolors = true
 opt.laststatus = 3
 opt.showmode = false
 opt.ruler = true
@@ -101,7 +100,7 @@ vim.fn.mkdir(vim.o.directory, "p")
 -- Performance / behavior -----------------------------------------------------
 opt.updatetime = 250
 opt.timeoutlen = 500
-opt.ttimeoutlen = 10
+opt.ttimeoutlen = 100
 opt.lazyredraw = false
 
 -- Spelling: enabled per filetype in autocmds, not globally.

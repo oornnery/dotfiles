@@ -1,9 +1,9 @@
 ---
-description: Make a tiny, obvious one- or two-file change with Luna.
+description: Handle this bounded task with minimal overhead.
 agent: fast
 subtask: false
 ---
 
-Small edit: $ARGUMENTS
+Handle this bounded task with minimal overhead.
 
-Keep scope to one or two files. Read, edit minimally, re-read, and run one focused check.
+$ARGUMENTS

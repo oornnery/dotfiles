@@ -27,8 +27,8 @@ chmod +x ~/.local/bin/herdr
 bash herdr/setup.sh
 ```
 
-The setup installs only the integrations used on this machine: Claude, Codex,
-and OpenCode. Check them after a Herdr upgrade with `herdr integration status`;
+The setup installs only the integrations used on this machine: Codex and
+OpenCode. Check them after a Herdr upgrade with `herdr integration status`;
 rerunning `herdr/setup.sh` updates them.
 
 ## Plugin prerequisites

@@ -4,19 +4,15 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
 
-ENABLE_CLAUDE_CODE="${ENABLE_CLAUDE_CODE:-1}"
 ENABLE_CODEX="${ENABLE_CODEX:-1}"
 ENABLE_OPENCODE="${ENABLE_OPENCODE:-1}"
 ENABLE_ANTIGRAVITY="${ENABLE_ANTIGRAVITY:-1}"
 ENABLE_OLLAMA="${ENABLE_OLLAMA:-1}"
 ENABLE_LM_STUDIO="${ENABLE_LM_STUDIO:-0}"
-ENABLE_RTK="${ENABLE_RTK:-1}"
-ENABLE_CAVEMAN="${ENABLE_CAVEMAN:-1}"
-ENABLE_CAVEKIT="${ENABLE_CAVEKIT:-1}"
+ENABLE_RTK="${ENABLE_RTK:-0}"
 ENABLE_CAVEMEM="${ENABLE_CAVEMEM:-1}"
 ENABLE_AGENTS="${ENABLE_AGENTS:-1}"
 ENABLE_AI_WAYBAR="${ENABLE_AI_WAYBAR:-1}"
-AGENTS_REPO="${AGENTS_REPO:-oornnery/.agents}"
 
 require_root
 
@@ -24,17 +20,6 @@ log::banner "Dev" "AI / LLM tools"
 
 if ! id "$USER_NAME" >/dev/null 2>&1; then
     die "User $USER_NAME doesn't exist"
-fi
-
-if [[ $ENABLE_CLAUDE_CODE -eq 1 ]]; then
-    log::step "Claude Code (Anthropic CLI)"
-    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ claude >/dev/null 2>&1; then
-        log::skip "claude already installed"
-    else
-        log::info "Installing via official installer"
-        sudo -u "$USER_NAME" -H bash -c 'curl -fsSL https://claude.ai/install.sh | bash'
-        log::ok "Claude Code installed (run 'claude login' to authenticate)"
-    fi
 fi
 
 if [[ $ENABLE_CODEX -eq 1 ]]; then
@@ -124,57 +109,19 @@ if [[ $ENABLE_RTK -eq 1 ]]; then
         sudo -u "$USER_NAME" -H bash -c '
             curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
         '
-        log::info "Initializing global config"
-        sudo -u "$USER_NAME" -H bash -c 'rtk init --global' || \
-            log::warn "rtk init --global failed (rerun manually after PATH refresh)"
-        log::ok "RTK installed (rerun 'rtk init --global' if PATH wasn't picked up)"
+        log::ok "RTK installed; use explicitly when compressed output helps."
     fi
 fi
 
 user_home="$(getent passwd "$USER_NAME" | cut -d: -f6)"
 
-# Helper: ensure Node.js + npm before installing any of the caveman tools.
+# Ensure Node.js + npm before installing the optional memory server.
 _ensure_node() {
-    if ! command -v node >/dev/null 2>&1; then
-        log::info "Installing nodejs + npm (Caveman ecosystem needs Node ≥18)"
+    if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+        log::info "Installing nodejs + npm (memory server prerequisite)"
         sudo pacman -S --needed --noconfirm nodejs npm
     fi
 }
-
-# ─── Caveman ecosystem (JuliusBrussee) ─────────────────────────────────────
-# Three complementary tools for token-efficient AI agent workflows:
-#   caveman → compress OUTPUT (what the agent says) via "caveman language"
-#   cavekit → spec-driven dev (SPEC.md + /ck:spec /ck:build /ck:check)
-#   cavemem → persistent memory across sessions (SQLite + MCP)
-
-if [[ $ENABLE_CAVEMAN -eq 1 ]]; then
-    log::step "Caveman (output token compression, ~65%)"
-    if [[ -d "$user_home/.claude/skills/caveman" ]]; then
-        log::skip "caveman skill already installed"
-    else
-        _ensure_node
-        log::info "Installing via official installer"
-        sudo -u "$USER_NAME" -H bash -c \
-            'curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash' \
-            || log::warn "caveman install failed (check network)"
-        log::ok "caveman installed — trigger with /caveman in Claude/Codex/Gemini"
-    fi
-fi
-
-if [[ $ENABLE_CAVEKIT -eq 1 ]]; then
-    log::step "Cavekit (spec-driven dev for Claude Code)"
-    if [[ -d "$user_home/.claude/plugins/cavekit" ]]; then
-        log::skip "cavekit plugin already installed"
-    else
-        _ensure_node
-        log::info "Installing via git clone → ~/.claude/plugins/cavekit"
-        sudo -u "$USER_NAME" -H bash -c '
-            mkdir -p "$HOME/.claude/plugins"
-            git clone --depth 1 https://github.com/JuliusBrussee/cavekit.git "$HOME/.claude/plugins/cavekit"
-        ' || log::warn "cavekit clone failed"
-        log::ok "cavekit installed — commands: /ck:spec /ck:build /ck:check"
-    fi
-fi
 
 if [[ $ENABLE_CAVEMEM -eq 1 ]]; then
     log::step "Cavemem (cross-session persistent memory + MCP)"
@@ -186,40 +133,21 @@ if [[ $ENABLE_CAVEMEM -eq 1 ]]; then
         sudo -u "$USER_NAME" -H bash -c '
             mkdir -p "$HOME/.local/npm"
             npm config set prefix "$HOME/.local/npm"
-            npm install -g cavemem
+            npm install -g cavemem@0.2.1
         ' || log::warn "cavemem npm install failed"
         log::ok "cavemem installed (viewer: cavemem viewer → http://localhost:37777)"
     fi
 
-    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ cavemem >/dev/null 2>&1; then
-        log::info "Registering Claude Code hooks + MCP"
-        sudo -u "$USER_NAME" -H bash -c 'cavemem install' \
-            || log::warn "cavemem install hooks failed — run 'cavemem install' manually"
-        log::info "Registering OpenCode hooks + MCP"
-        sudo -u "$USER_NAME" -H bash -c 'cavemem install --ide opencode' \
-            || log::warn "cavemem OpenCode hooks failed — run 'cavemem install --ide opencode' manually"
-    fi
+    log::info "MCP definitions are managed by the codex/ and opencode/ Stow packages."
 fi
 
 if [[ $ENABLE_AGENTS -eq 1 ]]; then
-    log::step "Custom agent skills (~/.agents)"
-    user_home="$(getent passwd "$USER_NAME" | cut -d: -f6)"
-    target="$user_home/.agents"
-
-    if [[ -d "$target/.git" ]]; then
-        log::info "Updating $target"
-        sudo -u "$USER_NAME" -H git -C "$target" pull --ff-only || \
-            log::warn "git pull failed (local changes? resolve manually)"
-    elif [[ -d "$target" ]]; then
-        log::warn "$target exists but is not a git repo — leaving alone"
+    log::step "Shared skills and client configuration from dotfiles"
+    dotfiles_dir="${DOTFILES_DIR:-$user_home/dotfiles}"
+    if [[ -f "$dotfiles_dir/scripts/ai-setup.sh" ]]; then
+        sudo -u "$USER_NAME" -H bash "$dotfiles_dir/scripts/ai-setup.sh" --apply
     else
-        if ! sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ gh >/dev/null 2>&1; then
-            log::info "Installing github-cli (gh) — needed to clone the agents repo"
-            sudo pacman -S --needed --noconfirm github-cli
-        fi
-        log::info "Cloning $AGENTS_REPO → $target"
-        sudo -u "$USER_NAME" -H gh repo clone "$AGENTS_REPO" "$target" || \
-            log::warn "gh clone failed — run 'gh auth login' then retry"
+        log::warn "Missing $dotfiles_dir/scripts/ai-setup.sh"
     fi
 fi
 

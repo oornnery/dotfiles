@@ -1,9 +1,9 @@
 ---
-description: Independently verify requirements and return PASS, FAIL, or BLOCKED.
+description: Verify requirements and implementation claims with evidence.
 agent: verifier
-subtask: true
+subtask: false
 ---
 
-Verify: $ARGUMENTS
+Verify requirements and implementation claims with evidence.
 
-Inspect actual diff and requirements. Run smallest sufficient checks and cite evidence.
+$ARGUMENTS

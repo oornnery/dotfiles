@@ -29,6 +29,9 @@ function M.setup(spec)
   end
 
   local function set_highlights()
+    if not vim.o.termguicolors then
+      return
+    end
     local bg = c.bg or "#1e1e2e"
     local fg = c.fg or "#cdd6f4"
     local surface = c.surface or bg
@@ -44,7 +47,6 @@ function M.setup(spec)
     local magenta = c.magenta or accent
     local orange = c.orange or yellow
 
-    vim.o.termguicolors = true
     vim.g.colors_name = "dotfiles"
 
     hl("Normal", { fg = fg, bg = bg })
@@ -308,6 +310,10 @@ function M.setup(spec)
 
   function M.apply()
     vim.o.background = M.background
+    if not vim.o.termguicolors then
+      vim.cmd.colorscheme("habamax")
+      return
+    end
     if M.colorscheme and not M._setting_colorscheme then
       M._setting_colorscheme = true
       pcall(vim.cmd.colorscheme, M.colorscheme)

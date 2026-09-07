@@ -40,3 +40,15 @@ map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Terminal normal mode" })
 
 -- Project root
 map("n", "<leader>rr", "<cmd>Root<cr>", { desc = "cd to project root" })
+
+-- Native equivalents when plugins are unavailable; no dead explorer bindings.
+if not vim.g.dotfiles_plugins or vim.g.dotfiles_basic_terminal then
+  map("n", "<leader>e", "<cmd>Lexplore<cr>", { desc = "Native explorer" })
+  map("n", "<leader>E", "<cmd>Explore<cr>", { desc = "Native directory" })
+end
+if not vim.g.dotfiles_plugins then
+  map("n", "<leader>ff", ":find ", { desc = "Find file" })
+  map("n", "<leader>fg", ":Search ", { desc = "Search files" })
+  map("n", "<leader>cf", "gg=G``", { desc = "Reindent buffer" })
+  map("n", "<leader>tt", "<cmd>Term<cr>", { desc = "Native terminal" })
+end

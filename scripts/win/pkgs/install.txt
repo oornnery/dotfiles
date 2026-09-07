@@ -73,8 +73,6 @@ game|Nefarius.HidHide
 game|ViGEm.ViGEmBus
 
 # === llms (AI clis + agents) ===
-llms|Anthropic.Claude
-llms|Anthropic.ClaudeCode
 llms|9PLM9XGG6VKS                   # Codex (msstore)
 llms|ElementLabs.LMStudio
 llms|Ollama.Ollama

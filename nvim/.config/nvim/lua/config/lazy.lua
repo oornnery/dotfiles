@@ -1,4 +1,8 @@
 -- Bootstrap lazy.nvim and load plugin specs from lua/plugins/*.lua.
+-- Explicit offline/native mode is useful on rescue hosts and for diagnosis.
+if vim.env.DOTFILES_NVIM_PLUGINS == "0" then
+  return false
+end
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -15,8 +19,10 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
       { out, "WarningMsg" },
     }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
+    vim.schedule(function()
+      vim.notify("Continuing with native editing; install lazy.nvim when online.", vim.log.levels.WARN)
+    end)
+    return false
   end
 end
 vim.opt.rtp:prepend(lazypath)
@@ -24,7 +30,7 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = { { import = "plugins" } },
   install = { colorscheme = { "habamax" } },
-  checker = { enabled = true, notify = false },
+  checker = { enabled = not vim.g.dotfiles_basic_terminal, notify = false },
   performance = {
     cache = { enabled = true },
     rtp = {
@@ -40,3 +46,4 @@ require("lazy").setup({
     },
   },
 })
+return true

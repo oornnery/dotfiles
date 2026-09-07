@@ -1,10 +1,9 @@
 ---
-description: Implement a complete repository task with the default GLM-5.3 build agent.
+description: Implement the requested task completely, with appropriate verification.
 agent: build
 subtask: false
 ---
 
-Implement: $ARGUMENTS
+Implement the requested task completely, with appropriate verification.
 
-Read repository contract, load relevant skills, make smallest complete change, add
-regression coverage, and run focused then relevant checks. Do not stop at a plan.
+$ARGUMENTS

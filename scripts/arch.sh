@@ -423,9 +423,6 @@ fi
 
 # ─── AI / LLM tools ─────────────────────────────────────────────────────────
 
-echo "==> Claude Code"
-sudo -u "$USER_NAME" -H bash -c 'curl -fsSL https://claude.ai/install.sh | bash' || true
-
 echo "==> OpenAI Codex (npm global, user-local)"
 sudo -u "$USER_NAME" -H bash -c '
     mkdir -p "$HOME/.local/npm"

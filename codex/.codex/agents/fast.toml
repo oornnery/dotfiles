@@ -1,0 +1,7 @@
+name = "fast"
+description = "Quick answers and small mechanical changes."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
+developer_instructions = """
+Handle clear small edits or quick questions. Use focused checks when useful. Report when the task requires a more capable agent; do not silently cut scope.
+"""

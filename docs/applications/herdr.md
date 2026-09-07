@@ -40,6 +40,7 @@ herdr --help       # full CLI reference
 ```
 
 Inside herdr:
+
 - `prefix+q` — detach (prefix defaults to `Ctrl+b`)
 - Click panes, drag borders, right-click for menus
 - Sidebar shows agent state across all workspaces
@@ -47,23 +48,36 @@ Inside herdr:
 ## Integrations
 
 ```bash
-herdr integration install claude    # Claude Code session restore
+herdr integration install codex     # Codex agent state/session integration
 herdr integration install opencode  # OpenCode session restore
 ```
 
 Supported agents out of the box: claude code, codex, opencode, pi, droid, grok,
 github copilot CLI, cursor agent, devin, kimi code CLI, and more.
 
+The versioned setup installs integrations only for Codex and OpenCode. To check
+local configuration and integration compatibility without restarting sessions:
+
+```bash
+herdr config check
+herdr integration status
+herdr plugin list
+```
+
+The configured OS notifications may not reach your Windows desktop over SSH.
+For an in-terminal alternative, set `[ui.toast] delivery = "herdr"`. Compare editor
+behavior outside Herdr before attributing a MobaXterm rendering issue to Neovim.
+
 ## Runtime files
 
 These live in `~/.config/herdr/` at runtime and are **not** tracked in dotfiles:
 
-| File | Purpose |
-|---|---|
-| `session.json` | Session state (auto-saved) |
-| `session-history.json` | Pane screen history (opt-in) |
-| `herdr.log` / `herdr-server.log` / `herdr-client.log` | Logs |
-| `*.sock` | Unix sockets |
+| File                                                  | Purpose                      |
+| ----------------------------------------------------- | ---------------------------- |
+| `session.json`                                        | Session state (auto-saved)   |
+| `session-history.json`                                | Pane screen history (opt-in) |
+| `herdr.log` / `herdr-server.log` / `herdr-client.log` | Logs                         |
+| `*.sock`                                              | Unix sockets                 |
 
 ## See also
 

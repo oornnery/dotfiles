@@ -2,6 +2,7 @@
 return {
   {
     "nvim-neo-tree/neo-tree.nvim",
+    cond = not vim.g.dotfiles_basic_terminal,
     branch = "v3.x",
     cmd = "Neotree",
     dependencies = {
@@ -67,6 +68,7 @@ return {
 
   {
     "stevearc/oil.nvim",
+    lazy = false,
     dependencies = { "nvim-tree/nvim-web-devicons" },
     cmd = "Oil",
     keys = {
@@ -81,8 +83,8 @@ return {
       },
     },
     opts = {
-      default_file_explorer = true,
-      columns = { "icon" },
+      default_file_explorer = not vim.g.dotfiles_basic_terminal,
+      columns = vim.g.dotfiles_basic_terminal and {} or { "icon" },
       view_options = {
         natural_order = "fast",
         show_hidden = false,
@@ -167,6 +169,7 @@ return {
 
   {
     "sphamba/smear-cursor.nvim",
+    cond = not vim.g.dotfiles_basic_terminal,
     lazy = false,
     opts = {
       smear_between_buffers = true,

@@ -10,26 +10,6 @@ if (-not (Have-Command node)) {
     Log-Warn 'node not found - run dev/languages first (some fallbacks need npm)'
 }
 
-# ── Claude Code (CLI) ──────────────────────────────────────
-# Prefer official winget package; fall back to claude.ai/install.ps1.
-if ($Env:ENABLE_CLAUDE_CODE -ne '0') {
-    if (Have-Command claude) {
-        Log-Skip 'claude already installed'
-    } else {
-        Winget-Install 'Anthropic.ClaudeCode'
-        if (-not (Have-Command claude)) {
-            Log-Info 'winget install failed - trying claude.ai/install.ps1'
-            try { Invoke-Expression (Invoke-RestMethod 'https://claude.ai/install.ps1') }
-            catch { Log-Warn "claude install failed: $($_.Exception.Message)" }
-        }
-    }
-}
-
-# ── Claude (desktop) ───────────────────────────────────────
-if ($Env:ENABLE_CLAUDE_DESKTOP -ne '0') {
-    Winget-Install 'Anthropic.Claude'
-}
-
 # ── Codex CLI ──────────────────────────────────────────────
 # OpenAI.Codex (winget) is the official CLI, replaces msstore + npm fallback.
 if ($Env:ENABLE_CODEX -ne '0') {

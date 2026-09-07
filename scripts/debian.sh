@@ -235,9 +235,6 @@ rm -rf /tmp/neovim
 
 # ─── AI / LLM tools ─────────────────────────────────────────────────────────
 
-echo "==> Claude Code"
-curl -fsSL https://claude.ai/install.sh | bash
-
 echo "==> OpenAI Codex (npm global)"
 if command -v npm >/dev/null; then
   mkdir -p "$HOME/.local/npm"

@@ -7,10 +7,10 @@ without neovim). Neovim is the daily driver. Config in `~/.vimrc`.
 
 | Bind         | Action                  |
 | ------------ | ----------------------- |
-| `,`          | Leader key              |
-| `,w`         | `:w` (save)             |
-| `,q`         | `:q` (quit)             |
-| `,x`         | `:x` (save + quit)      |
+| `<Space>`    | Leader key              |
+| `<Space>w`   | `:w` (save)             |
+| `<Space>q`   | `:q` (quit)             |
+| `<Space>x`   | `:x` (save + quit)      |
 | `<Esc><Esc>` | Clear search highlight  |
 
 ## Modes
@@ -137,7 +137,7 @@ Example: `ci"` → change text inside quotes. `dap` → delete paragraph.
 
 | Tip                                  | Why it helps                  |
 | ------------------------------------ | ----------------------------- |
-| Leader is `,` (close to right hand)  | Faster than default `\`       |
+| Leader is `Space`, as in Neovim      | Shared editing shortcuts      |
 | `<Esc><Esc>` clears `hlsearch`       | Visual quiet after `/`        |
 | `"+y` and `"+p` for system clipboard | Cross-app copy/paste          |
 | Text objects (`ci"`, `dap`)          | Less precise cursoring needed |

@@ -8,7 +8,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
-NVIM_DISTRO="${NVIM_DISTRO:-mini}"
+NVIM_DISTRO="${NVIM_DISTRO:-native}"
 
 require_root
 
@@ -28,9 +28,9 @@ case "$NVIM_DISTRO" in
         pkg="nvim.lazy"
         ;;
     *)
-        log::warn "Unknown NVIM_DISTRO=$NVIM_DISTRO; using mini"
-        NVIM_DISTRO="mini"
-        pkg="nvim.mini"
+        log::warn "Unknown NVIM_DISTRO=$NVIM_DISTRO; using native"
+        NVIM_DISTRO="native"
+        pkg="nvim"
         ;;
 esac
 
@@ -57,7 +57,7 @@ done
 
 stow_safe "$pkg"
 
-# The lazy.nvim variant auto-installs plugins on first launch. Native Neovim has no plugin
-# manager, and mini.nvim keeps its own lightweight setup.
+# The maintained nvim/ package uses lazy.nvim. "native" is its historical
+# selector name, not a promise of no plugins. Vim's native package is plugin-free.
 
 log::ok "Neovim ($NVIM_DISTRO) setup completed"

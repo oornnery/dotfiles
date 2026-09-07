@@ -2,6 +2,7 @@
 return {
   {
     "akinsho/bufferline.nvim",
+    cond = not vim.g.dotfiles_basic_terminal,
     version = "*",
     event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -74,6 +75,7 @@ return {
 
   {
     "rcarriga/nvim-notify",
+    cond = not vim.g.dotfiles_basic_terminal,
     event = "VeryLazy",
     opts = function()
       local bg = "#1e1e2e"
@@ -99,6 +101,7 @@ return {
 
   {
     "folke/noice.nvim",
+    cond = not vim.g.dotfiles_basic_terminal,
     cmd = "Noice",
     event = "VeryLazy",
     dependencies = {
@@ -237,7 +240,7 @@ return {
       delay = function(ctx)
         return ctx.plugin and 0 or 200
       end,
-      icons = { mappings = true },
+      icons = { mappings = not vim.g.dotfiles_basic_terminal },
       plugins = {
         marks = true,
         registers = true,

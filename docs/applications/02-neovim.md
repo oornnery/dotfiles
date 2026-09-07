@@ -1,73 +1,74 @@
-# Neovim
+# Neovim and Vim
 
-Three configs live side-by-side as mutually exclusive stow packages:
+The maintained daily config is `nvim/.config/nvim/` (Neovim 0.12+, lazy.nvim).
+The Arch selector calls this package `NVIM_DISTRO="native"` for historical reasons;
+it does have plugins. `nvim.mini/` and `nvim.lazy/` are alternative, mutually
+exclusive Stow packages, not layers required by the active setup.
 
-| Package      | Distro       | Shape |
-| ------------ | ------------ | ----- |
-| `nvim/`      | native       | Built-in Neovim only, no plugin manager |
-| `nvim.lazy/` | lazy.nvim    | Sources `nvim/` first, then adds plugins |
-| `nvim.mini/` | mini.nvim    | Separate mini.nvim-focused distro |
+`vim/.vimrc` is the native-only companion (`VIM_DISTRO="native"`). It uses Vim's
+built-in netrw, completion, quickfix, terminal, comments and statusline; no external
+plugins, language servers or AI extensions. Functional equivalents share shortcuts,
+but native reindentation is not an LSP formatter and `:find` is not a fuzzy picker.
 
-All target `~/.config/nvim`, so only one should be stowed at a time.
+## Shared workflow
 
-## Pick A Distro
+Leader is `Space` in both editors.
 
-Edit [`scripts/arch/arch.conf`](../../../scripts/arch/arch.conf):
+| Shortcut                              | Neovim                             | Vim (no external plugins)  |
+| ------------------------------------- | ---------------------------------- | -------------------------- |
+| `<Space>w`, `<Space>q`, `<Space>x`    | Save, quit, save+quit              | Same                       |
+| `<Space>e`                            | Neo-tree; netrw in basic mode      | netrw sidebar              |
+| `<Space>ff`                           | fzf files                          | Native `:find`             |
+| `<Space>fg`                           | fzf live grep                      | `:Search` into quickfix    |
+| `<Space>bb`, `[b`, `]b`               | Switch buffers                     | Same                       |
+| `<Space>sv`, `<Space>sh`              | Split windows                      | Same                       |
+| `<Space>rr`                           | Change to project root             | Same                       |
+| `<Space>cf`                           | Configured formatter               | Native reindentation       |
+| `gcc`, visual `gc`                    | Comment toggle                     | Native comment helper      |
+| `<Space>tt`, `<Space>tv`, `<Space>th` | Terminal float/vertical/horizontal | Native terminal splits     |
+| `<Space>?`                            | Cheatsheet                         | Cheatsheet via `dots help` |
+
+## MobaXterm / limited terminals
+
+Start on the remote host with:
 
 ```bash
-NVIM_DISTRO="native"
-# NVIM_DISTRO="lazy"
-# NVIM_DISTRO="mini"
+DOTFILES_TERMINAL=basic nvim
+DOTFILES_TERMINAL=basic vim
 ```
 
-Then re-run [`dev/stow.sh`](../../../scripts/arch/dev/stow.sh):
+Basic mode uses terminal colors, an ASCII statusline/list markers and no mouse
+capture. Neovim keeps editing/LSP plugins but skips animated cursor, Noice/notify,
+bufferline, Neo-tree and rendered Markdown. Oil/fzf omit file icons. Terminal key
+sequences have a 100 ms timeout instead of the previous 10 ms.
+
+Automatic basic mode recognizes `TERM_PROGRAM` containing `moba` and Linux TTYs.
+SSH often forwards only `TERM`, so set the override on the remote host when needed.
+Use `DOTFILES_TERMINAL=full` to override detection. This does not force RGB colors.
+Do not globally fake `TERM` or `COLORTERM`; they must describe the actual terminal.
+For full icon rendering, configure a Nerd Font in the Windows terminal itself.
+
+Compare inside/outside Herdr or tmux. The tmux config still advertises RGB and
+extended keys for generic xterm clients; test directly if display or keys differ.
+MobaXterm visual correctness must be confirmed on Windows, not by a headless test.
+
+For a no-plugin baseline without downloading anything:
 
 ```bash
-./scripts/arch/arch.sh dev/stow
+DOTFILES_TERMINAL=basic DOTFILES_NVIM_PLUGINS=0 nvim
 ```
 
-## Native Base
+If lazy.nvim cannot be downloaded on a new host, startup now continues with native
+editing and a warning, instead of waiting for a key and exiting. In regular mode,
+Oil loads at startup so opening a directory does not depend on first invoking a key.
 
-The native config is the source of truth for daily editor behavior:
+## Verification
 
-- Leader is `Space`
-- Custom statusline and theme loader
-- `:Helpme`, `:Cheatsheet`, and `<Space>?`
-- Netrw explorer, quickfix search, terminal split, sessions
-- Native comment toggling and project-root helper
+```bash
+python3 scripts/test-editors.py
+```
 
-## lazy.nvim Variant
-
-`nvim.lazy/` keeps the same native options, keymaps, statusline, cheatsheet,
-and theme behavior. It only adds plugin extras through lazy.nvim, such as:
-
-- `mini.nvim` modules for surround, comment, pairs, indentscope, and animation
-- Harpoon pinned-file navigation
-- render-markdown.nvim
-- nvim-ufo folds
-- dial.nvim smart increment/decrement
-- smear-cursor.nvim cursor effect
-
-Run `:Lazy` to manage plugins.
-
-## mini.nvim Variant
-
-`nvim.mini/` remains a separate mini.nvim distro. Use it when you want a
-plugin-centered config instead of the strict native base.
-
-## Common Bindings
-
-| Bind          | Action |
-| ------------- | ------ |
-| `<Space>w`    | Write file |
-| `<Space>q`    | Quit window |
-| `<Space>e`    | Toggle netrw explorer |
-| `<Space>ff`   | Native `:find` file lookup |
-| `<Space>sg`   | Project search into quickfix |
-| `<Space>bb`   | Switch buffer |
-| `[b` / `]b`   | Previous / next buffer |
-| `[q` / `]q`   | Previous / next quickfix item |
-| `<Space>sv`   | Vertical split |
-| `<Space>sh`   | Horizontal split |
-| `<Space>tt`   | Terminal split |
-| `<Space>?`    | Cheatsheet |
+The tests cover both editors in full/basic native mode: startup, shared mappings,
+Python comments/indentation, project-root navigation and directory browsing. They
+do not emulate MobaXterm or contact an AI provider. See the
+[Neovim guide](../../nvim/.config/nvim/README.md) for the normal plugin stack.

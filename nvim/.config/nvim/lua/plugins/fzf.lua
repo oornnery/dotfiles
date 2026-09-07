@@ -18,6 +18,8 @@ return {
     },
     opts = {
       "fzf-vim",
+      file_icons = not vim.g.dotfiles_basic_terminal,
+      git_icons = not vim.g.dotfiles_basic_terminal,
       winopts = {
         width = 0.8,
         height = 0.6,

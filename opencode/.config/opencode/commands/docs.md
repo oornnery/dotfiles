@@ -1,10 +1,9 @@
 ---
-description: Write or synchronize verified project documentation.
-agent: docs-writer
+description: Update documentation from verified code and configuration.
+agent: fast
 subtask: false
 ---
 
-Documentation task: $ARGUMENTS
+Update documentation from verified code and configuration.
 
-Verify every technical claim against current code/config. Keep commands executable and
-audience clear.
+$ARGUMENTS

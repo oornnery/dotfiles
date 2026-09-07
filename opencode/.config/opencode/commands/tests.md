@@ -1,10 +1,9 @@
 ---
-description: Design and implement focused regression, unit, integration, or async tests.
-agent: test-writer
+description: Add meaningful tests for the requested behavior using the existing test setup.
+agent: build
 subtask: false
 ---
 
-Test task: $ARGUMENTS
+Add meaningful tests for the requested behavior using the existing test setup.
 
-Inspect behavior and existing style. Add smallest durable tests, mock only external
-boundaries, and run focused then relevant suites.
+$ARGUMENTS

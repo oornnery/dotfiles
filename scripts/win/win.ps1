@@ -60,7 +60,7 @@ $descriptions = [ordered]@{
     'dev/shell'                   = 'link pwsh profile'
     'dev/languages'               = 'Python + Node + Go + Rust + Bun + uv + pnpm + fnm + Lua + Zig + cmake'
     'dev/editor'                  = 'Neovim + VSCode + configs'
-    'dev/llms'                    = 'Claude Code + Codex (+ Ollama optional)'
+    'dev/llms'                    = 'Codex (+ Ollama optional)'
     'dev/wsl'                     = 'WSL2 + .wslconfig'
 
     'game/stack'                  = 'launchers (Steam + Epic + EA + LoL + Minecraft + ...)'

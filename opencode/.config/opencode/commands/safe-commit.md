@@ -1,6 +1,7 @@
 ---
 description: Create a reviewed Conventional Commit from intended changes without pushing.
 agent: build
+subtask: false
 ---
 
 Create a safe commit for: $ARGUMENTS

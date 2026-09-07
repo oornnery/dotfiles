@@ -108,3 +108,7 @@ opencode/.config/opencode/opencode-notifier-state.json
 opencode/.config/opencode/.caveman-active
 opencode/.config/opencode/opencode.jsonc.bak-*
 opencode/.config/opencode/package-lock.json
+
+# AI runtime state and archived variants are never configuration.
+opencode/.config/opencode/artifact-index/
+agents/.agents/skills/impeccable/scripts/bin/

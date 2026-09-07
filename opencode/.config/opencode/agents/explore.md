@@ -1,10 +1,8 @@
 ---
-description: Fast read-only local codebase explorer returning concise file and line evidence.
+description: Fast read-only discovery with file and symbol evidence.
 mode: subagent
-model: opencode-go/gpt-5.6-luna
-temperature: 0.1
-steps: 18
-color: secondary
+model: openai/gpt-5.6-luna
+reasoningEffort: low
 permission:
   "*": deny
   read:
@@ -17,10 +15,16 @@ permission:
   list: allow
   lsp: allow
   skill: allow
+  question: allow
+  webfetch: allow
+  websearch: allow
+  bash:
+    "*": deny
+    "git status*": allow
+    "git diff*": allow
+    "git log*": allow
+    "git show*": allow
 ---
 
-Locate definitions, references, callers, tests, configuration, and data flow. Do not
-edit, shell, browse web, propose broad fixes, or delegate.
-
-Lead with answer. Return concise `path:line — symbol — relevance` rows, grouped as
-Defs/Callers/Tests/Config when useful. State no match rather than guessing.
+Locate definitions, references, callers, tests and configuration. Answer with concise
+path/line evidence. No edits, redesigns or broad browsing. State when no match exists.

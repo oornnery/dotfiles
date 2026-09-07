@@ -2,6 +2,7 @@
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
+    cond = not vim.g.dotfiles_basic_terminal,
     ft = { "markdown", "codecompanion" },
     cmd = { "RenderMarkdown" },
     dependencies = {

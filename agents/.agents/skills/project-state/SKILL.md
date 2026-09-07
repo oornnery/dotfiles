@@ -1,20 +1,12 @@
 ---
 name: project-state
-description: Maintain durable SPEC, DESIGN, TODO, .spec, and .mem state without storing secrets or noisy transcripts.
+description: Record durable project decisions or handoff context when the user needs work to continue across sessions.
 ---
 
-# Project state
+Use the repository's existing source of truth. Record only changed decisions,
+evidence, remaining work and the next useful action. Keep facts separate from
+assumptions; link to code and checks instead of copying logs.
 
-Use for non-trivial work whose decisions, progress, checks, or open loops must survive
-sessions.
-
-- `SPEC.md`: objective, scope, requirements, success criteria.
-- `DESIGN.md`: architecture, API, UI, data, trade-offs.
-- `TODO.md`: current tasks and completion.
-- `.spec/state.md`: active milestone and validated state.
-- `.spec/handoff.md`: concise continuation context.
-- `.mem/decisions.md`: stable decisions and rationale.
-- `.mem/open-loops.md`: unresolved but durable questions.
-
-Store validated facts and stable decisions. Do not store secrets, guesses, raw chat,
-ephemeral logs, or duplicated documentation. Update only when state materially changes.
+Do not require SPEC.md, FORMAT.md, approval gates, commits or a particular folder
+layout. Create one short handoff document only when existing docs cannot carry the
+needed context. Never duplicate the same state in SPEC/DESIGN/TODO/.spec/.mem.

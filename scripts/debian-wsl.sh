@@ -115,14 +115,13 @@ EOF
 fi
 
 # ─── External installers (curl|sh) — run as the user ─────────────────────────
-log "User-level toolchain (uv, starship, zoxide, neovim, claude)"
+log "User-level toolchain (uv, starship, zoxide, neovim)"
 sudo -u "$USERNAME" -H bash -lc '
   set -e
   export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
   command -v uv       >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
   command -v starship >/dev/null || curl -fsSL https://starship.rs/install.sh | sh -s -- -y
   command -v zoxide   >/dev/null || curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-  command -v claude   >/dev/null || curl -fsSL https://claude.ai/install.sh | bash
 ' || warn "some user-level installers failed (rerun later)"
 
 # Neovim from source (Debian apt nvim is old) — optional, can be slow.

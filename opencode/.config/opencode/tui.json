@@ -18,7 +18,6 @@
       }
     ],
     "opencode-statusline@2.0.4",
-    "opencode-worktree-manager@0.1.7",
     "opencode-project-panel@0.1.4",
     "opencode-subagent-statusline@1.2.1"
   ]

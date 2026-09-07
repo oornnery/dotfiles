@@ -260,18 +260,6 @@
       "ManagerName": "Winget"
     },
     {
-      "Id": "Anthropic.ClaudeCode",
-      "Name": "Claude Code",
-      "Source": "winget",
-      "ManagerName": "Winget"
-    },
-    {
-      "Id": "Anthropic.Claude",
-      "Name": "Claude",
-      "Source": "winget",
-      "ManagerName": "Winget"
-    },
-    {
       "Id": "9PLM9XGG6VKS",
       "Name": "Codex",
       "Source": "winget",

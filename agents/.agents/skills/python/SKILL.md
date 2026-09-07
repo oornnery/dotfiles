@@ -31,10 +31,6 @@ and tests, then CI. Existing project decisions override these defaults.
 
 ## Verification
 
-Use project commands. Typical ladder:
-
-1. focused test;
-2. relevant suite;
-3. Ruff/linter;
-4. ty/mypy/pyright;
-5. package/build check when affected.
+Use the project's commands for the affected behavior. Packaging changes need an
+artifact/import check; typing changes need the configured checker. Ordinary edits
+do not require running every tool or the full suite after focused checks suffice.

@@ -8,6 +8,10 @@ scriptencoding utf-8
 " Leader ----------------------------------------------------------------------
 let mapleader = " "
 let maplocalleader = "\\"
+let s:terminal_profile = tolower($DOTFILES_TERMINAL)
+let g:dotfiles_basic_terminal = s:terminal_profile ==# 'basic'
+      \ || (index(['', 'auto'], s:terminal_profile) >= 0
+      \ && (tolower($TERM_PROGRAM) =~# 'moba' || $TERM ==# 'linux'))
 
 " Built-in runtime plugins ----------------------------------------------------
 filetype plugin indent on
@@ -43,8 +47,17 @@ set breakindent
 if exists('+signcolumn')
   set signcolumn=yes
 endif
-if has('termguicolors')
+if has('termguicolors') && !g:dotfiles_basic_terminal
+      \ && (has('gui_running') || $COLORTERM =~# 'truecolor\|24bit'
+      \ || $TERM =~# 'direct\|truecolor\|kitty\|ghostty')
   set termguicolors
+endif
+if g:dotfiles_basic_terminal
+  set mouse=
+  set listchars=tab:>\ ,trail:.,nbsp:+,extends:>,precedes:<
+  if exists('+t_ut')
+    set t_ut=
+  endif
 endif
 silent! colorscheme habamax
 
@@ -86,6 +99,7 @@ endif
 " Performance / behavior ------------------------------------------------------
 set updatetime=300
 set timeoutlen=500
+set ttimeout ttimeoutlen=100
 set ttyfast
 
 " Spelling: enable per filetype below.
@@ -163,8 +177,11 @@ let &statusline = join([
 
 " Active theme drop-in written by the `theme` command.
 " It is loaded after the statusline so it can override status colors.
-if filereadable(expand('~/.vim/theme.vim'))
+if !g:dotfiles_basic_terminal && filereadable(expand('~/.vim/theme.vim'))
   source ~/.vim/theme.vim
+endif
+if g:dotfiles_basic_terminal && has('termguicolors')
+  set notermguicolors
 endif
 
 " Commands --------------------------------------------------------------------
@@ -173,6 +190,7 @@ command! -nargs=1 Search execute 'silent! vimgrep /' . escape(<q-args>, '/\') . 
 command! Term botright split | resize 14 | terminal
 command! MkSession mksession! .session.vim
 command! LoadSession source .session.vim
+command! Root call <SID>ProjectRoot()
 command! -nargs=? Helpme call <SID>OpenHelpme(<q-args> ==# '' ? 'vim' : <q-args>)
 command! -nargs=? Cheatsheet call <SID>OpenHelpme(<q-args> ==# '' ? 'vim' : <q-args>)
 
@@ -185,12 +203,20 @@ nnoremap <leader>e :Lexplore<CR>
 nnoremap <leader>E :Explore<CR>
 nnoremap <leader>ff :find<Space>
 nnoremap <leader>sg :Search<Space>
+nnoremap <leader>fg :Search<Space>
+nnoremap <leader>fb :ls<CR>:buffer<Space>
+nnoremap <leader>fh :help<Space>
+nnoremap <leader>rr :Root<CR>
+nnoremap - :Explore<CR>
+nnoremap <leader>o :Explore<CR>
 
 " Buffers / quickfix
 nnoremap <leader>bb :ls<CR>:buffer<Space>
 nnoremap <leader>bd :bdelete<CR>
 nnoremap [b :bprevious<CR>
 nnoremap ]b :bnext<CR>
+nnoremap <S-h> :bprevious<CR>
+nnoremap <S-l> :bnext<CR>
 nnoremap [q :cprevious<CR>
 nnoremap ]q :cnext<CR>
 nnoremap <leader>co :copen<CR>
@@ -212,6 +238,7 @@ xnoremap <silent> gc :<C-u>call <SID>ToggleComment(line("'<"), line("'>"))<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap <leader>f gg=G``
+nnoremap <leader>cf gg=G``
 xnoremap <leader>f =
 nnoremap <leader>tw :setlocal wrap!<CR>
 nnoremap <leader>ts :setlocal spell!<CR>
@@ -219,9 +246,28 @@ nnoremap <leader>? :Cheatsheet vim<CR>
 
 " Terminal
 nnoremap <leader>tt :Term<CR>
+nnoremap <leader>th :Term<CR>
+nnoremap <leader>tv :botright vertical terminal<CR>
 tnoremap <Esc><Esc> <C-\><C-n>
 
 " Functions -------------------------------------------------------------------
+function! s:ProjectRoot() abort
+  let l:dir = empty(expand('%:p')) ? getcwd() : expand('%:p:h')
+  while 1
+    for l:marker in ['.git', 'pyproject.toml', 'package.json', 'Cargo.toml', 'go.mod', 'Makefile']
+      if isdirectory(l:dir . '/' . l:marker) || filereadable(l:dir . '/' . l:marker)
+        execute 'cd ' . fnameescape(l:dir)
+        return
+      endif
+    endfor
+    let l:parent = fnamemodify(l:dir, ':h')
+    if l:parent ==# l:dir
+      return
+    endif
+    let l:dir = l:parent
+  endwhile
+endfunction
+
 function! s:TrimTrailingWhitespace() abort
   if index(['markdown', 'text', 'gitcommit'], &filetype) >= 0
     return

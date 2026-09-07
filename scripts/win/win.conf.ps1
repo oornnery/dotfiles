@@ -12,8 +12,6 @@ $Env:THEME = 'catppuccin-mocha'
 $Env:NVIM_DISTRO = 'lazy'
 
 # Dev: AI clis + desktop apps
-$Env:ENABLE_CLAUDE_CODE     = '1'   # Anthropic.ClaudeCode (CLI)
-$Env:ENABLE_CLAUDE_DESKTOP  = '1'   # Anthropic.Claude (desktop)
 $Env:ENABLE_CODEX           = '1'   # OpenAI.Codex (CLI, winget)
 $Env:ENABLE_CODEX_DESKTOP   = '1'   # Codex GUI (msstore 9PLM9XGG6VKS)
 $Env:ENABLE_ANTIGRAVITY     = '1'   # Google.AntigravityIDE

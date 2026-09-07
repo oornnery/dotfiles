@@ -24,8 +24,8 @@ if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ herdr >/dev/null 2>&1; th
     log::skip "herdr already installed ($(sudo -u "$USER_NAME" -H bash -c 'herdr --version 2>/dev/null || echo unknown'))"
 else
     log::info "Installing via official installer"
-    sudo -u "$USER_NAME" -H bash -c 'curl -fsSL https://herdr.dev/install.sh | sh' || \
-        log::warn "Herdr install failed (check network / installer)"
+    sudo -u "$USER_NAME" -H bash -o pipefail -c 'curl -fsSL https://herdr.dev/install.sh | sh' || \
+        die "Herdr install failed (check network / installer)"
     log::ok "Herdr installed (run 'herdr' to launch)"
 fi
 

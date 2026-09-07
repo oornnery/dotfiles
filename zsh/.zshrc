@@ -484,10 +484,6 @@ if command -v opencode >/dev/null 2>&1; then
   source <(opencode completion zsh)
 fi
 
-# >>> oh-my-opencode-slim background subagents >>>
-export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
-# <<< oh-my-opencode-slim background subagents <<<
-
 # Bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"

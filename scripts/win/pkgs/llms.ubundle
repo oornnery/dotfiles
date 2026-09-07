@@ -1,8 +1,6 @@
 {
   "export_version": 3,
   "packages": [
-    { "Id": "Anthropic.Claude",                "Name": "Claude (desktop)",      "Source": "winget",  "ManagerName": "Winget" },
-    { "Id": "Anthropic.ClaudeCode",            "Name": "Claude Code (CLI)",     "Source": "winget",  "ManagerName": "Winget" },
     { "Id": "OpenAI.Codex",                    "Name": "Codex (CLI)",           "Source": "winget",  "ManagerName": "Winget" },
     { "Id": "9PLM9XGG6VKS",                    "Name": "Codex (desktop)",       "Source": "msstore", "ManagerName": "Winget" },
     { "Id": "Google.AntigravityIDE",           "Name": "Antigravity IDE",       "Source": "winget",  "ManagerName": "Winget" },

@@ -1,37 +1,11 @@
-# {{project-name}} agent guide
+# {{project-name}}
 
-## Sources of truth
+- Repository map: {{important-paths}}
+- Setup: {{command}}
+- Focused tests: {{command}}
+- Other required checks: {{commands}}
+- Source of truth for behavior and architecture: {{existing-docs}}
+- Local constraints: {{non-obvious-invariants}}
 
-- Product behavior: `{{path-or-document}}`
-- Architecture/contracts: `{{path-or-document}}`
-- Development commands: `{{path-or-document}}`
-- Current milestone: `.spec/state.md` when present
-
-Read source and tests before editing. Query `.mindmodel/` when present.
-
-## Repository map
-
-- `{{path}}`: {{purpose}}
-- `{{path}}`: {{purpose}}
-
-## Commands
-
-- Setup: `{{command}}`
-- Test: `{{command}}`
-- Lint: `{{command}}`
-- Typecheck: `{{command}}`
-- Build: `{{command}}`
-
-## Constraints
-
-- Preserve {{critical invariant}}.
-- Follow patterns in {{representative path}}.
-- Validate {{untrusted boundary}} before domain logic.
-- Never commit secrets or generated/private artifacts: {{paths}}.
-
-## Definition of done
-
-- Requested behavior implemented with smallest correct diff.
-- Relevant focused and aggregate checks pass.
-- Docs/config updated when public behavior or operations changed.
-- Remaining risk or blocked evidence stated explicitly.
+Replace placeholders with verified facts. Keep only instructions that change how
+work is done in this repository.
