@@ -72,5 +72,36 @@ hooks = true
 
 [hooks.state]
 
+# Keep the newer shared ~/.agents/skills copies; retain unique plugin skills.
+# Recheck these paths after upgrading the Cloudflare plugin (currently 0.1.2).
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/agents-sdk/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/cloudflare/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/durable-objects/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/sandbox-sdk/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/web-perf/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/workers-best-practices/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/wrangler/SKILL.md"
+enabled = false
+
 [hooks.state."/home/oornnery/.codex/hooks.json:session_start:0:0"]
 trusted_hash = "sha256:375f1427ce7a98088c7435ee6fe75bf9bf780f8aaea85728eabc144d972e3acf"

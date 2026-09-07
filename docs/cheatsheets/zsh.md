@@ -3,6 +3,40 @@
 Zsh + Oh-My-Zsh + Starship prompt. Config in `~/.zshrc`, functions in
 `~/.zsh_functions`. Aliases below are the ones defined in this dotfiles repo.
 
+## Startup and maintenance
+
+The `zsh` Stow package owns `.zshrc` and `.zshenv`. Open a new terminal after
+changes; repeatedly sourcing `.zshrc` can register duplicate plugin hooks.
+
+- PATH entries are deduplicated while preserving their first occurrence.
+- OpenCode completions are cached in `~/.cache/zsh/opencode-completion.zsh`
+  (or `$XDG_CACHE_HOME/zsh`). Replacing the binary invalidates the cache.
+  Run `opencode-completion-refresh` to rebuild manually. The first load after
+  installation or upgrade still pays the generation cost.
+- fnm, Atuin and mise generate their initialization code inside the deferred
+  callback. direnv is registered synchronously for the first prompt.
+- forgit installation belongs to `zsh/setup.sh`, not shell startup. An incomplete
+  checkout is preserved and skipped until repaired; other Antigen bundles retain
+  their existing installation behavior.
+- Vi mode is displayed by the shell prompt. No mode label is sent as Zellij pane
+  input.
+
+Regression checks: `python3 scripts/test-zsh.py` and
+`zsh -n zsh/.zshrc zsh/.zshenv`. The setup script backs up old compiled `.zwc`
+files too, because a newer compiled file can override an edited startup file.
+
+Keep any local migration backups outside this repository. Private
+`~/.config/ai/env` is not managed by Stow. Vim, Neovim and Zsh links passed a
+conflict-free Stow preview.
+
+Performance measurements are machine-dependent: five warm non-TTY loads had
+medians of 1.64 s for the new configuration and 1.65 s for the previous active
+file, both inheriting the now-deduplicated PATH. That is not evidence of a
+meaningful total speedup. A separate profile put cached OpenCode completion at
+0.53 ms; Antigen and Vi-mode command discovery remain the main measured costs.
+Non-TTY plugin loading emits ZLE warnings; the pseudo-terminal startup check
+did not. These timings do not measure a complete interactive prompt render.
+
 ## File-op aliases (safe-by-default)
 
 | Alias | Wraps   | Why                      |
@@ -118,11 +152,11 @@ Zsh + Oh-My-Zsh + Starship prompt. Config in `~/.zshrc`, functions in
 
 ### History (zsh-history-substring-search)
 
-| Bind     | Action                                          |
-| -------- | ----------------------------------------------- |
-| `↑` / `↓`| Substring-search history (filtered by current line) |
-| `k` / `j`| Same, in vi normal mode                         |
-| `Ctrl+R` | Full fuzzy history search (fzf integration)     |
+| Bind      | Action                                              |
+| --------- | --------------------------------------------------- |
+| `↑` / `↓` | Substring-search history (filtered by current line) |
+| `k` / `j` | Same, in vi normal mode                             |
+| `Ctrl+R`  | Full fuzzy history search (fzf integration)         |
 
 > Example: type `git` then press `↑` → only commands containing `git` cycle.
 
@@ -130,13 +164,13 @@ Zsh + Oh-My-Zsh + Starship prompt. Config in `~/.zshrc`, functions in
 
 Activated automatically if `atuin` binary exists (gated in `.zshrc`).
 
-| Bind / Command   | What                                                    |
-| ---------------- | ------------------------------------------------------- |
-| `Ctrl+R` (atuin) | Replaces the default reverse-search with TUI + stats    |
-| `atuin search`   | Search from any shell                                   |
+| Bind / Command      | What                                                 |
+| ------------------- | ---------------------------------------------------- |
+| `Ctrl+R` (atuin)    | Replaces the default reverse-search with TUI + stats |
+| `atuin search`      | Search from any shell                                |
 | `atuin import auto` | Import existing `.zhistory` into atuin's SQLite db   |
-| `atuin login`    | Optional: sync history across machines via atuin.sh     |
-| `atuin stats`    | Show your most-used commands, ratios, etc.              |
+| `atuin login`       | Optional: sync history across machines via atuin.sh  |
+| `atuin stats`       | Show your most-used commands, ratios, etc.           |
 
 ## Globbing extras
 
@@ -151,17 +185,17 @@ Activated automatically if `atuin` binary exists (gated in `.zshrc`).
 
 ## Plugins active (Oh-My-Zsh)
 
-| Plugin                          | What                                                        |
-| ------------------------------- | ----------------------------------------------------------- |
-| `zsh-vi-mode`                   | Modal vi editing in shell (`Esc` for normal mode)           |
-| `git` / `gh`                    | Aliases (`gst`, `gco`, `gp`, etc.) + GitHub CLI helpers     |
-| `sudo`                          | Double-`Esc` prepends `sudo` to current cmd                 |
-| `z`                             | Frecent-dir jumping (complements zoxide)                    |
-| `zsh-completions`               | Extra completion definitions catalog                        |
-| `zsh-autosuggestions`           | Fish-like ghost-text suggestion from history                |
-| `fzf-tab`                       | Replaces tab completion UI with fzf picker (with previews)  |
-| `fast-syntax-highlighting`      | Syntax highlight as you type (replaces zsh-syntax-highlighting — 5-10× faster) |
-| `zsh-history-substring-search`  | `↑`/`↓` filter history by substring                         |
+| Plugin                         | What                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| `zsh-vi-mode`                  | Modal vi editing in shell (`Esc` for normal mode)                              |
+| `git` / `gh`                   | Aliases (`gst`, `gco`, `gp`, etc.) + GitHub CLI helpers                        |
+| `sudo`                         | Double-`Esc` prepends `sudo` to current cmd                                    |
+| `z`                            | Frecent-dir jumping (complements zoxide)                                       |
+| `zsh-completions`              | Extra completion definitions catalog                                           |
+| `zsh-autosuggestions`          | Fish-like ghost-text suggestion from history                                   |
+| `fzf-tab`                      | Replaces tab completion UI with fzf picker (with previews)                     |
+| `fast-syntax-highlighting`     | Syntax highlight as you type (replaces zsh-syntax-highlighting — 5-10× faster) |
+| `zsh-history-substring-search` | `↑`/`↓` filter history by substring                                            |
 
 ## Functions (in `~/.zsh_functions`)
 

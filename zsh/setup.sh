@@ -63,6 +63,15 @@ if [ ! -f "$HOME/.antigen/antigen.zsh" ]; then
   fi
 fi
 
+echo "==> Optional forgit plugin"
+forgit_dir="$HOME/.antigen/bundles/wfxr/forgit"
+if [ ! -e "$forgit_dir" ]; then
+  mkdir -p "${forgit_dir%/*}"
+  git clone --depth 1 https://github.com/wfxr/forgit "$forgit_dir" || true
+elif [ ! -f "$forgit_dir/forgit.plugin.zsh" ]; then
+  echo "Skipping incomplete forgit checkout: $forgit_dir (preserved for manual repair)"
+fi
+
 echo "==> Starship"
 if ! has starship; then
   mkdir -p "$HOME/.local/bin"
@@ -105,7 +114,7 @@ fi
 
 echo "==> Backing up existing zsh files"
 stamp="$(date +%Y%m%d-%H%M%S)"
-for rel in .zshrc .zshenv .zprofile .zlogin .zsh_functions; do
+for rel in .zshrc .zshrc.zwc .zshenv .zshenv.zwc .zprofile .zlogin .zsh_functions; do
   target="$HOME/$rel"
   [ -e "$target" ] || [ -L "$target" ] || continue
 

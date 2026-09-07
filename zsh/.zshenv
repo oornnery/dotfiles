@@ -20,12 +20,14 @@ export XDG_STATE_HOME="$HOME/.local/state"
 [[ -r "$XDG_CONFIG_HOME/ai/env" ]] && source "$XDG_CONFIG_HOME/ai/env"
 
 # Local user binaries
+typeset -U path PATH
 path=(
   "$HOME/.local/bin"
   "$HOME/bin"
   "$HOME/.npm-global/bin"
   "$HOME/.local/npm/bin"
   "$HOME/.local/share/fnm"
+  "$HOME/.opencode/bin"
   "$HOME/.atuin/bin"
   "$HOME/.cargo/bin"
   "$HOME/go/bin"
@@ -52,8 +54,8 @@ path=(
 
 # WSL appends Windows PATH entries when appendWindowsPath=true. Keep useful
 # interop, but do not let Windows npm shims shadow Linux CLIs such as codex.
-if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null \
-  || grep -qi "wsl" /proc/sys/kernel/osrelease 2>/dev/null; then
+if [[ -n ${WSL_INTEROP:-}${WSL_DISTRO_NAME:-} ]] \
+  || [[ -r /proc/sys/kernel/osrelease && "$(</proc/sys/kernel/osrelease)" == *[Mm]icrosoft* ]]; then
   path=(${path:#/mnt/c/Users/*/AppData/Roaming/npm})
 fi
 

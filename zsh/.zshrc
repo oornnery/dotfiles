@@ -1,6 +1,7 @@
 # ~/.zshrc
 # This file is sourced for interactive shells.
 # Put aliases, completions, plugins, keybindings, prompt, and interactive UX here.
+typeset -U path PATH
 
 # -------------------------------
 # Zellij (manual start — no auto-attach)
@@ -68,11 +69,10 @@ if [[ -n "$_antigen_found" ]]; then
   antigen bundle zsh-users/zsh-completions
   antigen bundle zsh-users/zsh-autosuggestions
   antigen bundle Aloxaf/fzf-tab
-  # forgit: antigen's auto-clone is flaky here (leaves an empty dir → "Error!
-  # Activate logging" every shell). Pre-clone so antigen just sources it.
-  [[ -f "$ANTIGEN_HOME/bundles/wfxr/forgit/forgit.plugin.zsh" ]] \
-    || { rm -rf "$ANTIGEN_HOME/bundles/wfxr/forgit"; git clone --depth 1 -q https://github.com/wfxr/forgit "$ANTIGEN_HOME/bundles/wfxr/forgit" 2>/dev/null; }
-  antigen bundle wfxr/forgit
+  # Install/repair forgit through setup, never delete and clone it on shell startup.
+  if [[ -f "$ANTIGEN_HOME/bundles/wfxr/forgit/forgit.plugin.zsh" ]]; then
+    antigen bundle wfxr/forgit
+  fi
   antigen bundle zdharma-continuum/fast-syntax-highlighting
   antigen bundle zsh-users/zsh-history-substring-search
 
@@ -127,30 +127,8 @@ bindkey '^[d' kill-word           # Alt+D: delete word ahead
 # History search
 bindkey '^R' history-incremental-search-backward # Ctrl+R: fuzzy history
 
-# Zellij statusline vi-mode support (when inside Zellij)
-_dotfiles_zellij_set_vi_mode() {
-  [[ -n "${ZELLIJ:-}" ]] || return 0
-
-  local mode="${ZVM_MODE:-}" label="INSERT"
-  if [[ -n "${ZVM_MODE_NORMAL:-}" && "$mode" == "$ZVM_MODE_NORMAL" ]]; then
-    label="NORMAL"
-  elif [[ -n "${ZVM_MODE_VISUAL:-}" && "$mode" == "$ZVM_MODE_VISUAL" ]]; then
-    label="VISUAL"
-  elif [[ -n "${ZVM_MODE_VISUAL_LINE:-}" && "$mode" == "$ZVM_MODE_VISUAL_LINE" ]]; then
-    label="V-LINE"
-  elif [[ -n "${ZVM_MODE_REPLACE:-}" && "$mode" == "$ZVM_MODE_REPLACE" ]]; then
-    label="REPLACE"
-  elif [[ "${KEYMAP:-}" == "vicmd" ]]; then
-    label="NORMAL"
-  fi
-
-  command zellij action write-chars " $label " 2>/dev/null || true
-}
-
-if (( $+parameters[zvm_after_select_vi_mode_commands] )); then
-  zvm_after_select_vi_mode_commands+=(_dotfiles_zellij_set_vi_mode)
-fi
-_dotfiles_zellij_set_vi_mode
+# Vi mode belongs in the shell prompt. Zellij's write-chars sends pane input,
+# so it must not be used to publish a status label on mode changes.
 
 # -------------------------------
 # Completion and navigation
@@ -160,13 +138,14 @@ _dotfiles_zellij_set_vi_mode
 # This enables keybindings and fuzzy completion features.
 if command -v fzf >/dev/null 2>&1; then
   # Try modern --zsh flag first, fallback to legacy source
-  if fzf --zsh 2>/dev/null 1>/dev/null; then
-    source <(fzf --zsh)
+  if _dotfiles_fzf_init="$(fzf --zsh 2>/dev/null)"; then
+    eval "$_dotfiles_fzf_init"
   else
     # Legacy fzf (<0.48): source system-installed files
     [[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
     [[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
   fi
+  unset _dotfiles_fzf_init
 fi
 
 # Better completion styling
@@ -393,10 +372,8 @@ fe() {
 # tmux's global environment and would then suppress fastfetch in every pane.
 if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
   if [[ -n "${ZELLIJ:-}" ]]; then
-    if [[ "$(zellij action query-swap-layout 2>/dev/null)" != "" ]] || true; then
-      # inside zellij — fastfetch once per session
-      [[ -z "${ZELLIJ_FASTFETCH_SHOWN:-}" ]] && export ZELLIJ_FASTFETCH_SHOWN=1 && fastfetch
-    fi
+    # inside zellij — fastfetch once per session, no unused IPC query
+    [[ -z "${ZELLIJ_FASTFETCH_SHOWN:-}" ]] && export ZELLIJ_FASTFETCH_SHOWN=1 && fastfetch
   elif [[ -n "${TMUX:-}" ]]; then
     if [[ "$(tmux show-options -wqv @fastfetch_shown 2>/dev/null)" != 1 ]]; then
       tmux set-option -w @fastfetch_shown 1 2>/dev/null
@@ -460,33 +437,57 @@ if [[ -z "${XDG_RUNTIME_DIR:-}" || ! -d "$XDG_RUNTIME_DIR" ]]; then
     chmod 700 "$XDG_RUNTIME_DIR"
 fi
 
-# Everything else deferred to AFTER the first prompt via zsh-defer if loaded.
-# Shaves ~200ms off shell startup by moving fnm/atuin/mise/direnv off the hot
-# path. They become active a few hundred ms later (you won't notice unless
-# you immediately need direnv for the very first command).
+# Generate initialization code inside the callback, not before scheduling it.
+_dotfiles_init_tool() {
+    local tool_name="$1" init_code
+    shift
+    init_code="$(command "$tool_name" "$@")" || return
+    eval "$init_code"
+}
+
+# direnv must establish the directory environment before the first command.
+command -v direnv >/dev/null && _dotfiles_init_tool direnv hook zsh
 if (( $+functions[zsh-defer] )); then
-    command -v fnm    >/dev/null && zsh-defer eval "$(fnm env --use-on-cd)"
-    command -v atuin  >/dev/null && zsh-defer eval "$(atuin init zsh)"
-    command -v mise   >/dev/null && zsh-defer eval "$(mise activate zsh)"
-    command -v direnv >/dev/null && zsh-defer eval "$(direnv hook zsh)"
+    command -v fnm    >/dev/null && zsh-defer _dotfiles_init_tool fnm env --use-on-cd
+    command -v atuin  >/dev/null && zsh-defer _dotfiles_init_tool atuin init zsh
+    command -v mise   >/dev/null && zsh-defer _dotfiles_init_tool mise activate zsh
 else
-    command -v fnm    >/dev/null && eval "$(fnm env --use-on-cd)"
-    command -v atuin  >/dev/null && eval "$(atuin init zsh)"
-    command -v mise   >/dev/null && eval "$(mise activate zsh)"
-    command -v direnv >/dev/null && eval "$(direnv hook zsh)"
+    command -v fnm    >/dev/null && _dotfiles_init_tool fnm env --use-on-cd
+    command -v atuin  >/dev/null && _dotfiles_init_tool atuin init zsh
+    command -v mise   >/dev/null && _dotfiles_init_tool mise activate zsh
 fi
 
 # opencode
 export PATH="$HOME/.opencode/bin:$PATH"
 
-# opencode completions (zsh) — requires compinit (already loaded by antigen)
+# Cache generated completions; rebuilding the CLI's output costs about a second.
+# A binary replacement invalidates the cache without running `opencode --version`.
+_dotfiles_opencode_completion() {
+  local binary_path=${commands[opencode]:A} cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/zsh
+  local cache_file=$cache_dir/opencode-completion.zsh signature cached_signature temporary_file
+  local -A binary_stat
+  [[ -n $binary_path && -f $binary_path ]] || return 0
+  zmodload -F zsh/stat b:zstat || return
+  zstat -H binary_stat -- "$binary_path" || return
+  signature="# $binary_path $binary_stat[mtime] $binary_stat[size] $binary_stat[ctime]"
+  [[ -r $cache_file ]] && IFS= read -r cached_signature < "$cache_file"
+  if [[ ${1:-0} != 1 && $cached_signature == $signature ]]; then
+    source "$cache_file"
+    return
+  fi
+  (
+    umask 077
+    mkdir -p -- "$cache_dir" || exit
+    temporary_file=$(mktemp "$cache_dir/opencode-completion.XXXXXXXX") || exit
+    trap 'command rm -f -- "$temporary_file"' EXIT
+    print -r -- "$signature" > "$temporary_file"
+    command "$binary_path" completion zsh >> "$temporary_file" || exit
+    command zsh -f -n "$temporary_file" || exit
+    command mv -f -- "$temporary_file" "$cache_file"
+  ) && source "$cache_file"
+}
+opencode-completion-refresh() { _dotfiles_opencode_completion 1 }
+
 if command -v opencode >/dev/null 2>&1; then
-  source <(opencode completion zsh)
+  _dotfiles_opencode_completion
 fi
-
-# Bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-# Rust/Cargo
-export PATH="$HOME/.cargo/bin:$PATH"

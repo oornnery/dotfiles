@@ -79,6 +79,19 @@ The shared global directory can also contain independently installed skills, suc
 Cloudflare and writing tools. They are preserved; they are not all owned by this repo.
 Do not reinstall a wildcard collection of generic workflow skills through bootstrap.
 
+Codex disables seven duplicate Cloudflare plugin skills through
+[`skills.config`](https://learn.chatgpt.com/docs/build-skills), keeping the newer
+shared copies available to both clients: `agents-sdk`, `cloudflare`,
+`durable-objects`, `sandbox-sdk`, `web-perf`, `workers-best-practices`, and `wrangler`.
+The plugin's unique `building-ai-agent-on-cloudflare` and
+`building-mcp-server-on-cloudflare` skills are retained. No vendor files are deleted.
+The overrides target the installed plugin version `0.1.2` and this account's
+absolute cache paths; recheck them after plugin upgrades or on another machine.
+The CLI accepted the strict configuration and an isolated discovery of the cached
+plugin skills confirmed the seven disabled/two enabled flags. This does not test
+the current app session's already-injected skill list; start a new session to
+refresh it.
+
 ## Plugins and MCP
 
 OpenCode server plugins retained: table formatter, DCP, notifier, safety net and
