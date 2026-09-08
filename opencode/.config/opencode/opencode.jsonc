@@ -93,7 +93,8 @@
   "permission": {
     "github_*": "ask",
     "cloudflare_*": "ask",
-    "chrome_devtools_*": "ask",
+    "chrome_devtools_*": "allow",
+    "playwright_*": "allow",
     "external_directory": {
       "~/proj/**": "allow"
     },

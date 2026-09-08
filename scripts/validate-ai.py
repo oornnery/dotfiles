@@ -60,6 +60,21 @@ def main():
     codex = ROOT / "codex/.codex"
     codex_config = tomllib.loads((codex / "config.toml").read_text())
     assert codex_config["model"] in MODELS
+    assert codex_config["approval_policy"] == "on-request"
+    assert codex_config["sandbox_mode"] == "workspace-write"
+    assert config["permission"]["bash"]["*"] == "allow"
+    assert "bash" not in agents["verifier"]["permission"], "Verifier must inherit shell policy"
+    for name in ("playwright", "chrome_devtools"):
+        assert config["permission"][f"{name}_*"] == "allow"
+        assert codex_config["mcp_servers"][name]["default_tools_approval_mode"] == "approve"
+        for role in ("plan", "explore", "reviewer", "security-reviewer"):
+            policy = agents[role]["permission"]
+            assert policy[f"{name}_*"] == "allow", role
+            assert policy["external_directory"]["*"] == "ask", role
+            assert policy["*"] == "deny", role
+    for name in ("github", "cloudflare"):
+        assert config["permission"][f"{name}_*"] == "ask"
+        assert codex_config["mcp_servers"][name]["default_tools_approval_mode"] == "prompt"
     codex_agents = list((codex / "agents").glob("*.toml"))
     skills_root = ROOT / "agents/.agents/skills"
     for path in [*codex_agents, *skills_root.glob("*/agents/*.toml")]:

@@ -123,9 +123,35 @@ DevTools for performance/network diagnosis; neither shares the other's login sta
 
 [GitHub MCP](https://github.com/github/github-mcp-server) uses the official hosted
 endpoint, limited to `repos,issues,pull_requests,actions` toolsets. Hosted server
-updates are controlled by GitHub rather than pinned locally. Both clients ask for
-approval before using these new servers; OpenCode's read-only modes keep their
-existing deny-by-default tool boundaries.
+updates are controlled by GitHub rather than pinned locally. Both clients keep
+approval enabled for GitHub and Cloudflare.
+
+### Routine command and browser permissions
+
+OpenCode's implementation modes and verifier inherit the global shell policy:
+routine commands, including uv, npm and Python, run without a per-command prompt.
+The verifier still forbids edits and must not use shell commands to implement fixes.
+Existing sensitive Git/token patterns and the safety-net plugin remain in place;
+command-name permissions are not a sandbox and cannot prove a script is harmless.
+
+Plan, explore and review modes retain their limited shell allowlist and deny edits.
+Their `external_directory` guard asks instead of denying, so an approved read outside
+the project can proceed. `~/proj/**` remains allowed. Protected environment files
+remain denied. Project configuration can override personal defaults.
+
+Playwright and Chrome DevTools tools are pre-approved in both clients, including
+OpenCode's read-only modes. This includes browser interactions and script evaluation,
+not only screenshots; use them only for the authorized task. A read-only role must
+not use the browser to mutate external services.
+
+Codex uses `approval_policy = "on-request"`, `sandbox_mode = "workspace-write"`
+and the existing automatic reviewer. Routine commands inside the sandbox need no
+blanket interpreter allowlist; network access, writes outside the sandbox and managed
+policies can still require approval. Browser MCP servers use
+`default_tools_approval_mode = "approve"`. These settings follow the
+[Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+and [OpenCode permissions](https://opencode.ai/docs/permissions/).
+Restart clients after changing permissions; an existing session may retain old rules.
 
 ### Cloudflare authentication
 
