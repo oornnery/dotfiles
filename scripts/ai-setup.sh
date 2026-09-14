@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Link the three AI Stow packages. --migrate also archives the retired setup.
+# Link the four AI Stow packages. --migrate also archives the retired setup.
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 target_dir="${DOTFILES_AI_TARGET:-$HOME}"
 mode="${1:---dry-run}"
@@ -45,8 +45,6 @@ if [[ "$mode" == --migrate || "$mode" == --dry-run ]]; then
     for name in opencode.slim opencode.omy opencode.pure; do
         archive "$repo_dir/$name" "repository/$name"
     done
-    archive "$target_dir/.claude" "claude/config"
-    archive "$target_dir/.claude.json" "claude/state.json"
     for name in .caveman-active .ponytail-active; do
         archive "$target_dir/.config/opencode/$name" "opencode/$name"
     done
@@ -72,7 +70,8 @@ done
 
 # Stow cannot remove links whose source was deleted in a previous revision.
 # Archive only broken links into this checkout, never another installation.
-for root in "$target_dir/.agents/skills" "$target_dir/.codex/agents" "$target_dir/.config/opencode"; do
+for root in "$target_dir/.agents/skills" "$target_dir/.codex/agents" "$target_dir/.config/opencode" \
+    "$target_dir/.claude"; do
     [[ -d "$root" ]] || continue
     while IFS= read -r -d '' link; do
         resolved="$(readlink -m "$link")"
@@ -87,6 +86,7 @@ if [[ "$mode" == --dry-run ]]; then
     echo "--apply only replaces old Impeccable/stale links and applies packages."
     exit 0
 fi
-stow --no-folding -d "$repo_dir" -t "$target_dir" -R agents codex opencode
-printf 'Applied shared skills, Codex and OpenCode to %s\n' "$target_dir"
+stow --no-folding -d "$repo_dir" -t "$target_dir" -R agents claude codex opencode
+printf 'Applied shared skills, Claude Code, Codex and OpenCode to %s\n' "$target_dir"
+python3 "$repo_dir/scripts/claude-mcp.py" --apply
 [[ -z "$backup_dir" ]] || printf 'Recover archived paths using %s/moves.tsv\n' "$backup_dir"

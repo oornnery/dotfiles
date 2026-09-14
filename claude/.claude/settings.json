@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(rtk:*)",
+      "Bash(uv run:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv lock:*)",
+      "Bash(uvx:*)",
+      "Bash(python3:*)",
+      "Bash(pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm --prefix:*)",
+      "Bash(npx:*)",
+      "Bash(pnpm:*)",
+      "Bash(cargo:*)",
+      "Bash(go:*)",
+      "Bash(make:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git stash list:*)",
+      "Bash(gh run:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh issue view:*)",
+      "Bash(rg:*)",
+      "Bash(fd:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(stat:*)",
+      "Bash(file:*)",
+      "Bash(which:*)",
+      "Bash(tree:*)"
+    ],
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/.ssh/**)",
+      "Read(**/.aws/**)",
+      "Read(**/*.pem)",
+      "Read(**/id_rsa*)",
+      "Read(**/.claude/.credentials.json)",
+      "Read(**/auth.json)",
+      "Bash(cat .env*)",
+      "Bash(cat *.env)",
+      "Bash(cat *.env.*)",
+      "Bash(head .env*)",
+      "Bash(tail .env*)",
+      "Bash(rtk read .env*)",
+      "Bash(git add .)",
+      "Bash(git add -A:*)",
+      "Bash(git commit --amend:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(rm -rf:*)",
+      "Bash(ruff check --unsafe-fixes:*)",
+      "Bash(uv run ruff check --unsafe-fixes:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(docker:*)",
+      "Bash(kubectl:*)",
+      "Bash(sudo:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.cargo/bin/rtk\" hook claude"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "ck@cavekit-marketplace": true,
+    "ponytail@ponytail": true
+  },
+  "extraKnownMarketplaces": {
+    "cavekit-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/cavekit"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
+  }
+}

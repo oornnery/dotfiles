@@ -29,6 +29,7 @@ Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 - `gdm/`, `greetd/`, `iwd/`, `zram/` → system stow packages handled by Arch modules
 - `git/` → `.gitconfig`
 - `hyprland/` → Hyprland config
+- `claude/` → Claude Code config: global contract, subagents, skills, output styles, MCP list
 - `opencode/` → Active OpenCode config, agents, commands, skills, and templates
 - `agents/` → Skills shared by OpenCode and Codex through `~/.agents/skills`
 - `codex/` → Codex config, global guidance, custom agents, and MCP definitions
@@ -82,6 +83,7 @@ stow -v -t ~ zsh
 stow -v -t ~ bash
 stow -v -t ~ nvim
 stow -v -t ~ tmux
+stow --no-folding -v -t ~ claude
 stow --no-folding -v -t ~ opencode
 stow --no-folding -v -t ~ agents
 stow --no-folding -v -t ~ codex

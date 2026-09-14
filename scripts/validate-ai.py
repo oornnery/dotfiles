@@ -15,6 +15,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELS = {"gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol", "gpt-6-astra"}
+CLAUDE_MODELS = {"opus", "sonnet", "haiku", "fable", "inherit"}
+EFFORT = {"low", "medium", "high", "xhigh", "max"}
 
 
 def frontmatter(path):
@@ -99,6 +101,31 @@ def main():
         else:
             assert server["command"] == [peer["command"], *peer.get("args", [])], name
             assert server.get("environment", {}) == peer.get("env", {}), name
+    claude = ROOT / "claude/.claude"
+    claude_settings = json.loads((claude / "settings.json").read_text())
+    marketplaces = set(claude_settings.get("extraKnownMarketplaces", {}))
+    for plugin in claude_settings.get("enabledPlugins", {}):
+        _, _, marketplace = plugin.partition("@")
+        assert not marketplace or marketplace in marketplaces, plugin
+    claude_agents = list((claude / "agents").glob("*.md"))
+    for path in claude_agents:
+        meta = frontmatter(path)
+        assert meta["name"] == path.stem, path
+        assert meta["description"], path
+        assert meta.get("model", "inherit") in CLAUDE_MODELS, path
+        assert meta.get("effort", "medium") in EFFORT, path
+    claude_skills = sorted(p for p in (claude / "skills").iterdir() if p.is_dir())
+    agent_names = {p.stem for p in claude_agents} | {"Explore", "Plan", "general-purpose"}
+    for directory in claude_skills:
+        # Shared skills are symlinks into the agents package; both must resolve.
+        meta = frontmatter(directory / "SKILL.md")
+        assert meta["description"], directory
+        if target := meta.get("agent"):
+            assert target in agent_names, directory
+            assert meta.get("context") == "fork", directory
+    for name, server in json.loads((claude / "mcp/servers.json").read_text()).items():
+        assert server["command" if server["type"] == "stdio" else "url"], name
+
     if args.schema:
         import jsonschema
 
@@ -106,7 +133,8 @@ def main():
         expanded = {**config, "agent": agents, "command": {**config.get("command", {}), **commands}}
         jsonschema.validate(expanded, schema)
     print(f"PASS: {len(agents)} OpenCode agents, {len(commands)} commands, "
-          f"{len(codex_agents)} Codex agents, {len(skills)} shared skills; MCP parity")
+          f"{len(codex_agents)} Codex agents, {len(skills)} shared skills; MCP parity; "
+          f"{len(claude_agents)} Claude agents, {len(claude_skills)} Claude skills")
 
 
 if __name__ == "__main__":

@@ -6,8 +6,16 @@ zsh/.config/ai/env
 arch.log
 scripts/arch/lib/arch.log
 
-# Claude Code local state
+# Claude Code local state (the stow package below is versioned).
 .claude/
+!claude/.claude/
+!claude/.claude/**
+claude/.claude/plugins/
+claude/.claude/projects/
+claude/.claude/sessions/
+claude/.claude/todos/
+claude/.claude/shell-snapshots/
+claude/.claude/backups/
 
 # Python bytecode caches (fabric-shell etc.)
 __pycache__/

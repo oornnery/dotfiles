@@ -1,13 +1,65 @@
-# Codex and OpenCode
+# Claude Code, Codex and OpenCode
 
-One maintained setup, three GNU Stow packages:
+One maintained setup, four GNU Stow packages:
 
 - `agents/.agents/skills/`: shared domain skills and pinned Impeccable.
+- `claude/.claude/`: Claude Code contract, subagents, skills, output styles, MCP list.
 - `codex/.codex/`: Codex configuration and small role adapters.
 - `opencode/.config/opencode/`: OpenCode modes, command shortcuts and configuration.
 
+Claude Code is the daily driver on the primary machine; Codex and OpenCode stay
+maintained for the other machines and for Neovim's `opencode` integration.
+
 User requests and project instructions override personal defaults. Ordinary work
 does not require SPEC.md, planning approval, automatic commits or a fixed test ladder.
+
+## Claude Code
+
+`claude/.claude/` carries `CLAUDE.md` (the personal contract), `settings.json`
+(permissions, the RTK hook, plugin marketplaces), `agents/`, `skills/`,
+`output-styles/`, `RTK.md`, and `mcp/servers.json`. The eight shared skills are
+symlinks into `agents/.agents/skills/`, so all three clients read one copy.
+
+| Agent               | Model  | Effort | Purpose                                    |
+| ------------------- | ------ | ------ | ------------------------------------------ |
+| `deep`              | opus   | high   | Difficult implementation and migrations    |
+| `debugger`          | opus   | high   | Root cause; fixes when requested           |
+| `reviewer`          | opus   | high   | Read-only code review                      |
+| `security-reviewer` | opus   | high   | Read-only security audit                   |
+| `verifier`          | sonnet | high   | PASS / FAIL / BLOCKED with evidence        |
+| `frontend`          | opus   | medium | Impeccable UI design and implementation    |
+| `shape`             | opus   | medium | Product definition and requested documents |
+| `fast`              | haiku  | low    | Small edits, quick answers, docs           |
+
+`Explore` and `Plan` are built in and not duplicated. Skills mirror the OpenCode
+commands: `/implement`, `/deep`, `/debug`, `/fast`, `/plan`, `/shape`, `/frontend`,
+`/docs`, `/tests`, `/verify`, `/safe-commit`, `/project-bootstrap`, plus the caveman
+family. The **Caveman** output style makes compressed prose the default; `/caveman`
+applies to one session only.
+
+MCP servers come from `claude/.claude/mcp/servers.json` and are applied at user scope
+by `scripts/claude-mcp.py`, which uses `claude mcp add-json --scope user` when the CLI
+is present and otherwise merges into `~/.claude.json` after a timestamped backup.
+
+Two plugins are declared in `settings.json` and their marketplaces clone at startup,
+but declaring a plugin enabled does not install it:
+
+```bash
+claude plugin install ck@cavekit-marketplace --scope user --yes
+claude plugin install ponytail@ponytail --scope user --yes
+```
+
+- **ck** ([cavekit](https://github.com/JuliusBrussee/cavekit)) — spec-driven loop over
+  one `SPEC.md`, plus bug-to-spec backprop and the caveman spec encoding.
+- **ponytail** ([ponytail](https://github.com/DietrichGebert/ponytail)) — cuts
+  unnecessary *code*: YAGNI, stdlib first. Its hooks need `node` on the PATH.
+
+RTK rewrites shell commands through a `PreToolUse` hook declared as
+`"$HOME/.cargo/bin/rtk" hook claude`; it stays inert if the binary is missing.
+
+The desktop app ships no Linux CLI — under WSL it drives shells from the Windows side,
+so `claude` is absent and the `/plugin`, `/hooks` and `/config` dialogs never open in
+its Code tab. `scripts/llms.sh` installs the CLI into `~/.local`.
 
 ## OpenCode modes
 
