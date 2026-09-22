@@ -107,6 +107,14 @@ def main():
     for plugin in claude_settings.get("enabledPlugins", {}):
         _, _, marketplace = plugin.partition("@")
         assert not marketplace or marketplace in marketplaces, plugin
+    claude_hooks = claude_settings.get("hooks", {})
+    for event in ("SessionStart", "UserPromptSubmit", "PostToolUse", "Stop", "SessionEnd"):
+        hook_commands = [
+            hook["command"]
+            for group in claude_hooks.get(event, [])
+            for hook in group.get("hooks", [])
+        ]
+        assert any("cavemem hook run" in command for command in hook_commands), event
     claude_agents = list((claude / "agents").glob("*.md"))
     for path in claude_agents:
         meta = frontmatter(path)

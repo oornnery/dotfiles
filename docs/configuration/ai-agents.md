@@ -41,18 +41,40 @@ MCP servers come from `claude/.claude/mcp/servers.json` and are applied at user 
 by `scripts/claude-mcp.py`, which uses `claude mcp add-json --scope user` when the CLI
 is present and otherwise merges into `~/.claude.json` after a timestamped backup.
 
-Two plugins are declared in `settings.json` and their marketplaces clone at startup,
+Cavemem memory is written by hooks in `settings.json` for `SessionStart`,
+`UserPromptSubmit`, `PostToolUse`, `Stop` and `SessionEnd`, each running
+`fnm exec --using=22 -- cavemem hook run <event> --ide claude-code`. Session start
+injects compressed summaries of up to three prior sessions, and the MCP tools expose
+search, timeline and observation reads. Verify with `cavemem status`, `cavemem doctor`
+or `cavemem search "<term>"`. Do not run `cavemem install --ide claude-code`: it
+replaces these hooks with a version-pinned node path and adds a duplicate `mcpServers`
+block to `settings.json`, while user-scope servers stay in `~/.claude.json`.
+
+Context is bounded by `autoCompactWindow: 300000` in `settings.json`, so auto-compact
+runs well before the 1M window fills. Change it per session with `/autocompact`, and
+keep tool search enabled (the default) so MCP tool definitions are deferred.
+
+Five plugins are declared in `settings.json` and their marketplaces clone at startup,
 but declaring a plugin enabled does not install it:
 
 ```bash
 claude plugin install ck@cavekit-marketplace --scope user --yes
 claude plugin install ponytail@ponytail --scope user --yes
+claude plugin install pyright-lsp@claude-plugins-official --scope user --yes
+claude plugin install codex@openai-codex --scope user --yes
+claude plugin install frontend-design@claude-plugins-official --scope user --yes
 ```
 
 - **ck** ([cavekit](https://github.com/JuliusBrussee/cavekit)) — spec-driven loop over
   one `SPEC.md`, plus bug-to-spec backprop and the caveman spec encoding.
 - **ponytail** ([ponytail](https://github.com/DietrichGebert/ponytail)) — cuts
   unnecessary *code*: YAGNI, stdlib first. Its hooks need `node` on the PATH.
+- **pyright-lsp** (official) — Pyright language-server diagnostics for Python.
+- **codex** ([openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)) —
+  delegate tasks and reviews from Claude Code to the Codex CLI.
+- **frontend-design** (official) — Anthropic's visual-direction skill for distinctive
+  UI. It overlaps the `impeccable` playbooks; the `frontend` agent still routes to
+  Impeccable.
 
 RTK rewrites shell commands through a `PreToolUse` hook declared as
 `"$HOME/.cargo/bin/rtk" hook claude`; it stays inert if the binary is missing.
@@ -164,7 +186,10 @@ Both clients configure the same six MCP servers:
 | cloudflare      | Cloudflare API search and approved execution      |
 
 Cavemem retains the existing Node 22/fnm launch adapter. Ensure `fnm`, Node 22 and
-`cavemem` are on PATH. Memory databases and client authentication stay outside Git.
+`cavemem` are on PATH. Only Claude Code registers write hooks; Codex and OpenCode read
+the same database through the MCP tools. Hooks persist truncated tool inputs/outputs in
+the local database and only strip `<private>` blocks, so the deny rules remain the
+protection for secrets. Memory databases and client authentication stay outside Git.
 
 [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) is pinned
 to `1.8.0`. It starts headless Chrome with a temporary isolated profile; it does not
