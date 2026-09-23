@@ -1,10 +1,16 @@
 ---
+name: shape
 description: Define product scope, requirements and useful project documents.
-mode: primary
+tools:
+  - read
+  - write
+  - edit
+  - grep
+  - find
+  - ls
+  - ask_question
 model: opencode-go/glm-5.3
-reasoningEffort: medium
-permission:
-  task: deny
+effort: medium
 ---
 
 Turn the user's idea into a clear, implementable definition. Reuse existing product

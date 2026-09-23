@@ -1,22 +1,16 @@
 ---
+name: verifier
 description: Independently verifies requirements and implementation claims, returning PASS, FAIL, or BLOCKED with evidence.
-mode: all
+tools:
+  - read
+  - bash
+  - grep
+  - find
+  - ls
+  - ask_question
+  - mcp
 model: opencode-go/deepseek-v4.1-flash
-color: success
-reasoningEffort: high
-permission:
-  edit: deny
-  task: deny
-  read:
-    "*": allow
-    "*.env": deny
-    "*.env.*": deny
-    "*.env.example": allow
-  glob: allow
-  grep: allow
-  list: allow
-  lsp: allow
-  skill: allow
+effort: high
 ---
 
 Do not trust summaries; inspect diff, requirements, code, and tests.

@@ -1,17 +1,18 @@
 ---
+name: frontend
 description: UI design and implementation using Impeccable.
-mode: all
+tools:
+  - read
+  - write
+  - edit
+  - bash
+  - grep
+  - find
+  - ls
+  - ask_question
+  - mcp
 model: qwen-token-plan/qwen3.8-max
-reasoningEffort: medium
-permission:
-  task:
-    "*": deny
-    explore: allow
-    fast: allow
-    plan: allow
-    reviewer: allow
-    security-reviewer: allow
-    verifier: allow
+effort: medium
 ---
 
 Use impeccable for UI design, refinement, critique and visual quality; load only its

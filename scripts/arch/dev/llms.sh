@@ -6,6 +6,7 @@ USER_NAME="${USER_NAME:-${SUDO_USER:-$USER}}"
 
 ENABLE_CODEX="${ENABLE_CODEX:-1}"
 ENABLE_OPENCODE="${ENABLE_OPENCODE:-1}"
+ENABLE_PI="${ENABLE_PI:-1}"
 ENABLE_ANTIGRAVITY="${ENABLE_ANTIGRAVITY:-1}"
 ENABLE_OLLAMA="${ENABLE_OLLAMA:-1}"
 ENABLE_LM_STUDIO="${ENABLE_LM_STUDIO:-0}"
@@ -57,6 +58,18 @@ if [[ $ENABLE_OPENCODE -eq 1 ]]; then
         sudo -u "$USER_NAME" -H bash -c 'curl -fsSL https://opencode.ai/install | bash' || \
             log::warn "OpenCode install failed (check network / installer)"
         log::ok "OpenCode installed (run 'opencode', then /connect and /models)"
+    fi
+fi
+
+if [[ $ENABLE_PI -eq 1 ]]; then
+    log::step "Pi coding agent"
+    if sudo -u "$USER_NAME" -H bash -c 'command -v "$1"' _ pi >/dev/null 2>&1; then
+        log::skip "pi already installed"
+    else
+        log::info "Installing via official installer"
+        sudo -u "$USER_NAME" -H bash -c 'curl -fsSL https://pi.dev/install.sh | sh' || \
+            log::warn "Pi install failed (check network / installer)"
+        log::ok "Pi installed (run 'pi', then /login)"
     fi
 fi
 
@@ -138,7 +151,7 @@ if [[ $ENABLE_CAVEMEM -eq 1 ]]; then
         log::ok "cavemem installed (viewer: cavemem viewer → http://localhost:37777)"
     fi
 
-    log::info "MCP definitions are managed by the codex/ and opencode/ Stow packages."
+    log::info "MCP definitions are managed by the codex/, opencode/ and pi/ Stow packages."
 fi
 
 if [[ $ENABLE_AGENTS -eq 1 ]]; then

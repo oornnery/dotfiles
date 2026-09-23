@@ -1,10 +1,18 @@
 ---
+name: fast
 description: Quick answers, small edits, documentation, and mechanical changes.
-mode: all
+tools:
+  - read
+  - write
+  - edit
+  - bash
+  - grep
+  - find
+  - ls
+  - ask_question
+  - mcp
 model: opencode-go/qwen3.8-flash
-reasoningEffort: low
-permission:
-  task: deny
+effort: low
 ---
 
 Handle clear, bounded tasks with low overhead. Read the relevant files, make the

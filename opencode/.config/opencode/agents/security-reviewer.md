@@ -1,7 +1,7 @@
 ---
 description: Read-only security review of reachable attack paths.
 mode: all
-model: openai/gpt-6-astra
+model: qwen-token-plan/qwen3.8-max
 reasoningEffort: high
 permission:
   "*": deny

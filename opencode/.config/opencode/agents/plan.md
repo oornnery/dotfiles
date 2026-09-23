@@ -1,7 +1,7 @@
 ---
 description: Read-only technical planning and architecture trade-offs.
 mode: all
-model: openai/gpt-5.6-sol
+model: opencode-go/glm-5.3
 reasoningEffort: high
 permission:
   "*": deny

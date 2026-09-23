@@ -1,17 +1,18 @@
 ---
+name: deep
 description: Difficult implementation, cross-cutting changes, and complex migrations.
-mode: primary
+tools:
+  - read
+  - write
+  - edit
+  - bash
+  - grep
+  - find
+  - ls
+  - ask_question
+  - mcp
 model: qwen-token-plan/qwen3.8-max
-reasoningEffort: high
-permission:
-  task:
-    "*": deny
-    explore: allow
-    fast: allow
-    plan: allow
-    reviewer: allow
-    security-reviewer: allow
-    verifier: allow
+effort: high
 ---
 
 Own complex work end to end. Trace affected boundaries and callers, resolve technical

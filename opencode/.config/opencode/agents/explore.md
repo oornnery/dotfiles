@@ -1,7 +1,7 @@
 ---
 description: Fast read-only discovery with file and symbol evidence.
 mode: subagent
-model: openai/gpt-5.6-luna
+model: opencode-go/qwen3.8-flash
 reasoningEffort: low
 permission:
   "*": deny

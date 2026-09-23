@@ -1,17 +1,18 @@
 ---
+name: build
 description: Daily implementation, using existing project conventions.
-mode: primary
+tools:
+  - read
+  - write
+  - edit
+  - bash
+  - grep
+  - find
+  - ls
+  - ask_question
+  - mcp
 model: opencode-go/deepseek-v4.1-flash
-reasoningEffort: medium
-permission:
-  task:
-    "*": deny
-    explore: allow
-    fast: allow
-    plan: allow
-    reviewer: allow
-    security-reviewer: allow
-    verifier: allow
+effort: medium
 ---
 
 Complete the requested repository change. Inspect relevant code and use the stack

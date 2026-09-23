@@ -14,7 +14,17 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODELS = {"gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol", "gpt-6-astra"}
+CODEX_MODELS = {"gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol", "gpt-6-astra"}
+OPENCODE_MODELS = {
+    "opencode-go/deepseek-v4.1-flash",
+    "opencode-go/qwen3.8-flash",
+    "opencode-go/glm-5.3",
+    "qwen-token-plan/qwen3.8-max",
+}
+PI_MODELS = {
+    "opencode-go": {"deepseek-v4.1-flash", "qwen3.8-flash", "qwen3.8-max", "glm-5.3"},
+    "qwen-token-plan": {"qwen3.8-max"},
+}
 CLAUDE_MODELS = {"opus", "sonnet", "haiku", "fable", "inherit"}
 EFFORT = {"low", "medium", "high", "xhigh", "max"}
 
@@ -42,8 +52,7 @@ def main():
     }
     for name, agent in agents.items():
         assert agent["mode"] in {"primary", "all", "subagent"}, name
-        assert agent["model"].startswith("openai/"), name
-        assert agent["model"].split("/", 1)[1] in MODELS, name
+        assert agent["model"] in OPENCODE_MODELS, name
         assert agent.get("reasoningEffort", "medium") in {"low", "medium", "high", "xhigh", "max"}, name
         task = agent.get("permission", {}).get("task", {})
         if isinstance(task, dict):
@@ -58,10 +67,16 @@ def main():
     for plugin in config["plugin"]:
         if plugin.startswith("."):
             assert (opencode / plugin).is_file(), plugin
+    token_plan = config["provider"]["qwen-token-plan"]
+    assert token_plan["npm"] == "@ai-sdk/openai-compatible"
+    assert token_plan["options"]["baseURL"].startswith("https://token-plan.")
+    assert token_plan["options"]["apiKey"] == "{env:QWEN_TOKEN_PLAN_API_KEY}"
+    for model in ("qwen3.8-max", "qwen3.8-flash", "deepseek-v4.1-flash", "glm-5.3"):
+        assert model in token_plan["models"], model
 
     codex = ROOT / "codex/.codex"
     codex_config = tomllib.loads((codex / "config.toml").read_text())
-    assert codex_config["model"] in MODELS
+    assert codex_config["model"] in CODEX_MODELS
     assert codex_config["approval_policy"] == "on-request"
     assert codex_config["sandbox_mode"] == "workspace-write"
     assert config["permission"]["bash"]["*"] == "allow"
@@ -81,7 +96,7 @@ def main():
     skills_root = ROOT / "agents/.agents/skills"
     for path in [*codex_agents, *skills_root.glob("*/agents/*.toml")]:
         agent = tomllib.loads(path.read_text())
-        assert agent.get("model", codex_config["model"]) in MODELS, path
+        assert agent.get("model", codex_config["model"]) in CODEX_MODELS, path
     skills = list(skills_root.glob("*/SKILL.md"))
     for path in skills:
         meta = frontmatter(path)
@@ -134,6 +149,33 @@ def main():
     for name, server in json.loads((claude / "mcp/servers.json").read_text()).items():
         assert server["command" if server["type"] == "stdio" else "url"], name
 
+    pi = ROOT / "pi/.pi/agent"
+    pi_settings = json.loads((pi / "settings.json").read_text())
+    pi_mcp = json.loads((pi / "mcp.json").read_text())["mcpServers"]
+    pi_agents = {p.stem: frontmatter(p) for p in (pi / "agents").glob("*.md")}
+    pi_prompts = {p.stem: frontmatter(p) for p in (pi / "prompts").glob("*.md")}
+    default = f"{pi_settings['defaultProvider']}/{pi_settings['defaultModel']}"
+    assert default in OPENCODE_MODELS, default
+    assert default in pi_settings["enabledModels"], default
+    for package in pi_settings["packages"]:
+        assert re.search(r"@\d+\.\d+", package), f"Unpinned Pi package: {package}"
+    assert set(pi_agents) == set(agents), "Pi/OpenCode subagent drift"
+    assert set(pi_prompts) == set(commands), "Pi/OpenCode prompt drift"
+    for name, agent in pi_agents.items():
+        assert agent["name"] == name, name
+        assert agent["description"], name
+        assert agent["tools"], name
+        provider, _, model = agent["model"].partition("/")
+        assert model in PI_MODELS.get(provider, set()), name
+        assert agent.get("effort", "medium") in EFFORT, name
+        if name in {"explore", "plan", "reviewer", "security-reviewer", "verifier"}:
+            assert not {"write", "edit"} & set(agent["tools"]), f"Read-only Pi subagent: {name}"
+    for name, prompt in pi_prompts.items():
+        assert prompt["description"], name
+    assert set(pi_mcp) == set(config["mcp"]), "MCP adapter drift (Pi)"
+    assert pi_mcp["github"]["headers"]["Authorization"] == "Bearer ${GITHUB_MCP_TOKEN}"
+    assert pi_mcp["cavemem"]["command"] == "fnm"
+
     if args.schema:
         import jsonschema
 
@@ -142,7 +184,8 @@ def main():
         jsonschema.validate(expanded, schema)
     print(f"PASS: {len(agents)} OpenCode agents, {len(commands)} commands, "
           f"{len(codex_agents)} Codex agents, {len(skills)} shared skills; MCP parity; "
-          f"{len(claude_agents)} Claude agents, {len(claude_skills)} Claude skills")
+          f"{len(claude_agents)} Claude agents, {len(claude_skills)} Claude skills; "
+          f"{len(pi_agents)} Pi subagents, {len(pi_prompts)} Pi prompts")
 
 
 if __name__ == "__main__":

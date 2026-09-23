@@ -1,7 +1,7 @@
 ---
 description: Read-only review of actual diffs, callers and tests.
 mode: all
-model: openai/gpt-5.6-sol
+model: opencode-go/glm-5.3
 reasoningEffort: high
 permission:
   "*": deny

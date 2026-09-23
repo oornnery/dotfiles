@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# User-side installer for Claude Code/Codex/OpenCode; configuration comes only from this repo.
+# User-side installer for Claude Code/Codex/OpenCode/Pi; configuration comes only from this repo.
 # The Arch system bootstrap remains scripts/arch/dev/llms.sh.
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 if [[ $EUID -eq 0 ]]; then
@@ -22,10 +22,13 @@ fi
 if [[ ${ENABLE_OPENCODE:-1} == 1 ]] && ! command -v opencode >/dev/null 2>&1; then
     curl -fsSL https://opencode.ai/install | bash
 fi
+if [[ ${ENABLE_PI:-1} == 1 ]] && ! command -v pi >/dev/null 2>&1; then
+    curl -fsSL https://pi.dev/install.sh | sh
+fi
 if [[ ${ENABLE_CAVEMEM:-1} == 1 ]] && ! command -v cavemem >/dev/null 2>&1; then
     command -v npm >/dev/null || { echo "Install Node.js/npm first." >&2; exit 1; }
     npm install --global --prefix "$HOME/.local" cavemem@0.2.1
 fi
 
 bash "$repo_dir/scripts/ai-setup.sh" --apply
-echo "Configuration applied. Restart the clients; authenticate with codex login and OpenCode /connect."
+echo "Configuration applied. Restart the clients; authenticate with codex login, OpenCode /connect and Pi /login."

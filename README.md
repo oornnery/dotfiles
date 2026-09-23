@@ -31,9 +31,10 @@ Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 - `hyprland/` → Hyprland config
 - `claude/` → Claude Code config: global contract, subagents, skills, output styles, MCP list
 - `opencode/` → Active OpenCode config, agents, commands, skills, and templates
-- `agents/` → Skills shared by OpenCode and Codex through `~/.agents/skills`
+- `pi/` → Pi config: contract, settings, subagents, prompt templates, MCP servers
+- `agents/` → Skills shared by OpenCode, Codex and Pi through `~/.agents/skills`
 - `codex/` → Codex config, global guidance, custom agents, and MCP definitions
-- [AI setup](docs/configuration/ai-agents.md) → model tiers, OpenCode modes, Impeccable, migration and recovery
+- [AI setup](docs/configuration/ai-agents.md) → model tiers, OpenCode/Pi modes, Impeccable, migration and recovery
 - `zsh/.config/ai/` → shared, private API-key environment template and guide
 
 ## Quick install
@@ -85,6 +86,7 @@ stow -v -t ~ nvim
 stow -v -t ~ tmux
 stow --no-folding -v -t ~ claude
 stow --no-folding -v -t ~ opencode
+stow --no-folding -v -t ~ pi
 stow --no-folding -v -t ~ agents
 stow --no-folding -v -t ~ codex
 ```

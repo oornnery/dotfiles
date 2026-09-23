@@ -1,0 +1,23 @@
+{
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4.1-flash",
+  "defaultThinkingLevel": "medium",
+  "quietStartup": true,
+  "enabledModels": [
+    "opencode-go/deepseek-v4.1-flash",
+    "opencode-go/qwen3.8-flash",
+    "opencode-go/qwen3.8-max",
+    "opencode-go/glm-5.3",
+    "qwen-token-plan/qwen3.8-max"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 20000
+  },
+  "packages": [
+    "npm:pi-mcp-adapter@2.36.0",
+    "npm:pi-subagents-j0k3r@1.6.1",
+    "npm:pi-plan-task@5.0.5"
+  ]
+}
