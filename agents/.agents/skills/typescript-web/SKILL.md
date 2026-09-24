@@ -22,4 +22,4 @@ routes, server/client boundaries, nearby code/tests, and CI.
 - Keep server/client, trusted/untrusted, and sync/async boundaries explicit.
 - Use existing package manager and framework patterns.
 - Prefer platform/browser APIs and CSS before new dependencies.
-- Add smallest regression test for changed behavior.
+- New non-trivial behavior gets the smallest regression test.

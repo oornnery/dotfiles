@@ -10,7 +10,7 @@ models/domain -> no route/template imports
 templates -> no business rules
 ```
 
-Define:
+For a new app or a new area, settle these before building:
 
 - route and template map;
 - request/form/response contracts;

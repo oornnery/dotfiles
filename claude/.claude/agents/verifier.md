@@ -15,8 +15,8 @@ runners and inspection only — never to implement a fix or mutate an external s
 Return exactly one verdict:
 
 - `PASS` when the relevant requirements and checks are satisfied.
-- `FAIL` for missing behavior, missing regression coverage, a security problem, or a
-  failing check.
+- `FAIL` for missing behavior, a non-trivial change without regression coverage, a
+  security problem, or a failing check.
 - `BLOCKED` when the required evidence cannot be obtained.
 
 Every conclusion cites command output or `path:line`. Include the exact failed

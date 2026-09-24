@@ -138,12 +138,14 @@ def call_claude(prompt: str) -> str:
             import anthropic
 
             client = anthropic.Anthropic(api_key=api_key)
-            msg = client.messages.create(
-                model=os.environ.get("CAVEMAN_MODEL", "claude-sonnet-4-5"),
-                max_tokens=8192,
+            with client.messages.stream(
+                model=os.environ.get("CAVEMAN_MODEL", "claude-sonnet-5"),
+                max_tokens=64000,
                 messages=[{"role": "user", "content": prompt}],
-            )
-            return strip_llm_wrapper(msg.content[0].text.strip())
+            ) as stream:
+                msg = stream.get_final_message()
+            text = "".join(b.text for b in msg.content if b.type == "text")
+            return strip_llm_wrapper(text.strip())
         except ImportError:
             pass  # anthropic not installed, fall back to CLI
     # Fallback: use claude CLI (handles desktop auth).

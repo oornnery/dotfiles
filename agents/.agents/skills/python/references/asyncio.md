@@ -7,4 +7,4 @@
 - Never swallow `CancelledError`; clean up then re-raise.
 - Move unavoidable blocking work off event loop.
 - Close clients, streams, subprocesses, tasks, and background workers deterministically.
-- Test cancellation, timeout, partial failure, and resource cleanup.
+- Test the cancellation, timeout, partial-failure and cleanup paths the change introduces.
