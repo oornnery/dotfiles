@@ -491,3 +491,13 @@ opencode-completion-refresh() { _dotfiles_opencode_completion 1 }
 if command -v opencode >/dev/null 2>&1; then
   _dotfiles_opencode_completion
 fi
+
+# oh-my-opencode-slim background subagents
+export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+
+# ForgeCode shell plugin and prompt theme
+if command -v forge >/dev/null 2>&1; then
+  export NERD_FONT=0 FORGE_EDITOR=nvim
+  [[ -n "${_FORGE_PLUGIN_LOADED:-}" ]] || eval "$(forge zsh plugin)"
+  [[ -n "${_FORGE_THEME_LOADED:-}" ]] || eval "$(forge zsh theme)"
+fi
