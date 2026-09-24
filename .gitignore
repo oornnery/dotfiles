@@ -75,6 +75,11 @@ skills-lock.json
 antigen.zsh
 herdr/.config/herdr/session.json
 herdr/.config/herdr/*.log
+herdr/.config/herdr/session-history.json
+herdr/.config/herdr/plugins/
+herdr/.config/herdr/plugins.json
+herdr/.config/herdr/.plugins.lock
+herdr/.config/herdr/*.bak.*
 
 # OpenCode local state, caches, and generated files
 .config/opencode/node_modules/
