@@ -126,3 +126,22 @@ progress notifications (no swayosd-server).
 | `XF86AudioMicMute`               | `volume mic-mute-toggle`|
 | `XF86MonBrightnessUp/Down`       | `brightness raise/lower`|
 | `XF86AudioNext/Prev/Play/Pause`  | playerctl               |
+
+## Terminal window manager (herdr)
+
+One vocabulary for moving, from the desktop down to a split inside the editor:
+
+| Layer | Move | Create / close | Jump |
+| ----- | ---- | -------------- | ---- |
+| Hyprland (GUI) | `Super+H/J/K/L` | `Super+Enter`, `Super+Q` | `Super+1..9` workspace |
+| herdr workspace | — | `prefix+shift+n` / `prefix+shift+d` | `prefix+w`, `prefix+t`, `prefix+l` back |
+| herdr tab | `prefix+h/j/k/l` inside the tab bar | `prefix+c` / `prefix+shift+x` | `prefix+1..9` |
+| herdr pane | `prefix+h/j/k/l` or `Alt+h/j/k/l` | `prefix+v` / `prefix+-`, `prefix+x` | `prefix+g` |
+| Neovim split | `Ctrl+h/j/k/l` (crosses the edge into herdr) | `<Space>vs` / `<Space>q` | `<Space>1..9` |
+| lazygit / lazydocker | `hjkl`, `[` / `]` panels | `?` shows every binding | `q` |
+| zsh | `Ctrl+X Ctrl+R` snippet, `Ctrl+R` history | — | `Ctrl+T` file path |
+
+`Alt+h/j/k/l` is the pane chord because `Ctrl+h/j/k/l` belongs to readline and to
+the TUIs running inside the panes. Full key tables:
+[herdr](../cheatsheets/herdr.md), [neovim](../cheatsheets/neovim.md),
+[TUIs](../applications/05-tuis.md), [pet](../cheatsheets/pet.md).

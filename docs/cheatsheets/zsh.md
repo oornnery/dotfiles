@@ -72,6 +72,11 @@ did not. These timings do not measure a complete interactive prompt render.
 | `ld`   | `lazydocker`            | Docker TUI                            |
 | `py`   | `python`                | Python interpreter                    |
 
+## Snippets
+
+`Ctrl+X Ctrl+R` inserts a [pet](pet.md) snippet at the cursor instead of running
+it, so you can still edit it. Snippets live in the `pet/` stow package.
+
 ## Navigation
 
 | Alias  | Means         |

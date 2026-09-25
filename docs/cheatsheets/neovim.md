@@ -40,7 +40,7 @@ adds plugins with lazy.nvim.
 
 | Bind          | Action |
 | ------------- | ------ |
-| `Ctrl-h/j/k/l`| Move between windows |
+| `Ctrl-h/j/k/l`| Move between windows; at a split edge, into the [herdr](herdr.md) pane |
 | `<Space>sv`   | Vertical split |
 | `<Space>sh`   | Horizontal split |
 | `<Space>=`    | Equalize windows |

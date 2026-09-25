@@ -20,6 +20,8 @@ silent no-ops.
 | lazygit    | `git` UI        | bound to `Super + Shift + G` in Hyprland                 |
 | lazydocker | `docker stats`  | bound to `Super + Shift + D`                             |
 | yazi       | ranger          | TUI file manager                                         |
+| pet        | shell history   | snippet library; `Ctrl+X Ctrl+R` inserts — see [pet](../cheatsheets/pet.md) |
+| yt-dlp     | —               | run through `uvx`; `dots yt <url>` = transcript + AI summary |
 | btop       | htop            | bound to `Super + Shift + T`                             |
 | gum        | dialog          | scripts; pretty TUI prompts                              |
 | tealdeer   | tldr            | `tldr <cmd>` — concise examples                          |

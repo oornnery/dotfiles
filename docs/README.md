@@ -61,6 +61,8 @@ Per-tool quick references — paste-ready commands, no narrative.
 - [bash](cheatsheets/bash.md)
 - [tmux](cheatsheets/tmux.md)
 - [zellij](cheatsheets/zellij.md) — vim-flavored multiplexer
+- [herdr](cheatsheets/herdr.md) — agent multiplexer keymap + plugin actions
+- [pet](cheatsheets/pet.md) — snippet manager + `Ctrl+X Ctrl+R`
 - [fastfetch](cheatsheets/fastfetch.md)
 
 ### File / text

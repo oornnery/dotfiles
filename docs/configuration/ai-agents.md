@@ -130,33 +130,96 @@ Set `OPENCODE_SERVER_PASSWORD` in your private environment when authentication i
 `pi/.pi/agent/` carries `AGENTS.md` (the personal contract), `settings.json`,
 `mcp.json`, `agents/` and `prompts/`. Pi reads `AGENTS.md` plus ancestor files as
 context, and auto-discovers `~/.agents/skills/`, so the shared skills need no
-settings entry. `settings.json` sets the `opencode-go/deepseek-v4.1-flash` default
-with `qwen3.8-flash`, `qwen3.8-max` and `glm-5.3` in the Ctrl+P list, plus three
-pinned packages:
+settings entry. The package is stowed with `dots stow pi`; a pre-existing real
+`~/.pi/agent/settings.json` is moved aside with a timestamp, never merged. Pi rewrites
+`defaultProvider`, `defaultModel` and `theme` in that file when you switch models in a
+session, so expect churn there — same as the counters in the Codex config.
 
-- [pi-mcp-adapter](https://github.com/nicobailon/pi-mcp-adapter) v2.36.0 — lazy `mcp`
-  proxy tool; `~/.pi/agent/mcp.json` holds the same six servers as Codex and OpenCode.
-- [pi-subagents-j0k3r](https://github.com/j0k3r-dev-rgl/pi-subagents-j0k3r) v1.6.1 —
-  the `agents/*.md` subagents, reachable through `subagent_run` and `/subagents`.
-- [pi-plan-task](https://www.npmjs.com/package/pi-plan-task) v5.0.5 — the `/pt`
-  Plan → Review → Approve → Build → Verify workflow.
+`settings.json` defaults to `opencode-go/deepseek-v4.1-flash` with `qwen3.8-flash`,
+`qwen3.8-max` and `glm-5.3` in the Ctrl+P list, plus automatic compaction
+(`reserveTokens` 16384, `keepRecentTokens` 20000). Provider names are per client: Pi
+authenticates the Alibaba plan as `qwen-token-plan-individual`, while OpenCode calls it
+`qwen-token-plan`. A model id copied between the two adapters resolves to nothing, so
+`scripts/validate-ai.py` checks Pi subagent models against the Pi names only.
+
+### Packages
+
+Every entry is pinned to a version or a full commit; `pi list` prints them with their
+on-disk paths, and `pi update --all` reconciles the pins.
+
+| Pi package                                 | What it adds                                                        | Equivalent already in the stack                                  |
+| ------------------------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `pi-mcp-adapter` 2.36.0                    | lazy `mcp` proxy tool over `~/.pi/agent/mcp.json`                   | Codex `[mcp_servers]`, OpenCode `mcp`, `claude mcp`              |
+| `pi-subagents-j0k3r` 1.6.1                 | `agents/*.md` subagents via `subagent_run`, `/subagents`            | Claude `agents/`, OpenCode modes, Codex agents                   |
+| `pi-plan-task` 5.0.5                       | `/pt` Plan → Review → Approve → Build → Verify                      | Claude Plan mode, `/plan`, cavekit `ck` spec loop                |
+| `pi-background-tasks` 2.6.5                | durable background shell, read-only delegated agents                | OpenCode/ForgeCode background subagents, Claude background tasks |
+| `pi-web-access` 0.31.0                     | web search, URL fetch, GitHub clone, PDF and YouTube extraction     | Codex web search, context7, `dots yt`                            |
+| `pi-rewind` 0.5.0                          | file checkpoints, `/rewind`, auto-snapshot before edits             | Claude Code checkpointing                                        |
+| `pi-opencode-go-usage` 1.1.1               | `/usage` meter for the default router                               | Claude `/usage`, OpenCode statusline plugin                      |
+| `@narumitw/pi-btw` 0.61.1                  | `/btw` side question that never enters the session history          | OpenCode side conversations, `/btw`                              |
+| `@osolmaz/pi-workflows` 0.17.4             | `/packages` resource manager: health checks, reload, enable/disable | `pi config`, OpenCode plugin list                                |
+| `@ladbabynpm/picc-ask-user-question` 0.1.1 | `AskUserQuestion` with the Claude-style tab/enter wizard            | Claude Code `AskUserQuestion`                                    |
+| `pi-mermaid` 0.3.0                         | render Mermaid diagrams as ASCII in the terminal                    | OpenCode table formatter, `glow`                                 |
+| `@twkrash/pi-session-inspector` 1.4.0      | local token/cost/model/tool/subagent analytics per session          | Claude `/cost`, `/context`                                       |
+| `madeye/pi-jev` `v0.1.0` (git)             | `jev_search`/`jev_rank` file retrieval, `/jev find`                 | RTK-style output trimming, `rg` + `read`                         |
+
+Deliberately **not** installed, because the setup already has that layer or the
+package weakens a boundary:
+
+- `pi-hermes-memory`, `pi-memory-mem0`, `pi-magic-context`, `pi-session-memory`,
+  `velorith`, `pi-compaction-lite`: Cavemem is the single memory layer, shared by all
+  four clients through MCP.
+- `pi-mcp-extension`, `pi-mcp-auth-parallel`: duplicate `pi-mcp-adapter`.
+- `pi-goal`, `pi-goal-x`, `pi-plan-mode`, `pi-todo`, `task-master`: duplicate `pi-plan-task`.
+- `pi-no-brainer` (auto-approves every tool call), `pi-auto-approve`,
+  `pi-permission-system`, `pi-soulock`, `pi-gastby`: this setup relies on the agent tool
+  lists and task boundaries, not on an approval bypass.
+- `pi-chrome-devtools`, `pi-browser-use`, `pi-firecrawl`, `pi-search-x`,
+  `pi-websearch-searchapi`: the same servers are declared once in `mcp.json`.
+- `pi-cloudflare`, `pi-opencode-compact`, `pi-claude-auth`, `pi-codex-auth`,
+  `pi-antigravity`, `pi-gigachat`, `pi-token-switcher`, `pi-quota`: duplicate vendored
+  skills, providers or model routing owned by the router.
+
+`pi-auto-compact` was installed and removed again: it refuses to activate while Pi's
+built-in `compaction.enabled` is true, and the built-in path is the one this file
+documents.
 
 Pi subagents mirror the OpenCode modes; read-only roles keep read-only tool lists.
 
-| Subagents                         | Model                           | Effort        |
-| --------------------------------- | ------------------------------- | ------------- |
-| build, verifier                   | opencode-go/deepseek-v4.1-flash | medium / high |
-| fast, explore                     | opencode-go/qwen3.8-flash       | low           |
-| plan, reviewer                    | opencode-go/glm-5.3             | high          |
-| shape                             | opencode-go/glm-5.3             | medium        |
-| deep, debugger, security-reviewer | qwen-token-plan/qwen3.8-max     | high          |
-| frontend                          | qwen-token-plan/qwen3.8-max     | medium        |
+| Subagents                         | Model                                  | Effort        |
+| --------------------------------- | -------------------------------------- | ------------- |
+| build, verifier                   | opencode-go/deepseek-v4.1-flash        | medium / high |
+| fast, explore                     | opencode-go/qwen3.8-flash              | low           |
+| plan, reviewer                    | opencode-go/glm-5.3                    | high          |
+| shape                             | opencode-go/glm-5.3                    | medium        |
+| deep, debugger, security-reviewer | qwen-token-plan-individual/qwen3.8-max | high          |
+| frontend                          | qwen-token-plan-individual/qwen3.8-max | medium        |
 
 `prompts/` ports the 15 command shortcuts as prompt templates, so `/implement`,
 `/review`, `/safe-commit` and the rest behave like their OpenCode counterparts. Pi
 has no built-in permission prompts, MCP tool subsetting or plan mode: those come
 from the packages above and from the agent tool lists. Treat that as the boundary;
 there is no interactive approval gate to fall back on.
+
+### Credentials and `.env`
+
+Pi never reads a `.env` file. Provider keys come from `~/.pi/agent/auth.json`
+(`pi auth check --provider X --model Y` reports readiness) or from the process
+environment, which this setup populates from `~/.config/ai/env`, sourced by
+`zsh/.zshenv`. That file is gitignored; `zsh/.config/ai/env.example` documents the
+keys. A repo-root `.env` is also gitignored and read by nothing here, so putting
+`TYPESAFE_API_KEY` or `GITHUB_MCP_TOKEN` there has no effect — add them to
+`~/.config/ai/env` and restart the client.
+
+`pi-jev` follows the same rule: with no `TYPESAFE_API_KEY` it stays local-only
+(`jev_search` ranks excerpts by word overlap) and its hosted flags stay off. Set
+`TYPESAFE_BASE_URL` to point the same requests at a self-hosted compatible server
+instead. Nothing is sent anywhere unless you export a key.
+
+Cavemem needs Node 22 through fnm (`fnm install 22`) because all four clients launch
+it as `fnm exec --using=22 -- cavemem mcp`; without that version the MCP connect fails
+in every client at once. `herdr integration install pi` adds Pi's agent-state hook, so
+herdr shows Pi panes as working/blocked/done like the others.
 
 ## Codex roles
 
