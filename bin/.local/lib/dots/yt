@@ -1,0 +1,274 @@
+#!/usr/bin/env bash
+# dots:summary=Video → transcript → AI summary (yt-dlp via uvx + pi)
+# dots:args=<url>... [--langs pt,en] [--no-summary] [--no-auto] [--keep-vtt] [--vault] [--model X] [--prompt TEXT] [--from-file F]
+set -euo pipefail
+
+# dots yt — "watch this later, I only want the content".
+#
+#   dots yt https://www.youtube.com/watch?v=QyVFkGuswl4
+#   dots yt --langs en --no-summary <url>
+#   dots yt --vault <url>                    # also copy the note into the vault Inbox
+#   dots yt --from-file clip.vtt             # offline: skip yt-dlp entirely
+#
+# yt-dlp runs through `uvx`, so there is nothing to install and it is always
+# current. Subtitles beat ASR here: manual subs first, then auto-generated ones.
+# Without ffmpeg a video with no subtitles cannot be transcribed, so it fails
+# loudly instead of downloading audio nobody processes.
+
+YT_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/yt"
+YTDLP="${YTDLP_CMD:-uvx --from yt-dlp yt-dlp}"
+LANGS="pt,en"
+SUMMARY=1
+AUTO=1
+KEEP_VTT=0
+TO_VAULT=0
+MODEL="${YT_MODEL:-}"
+PROMPT="${YT_PROMPT:-}"
+FROM_FILE=""
+urls=()
+
+usage() {
+    sed -n '6,16p' "$0" | sed 's/^# \{0,1\}//'
+    cat <<'EOF'
+
+Flags:  --langs L     comma separated subtitle languages (default pt,en)
+        --no-auto     manual subtitles only
+        --no-summary  transcript only, no model call
+        --keep-vtt    keep the raw subtitle file next to the text
+        --vault       copy the Markdown note into $OBSIDIAN_VAULT/Inbox
+        --model X     pi model override for the summary
+        --prompt T    replace the default summary instructions
+        --from-file F transcribe a local .vtt/.srt/.txt instead of fetching
+
+Env:    YTDLP_CMD  yt-dlp command (default: uvx --from yt-dlp yt-dlp)
+        YT_MODEL   default model        YT_PROMPT  default instructions
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --langs)      LANGS="${2:-}"; shift 2 ;;
+        --model)      MODEL="${2:-}"; shift 2 ;;
+        --prompt)     PROMPT="${2:-}"; shift 2 ;;
+        --dir)        YT_DIR="${2:-}"; shift 2 ;;
+        --from-file)  FROM_FILE="${2:-}"; shift 2 ;;
+        --no-summary) SUMMARY=0; shift ;;
+        --no-auto)    AUTO=0; shift ;;
+        --keep-vtt)   KEEP_VTT=1; shift ;;
+        --vault)      TO_VAULT=1; shift ;;
+        -h|--help)    usage; exit 0 ;;
+        -*)           echo "dots yt: unknown flag: $1" >&2; usage >&2; exit 2 ;;
+        *)            urls+=("$1"); shift ;;
+    esac
+done
+
+if [[ -z "$FROM_FILE" && ${#urls[@]} -eq 0 ]]; then
+    usage >&2
+    exit 2
+fi
+command -v python3 >/dev/null || { echo "dots yt: python3 required" >&2; exit 1; }
+
+notify() { dots notify "$@" -a yt 2>/dev/null || true; }
+
+die_rate_limited() {
+    echo "         YouTube is rate limiting this host. Retry with a browser session:" >&2
+    echo "         YTDLP_CMD='$YTDLP --cookies-from-browser firefox' dots yt <url>" >&2
+}
+
+# ─── Subtitles → plain text ─────────────────────────────────────────────────
+vtt_to_text() { # vtt_to_text <subtitle|text file> <output>
+    python3 - "$1" "$2" <<'PY'
+import re, sys
+src, dst = sys.argv[1], sys.argv[2]
+out, prev = [], None
+for raw in open(src, encoding="utf-8", errors="replace"):
+    line = raw.strip()
+    if not line or line.startswith(("WEBVTT", "Kind:", "Language:", "NOTE", "STYLE", "REGION", "{")):
+        continue
+    if "-->" in line or re.fullmatch(r"[\d:.,]+\s*-->\s*[\d:.,]+.*", line):
+        continue
+    if re.fullmatch(r"\d+", line):                       # srt cue index
+        continue
+    line = re.sub(r"<[^>]+>", "", line).replace("&nbsp;", " ")
+    line = re.sub(r"\s+", " ", line).strip()
+    if not line or line == prev:                         # rolling auto-sub repeats
+        continue
+    prev = line
+    out.append(line)
+open(dst, "w", encoding="utf-8").write(" ".join(out).strip() + "\n")
+PY
+}
+
+# ─── Text → chunks of at most ~18k chars, split on whitespace ───────────────
+split_chunks() { # split_chunks <text> <dir>  → prints one chunk file per line
+    python3 - "$1" "$2" <<'PY'
+import os, sys
+LIMIT = 18000
+text = " ".join(open(sys.argv[1], encoding="utf-8").read().split())
+os.makedirs(sys.argv[2], exist_ok=True)
+parts, rest = [], text
+while len(rest) > LIMIT:
+    cut = rest.rfind(" ", 0, LIMIT)
+    if cut < LIMIT // 2:
+        cut = LIMIT
+    parts.append(rest[:cut])
+    rest = rest[cut:].lstrip()
+parts.append(rest or "(empty transcript)")
+for i, part in enumerate(parts, 1):
+    path = os.path.join(sys.argv[2], f"part-{i:02d}.txt")
+    open(path, "w", encoding="utf-8").write(part + "\n")
+    print(path)
+PY
+}
+
+# ─── Summary (map over chunks, then reduce) ─────────────────────────────────
+summarise() { # summarise <transcript> <note file> <header block>
+    local text="$1" note="$2" header="$3"
+    command -v pi >/dev/null || { echo "dots yt: pi not on PATH — keeping the transcript only" >&2; return 0; }
+
+    local instr="${PROMPT:-Resuma em português do Brasil, em Markdown, sem introdução: 1) tese central em 2 linhas; 2) bullets dos pontos técnicos; 3) ferramentas, modelos e comandos citados; 4) citações curtas com o minuto aproximado; 5) três próximos passos acionáveis. Densidade alta, nada de enchimento.}"
+    local piargs=(-p --no-session)
+    [[ -n "$MODEL" ]] && piargs+=(--model "$MODEL")
+
+    local tmp chunk n=0 total
+    tmp="$(mktemp -d)"
+    # ${tmp:-} so the trap is safe if it fires after the local goes out of scope.
+    trap 'rm -rf "${tmp:-}"' RETURN
+    mapfile -t chunk < <(split_chunks "$text" "$tmp/parts")
+    total="${#chunk[@]}"
+
+    local notes="$tmp/notes.md"
+    : >"$notes"
+    for f in "${chunk[@]}"; do
+        n=$((n + 1))
+        [[ "$total" -gt 1 ]] && echo "  summarising part $n/$total…"
+        { printf '%s\n\n' "$instr"; cat "$f"; } | pi "${piargs[@]}" >>"$notes" 2>/dev/null || {
+            echo "dots yt: pi failed on part $n ($f)" >&2
+            return 1
+        }
+        printf '\n\n' >>"$notes"
+    done
+
+    {
+        printf '%s\n\n' "$header"
+        if [[ "$total" -gt 1 ]]; then
+            printf '## Resumo\n\n'
+            printf 'Funda estas %s notas parciais em um único resumo, sem repetição e sem preâmbulo:\n\n' "$total" | cat - "$notes" \
+                | pi "${piargs[@]}" 2>/dev/null || cat "$notes"
+        else
+            cat "$notes"
+        fi
+    } >"$note"
+    echo "  summary: $note"
+}
+
+# ─── One local subtitle/transcript file ─────────────────────────────────────
+process_file() { # process_file <path> [id] [title]
+    local src="$1" id="${2:-}" title="${3:-}"
+    [[ -f "$src" ]] || { echo "dots yt: no such file: $src" >&2; return 1; }
+    [[ -n "$id" ]] || id="$(basename "${src%.*}")"
+    [[ -n "$title" ]] || title="$id"
+
+    local work="$YT_DIR/$id" text
+    mkdir -p "$work"
+    text="$work/$id.txt"
+    case "$src" in
+        *.vtt|*.srt) vtt_to_text "$src" "$text" ;;
+        *)           cp "$src" "$text" ;;
+    esac
+
+    local words
+    words="$(wc -w <"$text")"
+    [[ "$words" -lt 30 ]] && { echo "dots yt: transcript too short ($words words)" >&2; return 1; }
+    echo "→ $title"
+    echo "  transcript: $text ($words words)"
+    [[ "$SUMMARY" -eq 1 ]] || return 0
+
+    local header
+    header="$(printf '# %s\n\n- transcript: %s (%s words)\n\n' "$title" "$text" "$words")"
+    summarise "$text" "$work/$id.md" "$header" || return 1
+    notify "Resumo pronto" "$title" -i document-save -t 5000
+    if [[ $TO_VAULT -eq 1 ]]; then push_vault "$work/$id.md" "$id"; fi
+}
+
+push_vault() { # push_vault <note> <id>
+    local vault="${OBSIDIAN_VAULT:-$HOME/Documents/vault}"
+    if [[ -d "$vault" ]]; then
+        mkdir -p "$vault/Inbox"
+        cp "$1" "$vault/Inbox/$2.md"
+        echo "  vault: $vault/Inbox/$2.md"
+    else
+        echo "dots yt: no vault at $vault (set OBSIDIAN_VAULT) — --vault skipped" >&2
+    fi
+}
+
+# ─── One remote URL ─────────────────────────────────────────────────────────
+process_url() {
+    local url="$1" meta
+    if ! command -v "${YTDLP%% *}" >/dev/null; then
+        echo "dots yt: '${YTDLP%% *}' not found — install uv (provides uvx) or set YTDLP_CMD" >&2
+        return 1
+    fi
+
+    meta="$($YTDLP --no-warnings --skip-download \
+              --print '%(id)s<|>%(title)s<|>%(channel)s<|>%(duration_string)s<|>%(upload_date)s' \
+              "$url" 2>&1)" || {
+        echo "dots yt: could not read metadata for $url" >&2
+        printf '         %s\n' "${meta//$'\n'/ }" >&2
+        [[ "$meta" == *"Sign in"* || "$meta" == *"429"* ]] && die_rate_limited
+        return 1
+    }
+
+    local id="${meta%%<|>*}" rest="${meta#*<|>}"; local title="${rest%%<|>*}"
+    rest="${rest#*<|>}"; local channel="${rest%%<|>*}"
+    rest="${rest#*<|>}"; local duration="${rest%%<|>*}"; local uploaded="${rest##*<|>}"
+    [[ -n "$id" && "$id" != "$meta" ]] || { echo "dots yt: unexpected metadata: $meta" >&2; return 1; }
+
+    local work="$YT_DIR/$id"
+    mkdir -p "$work"
+    echo "→ $title"
+
+    $YTDLP --no-warnings --skip-download --write-info-json -o "$work/%(id)s.%(ext)s" "$url" >/dev/null 2>&1 || true
+
+    # "pt,en" → "pt.*,en.*" so Brazilian auto-subs (pt-BR) also match.
+    local glob
+    glob="$(printf '%s' "${LANGS// /}" | awk -F, '{for(i=1;i<=NF;i++) printf "%s.*%s", $i, (i<NF ? "," : "")}')"
+
+    local subargs=(--skip-download --write-subs --sub-langs "$glob" --sub-format "vtt/srt/best" -o "$work/%(id)s.%(ext)s")
+    [[ $AUTO -eq 1 ]] && subargs+=(--write-auto-subs)
+    $YTDLP --no-warnings "${subargs[@]}" "$url" >/dev/null 2>&1 || true
+
+    local vtt
+    vtt="$(find "$work" -maxdepth 1 -name '*.vtt' -print -quit 2>/dev/null || true)"
+    if [[ -z "$vtt" ]]; then
+        notify "Sem legenda" "$title" -i dialog-warning -t 6000
+        echo "dots yt: no subtitles for '$LANGS' ($id)." >&2
+        echo "         Try --langs en, or --no-auto=false style sources; ASR needs ffmpeg." >&2
+        return 1
+    fi
+
+    local text="$work/$id.txt" words
+    vtt_to_text "$vtt" "$text"
+    words="$(wc -w <"$text")"
+    echo "  transcript: $text ($words words)"
+    [[ $KEEP_VTT -eq 0 ]] && find "$work" -maxdepth 1 -name '*.vtt' -delete
+
+    [[ $SUMMARY -eq 1 ]] || { notify "Transcrito" "$title" -i document-save -t 4000; return 0; }
+
+    local header
+    header="$(printf '# %s\n\n- url: %s\n- id: %s\n- channel: %s\n- duration: %s\n- uploaded: %s\n- transcript: %s (%s words)\n\n' \
+        "$title" "$url" "$id" "$channel" "$duration" "$uploaded" "$text" "$words")"
+    summarise "$text" "$work/$id.md" "$header" || return 1
+    notify "Resumo pronto" "$title" -i document-save -t 5000
+    if [[ $TO_VAULT -eq 1 ]]; then push_vault "$work/$id.md" "$id"; fi
+}
+
+fail=0
+if [[ -n "$FROM_FILE" ]]; then
+    process_file "$FROM_FILE" || fail=1
+else
+    for u in "${urls[@]}"; do
+        process_url "$u" || fail=1
+    done
+fi
+exit $fail
