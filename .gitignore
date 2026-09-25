@@ -111,6 +111,9 @@ opencode.slim/.config/opencode/plugins/caveman/package-lock.json
 opencode.slim/.config/opencode/plugins/caveman/node_modules/
 
 # Active OpenCode Stow package: keep config, ignore generated state.
+# Root stub auto-written by OpenCode when it runs in this checkout; the real
+# config is opencode/.config/opencode/opencode.jsonc.
+/opencode.jsonc
 /.opencode/
 /thoughts/
 opencode/.config/opencode/node_modules/
