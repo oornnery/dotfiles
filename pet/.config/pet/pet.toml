@@ -1,0 +1,16 @@
+# pet/.config/pet/pet.toml
+# Stowed to ~/.config/pet/pet.toml by the `pet/` package.
+#
+# Snippets deliberately keep pet's built-in location, ~/.config/pet/snippet.toml,
+# which this same package owns and Git versions. Do not set `snippetfile` or
+# `snippetdirs`: pet resolves those as absolute paths, so a $HOME-specific value
+# would break the second machine and `pet new` would start writing untracked
+# files. Register a snippet with `pet new` and commit snippet.toml.
+
+[General]
+  editor = "nvim"
+  column = 60
+  selectcmd = "fzf --ansi --height 40% --layout=reverse --border"
+  sortby = "-recency"
+  color = true
+  format = "[$description]: $command $tags"

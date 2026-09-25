@@ -1,0 +1,174 @@
+# pet/.config/pet/snippet.toml
+# Stowed to ~/.config/pet/snippet.toml. `pet new` appends here; keep it committed.
+# Insert at the prompt with Ctrl+X Ctrl+R (see zsh/.zshrc), or `pet search -t <tag>`.
+# Tags are space delimited; `pet list --oneline` shows everything.
+
+# ─── YouTube / transcripts ──────────────────────────────────────────────────
+
+[[snippets]]
+  description = "Transcribe a video and write an AI summary (yt-dlp via uvx + pi)"
+  command = "yts https://www.youtube.com/watch?v=VIDEO_ID"
+  tag = "yts youtube transcript ai"
+  output = ""
+
+[[snippets]]
+  description = "Same, but keep the raw .vtt and skip the model call"
+  command = "yts --keep-vtt --no-summary https://www.youtube.com/watch?v=VIDEO_ID"
+  tag = "yts youtube transcript"
+  output = ""
+
+[[snippets]]
+  description = "Summary as a Markdown note, copied into the Obsidian vault Inbox"
+  command = "yts --vault https://www.youtube.com/watch?v=VIDEO_ID"
+  tag = "yts youtube obsidian summary"
+  output = ""
+
+[[snippets]]
+  description = "List what yts already saved (transcripts, summaries)"
+  command = "ls -lt \"${XDG_DATA_HOME:-$HOME/.local/share}/yts\" | head -20"
+  tag = "yts youtube"
+  output = ""
+
+[[snippets]]
+  description = "Download only the audio track of a video"
+  command = "uvx --from yt-dlp yt-dlp -f bestaudio -x --audio-format m4a -o \"$HOME/Downloads/%(title).80s.%(ext)s\""
+  tag = "youtube media"
+  output = ""
+
+# ─── Terminal multiplexer (herdr) ───────────────────────────────────────────
+
+[[snippets]]
+  description = "Reload herdr config without restarting panes"
+  command = "herdr server reload-config"
+  tag = "herdr config"
+  output = ""
+
+[[snippets]]
+  description = "Show every active herdr keybinding (also prefix+?)"
+  command = "herdr keybinding list"
+  tag = "herdr keys"
+  output = ""
+
+[[snippets]]
+  description = "Which agents does herdr see, and why"
+  command = "herdr agent list && herdr agent explain \"$(herdr pane current --json | jq -r .target)\" --json"
+  tag = "herdr agents debug"
+  output = ""
+
+[[snippets]]
+  description = "List herdr plugins with their pinned git refs"
+  command = "herdr plugin list"
+  tag = "herdr plugins"
+  output = ""
+
+# ─── AI clients ─────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "Pi: list loaded packages and their on-disk paths"
+  command = "pi list"
+  tag = "pi ai"
+  output = ""
+
+[[snippets]]
+  description = "Pi: one-shot prompt without saving a session"
+  command = "pi -p --no-session \"summarise this diff\""
+  tag = "pi ai"
+  output = ""
+
+[[snippets]]
+  description = "Pi: update pi, packages and model catalogs"
+  command = "pi update --all"
+  tag = "pi ai update"
+  output = ""
+
+[[snippets]]
+  description = "Check provider credentials for a pi model"
+  command = "pi auth check --provider opencode-go --model deepseek-v4.1-flash --json"
+  tag = "pi ai auth"
+  output = ""
+
+# ─── Dotfiles ───────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "Stow a package (backs up conflicting real files first)"
+  command = "dots stow <pkg>"
+  tag = "dotfiles stow"
+  output = ""
+
+[[snippets]]
+  description = "Preview which symlinks a package would create"
+  command = "stow -n -d ~/dotfiles -t ~ -R <pkg> 2>&1 | tail -20"
+  tag = "dotfiles stow"
+  output = ""
+
+[[snippets]]
+  description = "Validate the AI adapters and markdown after an edit"
+  command = "cd ~/dotfiles && python3 scripts/validate-ai.py && rumdl docs/"
+  tag = "dotfiles ai check"
+  output = ""
+
+# ─── Git / GitHub ───────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "Open lazygit in the current repo"
+  command = "lazygit"
+  tag = "git tui"
+  output = ""
+
+[[snippets]]
+  description = "Undo the last commit, keeping the changes staged"
+  command = "git reset --soft HEAD~1"
+  tag = "git"
+  output = ""
+
+[[snippets]]
+  description = "List files changed in a commit range, with line counts"
+  command = "git diff --stat main...HEAD"
+  tag = "git"
+  output = ""
+
+[[snippets]]
+  description = "PR for the current branch, then watch checks"
+  command = "gh pr create --fill && gh pr checks --watch"
+  tag = "git github"
+  output = ""
+
+# ─── Arch system ────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "Which package owns a file or command"
+  command = "pacman -Qo $(command -v git) /etc/pacman.conf"
+  tag = "arch pacman"
+  output = ""
+
+[[snippets]]
+  description = "Orphans, then a topgrade dry run"
+  command = "pacman -Qtdq; topgrade --only system --dry-run"
+  tag = "arch maintenance"
+  output = ""
+
+[[snippets]]
+  description = "Journal for one unit, newest first, since boot"
+  command = "journalctl -b -u <unit> -p warning --no-pager | tail -50"
+  tag = "arch systemd"
+  output = ""
+
+# ─── Search / files ─────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "Ripgrep with context, ignoring nothing but gitignored files"
+  command = "rg -n -C 3 --hidden --glob '!.git/'"
+  tag = "search files"
+  output = ""
+
+[[snippets]]
+  description = "Find the 20 largest files under a path"
+  command = "du -ah . | sort -rh | head -20"
+  tag = "files"
+  output = ""
+
+[[snippets]]
+  description = "Serve the current directory over the LAN"
+  command = "python3 -m http.server 8000 --bind 0.0.0.0"
+  tag = "files network"
+  output = ""

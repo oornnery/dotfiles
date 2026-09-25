@@ -24,7 +24,8 @@ fi
 if [[ $ENABLE_CLI_ESSENTIAL -eq 1 ]]; then
     log::step "Essential modern CLI replacements"
     sudo pacman -S --needed --noconfirm \
-        bottom dust duf procs sd tealdeer jless git-delta
+        bottom dust duf procs sd tealdeer jless git-delta yt-dlp
+    log::info "yt-dlp runs from the repo too: dots yt <url> uses 'uvx --from yt-dlp'"
     log::info "tealdeer cache update (run as user)"
     sudo -u "$USER_NAME" -H tldr --update 2>/dev/null \
         || log::warn "tldr --update failed (transient; run manually if needed)"
@@ -43,13 +44,13 @@ fi
 # ─── AUR (pay-respects, topgrade) ─────────────────────────────────────────
 
 if [[ $ENABLE_CLI_AUR -eq 1 ]]; then
-    log::step "AUR: pay-respects + topgrade"
+    log::step "AUR: pay-respects, topgrade, pet"
     if ! command -v paru >/dev/null 2>&1; then
         log::warn "paru not found — install core/paru.sh first"
     else
         sudo -u "$USER_NAME" -H paru -S --needed --noconfirm \
-            pay-respects topgrade || log::warn "AUR install failed"
-        log::ok "pay-respects + topgrade installed"
+            pay-respects topgrade pet-bin || log::warn "AUR install failed"
+        log::ok "pay-respects + topgrade + pet installed"
     fi
 fi
 

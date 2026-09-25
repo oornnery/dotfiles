@@ -127,6 +127,20 @@ bindkey '^[d' kill-word           # Alt+D: delete word ahead
 # History search
 bindkey '^R' history-incremental-search-backward # Ctrl+R: fuzzy history
 
+# Snippet library (pet, config in the pet/ package). Ctrl+X Ctrl+R inserts the
+# selected command at the cursor instead of running it, so you can still edit it.
+# The upstream docs bind Ctrl+S and disable flow control with `stty -ixon`; this
+# uses the Ctrl-X prefix so ^S stays available for its shell job.
+if command -v pet >/dev/null 2>&1; then
+  function pet-select() {
+    BUFFER=$(pet search --query "$LBUFFER" || true)
+    CURSOR=$#BUFFER
+    zle redisplay
+  }
+  zle -N pet-select
+  bindkey '^X^R' pet-select
+fi
+
 # Vi mode belongs in the shell prompt. Zellij's write-chars sends pane input,
 # so it must not be used to publish a status label on mode changes.
 
