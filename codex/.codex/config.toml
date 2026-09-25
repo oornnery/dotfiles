@@ -1,5 +1,5 @@
 model = "gpt-5.6-luna"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 approvals_reviewer = "auto_review"
@@ -68,12 +68,27 @@ trust_level = "trusted"
 [projects."/home/oornnery/proj/ve-abr"]
 trust_level = "trusted"
 
+[projects."/home/oornnery/proj/friday"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/fb"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/pyhtx"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/labs"]
+trust_level = "trusted"
+
+[projects."/mnt/c/Users/fabio/Downloads/harness"]
+trust_level = "trusted"
+
 [tui]
 status_line = ["model-with-reasoning", "current-dir", "git-branch"]
 status_line_use_colors = true
 
 [tui.model_availability_nux]
-gpt-6-astra = 3
+gpt-6-astra = 4
 
 [features]
 hooks = true
