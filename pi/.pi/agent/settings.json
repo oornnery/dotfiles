@@ -8,7 +8,8 @@
     "opencode-go/qwen3.8-flash",
     "opencode-go/qwen3.8-max",
     "opencode-go/glm-5.3",
-    "qwen-token-plan/qwen3.8-max"
+    "qwen-token-plan-individual/qwen3.8-max",
+    "qwen-token-plan-individual/qwen3.8-flash"
   ],
   "compaction": {
     "enabled": true,
@@ -18,6 +19,16 @@
   "packages": [
     "npm:pi-mcp-adapter@2.36.0",
     "npm:pi-subagents-j0k3r@1.6.1",
-    "npm:pi-plan-task@5.0.5"
+    "npm:pi-plan-task@5.0.5",
+    "npm:pi-background-tasks@2.6.5",
+    "npm:pi-web-access@0.31.0",
+    "npm:pi-rewind@0.5.0",
+    "npm:pi-opencode-go-usage@1.1.1",
+    "npm:@narumitw/pi-btw@0.61.1",
+    "npm:@osolmaz/pi-workflows@0.17.4",
+    "git:github.com/madeye/pi-jev@v0.1.0",
+    "npm:@ladbabynpm/picc-ask-user-question@0.1.1",
+    "npm:pi-mermaid@0.3.0",
+    "npm:@twkrash/pi-session-inspector@1.4.0"
   ]
 }

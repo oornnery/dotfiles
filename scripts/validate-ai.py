@@ -23,7 +23,9 @@ OPENCODE_MODELS = {
 }
 PI_MODELS = {
     "opencode-go": {"deepseek-v4.1-flash", "qwen3.8-flash", "qwen3.8-max", "glm-5.3"},
-    "qwen-token-plan": {"qwen3.8-max"},
+    # Pi's own provider name for the Alibaba token plan; OpenCode calls it
+    # `qwen-token-plan`, so the two adapters are not interchangeable.
+    "qwen-token-plan-individual": {"qwen3.8-flash", "qwen3.8-max"},
 }
 CLAUDE_MODELS = {"opus", "sonnet", "haiku", "fable", "inherit"}
 EFFORT = {"low", "medium", "high", "xhigh", "max"}
@@ -158,7 +160,9 @@ def main():
     assert default in OPENCODE_MODELS, default
     assert default in pi_settings["enabledModels"], default
     for package in pi_settings["packages"]:
-        assert re.search(r"@\d+\.\d+", package), f"Unpinned Pi package: {package}"
+        # npm pins look like `name@1.2.3`; git pins use a tag (`@v0.1.0`) or a
+        # full commit sha. Anything else floats and must not be committed.
+        assert re.search(r"@(?:[0-9a-f]{40}|v?\d+\.\d+)", package), f"Unpinned Pi package: {package}"
     assert set(pi_agents) == set(agents), "Pi/OpenCode subagent drift"
     assert set(pi_prompts) == set(commands), "Pi/OpenCode prompt drift"
     for name, agent in pi_agents.items():

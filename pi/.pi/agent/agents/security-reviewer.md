@@ -8,7 +8,7 @@ tools:
   - ls
   - ask_question
   - mcp
-model: qwen-token-plan/qwen3.8-max
+model: qwen-token-plan-individual/qwen3.8-max
 effort: high
 ---
 
