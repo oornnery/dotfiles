@@ -36,3 +36,32 @@ key = "prefix+m"
 type = "plugin_action"
 command = "nicosuave.memex.palette"
 description = "Search agent session history"
+
+# Pane/split navigation (vim-herdr-navigation, linked by scripts/arch/dev/herdr.sh).
+# Alt instead of the plugin's documented Ctrl chords: Ctrl+L/Ctrl+K are readline's
+# clear-line and kill-word in every non-Vim pane, and lazygit/btop use the same
+# chords. Inside Neovim the plugin still maps <C-h/j/k/l> and hands the key back
+# at a split edge, so editor and multiplexer share one movement vocabulary.
+[[keys.command]]
+key = "alt+h"
+type = "plugin_action"
+command = "vim-herdr-navigation.left"
+description = "Navigate left (vim split / herdr pane)"
+
+[[keys.command]]
+key = "alt+j"
+type = "plugin_action"
+command = "vim-herdr-navigation.down"
+description = "Navigate down (vim split / herdr pane)"
+
+[[keys.command]]
+key = "alt+k"
+type = "plugin_action"
+command = "vim-herdr-navigation.up"
+description = "Navigate up (vim split / herdr pane)"
+
+[[keys.command]]
+key = "alt+l"
+type = "plugin_action"
+command = "vim-herdr-navigation.right"
+description = "Navigate right (vim split / herdr pane)"
