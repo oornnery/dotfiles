@@ -1,47 +1,82 @@
 #!/usr/bin/env bash
 # dots:summary=Cross-distro system + ecosystem updater
-# dots:args=(run)|check|list|status [--json]
+# dots:args=(run)|list [--refresh]|check|status [--json]|motd
 #
-# Detects pacman/paru (Arch) OR apt/nala (Debian); always runs the language
-# ecosystems: flatpak, npm -g, cargo, pipx, uv. `check` emits waybar JSON.
+# Detects pacman/paru (Arch) OR apt/nala (Debian); also flatpak, npm, pnpm, bun,
+# uv tools, pipx and cargo. Scans cache to ~/.cache/dots/updates.tsv; `motd` is the
+# zsh startup hook (prints one line, re-scans in the background every 6h).
+# `check` emits waybar JSON.
 set -uo pipefail
 
-CACHE="${XDG_RUNTIME_DIR:-/tmp}/update-check.json"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dots"
+CACHE="$CACHE_DIR/updates.tsv"          # eco<TAB>name<TAB>current<TAB>latest
+TTL="${DOTS_UPDATE_TTL:-21600}"         # seconds before the shell hook re-scans
 _have() { command -v "$1" >/dev/null 2>&1; }
 
-_count_pacman()  { _have checkupdates && { checkupdates 2>/dev/null | wc -l || true; } || echo 0; }
-_count_aur()     { _have paru && { paru -Qua 2>/dev/null | wc -l || true; } || echo 0; }
-_count_apt()     { _have apt-get && ! _have pacman && { apt-get -s upgrade 2>/dev/null | grep -c '^Inst' || true; } || echo 0; }
-_count_flatpak() { _have flatpak && { flatpak remote-ls --updates 2>/dev/null | wc -l || true; } || echo 0; }
-_count_npm()     { _have npm && { npm outdated -g --parseable 2>/dev/null | wc -l || true; } || echo 0; }
-_count_cargo()   { _have cargo-install-update && { cargo install-update -l 2>/dev/null | grep -c '^Yes ' || true; } || echo 0; }
-_count_pipx()    { _have pipx && { pipx list --json 2>/dev/null | jq -r '.venvs | keys | length' 2>/dev/null || true; } || echo 0; }
-_count_uv()      { _have uv && { uv tool list 2>/dev/null | grep -c '^' || true; } || echo 0; }
-
-_check() {
-    local p a d f n c x u total
-    p=$(_count_pacman) a=$(_count_aur) d=$(_count_apt) f=$(_count_flatpak)
-    n=$(_count_npm) c=$(_count_cargo) x=$(_count_pipx) u=$(_count_uv)
-    total=$(( p + a + d + f + n + c ))
-    cat <<EOF
-{
-  "count": $total,
-  "pacman": $p, "aur": $a, "apt": $d, "flatpak": $f,
-  "npm": $n, "cargo": $c, "pipx": $x, "uv": $u,
-  "text": "$total",
-  "tooltip": "pacman: $p, AUR: $a, apt: $d, flatpak: $f, npm: $n, cargo: $c, pipx: $x, uv: $u",
-  "class": "$([ "$total" -gt 0 ] && echo updates || echo clean)"
+# Registry check for ecosystems with no native "outdated": stdin "name version".
+# ponytail: naive != compare against latest stable; pre-releases may false-positive.
+_remote() {  # _remote <eco> <url with @@ for the name> <jq filter>
+    R_ECO=$1 R_URL=$2 R_JQ=$3 xargs -r -P8 -L1 bash -c '
+        n=${0//\//%2F}; l=$(curl -fsm10 -A dots-update "${R_URL/@@/$n}" | jq -r "$R_JQ") || exit 0
+        [[ -n $l && $l != null && $l != "$1" ]] && printf "%s\t%s\t%s\t%s\n" "$R_ECO" "$0" "$1" "$l"
+    ' || true
 }
-EOF
+
+# Each scanner prints TSV rows for what is outdated.
+_scan_pacman()  { _have checkupdates && checkupdates 2>/dev/null | awk '{print "pacman\t"$1"\t"$2"\t"$4}'; }
+_scan_aur()     { _have paru && paru -Qua 2>/dev/null | awk '{print "aur\t"$1"\t"$2"\t"$4}'; }
+_scan_apt()     { _have apt-get && ! _have pacman && apt-get -s upgrade 2>/dev/null | awk '/^Inst/{print "apt\t"$2"\t\t"}'; }
+_scan_flatpak() { _have flatpak && flatpak remote-ls --updates --columns=application 2>/dev/null | awk '{print "flatpak\t"$1"\t\t"}'; }
+_scan_npm()     { _have npm && npm outdated -g --json 2>/dev/null | jq -r 'to_entries[]|"npm\t\(.key)\t\(.value.current)\t\(.value.latest)"'; }
+_scan_pnpm()    { _have pnpm && pnpm outdated -g --format json 2>/dev/null | jq -r 'to_entries[]|"pnpm\t\(.key)\t\(.value.current)\t\(.value.latest)"'; }
+_scan_bun()     { _have bun && bun pm ls -g 2>/dev/null | sed -nE 's/^[^A-Za-z@]*(.+)@([^@ ]+)$/\1 \2/p' | _remote bun 'https://registry.npmjs.org/@@/latest' .version; }
+_scan_uv()      { _have uv && uv tool list 2>/dev/null | awk '/^[^- ]/{sub(/^v/,"",$2); print $1, $2}' | _remote uv 'https://pypi.org/pypi/@@/json' .info.version; }
+_scan_pipx()    { _have pipx && pipx list --json 2>/dev/null | jq -r '.venvs|to_entries[]|select(.value.metadata.main_package.package_version)|"\(.key) \(.value.metadata.main_package.package_version)"' | _remote pipx 'https://pypi.org/pypi/@@/json' .info.version; }
+_scan_cargo()   { _have cargo && cargo install --list 2>/dev/null | awk '/^[^ ]/ && !/\(/{v=$2; sub(/^v/,"",v); sub(/:$/,"",v); print $1, v}' | _remote cargo 'https://crates.io/api/v1/crates/@@' .crate.max_stable_version; }
+
+ECOS=(pacman aur apt flatpak npm pnpm bun uv pipx cargo)
+
+_refresh() {  # scan every ecosystem in parallel, atomically replace the cache
+    mkdir -p "$CACHE_DIR"
+    mkdir "$CACHE_DIR/lock" 2>/dev/null || { find "$CACHE_DIR/lock" -mmin +10 -exec rmdir {} \; 2>/dev/null; return 0; }
+    local e tmp; tmp="$(mktemp -d)"
+    for e in "${ECOS[@]}"; do "_scan_$e" > "$tmp/$e" 2>/dev/null & done
+    wait
+    cat "${ECOS[@]/#/$tmp/}" > "$CACHE.new" 2>/dev/null && mv "$CACHE.new" "$CACHE"
+    rm -rf "$tmp"; rmdir "$CACHE_DIR/lock" 2>/dev/null
+}
+
+_count() { [[ -f $CACHE ]] && awk -F'\t' -v e="$1" '$1==e' "$CACHE" | wc -l || echo 0; }
+
+# `check` keeps the waybar JSON shape.
+_check() {
+    _refresh
+    local e total=0 n json='' tip=''
+    for e in "${ECOS[@]}"; do n=$(_count "$e"); total=$((total + n)); json+="\"$e\": $n, "; tip+="$e: $n, "; done
+    printf '{ "count": %d, %s"text": "%d", "tooltip": "%s", "class": "%s" }\n' \
+        "$total" "$json" "$total" "${tip%, }" "$([ "$total" -gt 0 ] && echo updates || echo clean)"
 }
 
 _list() {
-    _have checkupdates && { echo "── pacman ──"; checkupdates 2>/dev/null | sed 's/^/  /'; echo; }
-    _have paru         && { echo "── AUR ──";    paru -Qua    2>/dev/null | sed 's/^/  /'; echo; }
-    _have apt-get && ! _have pacman && { echo "── apt ──"; apt-get -s upgrade 2>/dev/null | grep '^Inst' | sed 's/^/  /'; echo; }
-    _have flatpak      && { echo "── flatpak ──"; flatpak remote-ls --updates 2>/dev/null | sed 's/^/  /'; echo; }
-    _have npm          && { echo "── npm -g ──"; npm outdated -g --parseable 2>/dev/null | sed 's/^/  /'; echo; }
-    _have cargo-install-update && { echo "── cargo ──"; cargo install-update -l 2>/dev/null | sed 's/^/  /'; echo; }
+    [[ $1 == --refresh || ! -f $CACHE ]] && _refresh
+    local e
+    for e in "${ECOS[@]}"; do
+        [[ $(_count "$e") -gt 0 ]] || continue
+        printf '\033[1;32m── %s (%s) ──\033[0m\n' "$e" "$(_count "$e")"
+        awk -F'\t' -v e="$e" '$1==e { printf "  %-32s %s%s\n", $2, $3, ($4 ? "  →  " $4 : "") }' "$CACHE"
+    done
+    [[ -s $CACHE ]] || echo "everything is up to date"
+}
+
+# One line for interactive shells; stale/missing cache re-scans in the background.
+_motd() {
+    local age=$TTL
+    [[ -f $CACHE ]] && age=$(( $(date +%s) - $(stat -c %Y "$CACHE") ))
+    (( age >= TTL )) && { setsid nohup "$0" refresh >/dev/null 2>&1 & disown; } 2>/dev/null
+    [[ -s $CACHE ]] || return 0
+    local e n parts=()
+    for e in "${ECOS[@]}"; do n=$(_count "$e"); (( n )) && parts+=("$e $n"); done
+    printf '\033[33m󰚰 %d updates\033[0m \033[2m(%s) · dots update list\033[0m\n' "$(wc -l < "$CACHE")" "${parts[*]}"
 }
 
 _run() {
@@ -61,23 +96,27 @@ _run() {
 
     _have flatpak              && { printf '\n── flatpak update ──\n'; flatpak update -y || true; }
     _have npm                  && { printf '\n── npm -g ──\n'; "${_as_user[@]}" npm update -g || true; }
+    _have pnpm                 && { printf '\n── pnpm -g ──\n'; "${_as_user[@]}" pnpm update -g || true; }
+    _have bun                  && { printf '\n── bun -g ──\n'; "${_as_user[@]}" bun update -g || true; }
     _have cargo-install-update && { printf '\n── cargo install-update ──\n'; "${_as_user[@]}" cargo install-update -a || true; }
     _have pipx                 && { printf '\n── pipx upgrade-all ──\n'; "${_as_user[@]}" pipx upgrade-all || true; }
     _have uv                   && { printf '\n── uv tool upgrade ──\n'; "${_as_user[@]}" uv tool upgrade --all || true; }
 
-    _check > "$CACHE" || true
+    _refresh
     dots notify "Update complete" "All ecosystems refreshed" -a update -i system-software-update -t 5000
 }
 
 _status() {
     if [[ "${1:-}" == --json ]]; then _check; return; fi
-    if _have jq; then _check | jq -r '"\(.count) updates — \(.tooltip)"'; else _check; fi
+    _check | jq -r '"\(.count) updates — \(.tooltip)"'
 }
 
 case "${1:-run}" in
     ""|run) _run ;;
     check)  _check ;;
-    list)   _list ;;
+    list)   _list "${2:-}" ;;
+    refresh) _refresh ;;
+    motd)   _motd ;;
     status) _status "${2:-}" ;;
     -h|--help|help) sed -n '2,3p' "$0" ;;
     *) echo "dots update: unknown action: $1" >&2; exit 1 ;;

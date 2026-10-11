@@ -23,44 +23,44 @@ dots commands             # just the group names
 
 ## Commands
 
-| Command | Args | Summary |
-|---|---|---|
-| `dots theme` | list\|get\|set [name]\|cycle\|status | Switch visual theme across all surfaces |
-| `dots wallpaper` | (get)\|list\|next\|prev\|random\|set <path> | Manage hyprpaper wallpaper |
-| `dots style-corners` | <sharp\|round> | Sharp/round corners (Hyprland + Mako + Walker) |
-| `dots volume` | raise\|lower\|mute\|mic-mute\|set <0-100>\|get\|status | PipeWire volume / mic with OSD |
-| `dots brightness` | raise\|lower\|set <0-100>\|get\|status | Backlight brightness with OSD |
-| `dots magnify` | in\|out\|toggle\|reset\|set <factor>\|status | Hyprland cursor zoom |
-| `dots night` | toggle\|on\|off\|status | Blue-light filter (hyprsunset) |
-| `dots notice` | date\|weather\|battery\|network\|system\|volume\|brightness | On-demand info notifications |
-| `dots screenshot` | region [--copy]\|full\|window\|active\|delay <sec> | Capture (grim + slurp + satty) |
-| `dots record` | (toggle)\|region\|stop\|status | Screen recording (wf-recorder) |
-| `dots ocr` | [eng\|por\|eng+por] | OCR a region → clipboard |
-| `dots color` | (pick) | Pick a color → clipboard + history |
-| `dots power` | menu \| profile [cycle\|set <mode>\|list\|status] \| status | Power menu + power-profiles-daemon |
-| `dots dnd` | toggle\|on\|off\|status | Do-Not-Disturb (mako) |
-| `dots gamemode` | toggle\|on\|off\|status | Gaming mode (kill animations/idle) |
-| `dots update` | (run)\|check\|list\|status [--json] | Cross-distro updater (pacman/apt + npm/cargo/pipx/uv/flatpak) |
-| `dots hypr` | gaps\|layout\|transparency\|scale <±n\|=n>\|mirror [on\|off\|toggle]\|exit | Hyprland tweaks |
-| `dots scratch` | (toggle) | Quake-style scratchpad terminal |
-| `dots focus` | <pattern> [launch-cmd…] | Launch-or-focus a window |
-| `dots reload` | [all\|mako\|waybar\|tmux\|ags\|fabric\|hypr\|gtk\|zsh\|bash] | Reload daemons/shells |
-| `dots tui` | <command> [args…] | Open a TUI in a floating terminal |
-| `dots llm` | [claude\|codex\|gemini\|aichat\|llm\|ollama] | Pick an LLM CLI in a floating terminal |
-| `dots sudo` | <command> [args…] | sudo with a TUI password prompt |
-| `dots setup` | <module>\|<section>/<module>\|arch-wsl\|debian-wsl\|all\|--list | Run a bootstrap module |
-| `dots notify` | <title> [body] [-g/-u/-t/-a/-i/-r/-h] | Send a notification |
-| `dots notifications` | restore\|dismiss\|clear\|list\|pick\|dnd | Notification history |
-| `dots reminder` | <minutes> [message] \| show \| clear | Schedule a reminder |
-| `dots screensaver` | (run) | terminal-text-effects screensaver |
-| `dots help` | [topic \| --no-pager <topic> \| --list \| (picker)] | Cheatsheets (docs/cheatsheets/*.md) |
-| `dots keybindings` | (picker) | Searchable Hyprland keybindings |
-| `dots webapp` | install <name> <url> [icon]\|launch <name>\|list\|remove [name] | Firefox PWA web apps |
-| `dots obsidian` | new "Title"\|today\|find\|search [Q]\|open <file> | Obsidian vault helper |
-| `dots editor` | nvim native\|mini\|lazy / vim native\|plug / status | Switch nvim/vim variant (stow) |
-| `dots stow` | <pkg> [--system] | Stow a package (backs up conflicts) |
-| `dots hibernation` | setup\|available\|remove | Hibernation (swap = RAM) |
-| `dots voxtype` | install | Install Voxtype voice dictation |
+| Command              | Args                                                                       | Summary                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `dots theme`         | list\|get\|set [name]\|cycle\|status                                       | Switch visual theme across all surfaces                                                                          |
+| `dots wallpaper`     | (get)\|list\|next\|prev\|random\|set <path>                                | Manage hyprpaper wallpaper                                                                                       |
+| `dots style-corners` | <sharp\|round>                                                             | Sharp/round corners (Hyprland + Mako + Walker)                                                                   |
+| `dots volume`        | raise\|lower\|mute\|mic-mute\|set <0-100>\|get\|status                     | PipeWire volume / mic with OSD                                                                                   |
+| `dots brightness`    | raise\|lower\|set <0-100>\|get\|status                                     | Backlight brightness with OSD                                                                                    |
+| `dots magnify`       | in\|out\|toggle\|reset\|set <factor>\|status                               | Hyprland cursor zoom                                                                                             |
+| `dots night`         | toggle\|on\|off\|status                                                    | Blue-light filter (hyprsunset)                                                                                   |
+| `dots notice`        | date\|weather\|battery\|network\|system\|volume\|brightness                | On-demand info notifications                                                                                     |
+| `dots screenshot`    | region [--copy]\|full\|window\|active\|delay <sec>                         | Capture (grim + slurp + satty)                                                                                   |
+| `dots record`        | (toggle)\|region\|stop\|status                                             | Screen recording (wf-recorder)                                                                                   |
+| `dots ocr`           | [eng\|por\|eng+por]                                                        | OCR a region → clipboard                                                                                         |
+| `dots color`         | (pick)                                                                     | Pick a color → clipboard + history                                                                               |
+| `dots power`         | menu \| profile [cycle\|set <mode>\|list\|status] \| status                | Power menu + power-profiles-daemon                                                                               |
+| `dots dnd`           | toggle\|on\|off\|status                                                    | Do-Not-Disturb (mako)                                                                                            |
+| `dots gamemode`      | toggle\|on\|off\|status                                                    | Gaming mode (kill animations/idle)                                                                               |
+| `dots update`        | (run)\|list [--refresh]\|check\|status [--json]\|motd                      | Updater + outdated scan (pacman/paru/apt, npm/pnpm/bun, uv/pipx, cargo, flatpak); `motd` is the zsh startup hook |
+| `dots hypr`          | gaps\|layout\|transparency\|scale <±n\|=n>\|mirror [on\|off\|toggle]\|exit | Hyprland tweaks                                                                                                  |
+| `dots scratch`       | (toggle)                                                                   | Quake-style scratchpad terminal                                                                                  |
+| `dots focus`         | <pattern> [launch-cmd…]                                                    | Launch-or-focus a window                                                                                         |
+| `dots reload`        | [all\|mako\|waybar\|tmux\|ags\|fabric\|hypr\|gtk\|zsh\|bash]               | Reload daemons/shells                                                                                            |
+| `dots tui`           | <command> [args…]                                                          | Open a TUI in a floating terminal                                                                                |
+| `dots llm`           | [claude\|codex\|gemini\|aichat\|llm\|ollama]                               | Pick an LLM CLI in a floating terminal                                                                           |
+| `dots sudo`          | <command> [args…]                                                          | sudo with a TUI password prompt                                                                                  |
+| `dots setup`         | <module>\|<section>/<module>\|arch-wsl\|debian-wsl\|all\|--list            | Run a bootstrap module                                                                                           |
+| `dots notify`        | <title> [body] [-g/-u/-t/-a/-i/-r/-h]                                      | Send a notification                                                                                              |
+| `dots notifications` | restore\|dismiss\|clear\|list\|pick\|dnd                                   | Notification history                                                                                             |
+| `dots reminder`      | <minutes> [message] \| show \| clear                                       | Schedule a reminder                                                                                              |
+| `dots screensaver`   | (run)                                                                      | terminal-text-effects screensaver                                                                                |
+| `dots help`          | [topic \| --no-pager <topic> \| --list \| (picker)]                        | Cheatsheets (docs/cheatsheets/*.md)                                                                              |
+| `dots keybindings`   | (picker)                                                                   | Searchable Hyprland keybindings                                                                                  |
+| `dots webapp`        | install <name> <url> [icon]\|launch <name>\|list\|remove [name]            | Firefox PWA web apps                                                                                             |
+| `dots obsidian`      | new "Title"\|today\|find\|search [Q]\|open <file>                          | Obsidian vault helper                                                                                            |
+| `dots editor`        | nvim native\|mini\|lazy / vim native\|plug / status                        | Switch nvim/vim variant (stow)                                                                                   |
+| `dots stow`          | <pkg> [--system]                                                           | Stow a package (backs up conflicts)                                                                              |
+| `dots hibernation`   | setup\|available\|remove                                                   | Hibernation (swap = RAM)                                                                                         |
+| `dots voxtype`       | install                                                                    | Install Voxtype voice dictation                                                                                  |
 
 **Primitives / internal** (hidden from the picker, still callable): `dots menu`,
 `dots view`, `dots notify`, `dots state`, `dots hook`, `dots gpu` (waybar JSON),

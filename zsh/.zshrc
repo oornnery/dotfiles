@@ -515,3 +515,6 @@ if command -v forge >/dev/null 2>&1; then
   [[ -n "${_FORGE_PLUGIN_LOADED:-}" ]] || eval "$(forge zsh plugin)"
   [[ -n "${_FORGE_THEME_LOADED:-}" ]] || eval "$(forge zsh theme)"
 fi
+
+# Pending-updates line (cached; re-scans in the background every 6h).
+[[ -o interactive ]] && dots update motd 2>/dev/null
