@@ -6,7 +6,7 @@ Personal Neovim configuration. Modular, lazy-loaded, tuned for daily development
 
 - **lazy.nvim** specs: one file per area (`lua/plugins/*.lua`), each plugin lazy-loaded by keymap, event or command — startup stays fast.
 - **Pure Lua where it matters**: statusline and theme are hand-written (`lua/statusline.lua`, `lua/theme.lua`), no lualine/colorscheme dependency.
-- **Focused AI stack**: OpenCode handles agent work; Minuet provides local-first inline completion through Ollama.
+- **Focused AI stack**: OpenCode, Claude Code and Codex handle agent work; Codex (ChatGPT subscription) provides inline completion.
 - **Single source of truth for keys**: `docs/cheatsheet.md` — open it inside nvim with `<leader>?` / `:Helpme`.
 
 ## Structure
@@ -40,7 +40,7 @@ no-plugin baseline add `DOTFILES_NVIM_PLUGINS=0`. See the
 
 1. Install [Neovim 0.12+](https://github.com/neovim/neovim/releases) and a Nerd Font.
 2. Start `nvim` — lazy.nvim bootstraps itself, plugins install, treesitter parsers compile, mason installs the LSP servers (`lua_ls`, `rust_analyzer`, `ts_ls`, `pyright`, `ruff`, `bashls`, `marksman`).
-3. Optional but recommended: `fzf` binary (fzf-lua), `opencode` CLI (AI pairing), `ollama` (local completions).
+3. Optional but recommended: `fzf` binary (fzf-lua), `opencode` CLI (AI pairing), `codex` CLI logged in with ChatGPT (inline completion).
 4. Press `<leader>?` to read the cheatsheet.
 
 ## Plugin manager
@@ -73,39 +73,31 @@ return {
 
 Why: blink over nvim-cmp because it is fast, single-file-config and maintains its own LSP capabilities. The old `cmp.*` APIs that Noice documents are still bridged for backwards compat.
 
-How: completion opens automatically on insert (`menu.auto_show`), ghost text on, `super-tab` preset (see Keymaps). Signature help via LSP. Minuet is wired as a completion source (see AI).
+How: completion opens automatically on insert (`menu.auto_show`), ghost text on, `super-tab` preset (see Keymaps). Signature help via LSP. AI ghost text comes from codex-complete, outside Blink (see AI).
 
 ### AI
 
-| Plugin                                                           | What it does                                                                                                         |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim) | AI inline completions. Defaults to GLM, with direct OpenCode Go and free DeepSeek shortcuts.                         |
-| [opencode.nvim](https://github.com/nickjvandyke/opencode.nvim)   | Native pairing with the OpenCode CLI: ask with `@this` context, built-in prompts, accept/reject edits via diffpatch. |
+| Plugin                                                                  | What it does                                                                                                         |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [codex-complete.nvim](https://github.com/joegoggin/codex-complete.nvim) | Inline ghost-text completion through `codex app-server`, billed to the ChatGPT subscription from `codex login`.      |
+| [opencode.nvim](https://github.com/nickjvandyke/opencode.nvim)          | Native pairing with the OpenCode CLI: ask with `@this` context, built-in prompts, accept/reject edits via diffpatch. |
+| [sidekick.nvim](https://github.com/folke/sidekick.nvim)                 | Runs the Claude Code and Codex CLIs in a split and sends editor context into them.                                   |
 
-The split is deliberate: **OpenCode** owns chat, agent actions, edits, and review;
-**Minuet** only provides low-latency completion while typing.
+No API keys: every AI path goes through a vendor CLI and its own login.
+**OpenCode**, **Claude Code** and **Codex** own chat, agent actions, edits and
+review; **codex-complete** only writes ghost text.
 
-Automatic Minuet completion uses virtual-text ghost text only, avoiding duplicate
-requests and conflicts with the Blink menu. `<A-y>` remains available for a
-manual Minuet request in Blink. Cloud requests allow up to eight seconds, though
-GLM normally starts responding in about two seconds.
+Completion uses `gpt-5.6-luna` at `low` reasoning, the fastest model the
+subscription exposes. Expect roughly 5–9 s per suggestion (the first one also
+starts the app server), so it fits "pause and accept" rather than per-keystroke
+typing. Requests fire 300 ms after typing stops, each keystroke cancels the
+previous one, and they count against the Codex subscription limits. Threads are
+ephemeral, read-only, with network off. Sensitive files (`.env`, keys,
+credentials) are never sent. Claude's subscription cannot drive completion:
+Anthropic only allows it inside the official Claude Code client.
 
-How: Minuet reuses API credentials stored by OpenCode without copying secrets
-into dotfiles. It defaults to the working Z.AI `glm-5.3-flash` subscription.
-Use `<leader>ag` for GLM, `<leader>ao` for OpenCode Go, or `<leader>af` for the
-free DeepSeek endpoint; `<leader>aP` remains as a readable menu. Minuet has no
-automatic retry across providers.
-
-If neither subscription login exists, Minuet falls back to Ollama with
-`qwen2.5-coder:1.5b`; install and start it with:
-
-```sh
-ollama pull qwen2.5-coder:1.5b
-ollama serve
-```
-
-Explicit `MINUET_PROVIDER`, `MINUET_ENDPOINT`, and `MINUET_MODEL` environment
-variables override automatic selection.
+sidekick.nvim: `<leader>ac` Claude, `<leader>ax` Codex, `<leader>at` send
+`{this}`, `<leader>aF` send file, `<leader>ad` detach, `<C-.>` focus.
 
 opencode.nvim needs `opencode` on PATH; first use
 spawns `opencode --port` in a vsplit; proposed edits open in a diffpatch tab
@@ -249,7 +241,6 @@ Only when a server is attached. (`gd`/`gr` are plain LSP, not fzf.)
 | `<Tab>` / `<S-Tab>` | next / previous item (super-tab preset)        |
 | `<C-space>`         | show completion / docs                         |
 | `<C-e>`             | hide menu                                      |
-| `<A-y>`             | request/accept Minuet completion from the menu |
 
 ### Markdown
 
@@ -259,17 +250,17 @@ Only when a server is attached. (`gd`/`gr` are plain LSP, not fzf.)
 
 ### AI
 
-| Key                   | Action                                           |
-| --------------------- | ------------------------------------------------ |
-| `<leader>aa` (n,x)    | ask OpenCode about cursor/selection (`@this`)    |
-| `<leader>ap` (n,x)    | OpenCode prompt/command/server picker            |
-| `<leader>as` / `aM`   | Minuet: toggle inline completion / choose model  |
-| `<leader>ag` / `ao`   | Minuet: use GLM / OpenCode Go                    |
-| `<leader>af`          | Minuet: use free DeepSeek                        |
-| `<leader>aP`          | Minuet: OpenCode Go / free DeepSeek / GLM preset |
-| `<C-l>` / `<C-j>` (i) | accept Minuet suggestion / current line          |
-| `<A-n>` / `<A-p>` (i) | next / previous Minuet suggestion                |
-| `<C-]>` (i)           | dismiss Minuet suggestion                        |
+| Key                    | Action                                         |
+| ---------------------- | ---------------------------------------------- |
+| `<leader>aa` (n,x)     | ask OpenCode about cursor/selection (`@this`)  |
+| `<leader>ap` (n,x)     | OpenCode prompt/command/server picker          |
+| `<leader>ac` / `ax`    | sidekick: Claude Code / Codex CLI              |
+| `<leader>at` / `aF`    | sidekick: send `{this}` / file                 |
+| `<leader>ad` / `<C-.>` | sidekick: detach / focus                       |
+| `<C-l>` / `<M-s>` (i)  | Codex: accept suggestion / request one now     |
+| `<leader>as`           | Codex: toggle suggestions                      |
+| `<leader>aM` / `aR`    | Codex: choose model / reasoning effort         |
+| `<leader>ai` / `<M-;>` | Codex: code from comment under cursor / accept |
 
 ### Terminal, UI & sessions
 
@@ -295,7 +286,7 @@ Only when a server is attached. (`gd`/`gr` are plain LSP, not fzf.)
 | `:MkSession` / `:LoadSession` | save / restore `.session.vim` in the project                                                      |
 | `:Mason`                      | manage LSP servers/formatters                                                                     |
 | `:Lazy`                       | plugin manager UI                                                                                 |
-| `:Minuet`                     | Minuet diagnostics                                                                                |
+| `:checkhealth codex_complete` | Codex completion diagnostics                                                                      |
 | `:TSUpdate`                   | rebuild treesitter parsers (see Troubleshooting)                                                  |
 
 ## Theme
@@ -310,14 +301,20 @@ Switch with `dots theme set <name>` (from the dotfiles repo) — no nvim restart
 
 Managed by mason, auto-installed on first launch, enabled via `vim.lsp.enable`:
 
-| Language       | Server         | Notes                                                                          |
-| -------------- | -------------- | ------------------------------------------------------------------------------ |
-| Lua            | lua_ls         | LuaJIT runtime, nvim globals                                                   |
-| Python         | pyright + ruff | pyright basic type checking; ruff only for diagnostics (hover/format disabled) |
-| Rust           | rust_analyzer  |                                                                                |
-| TypeScript/TSX | ts_ls          |                                                                                |
-| Bash           | bashls         |                                                                                |
-| Markdown       | marksman       |                                                                                |
+| Language       | Server        | Notes                                                                             |
+| -------------- | ------------- | --------------------------------------------------------------------------------- |
+| Lua            | lua_ls        | LuaJIT runtime, nvim globals                                                      |
+| Python         | ty + ruff     | ty types/hover/goto/completion; ruff only for diagnostics (hover/format disabled) |
+| Rust           | rust_analyzer |                                                                                   |
+| TypeScript/TSX | ts_ls         |                                                                                   |
+| Bash           | bashls        |                                                                                   |
+| Markdown       | marksman      |                                                                                   |
+
+Python buffers also get `<localleader>` (`\`) keys that run through uv in
+toggleterm #9: `r` run file, `t` / `T` pytest file / project, `c` `ty check` +
+`ruff check` for the whole project. `i` opens the REPL in terminal #8 and `s`
+sends the line or visual selection to it (bracketed paste, so indented blocks
+survive the 3.13+ REPL).
 
 To add more: install via `:Mason`, then add a `vim.lsp.config()` block + `vim.lsp.enable()` in `lua/plugins/lsp.lua`.
 
@@ -325,31 +322,19 @@ To add more: install via `:Mason`, then add a `vim.lsp.config()` block + `vim.ls
 
 Format on save (`format_on_save`, 500 ms debounce, LSP fallback):
 
-| Filetype  | Formatter                     |
-| --------- | ----------------------------- |
-| Lua       | stylua                        |
-| Python    | ruff_format                   |
-| Rust      | rustfmt                       |
-| Go        | goimports, gofmt              |
-| JS/TS/TSX | prettierd → prettier fallback |
-| All       | trim_whitespace               |
+| Filetype  | Formatter                          |
+| --------- | ---------------------------------- |
+| Lua       | stylua                             |
+| Python    | ruff_organize_imports, ruff_format |
+| Rust      | rustfmt                            |
+| Go        | goimports, gofmt                   |
+| JS/TS/TSX | prettierd → prettier fallback      |
+| All       | trim_whitespace                    |
 
 ## Environment overrides
 
 | Variable                                                                      | Effect                                                                                 |
 | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`                                                              | Minuet uses OpenAI                                                                     |
-| `ANTHROPIC_API_KEY`                                                           | Minuet uses Anthropic                                                                  |
-| `GEMINI_API_KEY`                                                              | Minuet uses Gemini                                                                     |
-| `OLLAMA_HOST`                                                                 | Minuet uses Ollama (default `http://localhost:11434`)                                  |
-| `MINUET_PROVIDER`                                                             | Minuet provider override (`openai_compatible`, `openai`, `claude`, `gemini`, `ollama`) |
-| `OPENCODE_GO_API_KEY` / `OPENCODE_API_KEY`                                    | OpenCode Go / Zen credentials                                                          |
-| `ZAI_API_KEY`                                                                 | Z.AI/GLM Coding Plan credential                                                        |
-| `MINUET_MODEL`                                                                | Override the selected preset's model                                                   |
-| `MINUET_ENDPOINT`                                                             | Minuet API endpoint override                                                           |
-| `MINUET_API_KEY` / `OPENROUTER_API_KEY`                                       | key for `openai_compatible` provider                                                   |
-| `MINUET_TIMEOUT` / `MINUET_THROTTLE` / `MINUET_DEBOUNCE`                      | request timing                                                                         |
-| `MINUET_CONTEXT` / `MINUET_COMPLETIONS` / `MINUET_MAX_TOKENS` / `MINUET_NAME` | request shape                                                                          |
 | `DOTFILES_DIR`                                                                | where theme files are read from (default `~/dotfiles`)                                 |
 
 ## Requirements
@@ -357,7 +342,9 @@ Format on save (`format_on_save`, 500 ms debounce, LSP fallback):
 - **Neovim 0.12+** (blink.cmp and the new treesitter API require it)
 - `git`, `fzf`, a Nerd Font (icons)
 - `opencode` CLI — optional, powers opencode.nvim
-- `ollama` — optional, Minuet's default local provider
+- `codex` CLI logged in with ChatGPT — inline completion and sidekick.nvim
+- `claude` CLI — optional, used by sidekick.nvim
+- `uv` — Python run/test keys
 - `node` — only needed for prettierd (JS/TS formatting)
 - `cargo` — only if you switch blink.cmp away from `version = "1.*"` to build the fuzzy matcher from source
 - `gcc`/`cc` — treesitter parser compilation

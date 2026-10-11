@@ -65,12 +65,15 @@ return {
         "lua_ls",
         "rust_analyzer",
         "ts_ls",
-        "pyright",
+        "ty",
         "ruff",
         "bashls",
         "marksman",
       },
       automatic_installation = true,
+      -- vim.lsp.enable() below is the source of truth; otherwise any server
+      -- left installed in Mason (e.g. an old pyright) attaches as well.
+      automatic_enable = false,
     },
   },
 
@@ -109,19 +112,9 @@ return {
       })
       vim.lsp.config("rust_analyzer", { capabilities = capabilities })
       vim.lsp.config("ts_ls", { capabilities = capabilities })
-      vim.lsp.config("pyright", {
-        capabilities = capabilities,
-        settings = {
-          python = {
-            analysis = {
-              autoSearchPaths = true,
-              diagnosticMode = "workspace",
-              typeCheckingMode = "basic",
-              useLibraryCodeForTypes = true,
-            },
-          },
-        },
-      })
+      -- ty (Astral) owns Python types, hover, goto and completion; it finds
+      -- the project's .venv on its own. Ruff below owns lint + format.
+      vim.lsp.config("ty", { capabilities = capabilities })
       vim.lsp.config("ruff", {
         capabilities = capabilities,
         init_options = {
@@ -138,7 +131,7 @@ return {
         "lua_ls",
         "rust_analyzer",
         "ts_ls",
-        "pyright",
+        "ty",
         "ruff",
         "bashls",
         "marksman",
@@ -208,7 +201,7 @@ return {
         lua = { "stylua" },
         rust = { "rustfmt", lsp_format = "fallback" },
         go = { "goimports", "gofmt" },
-        python = { "ruff_format" },
+        python = { "ruff_organize_imports", "ruff_format" },
         javascript = { "prettierd", "prettier", stop_after_first = true },
         typescript = { "prettierd", "prettier", stop_after_first = true },
         ["*"] = { "trim_whitespace" },

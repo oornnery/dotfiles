@@ -327,6 +327,15 @@ function M.setup(spec)
     group = group,
     callback = set_highlights,
   })
+  -- Nvim enables 'termguicolors' on VimEnter, after init.lua has already
+  -- applied the theme without truecolor (habamax); re-apply once it flips.
+  vim.api.nvim_create_autocmd("OptionSet", {
+    group = group,
+    pattern = "termguicolors",
+    callback = function()
+      M.apply()
+    end,
+  })
 
   M.apply()
   return M

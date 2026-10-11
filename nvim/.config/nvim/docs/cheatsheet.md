@@ -187,56 +187,31 @@ Only works when a language server is attached.
 | `da` / `dr` in diff         | accept / reject an OpenCode edit                |
 | `dp` / `do` in diff         | accept / reject only the hunk under the cursor  |
 | `]c` / `[c` in diff         | next / previous change in OpenCode diff         |
-| `<leader>as`                | toggle Minuet inline AI completion              |
-| `<leader>aM`                | pick/change Minuet model                        |
-| `<leader>ag`                | use GLM-5.3-Flash (default)                     |
-| `<leader>ao`                | use DeepSeek V4 Flash on OpenCode Go            |
-| `<leader>af`                | use free DeepSeek endpoint                      |
-| `<leader>aP`                | choose OpenCode Go / free DeepSeek / GLM preset |
-| `<A-y>` in completion menu  | request/accept Minuet completion                |
-| `<C-l>` in insert           | accept Minuet inline suggestion                 |
-| `<C-j>` in insert           | accept Minuet inline line                       |
-| `<A-n>` / `<A-p>` in insert | next / previous Minuet suggestion               |
-| `<C-]>` in insert           | dismiss Minuet suggestion                       |
+| `<leader>ac` / `<leader>ax` | open Claude Code / Codex CLI (sidekick)         |
+| `<leader>at` in n/x         | send cursor/selection to the AI CLI             |
+| `<leader>aF`                | send current file to the AI CLI                 |
+| `<leader>ad` / `<C-.>`      | detach / focus the AI CLI                       |
+| `<C-l>` in insert           | accept Codex inline suggestion                  |
+| `<M-s>` in insert           | request a Codex suggestion now                  |
+| `<leader>as`                | toggle Codex inline suggestions                 |
+| `<leader>aM` / `<leader>aR` | Codex completion model / reasoning effort       |
+| `<leader>ai` / `<M-;>`      | generate code from comment / accept it          |
 
-Minuet defaults to the working Z.AI Coding Plan with `glm-5.3-flash`. Direct
-shortcuts switch to `deepseek-v4-flash` on OpenCode Go or
-`deepseek-v4-flash-free` on OpenCode Zen; `<leader>aP` shows the same choices
-with readable names. It reads existing OpenCode credentials at runtime without
-tracking secrets. Without either subscription, the fallback is local Ollama at
-`http://localhost:11434/v1/completions` with `qwen2.5-coder:1.5b`.
-
-Automatic suggestions appear as ghost text after a short pause. Blink does not
-send a second automatic AI request; `<A-y>` explicitly requests Minuet through
-the completion menu. If no ghost text appears, `<A-n>` manually triggers the
-virtual-text completion.
-
-API keys may be placed in `~/.config/ai/env`; see
-`~/dotfiles/zsh/.config/ai/README.md`. The provider switch is manual because
-Minuet does not retry a failed request against another endpoint automatically.
-If Go reports a quota/balance error or the free model is temporarily
-unavailable, press `<leader>ag` to return immediately to GLM.
-
-```sh
-ollama pull qwen2.5-coder:1.5b
-ollama serve
-```
-
-Fallback local profiles:
-
-- `qwen2.5-coder:1.5b`: recommended CPU/WSL default; fastest.
-- `qwen2.5-coder:7b`: better completion quality; slower and heavier.
-- `deepseek-coder-v2:16b`: highest local cost; use only with adequate GPU/RAM.
+Inline completion uses the ChatGPT subscription through `codex login`; no API
+key. Each suggestion takes about 5–9 s, so pause and accept with `<C-l>`.
+`:checkhealth codex_complete` diagnoses login or protocol problems.
 
 opencode.nvim needs the `opencode` CLI on PATH. First use starts a server in a vertical split (`opencode --port`); when it proposes edits you review them in a diffpatch tab. Save your files before asking — OpenCode reads them from disk.
 
-Useful overrides:
+## Python
 
-```sh
-MINUET_MODEL=qwen2.5-coder:7b nvim
-MINUET_ENDPOINT=http://localhost:11434/v1/completions nvim
-MINUET_PROVIDER=openai_compatible nvim
-```
+| Key                  | Action                                         |
+| -------------------- | ---------------------------------------------- |
+| `\r`                 | run file with `uv run python`                  |
+| `\t` / `\T`          | pytest current file / project                  |
+| `\c`                 | `ty check` + `ruff check` on the project       |
+| `\i`                 | open the `uv run python` REPL (terminal #8)    |
+| `\s` in n/x          | send line / selection to the REPL              |
 
 ## Terminal
 
