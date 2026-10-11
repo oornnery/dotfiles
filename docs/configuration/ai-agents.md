@@ -18,7 +18,7 @@ does not require SPEC.md, planning approval, automatic commits or a fixed test l
 
 `claude/.claude/` carries `CLAUDE.md` (the personal contract), `settings.json`
 (permissions, the RTK hook, plugin marketplaces), `agents/`, `skills/`,
-`output-styles/`, `RTK.md`, and `mcp/servers.json`. The eight shared skills are
+`output-styles/`, `RTK.md`, and `mcp/servers.json`. The nine shared skills are
 symlinks into `agents/.agents/skills/`, so every client reads one copy.
 
 | Agent               | Model  | Effort | Purpose                                    |
@@ -236,7 +236,7 @@ The independent review roles retain read-only boundaries.
 ## Skills and Impeccable
 
 Versioned personal skills: `python`, `python-cli`, `python-library`, `python-web`,
-`typescript-web`, `security`, `project-state`, and `impeccable`.
+`typescript-web`, `security`, `project-state`, `impeccable`, and `no-ai-slop`.
 The Python web preference remains FastAPI/Jinja with restrained progressive enhancement.
 Existing repository choices take precedence.
 
@@ -247,6 +247,12 @@ upstream reference files is normalized for Git checks. Upstream references, scri
 and nested Codex agents are retained. The launcher pins its engine version separately
 in `scripts/VERSION`; its first use may download the platform binary into the user's
 Impeccable cache. No global edit hooks were installed.
+
+`no-ai-slop` is vendored unmodified from
+[petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop), revision
+`000650b156983f5159695b441477f4e63b25dc85` (MIT, license included). It is a prose
+editor and detector for AI-writing patterns, loaded by its description only. Its word
+lists and example patterns are English; the structural rules carry over to pt-BR text.
 
 Examples:
 
