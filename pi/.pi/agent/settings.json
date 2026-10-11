@@ -1,6 +1,6 @@
 {
-  "defaultProvider": "opencode-go",
-  "defaultModel": "deepseek-v4.1-flash",
+  "defaultProvider": "qwen-token-plan-individual",
+  "defaultModel": "qwen3.8-max",
   "defaultThinkingLevel": "medium",
   "quietStartup": true,
   "enabledModels": [
