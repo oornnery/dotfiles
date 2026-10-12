@@ -61,3 +61,6 @@ fi
 
 export PATH
 [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
+# archify (vendored skill): no network update check; bump the pinned revision instead.
+export ARCHIFY_UPDATE_CHECK_DISABLED=1

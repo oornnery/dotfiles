@@ -18,7 +18,7 @@ does not require SPEC.md, planning approval, automatic commits or a fixed test l
 
 `claude/.claude/` carries `CLAUDE.md` (the personal contract), `settings.json`
 (permissions, the RTK hook, plugin marketplaces), `agents/`, `skills/`,
-`output-styles/`, `RTK.md`, and `mcp/servers.json`. The nine shared skills are
+`output-styles/`, `RTK.md`, and `mcp/servers.json`. The ten shared skills are
 symlinks into `agents/.agents/skills/`, so every client reads one copy.
 
 | Agent               | Model  | Effort | Purpose                                    |
@@ -236,7 +236,7 @@ The independent review roles retain read-only boundaries.
 ## Skills and Impeccable
 
 Versioned personal skills: `python`, `python-cli`, `python-library`, `python-web`,
-`typescript-web`, `security`, `project-state`, `impeccable`, and `no-ai-slop`.
+`typescript-web`, `security`, `project-state`, `impeccable`, `no-ai-slop`, and `archify`.
 The Python web preference remains FastAPI/Jinja with restrained progressive enhancement.
 Existing repository choices take precedence.
 
@@ -253,6 +253,15 @@ Impeccable cache. No global edit hooks were installed.
 `000650b156983f5159695b441477f4e63b25dc85` (MIT, license included). It is a prose
 editor and detector for AI-writing patterns, loaded by its description only. Its word
 lists and example patterns are English; the structural rules carry over to pt-BR text.
+
+`archify` is vendored from [tt-a1i/archify](https://github.com/tt-a1i/archify), revision
+`58ab0b98d2d0def8e49dced705c7b566936723ec` (MIT, license included), without its `test/`
+directory. It turns a description or a repository into a standalone HTML diagram
+(architecture, workflow, sequence, data flow, lifecycle) and writes under `.archify/` in
+the working directory. Its delivery step runs a bounded update check;
+`ARCHIFY_UPDATE_CHECK_DISABLED=1` in `zsh/.zshenv` turns it off, so update it by bumping
+the pinned revision. The vendored copy was not executed during setup (`doctor` and `demo`
+were not run).
 
 Examples:
 
