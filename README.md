@@ -25,7 +25,7 @@ Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
 - `scripts/debian.sh` → Debian bootstrap script
 - `scripts/arch/arch.sh` → Arch Linux bootstrap (native + WSL + VMs, hardware-aware)
 - `tmux/` → `.tmux.conf`
-- `wsl/` → WSL configuration (`.wslconfig`, `etc/wsl.conf`)
+- `wsl/` → WSL `etc/wsl.conf`; `windows/.wslconfig` → VM profile; docs in `docs/wsl/`
 - `gdm/`, `greetd/`, `iwd/`, `zram/` → system stow packages handled by Arch modules
 - `git/` → `.gitconfig`
 - `hyprland/` → Hyprland config
@@ -67,7 +67,7 @@ The repository also includes Windows-oriented setup files:
 - `editor/README.md` documents the shared VS Code and Zed setup, required tools, and frontend defaults.
 - `editor/Code/.vscode/` contains workspace recommendations and settings for VS Code.
 - `editor/Zed/.zed/settings.json` contains the Zed profile used in this setup.
-- `wsl/.wslconfig` contains the local WSL2 resource profile.
+- `windows/.wslconfig` contains the local WSL2 resource profile; see `docs/wsl/`.
 
 Then review the editor docs:
 
@@ -170,5 +170,5 @@ stow -D -v -t ~ zsh
 
 - `scripts/debian.sh` installs broad Debian packages; focused setup lives in package-local `setup.sh` files.
 - The Windows side is intentionally separate from the Linux `stow` flow and is documented under `editor/`.
-- `wsl/.wslconfig` is machine-level configuration and should be adapted to the RAM/CPU available on the host.
+- `windows/.wslconfig` is machine-level configuration and should be adapted to the RAM/CPU available on the host.
 - If a destination file already exists (for example `~/.zshrc`), back it up first to avoid conflicts.

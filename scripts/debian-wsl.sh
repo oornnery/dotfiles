@@ -40,18 +40,12 @@ nala install -y \
   unzip zip tar gzip bzip2 xz-utils p7zip-full \
   openssl openssh-client ca-certificates \
   man-db manpages \
-  libnotify-bin jq tree sudo locales
+  jq tree sudo locales
 
 log "Modern CLI tools"
 nala install -y \
   fzf ripgrep fd-find bat plocate git-delta \
-  btop htop fastfetch tealdeer procs \
-  tesseract-ocr wl-clipboard
-# Debian renames: fd → fdfind, bat → batcat
-USER_HOME_EARLY="/home/$USERNAME"
-mkdir -p "$USER_HOME_EARLY/.local/bin"
-[[ -x "$(command -v fdfind 2>/dev/null)" ]] && ln -sf "$(command -v fdfind)" "$USER_HOME_EARLY/.local/bin/fd"
-[[ -x "$(command -v batcat 2>/dev/null)" ]] && ln -sf "$(command -v batcat)" "$USER_HOME_EARLY/.local/bin/bat"
+  btop htop fastfetch tealdeer procs
 
 log "Languages: Python, Node, Rust, Go, Lua"
 nala install -y \
@@ -67,6 +61,13 @@ else
   useradd -m -G sudo -s /bin/zsh "$USERNAME"; created_user=1
 fi
 USER_HOME="$(getent passwd "$USERNAME" | cut -d: -f6)"
+
+# Debian renames fd → fdfind, bat → batcat; link the usual names (after the home exists).
+install -d -o "$USERNAME" -g "$USERNAME" "$USER_HOME/.local" "$USER_HOME/.local/bin"
+for pair in fdfind:fd batcat:bat; do
+  src="$(command -v "${pair%%:*}" || true)"
+  [[ -n "$src" ]] && sudo -u "$USERNAME" ln -sf "$src" "$USER_HOME/.local/bin/${pair##*:}"
+done
 
 if [[ "$created_user" -eq 1 && "$SKIP_PASSWD" != "1" ]]; then
   passwd "$USERNAME"
@@ -124,32 +125,32 @@ sudo -u "$USERNAME" -H bash -lc '
   command -v zoxide   >/dev/null || curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 ' || warn "some user-level installers failed (rerun later)"
 
-# Neovim from source (Debian apt nvim is old) — optional, can be slow.
-if [[ "${SKIP_NVIM_BUILD:-0}" != "1" ]]; then
-  log "Neovim (build from source)"
-  nala install -y ninja-build gettext cmake unzip curl build-essential
-  rm -rf /tmp/neovim
-  git clone --depth 1 --branch stable https://github.com/neovim/neovim /tmp/neovim
-  ( cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && make install )
-  rm -rf /tmp/neovim
+# Neovim: Debian's apt build is old, so use the upstream release tarball (x86_64).
+if [[ "${SKIP_NVIM_INSTALL:-0}" != "1" ]] && [[ "$(uname -m)" == "x86_64" ]]; then
+  log "Neovim (upstream release)"
+  curl -fsSL https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz \
+    | tar -xz -C /opt && ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim \
+    || warn "neovim download failed (rerun later or set SKIP_NVIM_INSTALL=1)"
 fi
 
 # ─── Stow dotfiles (terminal-only) as the user ───────────────────────────────
 log "Stow dotfiles"
 case "$VIM_DISTRO" in plug) vim_pkg=vim.plug ;; *) vim_pkg=vim ;; esac
 case "$NVIM_DISTRO" in mini) nvim_pkg=nvim.mini ;; lazy) nvim_pkg=nvim.lazy ;; *) nvim_pkg=nvim ;; esac
-CORE_PKGS=(bash zsh tmux git editor bin wsl "$vim_pkg" "$nvim_pkg")
+# wsl/ is a system package (/etc/wsl.conf, handled above); stowing it into $HOME would create ~/etc.
+CORE_PKGS=(bash zsh tmux git editor bin "$vim_pkg" "$nvim_pkg")
 
-sudo -u "$USERNAME" -H bash -lc "
-  cd '$DOTFILES_DIR'
+sudo -u "$USERNAME" -H bash -lc '
+  dir=$1 home=$2; shift 2
+  cd "$dir"
   # unstow conflicting editor variants first
-  for p in vim vim.plug nvim nvim.mini nvim.lazy; do stow -D -t '$USER_HOME' \$p 2>/dev/null || true; done
-  if stow -n -R -t '$USER_HOME' ${CORE_PKGS[*]} 2>/dev/null; then
-    stow -R -t '$USER_HOME' ${CORE_PKGS[*]}
+  for p in vim vim.plug nvim nvim.mini nvim.lazy; do stow -D -t "$home" "$p" 2>/dev/null || true; done
+  if stow -n -R -t "$home" "$@" 2>/dev/null; then
+    stow -R -t "$home" "$@"
   else
-    echo 'stow reported conflicts — back up the real files then re-run: dots stow <pkg>' >&2
+    echo "stow reported conflicts — back up the real files then re-run: dots stow <pkg>" >&2
   fi
-"
+' _ "$DOTFILES_DIR" "$USER_HOME" "${CORE_PKGS[@]}"
 
 log "Debian-WSL setup finished."
 cat <<EOF

@@ -44,6 +44,14 @@ but tailored to this hardware and workflow.
 - [GNOME extensions](configuration/10-gnome-extensions.md) — curated list + install workflow
 - [Waybar](configuration/11-waybar.md) — GNOME-inspired top bar layout + modules
 
+## WSL
+
+- [Overview](wsl/01-overview.md) — WSL, WSLg, wslc and how this distro is wired
+- [Inventory](wsl/02-inventory.md) — what is installed and what exists only on this machine
+- [wslc](wsl/03-wslc.md) — container CLI from Arch
+- [Debian](wsl/04-debian.md) — `scripts/debian-wsl.sh`
+- [NixOS idea](wsl/05-nixos.md) — mapping only, nothing built
+
 ## The Rest
 
 - [Troubleshooting](rest/01-troubleshooting.md)

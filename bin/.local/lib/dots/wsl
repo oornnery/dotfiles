@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# dots:summary=WSL inventory (publish-safe markdown) and wslc passthrough
+# dots:args=inventory|wslc [args…]
+#
+# `inventory` prints a markdown report of this distro: versions, config, package
+# managers and $HOME layout. Credential and state paths are counted, never named,
+# and Windows user names are masked, so the output is safe to paste into docs.
+set -uo pipefail
+
+WSLC="${WSLC_EXE:-/mnt/c/Program Files/WSL/wslc.exe}"
+_have() { command -v "$1" >/dev/null 2>&1; }
+_list() { tr '\n' ' ' | sed 's/ $//'; echo; }
+_win() { tr -d '\0' | sed -E 's#/mnt/c/Users/[^/ ]+#/mnt/c/Users/<user>#g; s#C:\\Users\\[^\\ ]+#C:\\Users\\<user>#g'; }
+
+_inventory() {
+    echo "# WSL inventory"; echo
+    echo "## Runtime"; echo
+    echo "- distro: $(. /etc/os-release && echo "$PRETTY_NAME"), kernel $(uname -r)"
+    echo "- systemd: $(ps -p 1 -o comm= 2>/dev/null)"
+    if _have wsl.exe; then
+        wsl.exe --version 2>/dev/null | tr -d '\0\r' | awk -F': ' 'NR<=3{print $2}' | paste -sd' ' | sed 's/^/- wsl, kernel, wslg: /'
+        wsl.exe -l -v 2>/dev/null | tr -d '\0\r' | sed -E '1d;s/^\*? +/- /' | grep . | sed 's/^/- distro: /;s/- distro: - /- distro: /'
+    fi
+    [[ -x $WSLC ]] && echo "- wslc: present ($("$WSLC" info 2>/dev/null | tr -d '\0\r' | awk -F': ' '/Sessões|Sessions/{print $2" sessions"}'))" || echo "- wslc: not found"
+    echo; echo "## /etc/wsl.conf"; echo; echo '```ini'; cat /etc/wsl.conf 2>/dev/null; echo '```'
+
+    echo; echo "## Packages"; echo
+    if _have pacman; then
+        echo "- pacman explicit ($(pacman -Qenq | wc -l)): $(pacman -Qenq | _list)"
+        echo "- foreign/AUR ($(pacman -Qmq | wc -l)): $(pacman -Qmq | _list)"
+        local orphan=""
+        for p in $(pacman -Qenq); do grep -rqw -- "$p" "${DOTFILES_DIR:-$HOME/dotfiles}/scripts" 2>/dev/null || orphan+="$p "
+        done
+        echo "- explicit but absent from scripts/: ${orphan:-none}"
+    fi
+    _have uv    && echo "- uv tools: $(uv tool list 2>/dev/null | awk '/^[^- ]/{print $1}' | _list)"
+    _have pipx  && echo "- pipx: $(pipx list --short 2>/dev/null | grep -v '😴' | _list)"
+    _have npm   && echo "- npm -g: $(npm ls -g --depth=0 --parseable 2>/dev/null | tail -n +2 | sed 's#.*/node_modules/##' | _list)"
+    _have pnpm  && echo "- pnpm -g: $(pnpm ls -g --parseable 2>/dev/null | tail -n +2 | sed 's#.*/node_modules/##' | _list)"
+    _have bun   && echo "- bun -g: $(bun pm ls -g 2>/dev/null | tail -n +2 | sed -E 's/^[^A-Za-z@]*//;s/@[0-9][^@]*$//' | _list)"
+    _have cargo && echo "- cargo: $(cargo install --list 2>/dev/null | awk '/^[^ ]/{print $1}' | _list)"
+    [[ -d ~/go/bin ]] && echo "- go bin: $(ls ~/go/bin | _list)"
+    _have flatpak && echo "- flatpak: $(flatpak list --app --columns=application 2>/dev/null | _list)"
+    echo "- systemd user units enabled: $(systemctl --user list-unit-files --state=enabled --no-legend 2>/dev/null | awk '{print $1}' | _list)"
+
+    echo; echo "## \$HOME layout"; echo
+    local n e t linked=0 win=0 cred=0 proj=0 tools=() local_=()
+    local credre='^\.(ssh|secrets|aws|azure|gnupg|netrc|npmrc|cloudflared|docker|kube|histfile|zhistory|bash_history|viminfo|lesshst|wget-hsts|claude\.json|copilot|supermaven|memex.*|cavemem)$'
+    shopt -s dotglob nullglob
+    for e in "$HOME"/*; do
+        n="${e##*/}"
+        [[ $n == *.lock ]] && continue
+        if [[ $n =~ $credre ]]; then cred=$((cred + 1)); continue; fi
+        if [[ -L $e ]]; then
+            t="$(readlink "$e")"
+            if [[ $t == /mnt/* ]]; then win=$((win + 1)); elif [[ $t == *dotfiles/* ]]; then linked=$((linked + 1)); tools+=("$n"); else local_+=("$n"); fi
+        elif [[ $n == .* ]]; then local_+=("$n")
+        elif [[ -d $e ]]; then proj=$((proj + 1))
+        fi
+    done
+    echo "- stowed from dotfiles ($linked): ${tools[*]}"
+    echo "- links into the Windows profile: $win"
+    echo "- credential/state entries (not listed): $cred"
+    echo "- project checkouts under \$HOME: $proj"
+    echo "- tool state only on this machine (${#local_[@]}): ${local_[*]}"
+    echo "- ~/.config only here: $(for e in ~/.config/*; do [[ -L $e ]] || printf '%s ' "${e##*/}"; done | sed 's/ $//')"
+}
+
+case "${1:-inventory}" in
+    inventory) _inventory | _win ;;
+    wslc)      shift; [[ -x $WSLC ]] || { echo "dots wsl: wslc.exe not found at $WSLC" >&2; exit 1; }; exec "$WSLC" "$@" ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots wsl: unknown action: $1" >&2; exit 1 ;;
+esac

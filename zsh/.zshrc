@@ -516,5 +516,8 @@ if command -v forge >/dev/null 2>&1; then
   [[ -n "${_FORGE_THEME_LOADED:-}" ]] || eval "$(forge zsh theme)"
 fi
 
+# wslc (WSL containers) lives on the Windows side and is not on the Linux PATH.
+[[ -x "/mnt/c/Program Files/WSL/wslc.exe" ]] && alias wslc='dots wsl wslc'
+
 # Pending-updates line (cached; re-scans in the background every 6h).
 [[ -o interactive ]] && dots update motd 2>/dev/null
