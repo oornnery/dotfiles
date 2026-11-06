@@ -1,12 +1,10 @@
 // Zellij, kept simple and in the spirit of Helix.
 //
-// It starts locked, so Helix and other apps keep all their keys. The Alt keys below
-// always work. Ctrl-g unlocks the regular Zellij modes, whose keys show in the bar.
-// Alt / opens the command palette, a searchable table like the one in Helix.
-//
-// Default theme: terminal colors, so it follows dots theme.
-default_mode "locked"
-default_layout "compact"
+// There are no modes: only the Alt keys below, so Helix and other apps keep all
+// theirs. The footer shows the main ones, Alt ? the rest, Alt / searches everything.
+// The theme is written by dots theme, from the same palette as everything else.
+theme "dots"
+default_layout "main"
 default_shell "zsh"
 pane_frames false
 simplified_ui true
@@ -15,33 +13,14 @@ copy_on_select true
 show_startup_tips false
 show_release_notes false
 
-keybinds {
+keybinds clear-defaults=true {
     shared {
-        // Move between panes, and to the next tab at the edge
-        bind "Alt h" { MoveFocusOrTab "Left"; }
-        bind "Alt l" { MoveFocusOrTab "Right"; }
-        bind "Alt j" { MoveFocus "Down"; }
-        bind "Alt k" { MoveFocus "Up"; }
-
-        // Panes: new ones tile by themselves
-        bind "Alt n" { NewPane; }
-        bind "Alt x" { CloseFocus; }
-        bind "Alt f" { ToggleFocusFullscreen; }
-        bind "Alt w" { ToggleFloatingPanes; }
-
-        // Tabs
-        bind "Alt t" { NewTab; }
-        bind "Alt [" { GoToPreviousTab; }
-        bind "Alt ]" { GoToNextTab; }
-        bind "Alt 1" { GoToTab 1; }
-        bind "Alt 2" { GoToTab 2; }
-        bind "Alt 3" { GoToTab 3; }
-        bind "Alt 4" { GoToTab 4; }
-        bind "Alt 5" { GoToTab 5; }
-
-        // Menus, each in a floating pane that closes when you are done
+        // Help and menus, each in a floating pane that closes when you are done
         bind "Alt /" {
             Run "dots" "palette" { floating true; close_on_exit true; }
+        }
+        bind "Alt ?" {
+            Run "dots" "help" "zellij" { floating true; close_on_exit true; }
         }
         bind "Alt u" {
             Run "dots" "palette" "tui" { floating true; close_on_exit true; }
@@ -55,5 +34,32 @@ keybinds {
         bind "Alt s" {
             LaunchOrFocusPlugin "session-manager" { floating true; move_to_focused_tab true; }
         }
+
+        // Move between panes, and to the next tab at the edge
+        bind "Alt h" { MoveFocusOrTab "Left"; }
+        bind "Alt l" { MoveFocusOrTab "Right"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+
+        // Panes: new ones tile by themselves
+        bind "Alt n" { NewPane; }
+        bind "Alt x" { CloseFocus; }
+        bind "Alt f" { ToggleFocusFullscreen; }
+        bind "Alt w" { ToggleFloatingPanes; }
+        bind "Alt e" { EditScrollback; }
+
+        // Tabs
+        bind "Alt t" { NewTab; }
+        bind "Alt [" { GoToPreviousTab; }
+        bind "Alt ]" { GoToNextTab; }
+        bind "Alt 1" { GoToTab 1; }
+        bind "Alt 2" { GoToTab 2; }
+        bind "Alt 3" { GoToTab 3; }
+        bind "Alt 4" { GoToTab 4; }
+        bind "Alt 5" { GoToTab 5; }
+
+        // Leave: Alt d keeps the session running, Alt q ends it
+        bind "Alt d" { Detach; }
+        bind "Alt q" { Quit; }
     }
 }

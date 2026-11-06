@@ -1,11 +1,13 @@
 # Zellij
 
-Panes and tabs in the terminal. It starts locked, so apps keep their keys, and the
-keys below always work. Start it with `zellij`, or `zellij -l dev` for the dev layout.
+Panes and tabs in the terminal, with no modes: only these keys, so apps keep theirs.
+The footer shows the main ones. Start it with `zellij`, or `zellij -l dev` for the
+dev layout.
 
 | Key | Action |
 | --- | ------ |
 | `Alt /` | Command palette: actions, TUIs and dots commands |
+| `Alt ?` | This page |
 | `Alt u` | Pick a TUI, in a floating pane |
 | `Alt r` | Run any command, in a new pane |
 | `Alt o` | Open a project from zoxide, in a new tab |
@@ -18,7 +20,9 @@ keys below always work. Start it with `zellij`, or `zellij -l dev` for the dev l
 | `Alt t` | New tab |
 | `Alt [` `]` | Previous and next tab |
 | `Alt 1` to `5` | Go to a tab |
-| `Ctrl g` | Unlock Zellij's own modes and show their keys |
+| `Alt e` | Open what the pane printed in the editor, to scroll and search |
+| `Alt d` | Leave; the session keeps running (`zellij attach` comes back) |
+| `Alt q` | End this session |
 
 Do not bind `Alt Enter` or `Alt Space`: Windows Terminal uses them.
 

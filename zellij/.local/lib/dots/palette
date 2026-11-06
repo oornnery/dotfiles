@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Zellij command palette: actions, TUIs and dots commands
-# dots:args=[tui | run | project]
+# dots:args=[tui | run | project | footer]
 #
 # Opens from Zellij in a floating pane (see config.kdl), like the command palette
 # in Helix: a searchable table of name, keys and what it does.
@@ -9,6 +9,7 @@
 #   dots palette tui      only the TUIs; the chosen one opens in a floating pane
 #   dots palette run      any command, in a new pane
 #   dots palette project  a folder from zoxide, in a new tab
+#   dots palette footer   the line of main keys at the bottom of every tab
 set -uo pipefail
 
 # shellcheck source=/dev/null
@@ -23,6 +24,26 @@ floating() { zellij run --floating --close-on-exit -- "$@"; }
 
 # id<TAB>name<TAB>keys<TAB>description. Padding the columns keeps the table aligned.
 row() { printf '%s\t%-24s %-10s %s\n' "$1" "$2" "$3" "$4"; }
+
+footer() {  # stays running, because the pane closes with its command
+    local key label line=''
+    while read -r key label; do
+        line+=" $G$key$N $D$label$N "
+    done <<'KEYS'
+Alt/ palette
+Alt? help
+Alt+n pane
+Alt+x close
+Alt+t tab
+Alt+hjkl move
+Alt+u TUIs
+Alt+o project
+Alt+e scrollback
+Alt+q quit
+KEYS
+    printf '%s' "$line"
+    exec sleep infinity
+}
 
 actions() {
     row pane       'new pane'           'Alt n' 'Open a pane; the layout tiles it'
@@ -39,7 +60,10 @@ actions() {
     row tuis       'open TUI'           'Alt u' 'Pick a TUI, in a floating pane'
     row snippet    'run snippet'        ''      'Pick a pet snippet and run it'
     row sessions   'sessions'           'Alt s' 'Switch, create or attach to sessions'
-    row keys       'all Zellij keys'    'Ctrl g' 'Unlock Zellij; its bar lists the keys'
+    row help       'help'               'Alt ?' 'All the keys'
+    row scrollback 'scrollback'         'Alt e' 'Open what this pane printed in the editor'
+    row detach     'detach'             'Alt d' 'Leave; the session keeps running'
+    row quit       'quit'               'Alt q' 'End this session'
 }
 
 tuis() {
@@ -73,9 +97,12 @@ act() {
         tuis)       pick_tui ;;
         snippet)    pet exec ;;
         sessions)   zellij action launch-or-focus-plugin session-manager --floating ;;
-        keys)       zellij action switch-mode normal ;;
+        help)       floating dots help zellij ;;
+        scrollback) tiled edit-scrollback ;;
+        detach)     zellij action detach ;;
+        quit)       zellij action quit ;;
         tui:*)      floating "${1#tui:}" ;;
-        dots:*)     zellij run --floating -- dots "${1#dots:}" ;;
+        dots:*)     floating bash -c 'dots "$1"; read -rsn1 -p "Press a key to close"' _ "${1#dots:}" ;;
     esac
 }
 
@@ -108,6 +135,7 @@ case "${1:-}" in
     tui)     pick_tui ;;
     run)     run ;;
     project) project ;;
-    -h|--help) sed -n '8,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+    footer)  footer ;;
+    -h|--help) sed -n '8,12p' "$0" | sed 's/^# \{0,1\}//' ;;
     *) err "dots palette: unknown action: $1"; exit 1 ;;
 esac

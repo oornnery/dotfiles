@@ -61,8 +61,9 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 - Daily use: Arch on WSL, with zsh, Helix, fnm and Windows Terminal.
 - In testing: vite-plus, next to fnm.
 - Kept for later, not linked: `hyprland`, `tmux`, `vim`.
-- Written but never run for real: the `hyprland` commands, `zellij/`, `windows/`, and
-  the setups in `dots install` that start services.
+- Written but never run for real: the `hyprland` commands, `windows/`, and the setups
+  in `dots install` that start services.
+- Zellij: no modes, only Alt keys, with a footer and a command palette (`Alt /`).
 - `ai/` is copied from the old repo and still needs a review.
 - This repo has no remote yet. The old one is `oornnery/dotfiles`, branch `master`.
 
@@ -71,6 +72,5 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 - Back to Arch on the desktop: `dots install hyprland`, then test its commands.
 - Review `ai/` and link what stays.
 - Try `tv` (television) in the Zellij palette, in place of fzf.
-- Try `zjstatus` for the Zellij bar.
 - Rebuild `self-hosted/`.
 - One-time changes between machines, if more than one machine ever needs them.
