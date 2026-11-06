@@ -38,6 +38,26 @@
   command = "lsblk && sudo mkfs.<fs=ext4> <device=/dev/sdX1>"
   tag = ["disk", "danger"]
 
+[[snippets]]
+  description = "find large files"
+  command = "find <dir=.> -type f -size +<size=100M> -exec du -h {} + | sort -rh"
+  tag = ["files", "disk"]
+
+[[snippets]]
+  description = "copy a folder with progress, resumable"
+  command = "rsync -avh --progress <from> <to>"
+  tag = ["files"]
+
+[[snippets]]
+  description = "checksum of a file"
+  command = "sha256sum <file>"
+  tag = ["files"]
+
+[[snippets]]
+  description = "pretty print a JSON file"
+  command = "jq . <file>"
+  tag = ["files", "json"]
+
 # ── Network ─────────────────────────────────────────────────────────────────
 
 [[snippets]]
@@ -95,6 +115,16 @@
   command = "dig +short <domain> <type=A>"
   tag = ["net", "dns"]
 
+[[snippets]]
+  description = "response headers of a URL"
+  command = "curl -sSI <url>"
+  tag = ["net", "http"]
+
+[[snippets]]
+  description = "active connections"
+  command = "ss -tun state established"
+  tag = ["net"]
+
 # ── Git ─────────────────────────────────────────────────────────────────────
 
 [[snippets]]
@@ -122,6 +152,26 @@
   command = "git commit --fixup <sha> && git rebase -i --autosquash <sha>~1"
   tag = ["git"]
 
+[[snippets]]
+  description = "graph of all branches"
+  command = "git log --oneline --graph --all -<n=30>"
+  tag = ["git"]
+
+[[snippets]]
+  description = "stash with a message"
+  command = "git stash push -m '<message>'"
+  tag = ["git"]
+
+[[snippets]]
+  description = "discard changes in a file"
+  command = "git restore <file>"
+  tag = ["git"]
+
+[[snippets]]
+  description = "show what git clean would delete"
+  command = "git clean -nd"
+  tag = ["git"]
+
 # ── Docker ──────────────────────────────────────────────────────────────────
 
 [[snippets]]
@@ -137,6 +187,16 @@
 [[snippets]]
   description = "container CPU and memory, once"
   command = "docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}'"
+  tag = ["docker"]
+
+[[snippets]]
+  description = "follow the logs of a compose service"
+  command = "docker compose logs -f --tail=100 <service>"
+  tag = ["docker"]
+
+[[snippets]]
+  description = "rebuild and restart a compose service"
+  command = "docker compose up -d --build <service>"
   tag = ["docker"]
 
 # ── Python / Node ───────────────────────────────────────────────────────────
@@ -155,6 +215,11 @@
   description = "serve this folder over HTTP"
   command = "python3 -m http.server <port=8000>"
   tag = ["net", "python"]
+
+[[snippets]]
+  description = "lint and fix Python here"
+  command = "uvx ruff check --fix ."
+  tag = ["python", "uv"]
 
 # ── System ──────────────────────────────────────────────────────────────────
 
@@ -177,6 +242,36 @@
   description = "PATH, one entry per line"
   command = "tr ':' '\\n' <<< \"$PATH\""
   tag = ["system"]
+
+[[snippets]]
+  description = "services that failed"
+  command = "systemctl --failed"
+  tag = ["system"]
+
+[[snippets]]
+  description = "errors since this boot"
+  command = "journalctl -p err -b --no-pager | tail -<n=50>"
+  tag = ["system"]
+
+[[snippets]]
+  description = "top processes by memory"
+  command = "ps axo pid,rss,comm --sort=-rss | head -<n=15>"
+  tag = ["system"]
+
+[[snippets]]
+  description = "top processes by CPU"
+  command = "ps axo pid,pcpu,comm --sort=-pcpu | head -<n=15>"
+  tag = ["system"]
+
+[[snippets]]
+  description = "pick processes and kill them"
+  command = "ps -eo pid,pcpu,pmem,comm --sort=-pcpu | fzf -m --header-lines=1 | awk '{print $1}' | xargs -r kill"
+  tag = ["system"]
+
+[[snippets]]
+  description = "drives, filesystems and mount points"
+  command = "lsblk -f"
+  tag = ["system", "disk"]
 
 # ── Packages ────────────────────────────────────────────────────────────────
 
@@ -230,6 +325,26 @@
   command = "pacman -Qdtq | sudo pacman -Rns -"
   tag = ["pacman"]
 
+[[snippets]]
+  description = "biggest installed packages"
+  command = "pacman -Qi | awk '/^Name/{n=$3} /^Installed Size/{print $4 $5, n}' | sort -h | tail -<n=20>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "why a package is installed"
+  command = "pacman -Qi <package> | grep -E 'Required By|Install Reason'"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "which package has a file, installed or not"
+  command = "pacman -F <file>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "clean the package cache, keeping 3 versions"
+  command = "sudo paccache -r"
+  tag = ["pacman"]
+
 # ── Media ───────────────────────────────────────────────────────────────────
 
 [[snippets]]
@@ -256,6 +371,16 @@
   description = "download only the subtitles (yt-dlp)"
   command = "yt-dlp --skip-download --write-subs --write-auto-subs --sub-langs '<langs=pt,en>' '<url>'"
   tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "convert a video or audio file (ffmpeg)"
+  command = "ffmpeg -i <input> <output=out.mp4>"
+  tag = ["media"]
+
+[[snippets]]
+  description = "extract the audio of a video (ffmpeg)"
+  command = "ffmpeg -i <input> -vn <output=audio.mp3>"
+  tag = ["media"]
 
 # ── Herdr ───────────────────────────────────────────────────────────────────
 
@@ -284,4 +409,9 @@
 [[snippets]]
   description = "Windows path of a Linux path (and back with -u)"
   command = "wslpath -w <path=.>"
+  tag = ["wsl"]
+
+[[snippets]]
+  description = "restart WSL, from inside it"
+  command = "wsl.exe --shutdown"
   tag = ["wsl"]
