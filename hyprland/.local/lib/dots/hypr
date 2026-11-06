@@ -1,81 +1,162 @@
 #!/usr/bin/env bash
-# dots:summary=Hyprland tweaks (gaps/layout/transparency/scale/mirror/exit)
-# dots:args=gaps|layout|transparency|scale <±n|=n>|mirror [on|off|toggle]|exit
-set -euo pipefail
+# dots:summary=Hyprland: look, layout, monitors, gamemode, keybinds and reload
+# dots:args=gaps | layout | transparency | corners <sharp|round> | gamemode [on|off|status] | scale <+n|-n|=n> | mirror [on|off] | focus <pattern> [command] | scratch | keys | reload | exit
+# dots:actions=gaps,layout,transparency,corners sharp,corners round,gamemode,mirror,scratch,keys,reload,exit
+set -uo pipefail
 
-_gaps() {
-    if dots state check hypr-gaps; then
-        dots state clear hypr-gaps
-        hyprctl --batch "keyword general:gaps_in 4; keyword general:gaps_out 8; keyword general:border_size 2; keyword decoration:rounding 8" >/dev/null
-        dots notify "Gaps" "ON (default)" -a hypr
-    else
-        dots state set hypr-gaps
-        hyprctl --batch "keyword general:gaps_in 0; keyword general:gaps_out 0; keyword general:border_size 0; keyword decoration:rounding 0" >/dev/null
-        dots notify "Gaps" "OFF (zero)" -a hypr
-    fi
+# shellcheck source=/dev/null
+. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+need hyprctl jq
+
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/dots/hypr"
+mkdir -p "$STATE"
+
+say() { dots notify "$1" "${2:-}" -a hypr -t 2000; }
+batch() { hyprctl --batch "$1" >/dev/null; }
+
+toggle() {  # toggle <flag> <command to turn on> <command to turn off>
+    if [[ -f $STATE/$1 ]]; then rm -f "$STATE/$1"; "$3"; else : > "$STATE/$1"; "$2"; fi
 }
 
-_layout() {
-    local cur next
-    cur=$(hyprctl getoption general:layout 2>/dev/null | awk '/str:/ {print $2; exit}')
-    case "$cur" in dwindle) next=master ;; master) next=dwindle ;; *) next=dwindle ;; esac
+gaps_off() { batch 'keyword general:gaps_in 0; keyword general:gaps_out 0; keyword general:border_size 0; keyword decoration:rounding 0'; say Gaps off; }
+gaps_on()  { batch 'keyword general:gaps_in 4; keyword general:gaps_out 8; keyword general:border_size 2; keyword decoration:rounding 8'; say Gaps on; }
+glass_on()  { batch 'keyword decoration:active_opacity 0.95; keyword decoration:inactive_opacity 0.85'; say Transparency on; }
+glass_off() { batch 'keyword decoration:active_opacity 1.0; keyword decoration:inactive_opacity 1.0'; say Transparency off; }
+
+layout() {
+    local next=dwindle
+    [[ $(hyprctl getoption general:layout -j | jq -r .str) == dwindle ]] && next=master
     hyprctl keyword general:layout "$next" >/dev/null
-    dots notify "Layout" "→ $next" -a hypr
+    say Layout "$next"
 }
 
-_transparency() {
-    if dots state check hypr-transparency; then
-        dots state clear hypr-transparency
-        hyprctl --batch "keyword decoration:active_opacity 1.0; keyword decoration:inactive_opacity 1.0" >/dev/null
-        dots notify "Transparency" "OFF (opaque)" -a hypr
+corners() {  # corners <sharp|round>
+    local radius config="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config"
+    case ${1:-} in
+        sharp) radius=0 ;;
+        round) radius=8 ;;
+        *) err "Usage: dots hypr corners <sharp|round>"; return 1 ;;
+    esac
+    hyprctl keyword decoration:rounding "$radius" >/dev/null
+    if [[ -f $config ]]; then
+        sed -i --follow-symlinks -E "s/^border-radius=.*/border-radius=$radius/" "$config"
+        makoctl reload 2>/dev/null
+    fi
+    say Corners "$1"
+}
+
+game_on() {
+    batch 'keyword animations:enabled 0; keyword decoration:blur:enabled 0; keyword decoration:shadow:enabled 0; keyword misc:vfr 0'
+    systemctl --user stop hypridle 2>/dev/null
+    say Gamemode "on: no animations, no idle"
+}
+game_off() {
+    batch 'keyword animations:enabled 1; keyword decoration:blur:enabled 1; keyword decoration:shadow:enabled 1; keyword misc:vfr 1'
+    systemctl --user start hypridle 2>/dev/null
+    say Gamemode off
+}
+gamemode() {
+    case ${1:-toggle} in
+        toggle) toggle gamemode game_on game_off ;;
+        on)     : > "$STATE/gamemode"; game_on ;;
+        off)    rm -f "$STATE/gamemode"; game_off ;;
+        status) if [[ -f $STATE/gamemode ]]; then echo on; else echo off; fi ;;
+        *) err "dots hypr gamemode: unknown: $1"; return 1 ;;
+    esac
+}
+
+scale() {  # scale <+n|-n|=n>
+    local delta=${1:-} monitor current target
+    monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')
+    current=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .scale')
+    case $delta in
+        +*|-*) target=$(awk -v c="$current" -v d="$delta" 'BEGIN{printf "%.2f", c+d}') ;;
+        =*)    target=${delta#=} ;;
+        *) err "Usage: dots hypr scale <+0.1|-0.1|=1.5>"; return 1 ;;
+    esac
+    awk -v n="$target" 'BEGIN{ exit !(n >= 0.8 && n <= 3) }' || { err "scale out of range: $target"; return 1; }
+    hyprctl keyword monitor "$monitor,preferred,auto,$target" >/dev/null
+    say "$monitor" "scale $target"
+}
+
+mirror() {
+    local action=${1:-toggle} monitors internal external
+    monitors=$(hyprctl monitors -j)
+    internal=$(jq -r '.[] | select(.name | startswith("eDP")) | .name' <<< "$monitors" | head -1)
+    external=$(jq -r '.[] | select(.name | startswith("eDP") | not) | .name' <<< "$monitors" | head -1)
+    if [[ -z $internal || -z $external ]]; then say Mirror "needs an internal and an external monitor"; return 1; fi
+    if [[ $action == toggle ]]; then
+        if [[ -f $STATE/mirror ]]; then action=off; else action=on; fi
+    fi
+    case $action in
+        on)
+            hyprctl keyword monitor "$external,preferred,auto,1,mirror,$internal" >/dev/null
+            : > "$STATE/mirror"; say Mirror "$external mirrors $internal" ;;
+        off)
+            hyprctl keyword monitor "$external,preferred,auto-right,1" >/dev/null
+            rm -f "$STATE/mirror"; say Mirror off ;;
+        *) err "dots hypr mirror: unknown: $action"; return 1 ;;
+    esac
+}
+
+focus() {  # focus <pattern> [command...]: focus a matching window, or start it
+    local pattern=${1:-} address
+    [[ -n $pattern ]] || { err "Usage: dots hypr focus <pattern> [command...]"; return 1; }
+    shift
+    address=$(hyprctl clients -j | jq -r --arg p "$pattern" \
+        '.[] | select((.class | test("\\b" + $p + "\\b"; "i")) or (.title | test("\\b" + $p + "\\b"; "i"))) | .address' | head -1)
+    if [[ -n $address ]]; then
+        hyprctl dispatch focuswindow "address:$address" >/dev/null
+    elif (( $# )); then
+        setsid -f "$@" >/dev/null 2>&1
     else
-        dots state set hypr-transparency
-        hyprctl --batch "keyword decoration:active_opacity 0.95; keyword decoration:inactive_opacity 0.85" >/dev/null
-        dots notify "Transparency" "ON (active 95% / inactive 85%)" -a hypr
+        setsid -f "$pattern" >/dev/null 2>&1
     fi
 }
 
-_scale() {
-    local delta="${1:-}" mon cur new
-    [[ -z "$delta" ]] && { echo "Usage: dots hypr scale {+0.1|-0.1|=1.5}" >&2; exit 1; }
-    mon="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
-    cur="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .scale')"
-    [[ -z "$mon" ]] && { echo "dots hypr scale: no focused monitor" >&2; exit 1; }
-    case "$delta" in
-        +*|-*) new=$(awk -v c="$cur" -v d="$delta" 'BEGIN{printf "%.2f", c+d}') ;;
-        =*)    new="${delta#=}" ;;
-        *)     echo "dots hypr scale: bad delta '$delta'" >&2; exit 1 ;;
-    esac
-    awk -v n="$new" 'BEGIN{ if (n+0 < 0.8 || n+0 > 3.0) exit 1 }' \
-        || { echo "dots hypr scale: $new out of range [0.8, 3.0]" >&2; exit 1; }
-    hyprctl keyword monitor "$mon,preferred,auto,$new"
-    dots notify "󰍹 $mon" "scale → $new" -a hypr -t 2000
+scratch() {
+    if ! hyprctl clients -j | jq -e '.[] | select(.class == "scratch")' >/dev/null; then
+        hyprctl dispatch exec "[workspace special:scratch silent;float;size 80% 60%;center] ${TERMINAL:-alacritty} --class scratch" >/dev/null
+        sleep 0.15
+    fi
+    hyprctl dispatch togglespecialworkspace scratch >/dev/null
 }
 
-_mirror() {
-    local action="${1:-toggle}" internal external
-    internal=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name | startswith("eDP")) | .name' | head -1)
-    external=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name | startswith("eDP") | not) | .name' | head -1)
-    [[ -z "$internal" || -z "$external" ]] && { dots notify "Mirror" "Precisa de 2 monitores (interno + externo)" -a hypr; exit 1; }
-    case "$action" in
-        on)  hyprctl keyword monitor "$external,preferred,auto,1,mirror,$internal" >/dev/null
-             dots state set hypr-mirror; dots notify "Mirror" "$external mirrors $internal" -a hypr ;;
-        off) hyprctl keyword monitor "$external,preferred,1600x0,1" >/dev/null
-             dots state clear hypr-mirror; dots notify "Mirror" "OFF — $external à direita" -a hypr ;;
-        toggle) if dots state check hypr-mirror; then _mirror off; else _mirror on; fi ;;
-        *) echo "Usage: dots hypr mirror [on|off|toggle]" >&2; exit 1 ;;
-    esac
+keys() {  # search the keybinds; Enter copies one
+    local choice
+    choice=$(hyprctl binds -j | jq -r '.[] | select(.key != "") | [.modmask, .key, (.description // .dispatcher), (.arg // "")] | @tsv' \
+        | while IFS=$'\t' read -r mods key what arg; do
+            local names=()
+            (( mods & 64 )) && names+=(Super)
+            (( mods & 4 ))  && names+=(Ctrl)
+            (( mods & 8 ))  && names+=(Alt)
+            (( mods & 1 ))  && names+=(Shift)
+            names+=("$key")
+            printf '%-28s %s %s\n' "$(IFS=+; echo "${names[*]}")" "$what" "$arg"
+        done | sort -u | dots menu keys) || return 0
+    if [[ -n $choice ]]; then printf '%s' "$choice" | wl-copy; say "Copied" "$choice"; fi
 }
 
-_exit() { if command -v hyprshutdown >/dev/null 2>&1; then exec hyprshutdown; else exec hyprctl dispatch exit; fi; }
+reload() {
+    hyprctl reload >/dev/null
+    have makoctl && makoctl reload 2>/dev/null
+    pkill -SIGUSR2 waybar 2>/dev/null
+    say Reloaded
+}
 
 case "${1:-}" in
-    gaps)         _gaps ;;
-    layout)       _layout ;;
-    transparency) _transparency ;;
-    scale)        shift; _scale "$@" ;;
-    mirror)       shift; _mirror "$@" ;;
-    exit)         _exit ;;
-    -h|--help|help) sed -n '2,3p' "$0" ;;
-    *) echo "dots hypr: unknown action: ${1:-}" >&2; exit 1 ;;
+    gaps)         toggle gaps gaps_off gaps_on ;;
+    layout)       layout ;;
+    transparency) toggle glass glass_on glass_off ;;
+    corners)      shift; corners "$@" ;;
+    gamemode)     shift; gamemode "$@" ;;
+    scale)        shift; scale "$@" ;;
+    mirror)       shift; mirror "$@" ;;
+    focus)        shift; focus "$@" ;;
+    scratch)      scratch ;;
+    keys)         keys ;;
+    reload)       reload ;;
+    exit)         exec hyprctl dispatch exit ;;
+    -h|--help)    sed -n '2,3p' "$0" ;;
+    *) err "Usage: dots hypr <action> (dots hypr --help)"; exit 1 ;;
 esac

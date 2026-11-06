@@ -1,22 +1,105 @@
 #!/usr/bin/env bash
-# dots:summary=Notification history (restore/dismiss/clear/list/pick/dnd)
-# dots:args=restore|dismiss|clear|list|pick|dnd
-set -euo pipefail
+# dots:summary=Notification history, do not disturb, reminders and info cards
+# dots:args=pick | restore | clear | dnd [on|off|status] | remind <minutes> [text] | reminders [clear] | info <date|weather|battery|network|system>
+# dots:actions=pick,restore,clear,dnd,reminders,info date,info weather,info battery,info network,info system
+set -uo pipefail
 
-command -v makoctl >/dev/null || { dots notify "Notifications" "mako not running" -a dots-notifications -i dialog-error; exit 1; }
+# shellcheck source=/dev/null
+. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
 
-case "${1:-help}" in
-    restore) makoctl restore 2>/dev/null || dots notify "Notifications" "No history to restore" -a dots-notifications -t 1500 ;;
-    dismiss) makoctl dismiss 2>/dev/null || true ;;
-    clear|dismiss-all) makoctl dismiss --all 2>/dev/null || true ;;
-    list)    makoctl list ;;
-    pick)
-        lines="$(makoctl list 2>/dev/null | jq -r '.data[][] | "\(.id.data)\t\(.["app-name"].data) — \(.summary.data)"' 2>/dev/null)"
-        [[ -z "$lines" ]] && { dots notify "Notifications" "No active notifications" -a dots-notifications -t 1500; exit 0; }
-        pick="$(printf '%s\n' "$lines" | dots menu 'Notification:')"; [[ -z "$pick" ]] && exit 0
-        id="${pick%%$'\t'*}"
-        makoctl invoke -n "$id" default 2>/dev/null || makoctl invoke -n "$id" 2>/dev/null || true ;;
-    toggle-dnd|dnd) exec dots dnd ;;
-    -h|--help|help|"") sed -n '2,3p' "$0" ;;
-    *) echo "dots notifications: unknown action: $1" >&2; exit 1 ;;
+REMINDERS="${XDG_STATE_HOME:-$HOME/.local/state}/dots/reminders"
+
+pick() {
+    local lines choice
+    lines=$(makoctl list -j 2>/dev/null | jq -r '.[] | "\(.id)\t\(.app_name) - \(.summary)"' 2>/dev/null)
+    if [[ -z $lines ]]; then dots notify Notifications "None active" -t 1500; return 0; fi
+    choice=$(dots menu notification <<< "$lines") || return 0
+    [[ -n $choice ]] && makoctl invoke -n "${choice%%$'\t'*}"
+}
+
+dnd() {
+    local action=${1:-toggle} active=0
+    makoctl mode | grep -qx do-not-disturb && active=1
+    if [[ $action == toggle ]]; then
+        if (( active )); then action=off; else action=on; fi
+    fi
+    case $action in
+        on)
+            makoctl mode -a do-not-disturb >/dev/null
+            dots notify "Do not disturb on" -a dnd -i notification-disabled -t 2000 ;;
+        off)
+            makoctl mode -r do-not-disturb >/dev/null
+            dots notify "Do not disturb off" -a dnd -i preferences-desktop-notification -t 2000 ;;
+        status) if (( active )); then echo on; else echo off; fi ;;
+        *) err "dots notifications dnd: unknown: $action"; return 1 ;;
+    esac
+}
+
+remind() {  # remind <minutes> [text]
+    [[ ${1:-} =~ ^[0-9]+$ ]] || { err "Usage: dots notifications remind <minutes> [text]"; return 1; }
+    local minutes=$1 file target text
+    shift
+    text=${*:-Reminder}
+    target=$(( $(date +%s) + minutes * 60 ))
+    mkdir -p "$REMINDERS"
+    file="$REMINDERS/$target-$$"
+    printf '%s\n' "$text" > "$file"
+    ( sleep "${minutes}m"
+      if [[ -f $file ]]; then dots notify Reminder "$text" -u critical -t 0; rm -f "$file"; fi ) >/dev/null 2>&1 &
+    disown
+    dots notify "Reminder set" "${minutes}m: $text"
+}
+
+reminders() {
+    local file target now
+    if [[ ${1:-} == clear ]]; then rm -f "$REMINDERS"/*; ok "reminders cleared"; return; fi
+    now=$(date +%s)
+    for file in "$REMINDERS"/*; do
+        [[ -f $file ]] || continue
+        target=${file##*/}; target=${target%%-*}
+        (( target > now )) && printf '%3dm  %s\n' "$(( (target - now + 59) / 60 ))" "$(<"$file")"
+    done
+}
+
+battery_card() {
+    local dir=/sys/class/power_supply/BAT0 capacity state urgency=normal
+    if [[ ! -d $dir ]]; then card Battery "<i>No battery found</i>" battery-missing; return; fi
+    capacity=$(<"$dir/capacity"); state=$(<"$dir/status")
+    (( capacity <= 15 )) && [[ $state != Charging ]] && urgency=critical
+    card Battery "<b>$capacity%</b> · $state" battery-good "$urgency"
+}
+
+card() { dots notify "$1" "$2" -a info -i "${3:-dialog-information}" -u "${4:-normal}" -t 6000; }
+
+info() {
+    local out
+    case ${1:-} in
+        date) card "$(date '+%H:%M')" "<b>$(date '+%A, %d %B %Y')</b>\n<small>week $(date +%V)</small>" x-office-calendar ;;
+        weather)
+            out=$(curl -fsSL --max-time 5 "https://wttr.in/${WEATHER_CITY:-}?format=%l:+%C+%t+(feels+%f),+%w,+%h") \
+                || out='<i>could not reach wttr.in</i>'
+            card Weather "${out//&/&amp;}" weather-clear ;;
+        battery) battery_card ;;
+        network)
+            out=$(ip -4 -o addr show | awk '$2 != "lo" {split($4,a,"/"); printf "<b>%s</b>: %s\n", $2, a[1]}')
+            card Network "${out:-<i>No connection</i>}" network-wireless ;;
+        system)
+            card System "<b>Up:</b> $(uptime -p | sed 's/^up //')
+<b>Load:</b> $(cut -d' ' -f1-3 /proc/loadavg)
+<b>RAM:</b> $(free -h | awk '/^Mem:/ {print $3 " / " $2}')
+<b>Disk:</b> $(df -h / | awk 'NR==2 {print $3 " / " $2 " (" $5 ")"}')" utilities-system-monitor ;;
+        *) err "Usage: dots notifications info <date|weather|battery|network|system>"; return 1 ;;
+    esac
+}
+
+case "${1:-pick}" in
+    pick)      need makoctl; pick ;;
+    restore)   need makoctl; makoctl restore ;;
+    clear)     need makoctl; makoctl dismiss --all ;;
+    dnd)       need makoctl; shift; dnd "$@" ;;
+    remind)    shift; remind "$@" ;;
+    reminders) shift; reminders "$@" ;;
+    info)      shift; info "$@" ;;
+    -h|--help) sed -n '2,3p' "$0" ;;
+    *) err "dots notifications: unknown action: $1"; exit 1 ;;
 esac
