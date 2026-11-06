@@ -11,7 +11,7 @@ max_height = 900
 
 [opener]
 edit = [
-    { run = "helix %s", block = true, desc = "Helix", for = "unix" },
+    { run = "dots pane helix %s", block = true, desc = "Helix", for = "unix" },
 ]
 open = [
     { run = "xdg-open %s", desc = "Open", for = "unix" },
