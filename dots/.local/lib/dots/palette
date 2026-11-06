@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# dots:summary=Search help, TUIs and dots commands with tv, inside Zellij
+# dots:summary=Search help, TUIs and dots commands with tv
 # dots:args=[tui]
 #
 #   dots palette      everything
 #   dots palette tui  only the TUIs
 #
-# Zellij opens it in a floating pane (see config.kdl). What you pick runs in that
-# same pane, which closes when it ends.
+# What you pick runs right here. Zellij opens this in a floating pane (see its
+# config.kdl), so there it closes when what you picked ends.
 set -uo pipefail
 
 # shellcheck source=/dev/null

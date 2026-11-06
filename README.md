@@ -45,7 +45,7 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 | `dots theme` | Switch colors, with a live preview |
 | `dots doctor` | Report what is wrong |
 | `dots edit`, `dots tui`, `dots help` | Open a config, a TUI or a page |
-| `dots palette` | Search help, TUIs and commands with tv, inside Zellij |
+| `dots palette` | Search help, TUIs and commands with tv |
 | `dots setup` | Set up a machine |
 | `dots wsl` | WSL report, and copy configs to Windows |
 

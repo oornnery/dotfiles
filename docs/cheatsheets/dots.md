@@ -17,7 +17,7 @@ Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` mark
 | Upgrade everything | `dots update` |
 | Switch colors | `dots theme` |
 | Open a TUI | `dots tui` |
-| Search help, TUIs and commands, inside Zellij | `dots palette` (`Alt /`) |
+| Search help, TUIs and commands | `dots palette` (`Alt /` in Zellij) |
 | Set up a machine | `dots setup` |
 | Copy configs to Windows | `dots wsl windows` |
 | Read these pages | `dots help` |

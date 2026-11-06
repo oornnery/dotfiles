@@ -161,7 +161,7 @@ Kept but not linked. Turn one on with `dots stow <name>`.
 | --- | --- |
 | `vim` | Small `.vimrc` without plugins, same keys as Helix |
 | `tmux` | Small `.tmux.conf`, same theme as Helix |
-| `zellij` | Theme, help and the `dots palette` command |
+| `zellij` | Theme, help and the keys for `dots palette` |
 | `hyprland` | Hyprland, Alacritty, Waybar, Mako, Walker, Wofi and the commands `capture`, `display`, `hypr`, `notifications`, `system`, `webapp`; not used on WSL |
 
 In the repo, but not stow packages:
