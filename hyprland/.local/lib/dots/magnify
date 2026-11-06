@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# dots:summary=Hyprland cursor zoom (screen magnifier)
+# dots:args=in|out|toggle|reset|set <factor>|status
+set -euo pipefail
+
+STATE="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/magnify-state"
+STEP="${MAGNIFY_STEP:-0.5}"; MIN="1.0"; MAX="3.0"
+mkdir -p "$(dirname "$STATE")"
+
+_current() { hyprctl getoption cursor:zoom_factor -j 2>/dev/null | jq -r '.float' 2>/dev/null || echo "1.0"; }
+_clamp()   { awk -v v="$1" -v mn="$MIN" -v mx="$MAX" 'BEGIN{if(v<mn)v=mn;if(v>mx)v=mx;printf "%.2f",v}'; }
+_apply() {
+    local f; f="$(_clamp "$1")"
+    hyprctl keyword cursor:zoom_factor "$f" >/dev/null
+    echo "$f" > "$STATE"
+    dots notify "Magnify" "${f}×" -a magnify -i zoom-original -t 1500
+}
+
+case "${1:-toggle}" in
+    in)    _apply "$(awk -v c="$(_current)" -v s="$STEP" 'BEGIN{print c+s}')" ;;
+    out)   _apply "$(awk -v c="$(_current)" -v s="$STEP" 'BEGIN{print c-s}')" ;;
+    reset) _apply "1.0" ;;
+    set)   [[ -z "${2:-}" ]] && { echo "Usage: dots magnify set <factor>" >&2; exit 1; }; _apply "$2" ;;
+    toggle|"")
+        cur="$(_current)"
+        if awk -v c="$cur" 'BEGIN{exit !(c+0 <= 1.01)}'; then _apply "1.5"; else _apply "1.0"; fi ;;
+    status) printf 'magnify %s×\n' "$(_current)" ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots magnify: unknown action: $1" >&2; exit 1 ;;
+esac

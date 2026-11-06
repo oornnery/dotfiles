@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# dots:summary=Firefox PWA web apps (install/launch/list/remove)
+# dots:args=install <name> <url> [icon] | launch <name> | list | remove [name]
+set -euo pipefail
+
+command -v firefoxpwa >/dev/null || { echo "dots webapp: firefoxpwa not installed (dots setup firefoxpwa)" >&2; exit 1; }
+
+_id_of() { firefoxpwa profile list 2>/dev/null | awk -v name="$1" '/^- / { id=$2 } $0 ~ "Name: " name "$" { print id; exit }'; }
+
+case "${1:-help}" in
+    install)
+        name="${2:-}"; url="${3:-}"; icon="${4:-}"
+        [[ -z "$name" || -z "$url" ]] && { echo "Usage: dots webapp install <name> <url> [icon]" >&2; exit 1; }
+        args=(site install "$url" --name "$name")
+        [[ -n "$icon" && -f "$icon" ]] && args+=(--icon-url "file://$icon")
+        firefoxpwa "${args[@]}"
+        dots notify "Webapp installed" "$name" -a webapp -g "" ;;
+    launch)
+        name="${2:-}"; [[ -z "$name" ]] && { echo "Usage: dots webapp launch <name>" >&2; exit 1; }
+        id="$(_id_of "$name")"
+        [[ -z "$id" ]] && { echo "dots webapp: no PWA named '$name'. Available:" >&2; firefoxpwa profile list 2>/dev/null | grep -E 'Name:' >&2; exit 1; }
+        exec firefoxpwa site launch "$id" ;;
+    list) firefoxpwa profile list ;;
+    remove|uninstall)
+        name="${2:-}"
+        if [[ -z "$name" ]]; then
+            name="$(firefoxpwa profile list 2>/dev/null | awk -F'Name: ' '/Name: /{print $2}' | dots menu 'Remove webapp:')" || exit 0
+            [[ -z "$name" ]] && exit 0
+        fi
+        id="$(_id_of "$name")"; [[ -z "$id" ]] && { echo "dots webapp: no PWA named '$name'" >&2; exit 1; }
+        firefoxpwa site uninstall "$id"
+        dots notify "Webapp removed" "$name" -a webapp -g "󰮜" ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots webapp: unknown action: $1" >&2; exit 1 ;;
+esac

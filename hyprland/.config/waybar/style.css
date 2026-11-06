@@ -1,0 +1,116 @@
+/* ~/.config/waybar/style.css
+ *
+ * Palette comes from ~/.config/waybar/theme.css, switchable with
+ * `theme set <name>`. Defines @colors: bg, bg-alt, bg-darker, fg, muted,
+ * border, accent, mauve, blue, sky, yellow, peach, green, teal,
+ * sapphire, red.
+ */
+
+@import "theme.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 12px;
+    font-weight: 600;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+window#waybar {
+    background-color: alpha(@bg, 0.85);
+    color: @fg;
+    border-radius: 10px;
+    border: 1px solid @border;
+}
+
+/* Workspaces container — same pill treatment as other modules so heights line up. */
+#workspaces {
+    padding: 4px 6px;
+    margin: 3px 2px;
+    background: alpha(@bg-alt, 0.6);
+    border-radius: 6px;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    margin: 0 1px;
+    color: @muted;
+    background: transparent;
+    border-radius: 4px;
+}
+
+#workspaces button.active {
+    color: @bg;
+    background: @accent;
+}
+
+#workspaces button:hover {
+    color: @accent;
+    background: alpha(@accent, 0.12);
+}
+
+#clock,
+#network,
+#bluetooth,
+#pulseaudio,
+#backlight,
+#battery,
+#cpu,
+#memory,
+#temperature,
+#power-profiles-daemon,
+#mpris,
+#tray,
+#language,
+#custom-power,
+#custom-ai-usage,
+#custom-apps,
+#custom-gpu,
+#custom-updates {
+    padding: 4px 10px;
+    margin: 3px 2px;
+    background: alpha(@bg-alt, 0.6);
+    border-radius: 6px;
+}
+
+#language { color: @teal; }
+
+#clock        { color: @mauve; }
+#network      { color: @blue; }
+#bluetooth    { color: @sky; }
+#pulseaudio   { color: @yellow; }
+#backlight    { color: @peach; }
+#battery      { color: @green; }
+#battery.warning  { color: @yellow; }
+#battery.critical { color: @red; }
+#cpu          { color: @teal; }
+#memory       { color: @sapphire; }
+#power-profiles-daemon { color: @accent; }
+#tray menu    { background: @bg-darker; }
+#custom-power    { color: @red; }
+#custom-ai-usage { color: @mauve; }
+
+#custom-apps     { color: @accent; }
+#custom-gpu      { color: @teal; }
+#custom-gpu.warning  { color: @yellow; }
+#custom-gpu.critical { color: @red; }
+#custom-updates  { color: @sapphire; }
+#temperature     { color: @peach; }
+#mpris           { color: @green; }
+
+#custom-power:hover {
+    background: @red;
+    color: @bg;
+}
+
+tooltip {
+    background: @bg-darker;
+    border: 1px solid @bg-alt;
+    border-radius: 6px;
+}
+
+tooltip label {
+    color: @fg;
+    padding: 4px 8px;
+}

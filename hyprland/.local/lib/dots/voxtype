@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# dots:summary=Install Voxtype voice dictation (wtype + voxtype-bin + model)
+# dots:args=install
+set -e
+
+case "${1:-install}" in
+    install) : ;;
+    -h|--help|help) sed -n '2,3p' "$0"; exit 0 ;;
+    *) echo "Usage: dots voxtype install" >&2; exit 1 ;;
+esac
+
+if command -v gum >/dev/null; then
+    gum confirm "Install Voxtype + AI model (~150MB) for voice dictation?" || exit 0
+else
+    echo "gum não instalado — pulando confirmação"
+fi
+
+command -v paru >/dev/null || { echo "paru required pra AUR install" >&2; exit 1; }
+
+sudo pacman -S --needed --noconfirm wtype
+paru -S --needed --noconfirm voxtype-bin
+mkdir -p ~/.config/voxtype
+
+if ! voxtype setup --download --no-post-install; then
+    dots notify "Voxtype" "Setup failed — verifique logs" -g "⚠" -u critical
+    exit 1
+fi
+
+if lspci | grep -iqE 'vga|3d' && command -v vulkaninfo >/dev/null 2>&1 && vulkaninfo --summary 2>/dev/null | grep -q 'GPU'; then
+    voxtype setup gpu --enable || true
+fi
+voxtype setup systemd || true
+
+dots notify "Voxtype Dictation Ready" "Bind a key to: voxtype toggle" -g "" -t 10000
+echo "Bind suggestion (Lua): hl.bind(M .. ' + F9', exec('voxtype toggle'))"

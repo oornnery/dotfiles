@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# dots:summary=Pick a color from screen (hyprpicker) → clipboard + history
+# dots:args=(pick)
+set -euo pipefail
+
+[[ "${1:-}" == -h || "${1:-}" == --help || "${1:-}" == help ]] && { sed -n '2,3p' "$0"; exit 0; }
+
+HIST="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/color-history"
+mkdir -p "$(dirname "$HIST")"
+
+command -v hyprpicker >/dev/null || { dots notify "Color picker" "hyprpicker not installed" -a color -i dialog-error; exit 1; }
+
+hex="$(hyprpicker -f hex -a 2>/dev/null || true)"
+[[ -z "$hex" ]] && exit 0
+
+printf '%s  %s\n' "$(date +%H:%M:%S)" "$hex" >> "$HIST"
+dots notify "Color copied" "$hex" -a color -i color-picker -t 3000 || true

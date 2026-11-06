@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# dots:summary=Power menu (lock/suspend/…) + power-profiles-daemon
+# dots:args=menu | profile [cycle|set <mode>|list|status] | status
+set -euo pipefail
+
+_icon()  { case "$1" in power-saver) echo battery-low ;; balanced) echo battery-good ;; performance) echo battery-full-charging ;; *) echo dialog-information ;; esac; }
+_emoji() { case "$1" in power-saver) echo 󰂃 ;; balanced) echo 󰁹 ;; performance) echo 󱐋 ;; *) echo '?' ;; esac; }
+
+_profile() {
+    command -v powerprofilesctl >/dev/null || { dots notify "power" "powerprofilesctl not found — install power-profiles-daemon" -a power -i dialog-error; exit 1; }
+    local sub="${1:-show}" p cur next; shift || true
+    case "$sub" in
+        show|"") p="$(powerprofilesctl get)"
+                 dots notify "$(_emoji "$p") Power profile" "$p" -a power -i "$(_icon "$p")" -t 3000 ;;
+        cycle)
+            cur="$(powerprofilesctl get)"
+            case "$cur" in power-saver) next=balanced ;; balanced) next=performance ;; performance) next=power-saver ;; *) next=balanced ;; esac
+            powerprofilesctl set "$next"
+            dots notify "$(_emoji "$next") Power profile" "$cur → $next" -a power -i "$(_icon "$next")" -t 3000 ;;
+        set) [[ -z "${1:-}" ]] && { echo "Usage: dots power profile set <power-saver|balanced|performance>" >&2; exit 1; }
+             powerprofilesctl set "$1"; p="$(powerprofilesctl get)"
+             dots notify "$(_emoji "$p") Power profile" "$p" -a power -i "$(_icon "$p")" -t 3000 ;;
+        list) powerprofilesctl list ;;
+        status)
+            p="$(powerprofilesctl get)"
+            if [[ "${1:-}" == --json ]]; then printf '{"profile":"%s"}\n' "$p"; else printf 'power profile %s\n' "$p"; fi ;;
+        *) echo "dots power profile: unknown: $sub" >&2; exit 1 ;;
+    esac
+}
+
+_menu() {
+    local choice
+    choice="$(printf '%s\n' "󰌾 Lock" "󰤄 Suspend" "󰍃 Logout" "󰜉 Reboot" "󰐥 Shutdown" | dots menu 'Power:')" || exit 0
+    case "$choice" in
+        *Lock)    exec hyprlock ;;
+        *Suspend) exec systemctl suspend ;;
+        *Logout)  exec hyprctl dispatch exit ;;
+        *Reboot)
+            [[ "$(printf 'Cancel\nReboot' | dots menu 'Confirm reboot:')" == "Reboot" ]] \
+                && exec systemctl reboot || dots notify "Power" "Reboot cancelled" -a power -t 1500 ;;
+        *Shutdown)
+            [[ "$(printf 'Cancel\nShutdown' | dots menu 'Confirm shutdown:')" == "Shutdown" ]] \
+                && exec systemctl poweroff || dots notify "Power" "Shutdown cancelled" -a power -t 1500 ;;
+    esac
+}
+
+case "${1:-menu}" in
+    menu)    _menu ;;
+    profile) shift; _profile "$@" ;;
+    status)  _profile status "${2:-}" ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots power: unknown action: $1" >&2; exit 1 ;;
+esac

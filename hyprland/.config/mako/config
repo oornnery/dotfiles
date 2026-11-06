@@ -1,0 +1,118 @@
+# ~/.config/mako/config — notification daemon.
+#
+# Colors come from ~/.config/mako/theme.config (managed by `theme set <name>`).
+# Layout + typography + behavior live here.
+# Reload after editing: `makoctl reload`.
+
+include=/home/oornnery/.config/mako/theme.config
+
+# ─── Layout & placement ────────────────────────────────────────────────────
+
+anchor=top-right
+margin=12
+outer-margin=8
+padding=14,18
+border-radius=10
+border-size=1
+width=400
+height=140
+max-visible=5
+sort=-time
+group-by=app-name
+
+# History buffer — `makoctl restore` pulls back the last expired notif
+# (used by `dots notifications restore` and the MS+Backspace bind).
+max-history=50
+
+# ─── Typography & rendering ────────────────────────────────────────────────
+
+font=JetBrainsMono Nerd Font 11
+markup=1
+format=<b>%s</b>\n%b
+icon-location=left
+max-icon-size=48
+text-alignment=left
+
+# ─── Timing ────────────────────────────────────────────────────────────────
+
+default-timeout=6000
+ignore-timeout=0
+
+# ─── Mouse interaction ─────────────────────────────────────────────────────
+# Left  → invoke default action (e.g. action handlers below)
+# Middle → dismiss the notification under cursor
+# Right → dismiss ALL visible notifications
+
+on-button-left=invoke-default-action
+on-button-middle=dismiss
+on-button-right=dismiss-all
+on-touch=invoke-default-action
+
+# ─── Per-urgency styling ───────────────────────────────────────────────────
+
+[urgency=low]
+default-timeout=3000
+
+[urgency=high]
+default-timeout=0
+border-size=2
+
+[urgency=critical]
+default-timeout=0
+border-size=2
+layer=overlay
+
+# ─── OSD-style notifications (volume / brightness / mic) ──────────────────
+# These use `x-canonical-private-synchronous` to replace previous OSD instead
+# of stacking when scrolling the wheel. Short timeout + larger icon.
+
+[summary="Volume"]
+default-timeout=1500
+group-by=
+
+[summary="Brightness"]
+default-timeout=1500
+group-by=
+
+[summary="Microphone"]
+default-timeout=1500
+group-by=
+
+# ─── App-specific rules ────────────────────────────────────────────────────
+
+# Spotify spams currently-playing — hide.
+[summary~="Spotify"]
+invisible=1
+
+# Screenshots: show the image preview large.
+[summary~="Screenshot.*"]
+icon-size=96
+default-timeout=4000
+
+# Theme switcher: smaller, faster.
+[app-name=theme]
+default-timeout=2000
+
+# Cheatsheet copies: very short toast.
+[app-name=Cheatsheet]
+default-timeout=2000
+group-by=
+
+# Update available: persistent so user notices.
+[summary="Update System"]
+default-timeout=0
+on-button-left=dismiss;exec alacritty -e bash -c 'dots update; read -p Done...'
+
+# Network/Bluetooth setup nudges from notice/onboarding.
+[summary="Setup Wi-Fi"]
+on-button-left=dismiss;exec dots tui impala
+
+[summary="Setup Bluetooth"]
+on-button-left=dismiss;exec dots tui bluetui
+
+[summary="Learn Keybindings"]
+on-button-left=dismiss;exec dots help
+
+# Hyprland-emitted events (monitor plug/unplug, screenshare, etc.) — info tier.
+[app-name=hyprland]
+default-timeout=3000

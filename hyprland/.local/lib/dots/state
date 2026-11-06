@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# dots:summary=Persistent state flags (~/.local/state/dots/<name>)
+# dots:args=<set|clear|check|toggle> <name>
+# dots:hidden=true
+set -euo pipefail
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dots"
+mkdir -p "$STATE_DIR"
+
+cmd="${1:-}"; name="${2:-}"
+[[ -z "$cmd" || -z "$name" ]] && { echo "Usage: dots state <set|clear|check|toggle> <name>" >&2; exit 1; }
+
+f="$STATE_DIR/$name"
+case "$cmd" in
+    set)    touch "$f" ;;
+    clear)  rm -f "$f" ;;
+    check)  [[ -f "$f" ]] ;;                       # exit 0 if set, 1 if not
+    toggle) if [[ -f "$f" ]]; then rm -f "$f"; echo off; else touch "$f"; echo on; fi ;;
+    *) echo "Unknown: $cmd" >&2; exit 1 ;;
+esac

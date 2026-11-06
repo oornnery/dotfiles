@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# dots:summary=Searchable Hyprland keybindings menu (copies the chosen bind)
+# dots:args=(picker)
+set -euo pipefail
+
+# Hyprland modmask: SHIFT=1, CTRL=4, ALT=8, SUPER=64
+_decode_mods() {
+    local m="$1" parts=()
+    (( m & 64 )) && parts+=("Super")
+    (( m & 4 ))  && parts+=("Ctrl")
+    (( m & 8 ))  && parts+=("Alt")
+    (( m & 1 ))  && parts+=("Shift")
+    if (( ${#parts[@]} == 0 )); then echo "—"; else local IFS='+'; echo "${parts[*]}"; fi
+}
+
+LINES=$(hyprctl binds -j 2>/dev/null \
+    | jq -r '.[] | select(.key != "") | "\(.modmask // 0)|\(.key)|\(.description // .dispatcher) \(.arg // "")"' \
+    | while IFS='|' read -r mods key rest; do
+        printf "%-30s  →  %s\n" "$(_decode_mods "$mods")+$key" "$rest"
+      done | sort -u)
+
+choice=$(printf '%s\n' "$LINES" | dots menu "Keybinds:")
+[[ -n "$choice" ]] && { printf '%s' "$choice" | wl-copy; dots notify "Bind copied" "$choice" -g ""; }

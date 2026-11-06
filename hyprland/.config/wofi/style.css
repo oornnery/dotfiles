@@ -1,0 +1,92 @@
+/* ~/.config/wofi/style.css
+ *
+ * Palette from ~/.config/wofi/theme.css (switched by `theme set <name>`).
+ * Defines @bg, @bg-alt, @fg, @accent.
+ */
+
+@import "theme.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 13px;
+    border: none;
+    outline: none;
+}
+
+/* Force solid background — Hyprland's blur on layer surfaces leaks
+ * through @color references parsed as semi-transparent. Plain rgba()
+ * with alpha=1 makes opacity explicit and prevents that. */
+window,
+#outer-box,
+#inner-box,
+#scroll,
+#input {
+    background-color: rgba(26, 27, 38, 1);
+}
+
+window {
+    border: 2px solid @accent;
+    border-radius: 12px;
+    color: @fg;
+    opacity: 1;
+}
+
+#outer-box {
+    margin: 8px;
+}
+
+#input {
+    margin: 4px 4px 8px 4px;
+    padding: 8px 12px;
+    background: @bg-alt;
+    color: @fg;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+#input:focus {
+    border-color: @accent;
+}
+
+#scroll {
+    margin-top: 4px;
+}
+
+#inner-box {
+    padding: 0;
+}
+
+/* Each row gets a tinted "cell" background + thin divider for grid feel. */
+#entry {
+    padding: 8px 12px;
+    margin: 2px 0;
+    background-color: @bg-alt;
+    border: 1px solid rgba(122, 162, 247, 0.08);   /* subtle accent edge */
+    border-radius: 6px;
+    color: @fg;
+}
+
+/* Mouse hover — softer accent */
+#entry:hover {
+    background-color: rgba(122, 162, 247, 0.18);
+    border-color: rgba(122, 162, 247, 0.3);
+}
+
+/* Keyboard-selected / focused — strong accent */
+#entry:selected {
+    background-color: @accent;
+    border-color: @accent;
+    color: @bg;
+}
+
+#entry image {
+    margin-right: 10px;
+}
+
+#text {
+    color: inherit;
+}
+
+#text:selected {
+    color: @bg;
+}

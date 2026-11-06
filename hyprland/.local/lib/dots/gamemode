@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# dots:summary=Gaming mode (kill animations/blur/idle)
+# dots:args=toggle|on|off|status
+set -euo pipefail
+
+_on() {
+    hyprctl --batch 'keyword animations:enabled 0 ; keyword decoration:blur:enabled 0 ; keyword decoration:shadow:enabled 0 ; keyword misc:vfr 0' >/dev/null
+    systemctl --user stop hypridle 2>/dev/null || true
+    dots state set gamemode
+    dots notify "Gamemode on" "Animations off, idle paused" -a gamemode -i applications-games -t 2000
+}
+_off() {
+    hyprctl --batch 'keyword animations:enabled 1 ; keyword decoration:blur:enabled 1 ; keyword decoration:shadow:enabled 1 ; keyword misc:vfr 1' >/dev/null
+    systemctl --user start hypridle 2>/dev/null || true
+    dots state clear gamemode
+    dots notify "Gamemode off" "Normal mode restored" -a gamemode -i applications-games -t 2000
+}
+
+case "${1:-toggle}" in
+    on)  _on ;;
+    off) _off ;;
+    status)    dots state check gamemode && echo on || echo off ;;
+    toggle|"") if dots state check gamemode; then _off; else _on; fi ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots gamemode: unknown action: $1" >&2; exit 1 ;;
+esac

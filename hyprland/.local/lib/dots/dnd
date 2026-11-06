@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# dots:summary=Do-Not-Disturb (mako)
+# dots:args=toggle|on|off|status
+set -euo pipefail
+
+command -v makoctl >/dev/null || { dots notify "DND" "mako not running" -a dnd -i dialog-error; exit 1; }
+
+_is()  { makoctl mode 2>/dev/null | grep -qx do-not-disturb; }
+_on()  { makoctl mode -a do-not-disturb >/dev/null
+         dots notify "DND on" "Notifications hidden" -a dnd -i notification-disabled -t 2000; }
+_off() { makoctl mode -r do-not-disturb >/dev/null
+         dots notify "DND off" "Notifications visible" -a dnd -i preferences-desktop-notification -t 2000; }
+
+case "${1:-toggle}" in
+    on)  _on ;;
+    off) _off ;;
+    status)    _is && echo on || echo off ;;
+    toggle|"") if _is; then _off; else _on; fi ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots dnd: unknown action: $1" >&2; exit 1 ;;
+esac

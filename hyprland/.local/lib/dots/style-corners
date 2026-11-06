@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# dots:summary=Set sharp or round corners (Hyprland + Mako + Walker)
+# dots:args=<sharp|round>
+set -euo pipefail
+
+mode="${1:-}"
+[[ "$mode" != "sharp" && "$mode" != "round" ]] && { echo "Usage: dots style-corners <sharp|round>" >&2; exit 1; }
+
+_hyprland() { case "$1" in sharp) hyprctl keyword decoration:rounding 0 >/dev/null ;; round) hyprctl keyword decoration:rounding 8 >/dev/null ;; esac; }
+
+_mako() {
+    local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config" target
+    case "$1" in sharp) target=0 ;; round) target=8 ;; esac
+    if grep -qE '^border-radius=' "$cfg" 2>/dev/null; then sed -i -E "s/^border-radius=.*/border-radius=$target/" "$cfg"
+    else echo "border-radius=$target" >> "$cfg"; fi
+    makoctl reload 2>/dev/null || true
+}
+
+_walker() {
+    local override="${XDG_CONFIG_HOME:-$HOME/.config}/walker/themes/default/corners.css" target
+    case "$1" in sharp) target=0 ;; round) target=12 ;; esac
+    cat > "$override" <<EOF
+.box-wrapper { border-radius: ${target}px; }
+.search-container { border-radius: $((target / 2))px; }
+EOF
+}
+
+_hyprland "$mode"
+_mako "$mode"
+_walker "$mode" 2>/dev/null || true
+
+case "$mode" in
+    sharp) dots notify "Corners" "Sharp" -g "󰝣" ;;
+    round) dots notify "Corners" "Round" -g "󰘇" ;;
+esac

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# window-finder — pick a window via wofi and focus it.
+#
+# Lists all Hyprland clients across workspaces in the format:
+#   <workspace>: <class> — <title>
+
+set -euo pipefail
+
+pick="$(
+    hyprctl clients -j \
+        | jq -r '.[] | "\(.workspace.id // "-"): \(.class) — \(.title) ::\(.address)"' \
+        | wofi --dmenu --prompt 'Window:' --width 720 --insensitive
+)"
+[[ -z "$pick" ]] && exit 0
+
+addr="${pick##*::}"
+[[ -z "$addr" ]] && exit 1
+
+hyprctl dispatch focuswindow "address:$addr" >/dev/null

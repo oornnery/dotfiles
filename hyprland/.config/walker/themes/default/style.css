@@ -1,0 +1,143 @@
+/* themes/default/style.css — walker visuals.
+ * Paleta: theme.css (escrito por `theme set <name>` — define @text, @base,
+ *                    @border, @selected-text). */
+
+@import "./theme.css";
+
+* {
+  all: unset;
+}
+
+* {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 14px;
+  color: @text;
+}
+
+scrollbar {
+  opacity: 0;
+}
+
+.normal-icons {
+  -gtk-icon-size: 18px;
+}
+
+.large-icons {
+  -gtk-icon-size: 32px;
+}
+
+.box-wrapper {
+  background: alpha(@base, 0.92);
+  padding: 16px;
+  border: 1px solid @border;
+  border-radius: 12px;
+}
+
+.search-container {
+  background: alpha(@base, 1.0);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid alpha(@border, 0.5);
+}
+
+.input placeholder {
+  opacity: 0.5;
+}
+
+.input:focus,
+.input:active {
+  box-shadow: none;
+  outline: none;
+}
+
+.content-container {
+}
+
+.placeholder {
+  opacity: 0.5;
+  padding: 20px;
+}
+
+.scroll {
+}
+
+.list {
+}
+
+child:hover .item-box {
+  background: alpha(@text, 0.04);
+  border-radius: 6px;
+}
+
+child:selected .item-box {
+  background: alpha(@selected-text, 0.12);
+  border-radius: 6px;
+}
+
+child:selected .item-box * {
+  color: @selected-text;
+}
+
+.item-box {
+  padding: 8px 12px;
+}
+
+.item-text-box {
+  all: unset;
+  padding: 6px 0;
+}
+
+.item-text {
+}
+
+.item-subtext {
+  font-size: 11px;
+  opacity: 0.6;
+  min-height: 0;
+}
+
+.elephant-hint {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+/* ───── Tab strip (provider chips above results) ────────────────────────────
+ * Decorative — shows what providers are available + their prefix shortcut.
+ * Not clickable (walker doesn't wire layout buttons to provider switching),
+ * but functions as a persistent cheat-sheet. */
+
+.tab-strip {
+  padding: 4px 0 8px 0;
+}
+
+.tab-chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;       /* pill */
+  background: alpha(@text, 0.08);
+  border: 1px solid alpha(@text, 0.12);
+  min-height: 0;
+}
+
+/* Per-provider colors — chip text + subtle bg tint */
+.chip-apps      { color: #cba6f7; background: alpha(#cba6f7, 0.12); border-color: alpha(#cba6f7, 0.25); }
+.chip-calc      { color: #f9e2af; background: alpha(#f9e2af, 0.12); border-color: alpha(#f9e2af, 0.25); }
+.chip-runner    { color: #f38ba8; background: alpha(#f38ba8, 0.12); border-color: alpha(#f38ba8, 0.25); }
+.chip-clipboard { color: #94e2d5; background: alpha(#94e2d5, 0.12); border-color: alpha(#94e2d5, 0.25); }
+.chip-symbols   { color: #fab387; background: alpha(#fab387, 0.12); border-color: alpha(#fab387, 0.25); }
+.chip-bluetooth { color: #89dceb; background: alpha(#89dceb, 0.12); border-color: alpha(#89dceb, 0.25); }
+.chip-files     { color: #a6e3a1; background: alpha(#a6e3a1, 0.12); border-color: alpha(#a6e3a1, 0.25); }
+.chip-windows   { color: #f5c2e7; background: alpha(#f5c2e7, 0.12); border-color: alpha(#f5c2e7, 0.25); }
+.chip-web       { color: #89b4fa; background: alpha(#89b4fa, 0.12); border-color: alpha(#89b4fa, 0.25); }
+.chip-pkg       { color: #74c7ec; background: alpha(#74c7ec, 0.12); border-color: alpha(#74c7ec, 0.25); }
+
+.keybinds {
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+.error {
+  color: @selected-text;
+  font-size: 11px;
+}

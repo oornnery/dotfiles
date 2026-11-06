@@ -1,0 +1,16 @@
+# ~/.config/wofi/config — launcher behavior.
+
+show=drun
+width=600
+height=420
+location=center
+allow_images=true
+allow_markup=true
+hide_scroll=true
+insensitive=true
+prompt=
+gtk_dark=true
+key_expand=Tab
+matching=fuzzy
+columns=1
+no_actions=true

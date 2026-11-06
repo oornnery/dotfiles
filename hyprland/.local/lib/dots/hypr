@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# dots:summary=Hyprland tweaks (gaps/layout/transparency/scale/mirror/exit)
+# dots:args=gaps|layout|transparency|scale <±n|=n>|mirror [on|off|toggle]|exit
+set -euo pipefail
+
+_gaps() {
+    if dots state check hypr-gaps; then
+        dots state clear hypr-gaps
+        hyprctl --batch "keyword general:gaps_in 4; keyword general:gaps_out 8; keyword general:border_size 2; keyword decoration:rounding 8" >/dev/null
+        dots notify "Gaps" "ON (default)" -a hypr
+    else
+        dots state set hypr-gaps
+        hyprctl --batch "keyword general:gaps_in 0; keyword general:gaps_out 0; keyword general:border_size 0; keyword decoration:rounding 0" >/dev/null
+        dots notify "Gaps" "OFF (zero)" -a hypr
+    fi
+}
+
+_layout() {
+    local cur next
+    cur=$(hyprctl getoption general:layout 2>/dev/null | awk '/str:/ {print $2; exit}')
+    case "$cur" in dwindle) next=master ;; master) next=dwindle ;; *) next=dwindle ;; esac
+    hyprctl keyword general:layout "$next" >/dev/null
+    dots notify "Layout" "→ $next" -a hypr
+}
+
+_transparency() {
+    if dots state check hypr-transparency; then
+        dots state clear hypr-transparency
+        hyprctl --batch "keyword decoration:active_opacity 1.0; keyword decoration:inactive_opacity 1.0" >/dev/null
+        dots notify "Transparency" "OFF (opaque)" -a hypr
+    else
+        dots state set hypr-transparency
+        hyprctl --batch "keyword decoration:active_opacity 0.95; keyword decoration:inactive_opacity 0.85" >/dev/null
+        dots notify "Transparency" "ON (active 95% / inactive 85%)" -a hypr
+    fi
+}
+
+_scale() {
+    local delta="${1:-}" mon cur new
+    [[ -z "$delta" ]] && { echo "Usage: dots hypr scale {+0.1|-0.1|=1.5}" >&2; exit 1; }
+    mon="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
+    cur="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .scale')"
+    [[ -z "$mon" ]] && { echo "dots hypr scale: no focused monitor" >&2; exit 1; }
+    case "$delta" in
+        +*|-*) new=$(awk -v c="$cur" -v d="$delta" 'BEGIN{printf "%.2f", c+d}') ;;
+        =*)    new="${delta#=}" ;;
+        *)     echo "dots hypr scale: bad delta '$delta'" >&2; exit 1 ;;
+    esac
+    awk -v n="$new" 'BEGIN{ if (n+0 < 0.8 || n+0 > 3.0) exit 1 }' \
+        || { echo "dots hypr scale: $new out of range [0.8, 3.0]" >&2; exit 1; }
+    hyprctl keyword monitor "$mon,preferred,auto,$new"
+    dots notify "󰍹 $mon" "scale → $new" -a hypr -t 2000
+}
+
+_mirror() {
+    local action="${1:-toggle}" internal external
+    internal=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name | startswith("eDP")) | .name' | head -1)
+    external=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name | startswith("eDP") | not) | .name' | head -1)
+    [[ -z "$internal" || -z "$external" ]] && { dots notify "Mirror" "Precisa de 2 monitores (interno + externo)" -a hypr; exit 1; }
+    case "$action" in
+        on)  hyprctl keyword monitor "$external,preferred,auto,1,mirror,$internal" >/dev/null
+             dots state set hypr-mirror; dots notify "Mirror" "$external mirrors $internal" -a hypr ;;
+        off) hyprctl keyword monitor "$external,preferred,1600x0,1" >/dev/null
+             dots state clear hypr-mirror; dots notify "Mirror" "OFF — $external à direita" -a hypr ;;
+        toggle) if dots state check hypr-mirror; then _mirror off; else _mirror on; fi ;;
+        *) echo "Usage: dots hypr mirror [on|off|toggle]" >&2; exit 1 ;;
+    esac
+}
+
+_exit() { if command -v hyprshutdown >/dev/null 2>&1; then exec hyprshutdown; else exec hyprctl dispatch exit; fi; }
+
+case "${1:-}" in
+    gaps)         _gaps ;;
+    layout)       _layout ;;
+    transparency) _transparency ;;
+    scale)        shift; _scale "$@" ;;
+    mirror)       shift; _mirror "$@" ;;
+    exit)         _exit ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots hypr: unknown action: ${1:-}" >&2; exit 1 ;;
+esac

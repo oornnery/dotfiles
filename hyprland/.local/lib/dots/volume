@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# dots:summary=PipeWire volume / mic control with OSD
+# dots:args=raise|lower|mute|mic-mute|set <0-100>|get|status [--json]
+set -euo pipefail
+
+STEP="${VOLUME_STEP:-5}"
+SINK="@DEFAULT_AUDIO_SINK@"
+SOURCE="@DEFAULT_AUDIO_SOURCE@"
+
+command -v wpctl >/dev/null || { dots notify "Volume" "wpctl missing" -i dialog-error -u critical; exit 1; }
+
+_pct()   { wpctl get-volume "$1" | awk '{printf "%d", $2 * 100}'; }
+_muted() { wpctl get-volume "$1" | grep -q MUTED && echo 1 || echo 0; }
+
+_osd_sink() {
+    local p muted icon body
+    p="$(_pct "$SINK")"; muted="$(_muted "$SINK")"
+    icon="audio-volume-medium"; body="${p}%"
+    [[ $muted -eq 1 ]] && { icon="audio-volume-muted"; body="muted"; }
+    dots notify "Volume" "$body" -a volume -i "$icon" -t 1500 \
+        -h "string:x-canonical-private-synchronous:volume" -h "int:value:$p"
+}
+_osd_mic() {
+    local muted icon body
+    muted="$(_muted "$SOURCE")"
+    icon="microphone-sensitivity-high"; body="active"
+    [[ $muted -eq 1 ]] && { icon="microphone-sensitivity-muted"; body="muted"; }
+    dots notify "Microphone" "$body" -a volume -i "$icon" -t 1500 \
+        -h "string:x-canonical-private-synchronous:mic"
+}
+
+case "${1:-get}" in
+    raise)                    wpctl set-volume -l 1.5 "$SINK" "${STEP}%+"; _osd_sink ;;
+    lower)                    wpctl set-volume "$SINK" "${STEP}%-";        _osd_sink ;;
+    mute|mute-toggle)         wpctl set-mute "$SINK" toggle;               _osd_sink ;;
+    mic-mute|mic-mute-toggle) wpctl set-mute "$SOURCE" toggle;             _osd_mic ;;
+    set)
+        [[ -z "${2:-}" ]] && { echo "Usage: dots volume set <0-100>" >&2; exit 1; }
+        wpctl set-volume -l 1.5 "$SINK" "${2}%"; _osd_sink ;;
+    get) _pct "$SINK" ;;
+    status)
+        if [[ "${2:-}" == --json ]]; then
+            printf '{"volume":%s,"muted":%s}\n' "$(_pct "$SINK")" "$(_muted "$SINK")"
+        else
+            [[ "$(_muted "$SINK")" -eq 1 ]] && sfx=" (muted)" || sfx=""
+            printf 'volume %s%%%s\n' "$(_pct "$SINK")" "$sfx"
+        fi ;;
+    -h|--help|help) sed -n '2,3p' "$0" ;;
+    *) echo "dots volume: unknown action: $1" >&2; exit 1 ;;
+esac
