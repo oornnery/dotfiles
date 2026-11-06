@@ -124,6 +124,7 @@ case "${1:-run}" in
     run)     run ;;
     list)    list "${2:-}" ;;
     refresh) refresh ;;
+    count)   if [[ -f $CACHE ]]; then wc -l < "$CACHE"; else echo 0; fi ;;  # for the bar
     motd)    motd ;;
     -h|--help) sed -n '2,3p' "$0" ;;
     *) err "dots update: unknown action: $1"; exit 1 ;;

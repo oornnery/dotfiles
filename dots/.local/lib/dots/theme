@@ -123,7 +123,9 @@ EOF
     put "$name/wofi.css"    "$HOME/.config/wofi/theme.css"
     put "$name/mako.config" "$HOME/.config/mako/theme.config"
     put "$name/walker.css"  "$HOME/.config/walker/themes/default/theme.css"
+    put "$name/alacritty.toml" "$HOME/.config/alacritty/theme.toml"
     send "$name"
+    if have hyprctl && [[ -x ${DOTS_LIB:-}/hypr ]]; then dots hypr reload >/dev/null 2>&1; fi
     ok "theme: $name"
     note "other open terminals change on their next shell; Helix with :config-reload"
 }
