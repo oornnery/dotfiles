@@ -1,0 +1,23 @@
+// A project: files and editor, git, and a shell. Opened by the dev shell function.
+layout {
+    default_tab_template {
+        pane size=1 borderless=true { plugin location="zellij:tab-bar"; }
+        children
+        pane size=1 borderless=true { plugin location="zellij:status-bar"; }
+    }
+    tab name="code" focus=true {
+        pane split_direction="vertical" {
+            // cd . because yazi believes $PWD, and Zellij hands down an old one
+            pane size="25%" name="yazi" command="sh" {
+                args "-c" "cd . && exec yazi"
+            }
+            pane focus=true command="helix"
+        }
+    }
+    tab name="git" {
+        pane command="lazygit"
+    }
+    tab name="shell" {
+        pane
+    }
+}

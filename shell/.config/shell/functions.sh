@@ -45,6 +45,25 @@ fe() {
     [ -n "$f" ] && ${EDITOR:-vi} "$f"
 }
 
+# y [dir]  -> yazi; on leaving, the shell stays in the folder you were in
+y() {
+    local tmp cwd
+    tmp=$(mktemp)
+    yazi --cwd-file="$tmp" "$@"
+    cwd=$(cat "$tmp")
+    rm -f "$tmp"
+    if [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then cd "$cwd" || return; fi
+}
+
+# dev -> this folder as a Zellij session, with the dev layout; again, it comes back to it
+dev() {
+    if [ -n "${ZELLIJ:-}" ]; then
+        zellij action new-tab --layout dev --cwd "$PWD" >/dev/null
+    else
+        zellij attach "${PWD##*/}" 2>/dev/null || zellij -s "${PWD##*/}" -n dev
+    fi
+}
+
 # prev -> save the previous command as a pet snippet
 prev() {
     pet new "$(fc -lrn | head -n 1 | sed 's/^[[:space:]]*//')"

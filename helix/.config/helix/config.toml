@@ -47,9 +47,28 @@ display-inlay-hints = true
 esc = "collapse_selection"
 tab = "goto_next_buffer"      # replaces jump_forward, also on Ctrl-i
 S-tab = "goto_previous_buffer"
+# Pick a file with yazi (recipe from its docs). insert-output is what lets it use
+# the terminal; the printf gives the screen back to Helix afterwards.
+C-y = [
+    ':sh rm -f /tmp/yazi-pick',
+    ':insert-output yazi "%{buffer_name}" --chooser-file=/tmp/yazi-pick',
+    ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+    ':open %sh{cat /tmp/yazi-pick}',
+    ':redraw',
+    ':set mouse false',
+    ':set mouse true',
+]
 
 [keys.normal.space]
 space = "file_picker"
+# Read this file with glow: a floating pane in Zellij, the whole terminal outside.
+m = [
+    ':insert-output dots pane --float glow -p "%{buffer_name}"',
+    ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+    ':redraw',
+    ':set mouse false',
+    ':set mouse true',
+]
 v = "vsplit"
 w = ":write"                  # window menu is still on Ctrl-w
 q = ":quit"

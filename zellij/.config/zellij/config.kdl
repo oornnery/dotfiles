@@ -1,5 +1,5 @@
 // Zellij as it comes, with its own keys, modes and bars. Only these additions:
-// help, and a palette to search help, TUIs and dots commands with tv.
+// help, a palette with tv, yazi and lazygit on top, and going straight to a tab.
 // The theme is written by dots theme, from the same palette as everything else.
 theme "dots"
 simplified_ui true  // square bars, without arrows
@@ -17,5 +17,16 @@ keybinds {
         bind "Alt u" {
             Run "dots" "palette" "tui" { floating true; close_on_exit true; }
         }
+        // Outside Zellij the shell has these two as well (conf.d/45-keys).
+        // Zellij hands down an old $PWD and yazi believes it; cd . sets it right.
+        bind "Alt e" {
+            Run "sh" "-c" "cd . && exec yazi" { floating true; close_on_exit true; name "yazi"; }
+        }
+        bind "Alt g" {
+            Run "lazygit" { floating true; close_on_exit true; }
+        }
+        bind "Alt 1" { GoToTab 1; }
+        bind "Alt 2" { GoToTab 2; }
+        bind "Alt 3" { GoToTab 3; }
     }
 }
