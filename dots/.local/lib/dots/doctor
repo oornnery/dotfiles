@@ -13,31 +13,6 @@ DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
 LIST="${XDG_CONFIG_HOME:-$HOME/.config}/dots/packages"
 problems=0
 bad() { warn "$*"; problems=$(( problems + 1 )); }
-fix() { [[ -n ${DOTS_FIXES:-} ]] && echo "$1" >> "$DOTS_FIXES"; }  # a command that solves it
-
-# On a terminal: check under a spinner, then offer the fixes it found.
-if can_prompt && [[ -z ${DOTS_SPUN:-} && -z ${DOTS_NO_FIX:-} ]]; then
-    fixes=$(mktemp)
-    DOTS_COLOR=1 DOTS_SPUN=1 DOTS_FIXES=$fixes gum spin --show-output --spinner dot \
-        --spinner.foreground 212 --title 'Checking...' -- "$0"
-    code=$?
-    if [[ -s $fixes ]]; then
-        echo
-        picked=$(sort -u "$fixes" | choose --all 'Run these fixes? (x toggles, enter runs)') || picked=''
-        if [[ -n $picked ]]; then
-            while IFS= read -r line; do
-                section "$line"
-                read -ra cmd <<< "$line"
-                "${cmd[@]}" </dev/tty
-            done <<< "$picked"
-            rm -f "$fixes"
-            section 'check again'
-            DOTS_NO_FIX=1 exec "$0"
-        fi
-    fi
-    rm -f "$fixes"
-    exit "$code"
-fi
 
 check_links() {
     section links
@@ -46,7 +21,7 @@ check_links() {
         [[ -d $DOTFILES/$pkg ]] || { bad "package in the list but not in the repo: $pkg"; continue; }
         while IFS= read -r f; do
             rel=${f#"$DOTFILES/$pkg/"}
-            [[ $HOME/$rel -ef $f ]] || { bad "not linked: ~/$rel (dots stow $pkg)"; fix "dots stow $pkg"; }
+            [[ $HOME/$rel -ef $f ]] || bad "not linked: ~/$rel (dots stow $pkg)"
         done < <(find "$DOTFILES/$pkg" -type f)
     done < <(sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" 2>/dev/null | grep -v '^$')
     while IFS= read -r f; do
@@ -63,12 +38,7 @@ check_tools() {
     done
     have paru || have yay || missing+=(paru)
     [[ -r $HOME/.antigen/antigen.zsh ]] || missing+=("antigen (~/.antigen)")
-    if (( ${#missing[@]} )); then
-        bad "missing: ${missing[*]}"
-        fix "dots pkg install"
-    else
-        ok "required tools are installed"
-    fi
+    if (( ${#missing[@]} )); then bad "missing: ${missing[*]}"; else ok "required tools are installed"; fi
 }
 
 check_scripts() {
@@ -111,7 +81,7 @@ check_node() {
 check_packages() {
     section packages
     local before=$problems sheet="$DOTFILES/docs/cheatsheets/packages.md" p
-    [[ -z $(dots pkg diff 2>/dev/null) ]] || { bad "packages differ from the saved lists (dots pkg diff)"; fix "dots pkg diff"; }
+    [[ -z $(dots pkg diff 2>/dev/null) ]] || bad "packages differ from the saved lists (dots pkg diff)"
     if [[ -f $sheet ]]; then
         while IFS= read -r p; do
             grep -qF "\`$p\`" "$sheet" || bad "not in packages.md: $p"
@@ -126,8 +96,7 @@ check_migrations() {
     section migrations
     local n; n=$(dots migrate --count 2>/dev/null)
     if [[ ${n:-0} != 0 ]]; then
-        bad "$n pending migration(s)"
-        fix "dots migrate"
+        bad "$n pending migration(s) (dots migrate)"
     else
         ok "nothing pending"
     fi
