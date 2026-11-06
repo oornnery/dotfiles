@@ -1,14 +1,20 @@
-# Prompt shared by zsh and bash; 60-prompt.zsh and 60-prompt.bash wire it in.
-# Terminal colors only, so it follows `dots theme`.
+# shellcheck shell=bash disable=SC2016,SC2034,SC2154,SC2296
+# The prompt, the same in zsh and bash: everything about it is in this file.
+# Terminal colors only, so it follows `dots theme`; icons from a Nerd Font.
 #
-#   [box] oornnery ~/dotfiles main +*? ↑1↓2 ≡1     ✗INT  12s  ⚙2  py:app  node 26  14:32
+#   [box] user  ~/dotfiles  main +1 *2 ?3 ↑1 ↓2 ≡1    ✗INT  12s  ⚙2  app  py 3.14  14:32
 #   ❯
 #
 # Left, who and where: container, user (@host on SSH), folder, git.
-# Git: + staged, * changed, ? untracked, ! conflict, ↑ ahead, ↓ behind, ≡ stashes.
-# Right, what happened and with what: error, time from 3s, background jobs,
-# Python venv, Node in a folder with package.json, clock. When the line does not
-# fit, they leave from the right; the error goes last.
+# Git: staged, changed, untracked, conflicts, ahead, behind, stashes, each with its count.
+# Right, what happened and with what: error, time from 3s, background jobs, Python
+# venv, the languages of this project, clock. When the line does not fit, they leave
+# from the right; the error goes last.
+
+_PI_BOX=$'' _PI_SSH=$'' _PI_USER=$'' _PI_HOME=$'' _PI_DIR=$''
+_PI_BRANCH=$'' _PI_STAGED=$'' _PI_CHANGED=$'' _PI_UNTRACKED=$''
+_PI_CONFLICT=$'' _PI_AHEAD=$'' _PI_BEHIND=$'' _PI_STASH=$''
+_PI_ERROR=$'' _PI_TIME=$'' _PI_JOBS=$'' _PI_VENV=$'' _PI_CLOCK=$''
 
 _prompt_add() {  # _prompt_add <color> <text> [text for the prompt, if it differs]
     out+="$o${e}${1}m$c${3:-$2}$r"
@@ -20,25 +26,60 @@ _prompt_right() {  # same as _prompt_add, for the right side
     rplain+="  $2"
 }
 
-_prompt_node() {  # major Node version here; asks node once per folder
-    [ -f package.json ] && command -v node >/dev/null 2>&1 || { _PROMPT_NODE=''; _PROMPT_NODE_DIR=''; return; }
-    [ "${_PROMPT_NODE_DIR:-}" = "$PWD" ] && return
-    _PROMPT_NODE_DIR=$PWD
-    _PROMPT_NODE=$(command node --version 2>/dev/null)
-    _PROMPT_NODE=${_PROMPT_NODE#v}
-    _PROMPT_NODE=${_PROMPT_NODE%%.*}
+_prompt_git() {  # _prompt_git <color> <icon> <count>: only when there are any
+    [ "$3" = 0 ] && return
+    out+=' '; plain+=' '
+    _prompt_add "$1" "$2$3"
+}
+
+_prompt_lang() {  # _prompt_lang <icon> <version command> <files...>: if one of them is at the root
+    local icon=$1 command=$2 file version
+    shift 2
+    for file in "$@"; do
+        [ -e "$root/$file" ] || continue
+        # The first number.number of what the command prints; some languages have none.
+        version=$(cd "$root" && eval "$command" 2>/dev/null | sed -nE 's/[^0-9]*([0-9]+\.[0-9]+).*/\1/p' | head -n 1)
+        _PROMPT_LANGS+="${_PROMPT_LANGS:+  }$icon${version:+ $version}"
+        return
+    done
+}
+
+_prompt_langs() {  # the languages of this project; looks once per folder and venv
+    local root=$PWD
+    [ "${_PROMPT_LANGS_KEY:-}" = "$PWD:${VIRTUAL_ENV:-}" ] && return
+    _PROMPT_LANGS_KEY="$PWD:${VIRTUAL_ENV:-}"
+    _PROMPT_LANGS=''
+    # From a subfolder, look at the root of the repository.
+    while [ "$root" != / ] && [ "$root" != "$HOME" ] && [ ! -e "$root/.git" ]; do
+        root=${root%/*}
+        root=${root:-/}
+    done
+    [ -e "$root/.git" ] || root=$PWD
+    _prompt_lang $'' 'if [ -z "${VIRTUAL_ENV:-}" ] && [ -r .python-version ]; then cat .python-version; else python3 --version; fi' \
+        pyproject.toml requirements.txt setup.py .python-version
+    _prompt_lang $'' 'node --version' package.json
+    _prompt_lang $'' 'rustc --version' Cargo.toml
+    _prompt_lang $'' 'go version' go.mod
+    _prompt_lang $'' 'lua -v' .luarc.json init.lua
+    _prompt_lang $'' 'java --version' pom.xml build.gradle build.gradle.kts
+    _prompt_lang $'' 'php --version' composer.json
+    _prompt_lang $'' 'ruby --version' Gemfile
+    _prompt_lang $'' 'zig version' build.zig
+    _prompt_lang $'' 'cc --version' CMakeLists.txt
+    _prompt_lang $'' ':' Dockerfile compose.yaml compose.yml docker-compose.yml
 }
 
 _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <close>
     local code=$1 secs=$2 jobs=$3 clock=$4 o=$5 c=$6 e=$'\033[' r
-    local dir safe_dir branch='' safe_branch oid='' ahead=0 behind=0 line ab xy venv arrow=2
-    local staged='' changed='' untracked='' conflict='' arrows='' out='' plain=''
+    local dir safe_dir branch='' safe_branch oid='' ahead=0 behind=0 line ab xy venv arrow=2 icon
+    local staged=0 changed=0 untracked=0 conflict=0 out='' plain=''
     local time='' level=6 right rplain pad=0 spaces='' max stash=0 status_text='' safe_venv=''
     r="$o${e}0m$c"
 
+    icon=$_PI_DIR
     case $PWD in
-        "$HOME")   dir='~' ;;
-        "$HOME"/*) dir="~${PWD#"$HOME"}" ;;
+        "$HOME")   dir='~'; icon=$_PI_HOME ;;
+        "$HOME"/*) dir="~${PWD#"$HOME"}"; icon=$_PI_HOME ;;
         *)         dir=$PWD ;;
     esac
 
@@ -48,12 +89,12 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
             '# branch.head '*) branch=${line#\# branch.head } ;;
             '# branch.ab '*)   ab=${line#\# branch.ab +}; ahead=${ab%% *}; behind=${ab##*-} ;;
             '# stash '*)       stash=${line#\# stash } ;;
-            '? '*) untracked='?' ;;
-            'u '*) conflict='!' ;;
+            '? '*) untracked=$(( untracked + 1 )) ;;
+            'u '*) conflict=$(( conflict + 1 )) ;;
             '1 '*|'2 '*)
                 xy=${line#? }; xy=${xy%% *}
-                [ "${xy%?}" = . ] || staged='+'
-                [ "${xy#?}" = . ] || changed='*' ;;
+                [ "${xy%?}" = . ] || staged=$(( staged + 1 ))
+                [ "${xy#?}" = . ] || changed=$(( changed + 1 )) ;;
         esac
     done < <(command git --no-optional-locks status --porcelain=v2 --branch --show-stash 2>/dev/null)
     [ "$branch" = '(detached)' ] && branch=${oid%"${oid#???????}"}
@@ -64,26 +105,25 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
     fi
 
     # Left side
-    if [ -n "${CONTAINER_ID:-}" ]; then _prompt_add 33 "[$CONTAINER_ID]"; out+=' '; plain+=' '; fi
+    if [ -n "${CONTAINER_ID:-}" ]; then _prompt_add 33 "$_PI_BOX $CONTAINER_ID"; out+=' '; plain+=' '; fi
     if [ -n "${SSH_CONNECTION:-}" ]; then
-        _prompt_add 32 "${USER:-}@${HOSTNAME:-${HOST:-}}"
+        _prompt_add 32 "$_PI_SSH ${USER:-}@${HOSTNAME:-${HOST:-}}"
     else
-        _prompt_add 32 "${USER:-}"
+        _prompt_add 32 "$_PI_USER ${USER:-}"
     fi
     out+=' '; plain+=' '
-    _prompt_add 36 "$dir" "$safe_dir"
+    _prompt_add 36 "$icon $dir" "$icon $safe_dir"
 
     if [ -n "$branch" ]; then
         out+=' '; plain+=' '
-        _prompt_add 35 "$branch" "$safe_branch"
-        if [ -n "$staged$changed$untracked$conflict" ]; then
-            out+=' '; plain+=' '
-            _prompt_add 33 "$staged$changed$untracked$conflict"
-        fi
-        [ "$ahead" != 0 ] && arrows+="↑$ahead"
-        [ "$behind" != 0 ] && arrows+="↓$behind"
-        if [ -n "$arrows" ]; then out+=' '; plain+=' '; _prompt_add 36 "$arrows"; fi
-        if [ "$stash" != 0 ]; then out+=' '; plain+=' '; _prompt_add 36 "≡$stash"; fi
+        _prompt_add 35 "$_PI_BRANCH $branch" "$_PI_BRANCH $safe_branch"
+        _prompt_git 32 "$_PI_STAGED" "$staged"
+        _prompt_git 33 "$_PI_CHANGED" "$changed"
+        _prompt_git 34 "$_PI_UNTRACKED" "$untracked"
+        _prompt_git 31 "$_PI_CONFLICT" "$conflict"
+        _prompt_git 36 "$_PI_AHEAD" "$ahead"
+        _prompt_git 36 "$_PI_BEHIND" "$behind"
+        _prompt_git 36 "$_PI_STASH" "$stash"
     fi
 
     # Right side
@@ -93,7 +133,7 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
         safe_venv=$venv
         [ -n "${ZSH_VERSION:-}" ] && safe_venv=${venv//\%/%%}
     fi
-    _prompt_node
+    _prompt_langs
 
     status_text=$code
     if [ "$code" -gt 128 ] && [ "$code" -lt 193 ]; then  # killed by a signal: show its name
@@ -111,12 +151,12 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
     max=$(( ${COLUMNS:-80} - 1 ))   # the last column would wrap in some terminals
     while [ "$level" -ge 0 ]; do
         right=''; rplain=''
-        [ "$level" -ge 1 ] && [ "$code" != 0 ] && _prompt_right 31 "✗$status_text"
-        [ "$level" -ge 2 ] && [ -n "$time" ] && _prompt_right 33 "$time"
-        [ "$level" -ge 3 ] && [ "$jobs" != 0 ] && _prompt_right 36 "⚙$jobs"
-        [ "$level" -ge 4 ] && [ -n "${venv:-}" ] && _prompt_right 32 "py:$venv" "py:$safe_venv"
-        [ "$level" -ge 5 ] && [ -n "${_PROMPT_NODE:-}" ] && _prompt_right 32 "node $_PROMPT_NODE"
-        [ "$level" -ge 6 ] && _prompt_right 2 "$clock"
+        [ "$level" -ge 1 ] && [ "$code" != 0 ] && _prompt_right 31 "$_PI_ERROR $status_text"
+        [ "$level" -ge 2 ] && [ -n "$time" ] && _prompt_right 33 "$_PI_TIME $time"
+        [ "$level" -ge 3 ] && [ "$jobs" != 0 ] && _prompt_right 36 "$_PI_JOBS $jobs"
+        [ "$level" -ge 4 ] && [ -n "${venv:-}" ] && _prompt_right 32 "$_PI_VENV $venv" "$_PI_VENV $safe_venv"
+        [ "$level" -ge 5 ] && [ -n "${_PROMPT_LANGS:-}" ] && _prompt_right 33 "$_PROMPT_LANGS"
+        [ "$level" -ge 6 ] && _prompt_right 2 "$_PI_CLOCK $clock"
         pad=$(( max - ${#plain} - ${#rplain} ))
         [ "$pad" -ge 0 ] && break
         level=$(( level - 1 ))
@@ -129,3 +169,45 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
 
     _PROMPT_LINE="$out$spaces$right"$'\n'"$o${e}3${arrow}m${c}❯$r "
 }
+
+# Each shell asks for the prompt in its own way, and passes its own codes to mark what
+# takes no room on the line.
+if [ -n "${ZSH_VERSION:-}" ]; then
+    _prompt_preexec() { _prompt_start=$SECONDS; }
+
+    _prompt_precmd() {
+        local code=$? secs=0 format='%D{%H:%M}'
+        [[ -n ${_prompt_start:-} ]] && secs=$(( SECONDS - _prompt_start ))
+        unset _prompt_start
+        _prompt_build "$code" "$secs" "${#jobstates}" "${(%)format}" '%{' '%}'
+    }
+
+    autoload -Uz add-zsh-hook
+    add-zsh-hook preexec _prompt_preexec
+    precmd_functions=(_prompt_precmd "${precmd_functions[@]}")   # first: it must read $?
+    setopt PROMPT_SUBST
+    PROMPT='${_PROMPT_LINE}'
+else
+    # Saves the start time and prints nothing. Reads PS1 because bash skips the
+    # arithmetic when the variable it expands is unset.
+    PS0='${PS1:$((_prompt_start=SECONDS,0)):0}'
+
+    _prompt_bash() {
+        local code=$? secs=0 clock pids jobs=0
+        [ -n "${_prompt_start:-}" ] && secs=$(( SECONDS - _prompt_start ))
+        unset _prompt_start
+        printf -v clock '%(%H:%M)T' -1
+        pids=$(jobs -p)
+        [ -n "$pids" ] && jobs=$(wc -l <<< "$pids")
+        _prompt_build "$code" "$secs" "$jobs" "$clock" $'\001' $'\002'
+    }
+
+    # First in the chain: it must read $?. direnv may have made this an array.
+    if [[ $(declare -p PROMPT_COMMAND 2>/dev/null) == 'declare -a'* ]]; then
+        PROMPT_COMMAND=(_prompt_bash "${PROMPT_COMMAND[@]}")
+    else
+        # shellcheck disable=SC2178,SC2128  # a plain string on this branch
+        PROMPT_COMMAND="_prompt_bash${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+    fi
+    PS1='${_PROMPT_LINE}'
+fi
