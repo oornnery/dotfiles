@@ -1,0 +1,8 @@
+// Kept for when zellij is needed; not linked by default (dots stow zellij).
+// Default theme and keys: terminal colors, so it follows dots theme.
+pane_frames false
+simplified_ui true
+default_shell "zsh"
+scroll_buffer_size 10000
+copy_on_select true
+show_startup_tips false
