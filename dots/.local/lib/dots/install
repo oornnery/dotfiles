@@ -28,6 +28,7 @@ tools|glow|Markdown in the terminal|glow|glow
 tools|lazygit|Git TUI|lazygit|lazygit
 tools|btop|System monitor|btop|btop
 tools|yazi|File manager|yazi|yazi
+tools|epycell|Jupyter notebooks in the terminal|rust|
 tools|cli-extras|bottom, dust, duf, procs, sd, tealdeer, jless, yt-dlp|bottom dust duf procs sd tealdeer jless yt-dlp|
 terminal|tmux|tmux with config and theme|tmux|tmux
 terminal|zellij|Zellij with config|zellij|zellij
@@ -90,6 +91,7 @@ post_vim()       { dots theme apply; }
 post_hyprland()  { dots theme apply; }
 post_docker()    { dots sudo systemctl enable --now docker && dots sudo usermod -aG docker "$USER"; }
 post_distrobox() { dots install docker; }
+post_epycell()   { cargo install --locked epycell; }
 post_node()      { fnm install --lts; }
 post_python()    { uv python install; }
 post_ollama()    { dots sudo systemctl enable --now ollama; }

@@ -21,6 +21,7 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 | `glow` | `glow` | Browse and read Markdown |
 | `herdr` | `herdr-bin` (aur) | Workspaces for AI coding agents |
 | `yazi` | `yazi` | File manager |
+| `epycell` | `epycell` (cargo) | Jupyter notebooks in the terminal |
 
 ## Shell
 
@@ -84,7 +85,6 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 | `pnpm` (npm) | Node packages |
 | `typescript` (npm) | TypeScript compiler |
 | `rust` | Rust and `cargo` |
-| `epycell` (cargo) | Jupyter notebooks in the terminal |
 
 `vite-plus` (`vp`) is being tested. It comes from its own installer, outside
 these lists, and has its own Node, so `npm` outside an interactive shell is a
