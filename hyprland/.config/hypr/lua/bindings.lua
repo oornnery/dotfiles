@@ -1,11 +1,11 @@
--- ~/.config/hypr/lua/bindings.lua — todas as keybindings.
+-- ~/.config/hypr/lua/bindings.lua — all the keybindings.
 --
 -- API Lua do Hyprland 0.55:
 --   hl.bind(keys, dispatcher|fn, opts?)
---   hl.dsp.exec_cmd(cmd)                                — roda shell
+--   hl.dsp.exec_cmd(cmd)                                — runs a shell command
 --   hl.dsp.focus({ direction = "l/r/u/d" })             — move focus
 --   hl.dsp.focus({ workspace = N | "e+1" | "e-1" })     — muda workspace
---   hl.dsp.window.close()                               — fecha janela
+--   hl.dsp.window.close()                               — closes the window
 --   hl.dsp.window.fullscreen()                          — fullscreen
 --   hl.dsp.window.float({ action = "toggle" })          — float toggle
 --   hl.dsp.window.pseudo()                              — pseudo tile
@@ -34,7 +34,7 @@ local lock        = "hyprlock"
 
 local function exec(cmd) return hl.dsp.exec_cmd(cmd) end
 
--- Helper: bind com `description` legível em hyprctl binds (em vez de __lua).
+-- Helper: a bind with a readable `description` in hyprctl binds (instead of __lua).
 local function kb(keys, dispatcher, desc)
   return hl.bind(keys, dispatcher, { description = desc })
 end
@@ -82,7 +82,7 @@ kb(MS .. " + Tab", exec("walker -m windows"),        "window picker (MS+Tab fall
 
 -- ─── Workspaces ────────────────────────────────────────────────────────────
 
--- SUPER + 1..9,0 → muda workspace; SHIFT também → move janela
+-- SUPER + 1..9,0 switches workspace; with SHIFT it moves the window
 for i = 1, 10 do
   local key = i % 10  -- 10 vira "0"
   kb(M  .. " + " .. key, hl.dsp.focus({ workspace = i }),         "workspace " .. i)
@@ -177,7 +177,7 @@ kb(MC .. " + Backspace",  exec("dots notifications pick"),    "notifications: pi
 -- ─── AGS sidebar (control panel) ───────────────────────────────────────────
 
 
--- ─── Multimedia keys (sem mod, repeating + locked) ─────────────────────────
+-- ─── Multimedia keys (no modifier, repeating + locked) ─────────────────────────
 
 hl.bind("XF86AudioRaiseVolume",  exec("dots system volume raise"),
     { repeating = true, locked = true, description = "volume up" })
@@ -192,7 +192,7 @@ hl.bind("XF86MonBrightnessUp",   exec("dots display brightness raise"),
 hl.bind("XF86MonBrightnessDown", exec("dots display brightness lower"),
     { repeating = true, locked = true, description = "brightness down" })
 
--- Playerctl (locked: funciona com sessão travada)
+-- Playerctl (locked: works while the session is locked)
 hl.bind("XF86AudioNext",  exec("playerctl next"),       { locked = true, description = "media: next" })
 hl.bind("XF86AudioPause", exec("playerctl play-pause"), { locked = true, description = "media: pause/play" })
 hl.bind("XF86AudioPlay",  exec("playerctl play-pause"), { locked = true, description = "media: pause/play" })

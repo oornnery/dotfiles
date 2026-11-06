@@ -1,13 +1,13 @@
 -- ~/.config/hypr/lua/windowrules.lua — window rules (regex match).
 
--- 1. Ignora pedidos de maximizar de todos os apps.
+-- 1. Ignore maximize requests from all apps.
 hl.window_rule({
   name = "suppress-maximize-events",
   match = { class = ".*" },
   suppress_event = "maximize",
 })
 
--- 2. Fix de drag issues no XWayland (sem class/title, xwayland, floating).
+-- 2. Fix drag issues on XWayland (no class or title, xwayland, floating).
 hl.window_rule({
   name = "fix-xwayland-drags",
   match = {
@@ -29,7 +29,7 @@ hl.window_rule({
   float = true,
 })
 
--- 4. Astal launcher fallback (caso título seja "Astal Launcher" ou "Launcher").
+-- 4. Launcher fallback (when the title is "Astal Launcher" or "Launcher").
 hl.window_rule({
   name = "astal-launcher-fallback",
   match = { title = "^(Astal Launcher|Launcher)$" },
@@ -42,7 +42,7 @@ hl.window_rule({
 })
 
 -- 5. floating-tui: alacritty spawn with --class floating-tui → centered float.
---    Usado por Super+Shift+{G/D/T/B/W/A,M} pra TUIs (lazygit, btop, etc.).
+--    Used by Super+Shift+{G/D/T/B/W/A,M} for TUIs (lazygit, btop, etc.).
 hl.window_rule({
   name = "floating-tui",
   match = { class = "^floating-tui$" },
@@ -51,7 +51,7 @@ hl.window_rule({
   size = "1000 700",
 })
 
--- 6. Bare `floating` class (cheatsheet usa esse — alacritty --class floating).
+-- 6. Bare `floating` class (the cheatsheet uses it: alacritty --class floating).
 hl.window_rule({
   name = "floating-generic",
   match = { class = "^floating$" },
@@ -60,8 +60,8 @@ hl.window_rule({
   size = "900 600",
 })
 
--- 7. floating-md: glow/bat reader pra cheatsheet docs. Reading-friendly
---    proportions (mais alto que largo, padding generoso, ideal pra MD).
+-- 7. floating-md: glow/bat reader for cheatsheets. Reading-friendly
+--    proportions (taller than wide, generous padding, good for Markdown).
 hl.window_rule({
   name = "floating-md",
   match = { class = "^floating-md$" },

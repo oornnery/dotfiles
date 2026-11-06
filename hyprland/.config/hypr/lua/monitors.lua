@@ -1,4 +1,4 @@
--- ~/.config/hypr/lua/monitors.lua — layout de monitores.
+-- ~/.config/hypr/lua/monitors.lua — monitor layout.
 -- hot-swap: edite e rode `hyprctl reload`.
 --
 -- Cheat-sheet hl.monitor():
@@ -6,7 +6,7 @@
 --   mode      = "1920x1080@60" | "preferred" | "highres"
 --   position  = "0x0" | "auto" | "1600x0"
 --   scale     = 1.0 | 1.2 | "auto"
---   transform = 0..7 (rotação)
+--   transform = 0..7 (rotation)
 --   mirror    = "eDP-1"
 
 -- VAIO display interno.
@@ -17,9 +17,9 @@ hl.monitor({
   scale    = 1.2,
 })
 
--- HDMI externo. `position = "auto"` deixa Hyprland calcular a posição
--- baseada no scale corrente do eDP-1 (evita hard-coding "1600x0" que
--- quebra quando o scale interno muda).
+-- External HDMI. `position = "auto"` lets Hyprland work out the position
+-- from the current eDP-1 scale (avoids a fixed "1600x0", which
+-- breaks when the internal scale changes).
 hl.monitor({
   output   = "HDMI-A-1",
   mode     = "preferred",
@@ -27,7 +27,7 @@ hl.monitor({
   scale    = 1,
 })
 
--- Fallback pra qualquer outro monitor conectado.
+-- Fallback for any other connected monitor.
 hl.monitor({
   output   = "",
   mode     = "preferred",

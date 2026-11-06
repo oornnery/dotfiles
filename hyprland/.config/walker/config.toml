@@ -3,11 +3,11 @@
 # Requer: walker + elephant-all (AUR).
 #
 # Theme: themes/default/{style.css,layout.xml,theme.css}
-# theme.css é overridden por `theme set <name>` (sistema de paletas do dotfiles).
+# theme.css is replaced by `dots theme set <name>`.
 
 theme = "default"
 
-# Janela
+# Window
 force_keyboard_focus = false
 close_when_open       = true       # Super+R 2x fecha
 click_to_close        = true
@@ -38,10 +38,10 @@ anchor_right   = true
 "symbols" = 3
 
 # ─── Providers (sources) ───────────────────────────────────────────────────
-# Default = queried on every keystroke (sem prefix). Mais providers = busca
-# mais ampla, mas resultados ficam mais ruidosos. Adicionei só os "leves":
-#   clipboard / symbols / playerctl / bluetooth — lookup em memória, fast.
-# Excluídos do default (mas acessíveis via prefix):
+# Default = queried on every keystroke (no prefix). More providers = wider search,
+# but noisier results. Only the light ones are here:
+#   clipboard / symbols / playerctl / bluetooth — in-memory lookup, fast.
+# Left out of the default (still reachable by prefix):
 #   files (filesystem walk), archlinuxpkgs (pacman DB query), bookmarks/todo.
 [providers]
 default = [
@@ -59,7 +59,7 @@ ignore_preview = []
 max_results = 50
 
 # ─── Prefix shortcuts ──────────────────────────────────────────────────────
-# Digite o prefix pra forçar um provider específico:
+# Type a prefix to force a specific provider:
 #   ;  → providerlist (escolhe provider)
 #   >  → runner (shell)
 #   /  → files
