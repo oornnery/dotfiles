@@ -1,8 +1,59 @@
-// Kept for when zellij is needed; not linked by default (dots stow zellij).
-// Default theme and keys: terminal colors, so it follows dots theme.
+// Zellij, kept simple and in the spirit of Helix.
+//
+// It starts locked, so Helix and other apps keep all their keys. The Alt keys below
+// always work. Ctrl-g unlocks the regular Zellij modes, whose keys show in the bar.
+// Alt / opens the command palette, a searchable table like the one in Helix.
+//
+// Default theme: terminal colors, so it follows dots theme.
+default_mode "locked"
+default_layout "compact"
+default_shell "zsh"
 pane_frames false
 simplified_ui true
-default_shell "zsh"
 scroll_buffer_size 10000
 copy_on_select true
 show_startup_tips false
+show_release_notes false
+
+keybinds {
+    shared {
+        // Move between panes, and to the next tab at the edge
+        bind "Alt h" { MoveFocusOrTab "Left"; }
+        bind "Alt l" { MoveFocusOrTab "Right"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+
+        // Panes: new ones tile by themselves
+        bind "Alt n" { NewPane; }
+        bind "Alt x" { CloseFocus; }
+        bind "Alt f" { ToggleFocusFullscreen; }
+        bind "Alt w" { ToggleFloatingPanes; }
+
+        // Tabs
+        bind "Alt t" { NewTab; }
+        bind "Alt [" { GoToPreviousTab; }
+        bind "Alt ]" { GoToNextTab; }
+        bind "Alt 1" { GoToTab 1; }
+        bind "Alt 2" { GoToTab 2; }
+        bind "Alt 3" { GoToTab 3; }
+        bind "Alt 4" { GoToTab 4; }
+        bind "Alt 5" { GoToTab 5; }
+
+        // Menus, each in a floating pane that closes when you are done
+        bind "Alt /" {
+            Run "dots" "palette" { floating true; close_on_exit true; }
+        }
+        bind "Alt u" {
+            Run "dots" "palette" "tui" { floating true; close_on_exit true; }
+        }
+        bind "Alt r" {
+            Run "dots" "palette" "run" { floating true; close_on_exit true; }
+        }
+        bind "Alt o" {
+            Run "dots" "palette" "project" { floating true; close_on_exit true; }
+        }
+        bind "Alt s" {
+            LaunchOrFocusPlugin "session-manager" { floating true; move_to_focused_tab true; }
+        }
+    }
+}
