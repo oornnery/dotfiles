@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# dots:summary=Install a ready-made setup: packages plus what they need after
-# dots:args=[name... | --list]
+# dots:summary=Install ready-made setups: packages plus what they need after
+# dots:args=[name... | --all | --list | --remove name... | --force name...]
 #
-#   dots install            pick from a checklist
-#   dots install <name>...  install those
-#   dots install --list     what is available
+#   dots install                 search and pick; what is installed stays hidden
+#   dots install --all           same, including what is installed
+#   dots install <name>...       install those; a group name installs the group
+#   dots install --force <name>  run it again even if it is installed
+#   dots install --remove <name> remove its packages
+#   dots install --list          everything, by group
 #
+# One failure does not stop the others; the end shows what happened to each.
 # To add one: a line in RECIPES, and a post_<name> function when it needs more
 # than packages. Packages go through `dots pkg add`, so the lists stay current.
 # shellcheck disable=SC2154  # colors come from _ui
@@ -14,18 +18,53 @@ set -uo pipefail
 # shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/_ui"
 
-# name|command that shows it is installed|description|packages
-RECIPES='docker|docker|Docker, Compose, service and group|docker docker-buildx docker-compose
-rust|cargo|rustup with the stable toolchain|rustup
-go|go|Go|go
-java|java|OpenJDK|jdk-openjdk
-zig|zig|Zig|zig
-node|fnm|fnm with Node LTS|fnm
-herdr|herdr|herdr and its plugins|herdr-bin
-delta|delta|Colored git diffs|git-delta
-hyprland|hyprctl|Desktop: compositor, bar, tools, and links the config|hyprland alacritty hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin libnotify grim slurp wf-recorder satty hyprpicker brightnessctl power-profiles-daemon wl-clipboard jq tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects
-webapp|firefoxpwa|Web apps as windows|firefox firefoxpwa
-voxtype|voxtype|Voice dictation with a local model|wtype voxtype-bin'
+# group|name|command that shows it is installed|description|packages
+RECIPES='languages|python|uv|Python with uv|python uv
+languages|node|fnm|fnm with Node LTS|fnm
+languages|bun|bun|Bun runtime|bun-bin
+languages|deno|deno|Deno runtime|deno
+languages|rust|cargo|rustup with the stable toolchain|rustup
+languages|go|go|Go|go
+languages|java|java|OpenJDK|jdk-openjdk
+languages|kotlin|kotlin|Kotlin|kotlin
+languages|zig|zig|Zig|zig
+languages|lua|lua|Lua and LuaRocks|lua luarocks
+languages|php|php|PHP and Composer|php composer
+languages|ruby|ruby|Ruby|ruby
+languages|dotnet|dotnet|.NET SDK|dotnet-sdk
+languages|elixir|elixir|Elixir|elixir
+containers|docker|docker|Docker, Compose, service and group|docker docker-buildx docker-compose lazydocker
+containers|podman|podman|Podman, Buildah and Skopeo|podman buildah skopeo
+containers|kubernetes|kubectl|kubectl, Helm and k9s|kubectl helm k9s
+cloud|terraform|terraform|Terraform|terraform
+cloud|aws|aws|AWS CLI|aws-cli-v2
+cloud|azure|az|Azure CLI|azure-cli
+cloud|gcloud|gcloud|Google Cloud CLI|google-cloud-cli
+data|sqlite|sqlite3|SQLite|sqlite
+data|postgres|psql|PostgreSQL, initialized and running|postgresql
+cli|cli-extras|btm|bottom, dust, duf, procs, sd, tealdeer, jless, yt-dlp|bottom dust duf procs sd tealdeer jless yt-dlp
+cli|delta|delta|Colored git diffs|git-delta
+editors|vscode|code|Visual Studio Code|visual-studio-code-bin
+editors|zed|zeditor|Zed|zed
+editors|cursor|cursor|Cursor|cursor-bin
+ai|claude|claude|Claude Code|claude-code
+ai|gemini|gemini|Gemini CLI|gemini-cli
+ai|opencode|opencode|OpenCode|opencode-bin
+ai|ollama|ollama|Ollama for local models|ollama
+ai|herdr|herdr|herdr and its plugins|herdr-bin
+ai|voxtype|voxtype|Voice dictation with a local model|wtype voxtype-bin
+apps|firefox|firefox|Firefox|firefox
+apps|chromium|chromium|Chromium|chromium
+apps|chrome|google-chrome-stable|Google Chrome|google-chrome
+apps|obsidian|obsidian|Obsidian|obsidian
+apps|discord|discord|Discord|discord
+apps|spotify|spotify|Spotify|spotify
+apps|vlc|vlc|VLC|vlc
+network|tailscale|tailscale|Tailscale, service running|tailscale
+network|openssh|sshd|OpenSSH server, service running|openssh
+desktop|fonts|fc-list|JetBrains Mono Nerd Font and emoji|ttf-jetbrains-mono-nerd noto-fonts-emoji
+desktop|hyprland|hyprctl|Compositor, bar, tools, and links the config|hyprland alacritty hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin libnotify grim slurp wf-recorder satty hyprpicker brightnessctl power-profiles-daemon wl-clipboard jq tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects
+desktop|webapp|firefoxpwa|Web apps as windows|firefox firefoxpwa'
 
 post_docker() {
     dots sudo systemctl enable --now docker
@@ -34,6 +73,17 @@ post_docker() {
 }
 post_rust()  { rustup default stable; }
 post_node()  { fnm install --lts; }
+post_postgres() {
+    if ! dots sudo test -e /var/lib/postgres/data/PG_VERSION; then
+        dots sudo -u postgres initdb -D /var/lib/postgres/data || return 1
+    fi
+    dots sudo systemctl enable --now postgresql
+}
+post_tailscale() {
+    dots sudo systemctl enable --now tailscaled
+    note "log in with: sudo tailscale up"
+}
+post_openssh() { dots sudo systemctl enable --now sshd; }
 post_herdr() {
     local p
     for p in thanhdat77/herdr-navigator nicosuave/memex rjyo/herdr-window-title-sync; do
@@ -49,40 +99,131 @@ post_hyprland() {
     dots theme apply
 }
 
-rows() {  # "name  description (installed)"
-    local name check desc pkgs
-    while IFS='|' read -r name check desc pkgs; do
-        if have "$check"; then desc+=' (installed)'; fi
-        printf '%-10s %s\n' "$name" "$desc"
+is_installed() {  # is_installed <check>; fonts are installed only with this exact font
+    if [[ $1 == fc-list ]]; then
+        fc-list 2>/dev/null | grep -q 'JetBrainsMono Nerd'
+    else
+        have "$1"
+    fi
+}
+
+field() {  # field <name> <column>
+    awk -F'|' -v n="$1" -v c="$2" '$2 == n {print $c; exit}' <<< "$RECIPES"
+}
+
+rows() {  # rows [--all]: "group  name  description", installed ones marked or hidden
+    local group name check desc pkgs
+    while IFS='|' read -r group name check desc pkgs; do
+        if is_installed "$check"; then
+            [[ ${1:-} == --all ]] || continue
+            desc+=' (installed)'
+        fi
+        printf '%-11s %-11s %s\n' "$group" "$name" "$desc"
     done <<< "$RECIPES"
 }
 
-run() {  # run <name>
-    local name=$1 check desc pkgs
-    IFS='|' read -r _ check desc pkgs < <(grep "^$name|" <<< "$RECIPES")
-    if [[ -z ${pkgs:-} ]]; then err "dots install: no such recipe: $name (dots install --list)"; return 1; fi
+list() {
+    local group last='' name check desc pkgs mark
+    while IFS='|' read -r group name check desc pkgs; do
+        if [[ $group != "$last" ]]; then section "$group"; last=$group; fi
+        mark=' '
+        if is_installed "$check"; then mark="$G✓$N"; fi
+        printf '%s %-11s %s%s%s\n' "$mark" "$name" "$D" "$desc" "$N"
+    done <<< "$RECIPES"
+}
+
+# Each result goes to RESULTS for the summary. Stdin comes from the terminal, so
+# questions from pacman are answered by you, not by the list being read.
+RESULTS=()
+done_with() { RESULTS+=("$1 $2"); }
+
+run() {  # run <name> <force: 0 or 1>
+    local name=$1 force=$2 check pkgs
+    check=$(field "$name" 3); pkgs=$(field "$name" 5)
+    if [[ -z $pkgs ]]; then err "no such recipe: $name (dots install --list)"; done_with "$name" unknown; return; fi
     section "$name"
+    if (( ! force )) && is_installed "$check"; then
+        note "already installed (--force runs it again)"
+        done_with "$name" skipped
+        return
+    fi
     # shellcheck disable=SC2086  # package names, one per word
-    dots pkg add $pkgs || { err "$name: packages failed"; return 1; }
-    if declare -F "post_$name" >/dev/null; then "post_$name" || { err "$name: setup step failed"; return 1; }; fi
-    ok "$name"
+    if ! dots pkg add $pkgs </dev/tty; then done_with "$name" 'failed: packages'; return; fi
+    if declare -F "post_$name" >/dev/null && ! "post_$name" </dev/tty; then
+        done_with "$name" 'failed: setup step'
+        return
+    fi
+    done_with "$name" installed
+}
+
+remove() {  # remove <name>
+    local pkgs
+    pkgs=$(field "$1" 5)
+    if [[ -z $pkgs ]]; then err "no such recipe: $1"; done_with "$1" unknown; return; fi
+    section "$1"
+    # shellcheck disable=SC2086  # package names, one per word
+    if dots pkg remove $pkgs </dev/tty; then done_with "$1" removed; else done_with "$1" 'failed: removing'; fi
+}
+
+summary() {  # prints each result; exits non-zero when something failed
+    local line name state failed=0
+    (( ${#RESULTS[@]} > 1 )) && section summary
+    for line in "${RESULTS[@]}"; do
+        name=${line%% *}; state=${line#* }
+        case $state in
+            installed|removed) ok "$name $state" ;;
+            skipped)           note "- $name already installed" ;;
+            *)                 err "$name: $state"; failed=1 ;;
+        esac
+    done
+    exit "$failed"
+}
+
+expand() {  # a group name becomes its recipes
+    local word
+    for word in "$@"; do
+        if grep -q "^$word|" <<< "$RECIPES"; then
+            awk -F'|' -v g="$word" '$1 == g {print $2}' <<< "$RECIPES"
+        else
+            echo "$word"
+        fi
+    done
+}
+
+pick() {  # pick [--all]: search and mark, one name per line
+    local rows
+    rows=$(rows "$@")
+    if [[ -z $rows ]]; then note "everything is installed (--all shows it)" >&2; return 1; fi
+    gum filter --no-limit --height 20 --placeholder 'search, Tab marks, Enter installs' <<< "$rows" \
+        | awk '{print $2}'
 }
 
 case "${1:-}" in
-    '')
-        if ! can_prompt; then rows; exit 0; fi
-        picked=$(rows | choose 'Install what? (x toggles, enter installs)') || exit 0
-        status=0
-        while read -r name _; do
-            [[ -z ${name:-} ]] || run "$name" || status=1
-        done <<< "$picked"
-        exit "$status" ;;
-    --list)  rows ;;
-    --names) cut -d'|' -f1 <<< "$RECIPES" ;;
-    -h|--help) sed -n '5,7p' "$0" | sed 's/^# \{0,1\}//' ;;
+    ''|--all)
+        if ! can_prompt; then list; exit 0; fi
+        force=0; [[ ${1:-} == --all ]] && force=1
+        picked=$(pick "$@") || exit 0
+        [[ -n $picked ]] || exit 0
+        mapfile -t names <<< "$picked"
+        for name in "${names[@]}"; do run "$name" "$force"; done
+        summary ;;
+    --list)  list ;;
+    --names) cut -d'|' -f1 <<< "$RECIPES" | sort -u; cut -d'|' -f2 <<< "$RECIPES" ;;
+    --force)
+        shift; (( $# )) || { err "Usage: dots install --force <name>..."; exit 1; }
+        mapfile -t names < <(expand "$@")
+        for name in "${names[@]}"; do run "$name" 1; done
+        summary ;;
+    --remove)
+        shift; (( $# )) || { err "Usage: dots install --remove <name>..."; exit 1; }
+        confirm "Remove the packages of: $*?" || exit 0
+        mapfile -t names < <(expand "$@")
+        for name in "${names[@]}"; do remove "$name"; done
+        summary ;;
+    -h|--help) sed -n '5,10p' "$0" | sed 's/^# \{0,1\}//' ;;
     -*) err "dots install: unknown option: $1"; exit 1 ;;
     *)
-        status=0
-        for name in "$@"; do run "$name" || status=1; done
-        exit "$status" ;;
+        mapfile -t names < <(expand "$@")
+        for name in "${names[@]}"; do run "$name" 0; done
+        summary ;;
 esac

@@ -12,7 +12,8 @@ Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` mark
 | Install a package and save it | `dots pkg add <name>` |
 | Remove a package and save it | `dots pkg remove [name]` |
 | Compare installed and saved | `dots pkg diff` |
-| Install a ready-made setup | `dots install` |
+| Install ready-made setups | `dots install`, or by group: `dots install languages` |
+| See every setup | `dots install --list` |
 | Upgrade everything | `dots update` |
 | Run one-time changes | `dots migrate` |
 | Switch colors | `dots theme` |
