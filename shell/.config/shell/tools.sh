@@ -42,12 +42,12 @@ _has direnv && eval "$(direnv hook "$_sh")"
 # In bash, atuin needs bash-preexec or ble.sh to be loaded first.
 if _has atuin; then
     if [ "$_sh" = zsh ] || [ -n "${BLE_VERSION:-}" ] || [ -n "${bash_preexec_imported:-}" ]; then
-        eval "$(atuin init "$_sh" --disable-up-arrow)"
+        eval "$(atuin init "$_sh" --disable-up-arrow --disable-ai)"
     fi
 fi
 
 # Fix the last failed command: fuck
-_has pay-respects && eval "$(pay-respects "$_sh" --alias fuck)"
+_has pay-respects && eval "$(pay-respects "$_sh" --alias fuck --nocnf)"
 
 # Smarter cd (z, zi). Keep last: in bash it hooks PROMPT_COMMAND.
 _has zoxide && eval "$(zoxide init "$_sh")"
