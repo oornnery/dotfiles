@@ -5,8 +5,8 @@ layout {
         pane size=1 borderless=true {
             plugin location="tab-bar"
         }
-        pane size=1 borderless=true command="dots" {
-            args "palette" "footer"
+        pane size=2 borderless=true {
+            plugin location="status-bar"
         }
     }
     tab name="edit" focus=true {

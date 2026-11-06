@@ -63,7 +63,8 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 - Kept for later, not linked: `hyprland`, `tmux`, `vim`.
 - Written but never run for real: the `hyprland` commands, `windows/`, and the setups
   in `dots install` that start services.
-- Zellij: no modes, only Alt keys, with a footer and a command palette (`Alt /`).
+- Zellij: a bar with the mode and its keys, modes on Alt keys, and a command palette
+  (`Alt /`).
 - `ai/` is copied from the old repo and still needs a review.
 - This repo has no remote yet. The old one is `oornnery/dotfiles`, branch `master`.
 
