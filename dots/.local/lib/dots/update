@@ -75,39 +75,12 @@ pending() {  # the upgradable managers with something to upgrade, comma-separate
     (IFS=,; printf '%s' "${list[*]:-}")
 }
 
-cleanup() {  # orphans can go (nothing marked); new system configs are yours to review
-    local orphans picked pacnew
-    orphans=$(pacman -Qdtq 2>/dev/null)
-    pacnew=$(find /etc \( -name '*.pacnew' -o -name '*.pacsave' \) 2>/dev/null | wc -l)
-    [[ -n $orphans || $pacnew != 0 ]] || return 0
-    section cleanup
-    if [[ -n $orphans ]]; then
-        if can_prompt; then
-            picked=$(choose 'Remove orphaned packages? (x toggles, enter applies)' <<< "$orphans") || picked=''
-            # shellcheck disable=SC2086  # package names, one per word
-            [[ -n $picked ]] && dots sudo pacman -Rns $picked
-        else
-            warn "orphaned packages: $(tr '\n' ' ' <<< "$orphans")"
-        fi
-    fi
-    if [[ $pacnew != 0 ]]; then warn "$pacnew new system config file(s): sudo env DIFFPROG='nvim -d' pacdiff"; fi
-    return 0
-}
-
-housekeeping() {  # after upgrading, or when there was nothing to upgrade
-    cleanup
-    if [[ $(dots migrate --count) != 0 ]]; then
-        section migrations
-        if { : >/dev/tty; } 2>/dev/null; then dots migrate </dev/tty; else warn "pending: dots migrate"; fi
-    fi
-}
-
 run() {
     local m chosen
     chosen=$(upgradable)
     if can_prompt; then  # show what is pending, then ask
         list --refresh
-        if [[ ! -s $CACHE ]]; then housekeeping; return 0; fi
+        [[ -s $CACHE ]] || return 0
         echo
         chosen=$(upgradable | choose --selected="$(pending)" 'Upgrade which? (x toggles, enter upgrades)') || return 0
     fi
@@ -116,7 +89,6 @@ run() {
         "upgrade_$m" || err "$m upgrade failed"
     done
     [[ -n $chosen ]] || return 0
-    housekeeping
     spin 'Scanning for updates...' "$0" refresh
 }
 

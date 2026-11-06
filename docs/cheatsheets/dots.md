@@ -15,9 +15,9 @@ Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` mark
 | Install ready-made setups | `dots install`, or by group: `dots install languages` |
 | See every setup | `dots install --list` |
 | Upgrade everything | `dots update` |
-| Run one-time changes | `dots migrate` |
 | Switch colors | `dots theme` |
 | Open a TUI | `dots tui` |
+| Search everything, inside Zellij | `dots palette` (`Alt /`) |
 | Set up a machine | `dots setup` |
 | Copy configs to Windows | `dots wsl windows` |
 | Read these pages | `dots help` |

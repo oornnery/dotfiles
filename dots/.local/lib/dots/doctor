@@ -92,16 +92,6 @@ check_packages() {
     (( problems == before )) && ok "saved lists and packages.md are up to date"
 }
 
-check_migrations() {
-    section migrations
-    local n; n=$(dots migrate --count 2>/dev/null)
-    if [[ ${n:-0} != 0 ]]; then
-        bad "$n pending migration(s) (dots migrate)"
-    else
-        ok "nothing pending"
-    fi
-}
-
 check_helix() {
     section helix
     have helix || { bad "helix not found"; return; }
@@ -125,7 +115,6 @@ check_scripts
 check_path
 check_node
 check_packages
-check_migrations
 check_helix
 
 echo

@@ -15,7 +15,7 @@ set -uo pipefail
 case "${1:-run}" in
     run)
         have paru || have yay || warn "no AUR helper: AUR packages will be skipped"
-        steps=$'link configs\ninstall packages\ntheme\nmigrations\ncheck'
+        steps=$'link configs\ninstall packages\ntheme\ncheck'
         if can_prompt; then
             steps=$(choose --all 'Which steps? (x toggles, enter runs)' <<< "$steps") || exit 0
         fi
@@ -26,7 +26,6 @@ case "${1:-run}" in
                 'link configs')     dots stow sync </dev/tty || err "some packages did not link" ;;
                 'install packages') dots pkg install </dev/tty ;;
                 theme)              dots theme apply ;;
-                migrations)         dots migrate --init </dev/tty ;;
                 check)              dots doctor </dev/tty ;;
             esac
         done <<< "$steps"

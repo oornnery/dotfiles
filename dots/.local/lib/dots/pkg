@@ -145,32 +145,13 @@ remove_() {  # remove_ [package...]
     return "$failed"
 }
 
-diff_() {
-    local m a b p extras=()
+diff_() {  # a real diff per manager: - saved but not installed, + installed but not saved
+    local m
     for m in "${MANAGERS[@]}"; do
         available "$m" || continue
-        a=$(only_now "$m"); b=$(only_saved "$m")
-        [[ -z $a$b ]] && continue
-        printf '%s── %s ──%s\n' "$H" "$m" "$N"
-        [[ -n $a ]] && printf "  $G+$N %s\n" $a
-        [[ -n $b ]] && printf "  $R-$N %s\n" $b
-        for p in $a; do extras+=("$m $p"); done
+        diff -U0 --color=auto --label "$m saved" --label "$m installed" <(saved "$m") <(now "$m")
     done
-    (( ${#extras[@]} )) && can_prompt && remove_extras "${extras[@]}"
     return 0
-}
-
-remove_extras() {  # offer to remove what is installed but not saved
-    local picked line m names
-    picked=$(printf '%s\n' "$@" | choose 'Remove any of these? (x toggles, enter applies, none keeps all)') || return 0
-    [[ -n $picked ]] || return 0
-    confirm "Remove $(wc -l <<< "$picked") package(s)?" || return 0
-    for m in "${MANAGERS[@]}"; do
-        names=$(while IFS=' ' read -r line p; do [[ $line == "$m" ]] && echo "$p"; done <<< "$picked")
-        [[ -n $names ]] || continue
-        # shellcheck disable=SC2086  # package names, one per word
-        "uninstall_$m" $names || err "some $m removals failed"
-    done
 }
 
 install() {
