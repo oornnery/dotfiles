@@ -110,8 +110,7 @@
     },
 
     "custom/updates": {
-        "exec":         "dots update check",
-        "return-type":  "json",
+        "exec":         "dots update count",
         "interval":     3600,
         "format":       "󰚰 {}",
         "tooltip":      true,
@@ -124,7 +123,7 @@
     "memory":      { "format": "󰾆 {percentage}%",    "interval": 10 },
 
     "custom/gpu": {
-        "exec":         "dots gpu",
+        "exec":         "dots system gpu",
         "return-type":  "json",
         "interval":     5,
         "format":       "󰢮 {}"
@@ -203,7 +202,7 @@
 
     "custom/power": {
         "format":   "󰐥",
-        "on-click": "dots power menu",
+        "on-click": "dots system power",
         "tooltip":  false
     }
 }

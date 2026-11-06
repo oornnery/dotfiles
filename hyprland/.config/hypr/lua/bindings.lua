@@ -45,12 +45,11 @@ kb(M  .. " + Return", exec(terminal),                       "terminal")
 kb(M  .. " + E",      exec(fileManager),                    "file manager")
 kb(M  .. " + R",      exec(menu),                           "launcher (walker default search)")
 kb(M  .. " + space",  exec("walker -m providerlist"),       "launcher (walker provider picker)")
-kb(M  .. " + I",      exec("dots llm"),                          "LLM picker (claude/codex/…)")
 kb(M  .. " + B",      exec(browser),                        "browser")
 kb(M  .. " + L",      exec(lock),                           "lock screen")
-kb(MS .. " + P",      exec("dots power menu"),                   "power menu (lock/suspend/logout/reboot/shutdown)")
+kb(MS .. " + P",      exec("dots system power"),                   "power menu (lock/suspend/logout/reboot/shutdown)")
 kb(M  .. " + M",      exec("dots hypr exit"),                    "exit Hyprland (graceful)")
-kb(M  .. " + grave",  exec("dots scratch"),                      "scratchpad terminal")
+kb(M  .. " + grave",  exec("dots hypr scratch"),                      "scratchpad terminal")
 
 -- ─── Window management ─────────────────────────────────────────────────────
 
@@ -100,16 +99,16 @@ kb(M  .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }),                 "
 
 -- ─── Screenshots ───────────────────────────────────────────────────────────
 
-kb("Print",            exec("dots screenshot region"),         "screenshot region")
-kb(M  .. " + Print",   exec("dots screenshot full"),           "screenshot full")
-kb(MS .. " + F",       exec("dots screenshot region --copy"),  "screenshot region (clipboard)")
-kb(MC .. " + Print",   exec("dots screenshot window"),         "screenshot window")
-kb(MS .. " + O",       exec("dots ocr"),                       "OCR region → clipboard")
+kb("Print",            exec("dots capture screenshot region"),         "screenshot region")
+kb(M  .. " + Print",   exec("dots capture screenshot full"),           "screenshot full")
+kb(MS .. " + F",       exec("dots capture screenshot region --copy"),  "screenshot region (clipboard)")
+kb(MC .. " + Print",   exec("dots capture screenshot window"),         "screenshot window")
+kb(MS .. " + O",       exec("dots capture ocr"),                       "OCR region → clipboard")
 
 -- ─── Clipboard / color picker / pickers (walker-driven) ───────────────────
 
 kb(M  .. " + V",          exec("walker -m clipboard"),    "clipboard history")
-kb(MS .. " + C",          exec("dots color pick"),           "color picker (hex)")
+kb(MS .. " + C",          exec("dots capture color"),           "color picker (hex)")
 kb(M  .. " + period",     exec("walker -m symbols"),      "emoji / symbols")
 kb(MS .. " + period",     exec("walker -m symbols"),      "emoji / symbols (alias)")
 
@@ -133,27 +132,27 @@ kb(MC .. " + Z",  exec("dots webapp launch zoom"),       "webapp: Zoom")
 
 -- ─── Notices (on-demand info → notify-send) ────────────────────────────────
 
-kb(MCA .. " + T",  exec("dots notice date"),              "notice: date")
-kb(MCA .. " + W",  exec("dots notice weather"),           "notice: weather")
-kb(MCA .. " + B",  exec("dots notice battery"),           "notice: battery")
-kb(MCA .. " + N",  exec("dots notice network"),           "notice: network")
-kb(MCA .. " + S",  exec("dots notice system"),            "notice: system info")
+kb(MCA .. " + T",  exec("dots notifications info date"),              "notice: date")
+kb(MCA .. " + W",  exec("dots notifications info weather"),           "notice: weather")
+kb(MCA .. " + B",  exec("dots notifications info battery"),           "notice: battery")
+kb(MCA .. " + N",  exec("dots notifications info network"),           "notice: network")
+kb(MCA .. " + S",  exec("dots notifications info system"),            "notice: system info")
 
 -- ─── Monitor scale + magnify ───────────────────────────────────────────────
 
 kb(M  .. " + slash",   exec("dots hypr scale +0.1"),      "monitor scale +0.1")
 kb(MA .. " + slash",   exec("dots hypr scale -0.1"),      "monitor scale -0.1")
-kb(M  .. " + equal",   exec("dots magnify in"),           "magnify in")
-kb(M  .. " + minus",   exec("dots magnify out"),          "magnify out")
-kb(MS .. " + m",       exec("dots magnify toggle"),       "magnify toggle")
+kb(M  .. " + equal",   exec("dots display magnify in"),           "magnify in")
+kb(M  .. " + minus",   exec("dots display magnify out"),          "magnify out")
+kb(MS .. " + m",       exec("dots display magnify toggle"),       "magnify toggle")
 
 -- ─── Themes + power profile + DND + night mode ─────────────────────────────
 
 kb(MCA .. " + Y",  exec("dots theme cycle"),              "cycle theme")
-kb(MCA .. " + P",  exec("dots power profile cycle"),      "cycle power profile")
-kb(MCA .. " + D",  exec("dots dnd"),                      "toggle DND")
-kb(MCA .. " + M",  exec("dots night"),               "toggle night mode")
-kb(MCA .. " + R",  exec("dots record"),                   "screen record")
+kb(MCA .. " + P",  exec("dots system profile cycle"),      "cycle power profile")
+kb(MCA .. " + D",  exec("dots notifications dnd"),                      "toggle DND")
+kb(MCA .. " + M",  exec("dots display night"),               "toggle night mode")
+kb(MCA .. " + R",  exec("dots capture record"),                   "screen record")
 
 -- ─── Hyprland state toggles (gaps, transparency, layout, mirror) ───────────
 
@@ -168,9 +167,6 @@ kb(MA .. " + space", exec("hyprctl switchxkblayout all next"), "cycle keyboard l
 -- ─── Helpers: cheatsheet + Obsidian ────────────────────────────────────────
 
 kb(MS .. " + H",  exec("dots help"),            "cheatsheet (all sources)")
-kb(M  .. " + N",  exec("dots obsidian today"),       "obsidian: today's note")
-kb(MS .. " + N",  exec("dots obsidian find"),        "obsidian: find note")
-kb(MC .. " + N",  exec("dots obsidian search"),      "obsidian: search content")
 
 -- ─── Notifications (mako) ──────────────────────────────────────────────────
 
@@ -183,17 +179,17 @@ kb(MC .. " + Backspace",  exec("dots notifications pick"),    "notifications: pi
 
 -- ─── Multimedia keys (sem mod, repeating + locked) ─────────────────────────
 
-hl.bind("XF86AudioRaiseVolume",  exec("dots volume raise"),
+hl.bind("XF86AudioRaiseVolume",  exec("dots system volume raise"),
     { repeating = true, locked = true, description = "volume up" })
-hl.bind("XF86AudioLowerVolume",  exec("dots volume lower"),
+hl.bind("XF86AudioLowerVolume",  exec("dots system volume lower"),
     { repeating = true, locked = true, description = "volume down" })
-hl.bind("XF86AudioMute",         exec("dots volume mute"),
+hl.bind("XF86AudioMute",         exec("dots system volume mute"),
     { repeating = true, locked = true, description = "mute toggle" })
-hl.bind("XF86AudioMicMute",      exec("dots volume mic-mute"),
+hl.bind("XF86AudioMicMute",      exec("dots system volume mic-mute"),
     { repeating = true, locked = true, description = "mic mute toggle" })
-hl.bind("XF86MonBrightnessUp",   exec("dots brightness raise"),
+hl.bind("XF86MonBrightnessUp",   exec("dots display brightness raise"),
     { repeating = true, locked = true, description = "brightness up" })
-hl.bind("XF86MonBrightnessDown", exec("dots brightness lower"),
+hl.bind("XF86MonBrightnessDown", exec("dots display brightness lower"),
     { repeating = true, locked = true, description = "brightness down" })
 
 -- Playerctl (locked: funciona com sessão travada)
