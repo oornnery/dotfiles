@@ -1,4 +1,4 @@
-# A mode of dots palette, which gives the lines and the preview. Tab shows the others.
+# A mode of dots palette, which gives the lines and the preview.
 [metadata]
 name = "dots-linux"
 description = "Man pages"
@@ -11,6 +11,3 @@ display = "{split: :1..}"
 
 [preview]
 command = "dots palette --preview '{split: :0}' '{split: :1}'"
-
-[keybindings]
-tab = "toggle_remote_control"

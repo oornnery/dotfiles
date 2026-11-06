@@ -12,7 +12,7 @@ keybinds {
             Run "dots" "palette" { floating true; close_on_exit true; }
         }
         bind "Alt ?" {
-            Run "dots" "help" "zellij" { floating true; close_on_exit true; }
+            Run "dots" "palette" "help" { floating true; close_on_exit true; }
         }
         bind "Alt u" {
             Run "dots" "palette" "tui" { floating true; close_on_exit true; }

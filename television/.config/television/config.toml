@@ -1,0 +1,5 @@
+# Only what differs from the defaults of tv. In every channel, Tab shows the others;
+# Ctrl-t, its default, belongs to Zellij. Marking several lines moves to Ctrl-Space.
+[keybindings]
+tab = "toggle_remote_control"
+ctrl-space = "toggle_selection_down"

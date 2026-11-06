@@ -9,7 +9,7 @@ shows the current mode and its keys. `Esc` or `Enter` leaves a mode.
 | --- | ------ |
 | `Alt /` | Search everything with tv; `Tab` there switches modes |
 | `Alt u` | Pick a TUI |
-| `Alt ?` | This page (`q` closes it) |
+| `Alt ?` | Search the help pages with tv, this one included |
 | `Alt e` | Yazi |
 | `Alt g` | Lazygit |
 | `Alt 1` `2` `3` | Go to that tab |

@@ -1,9 +1,9 @@
 // A project: files and editor, git, and a shell. Opened by the dev shell function.
 layout {
     default_tab_template {
-        pane size=1 borderless=true { plugin location="zellij:tab-bar"; }
+        pane size=1 borderless=true { plugin location="tab-bar"; }
         children
-        pane size=1 borderless=true { plugin location="zellij:status-bar"; }
+        pane size=1 borderless=true { plugin location="status-bar"; }
     }
     tab name="\u{f121} code" focus=true {
         pane split_direction="vertical" {
