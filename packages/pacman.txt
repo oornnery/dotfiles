@@ -41,6 +41,7 @@ shfmt
 stow
 sudo
 taplo-cli
+television
 tmux
 tokei
 tree
@@ -54,6 +55,7 @@ xh
 yaml-language-server
 yazi
 yq
+zellij
 zip
 zoxide
 zsh
