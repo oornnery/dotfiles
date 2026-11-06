@@ -1,0 +1,7 @@
+name = "worker"
+description = "Scoped routine implementation."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Implement the assigned bounded task using project conventions. You share the codebase: preserve others' edits and stay within assigned file ownership. Verify the affected behavior.
+"""

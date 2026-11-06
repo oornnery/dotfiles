@@ -1,0 +1,159 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "lsp": true,
+  "provider": {
+    "zai": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Z.ai (GLM Coding Plan)",
+      "options": {
+        "baseURL": "https://api.z.ai/api/coding/paas/v4"
+      },
+      "models": {
+        "glm-5.3": {
+          "name": "GLM 5.3"
+        },
+        "glm-5.2": {
+          "name": "GLM 5.2"
+        },
+        "glm-5.1": {
+          "name": "GLM 5.1"
+        }
+      }
+    },
+    "qwen-token-plan": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Qwen Token Plan (Alibaba)",
+      "options": {
+        "baseURL": "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "{env:QWEN_TOKEN_PLAN_API_KEY}"
+      },
+      "models": {
+        "qwen3.8-max": {
+          "name": "Qwen3.8 Max"
+        },
+        "qwen3.8-flash": {
+          "name": "Qwen3.8 Flash"
+        },
+        "qwen3.7-max": {
+          "name": "Qwen3.7 Max"
+        },
+        "qwen3.7-plus": {
+          "name": "Qwen3.7 Plus"
+        },
+        "qwen3.6-flash": {
+          "name": "Qwen3.6 Flash"
+        },
+        "deepseek-v4.1-flash": {
+          "name": "DeepSeek V4.1 Flash"
+        },
+        "deepseek-v4-pro-0813": {
+          "name": "DeepSeek V4 Pro 0813"
+        },
+        "deepseek-v4-pro": {
+          "name": "DeepSeek V4 Pro"
+        },
+        "deepseek-v4-flash-0731": {
+          "name": "DeepSeek V4 Flash 0731"
+        },
+        "glm-5.3": {
+          "name": "GLM 5.3"
+        },
+        "glm-5.2": {
+          "name": "GLM 5.2"
+        }
+      }
+    }
+  },
+  "plugin": [
+    "@franlol/opencode-md-table-formatter@0.0.6",
+    "@tarquinen/opencode-dcp@3.1.14",
+    "@mohak34/opencode-notifier@0.2.8",
+    "cc-safety-net@1.0.6",
+    "opencode-update-notifier@0.3.3"
+  ],
+  "model": "opencode-go/deepseek-v4.1-flash",
+  "small_model": "opencode-go/qwen3.8-flash",
+  "mcp": {
+    "cavemem": {
+      "type": "local",
+      "command": [
+        "fnm",
+        "exec",
+        "--using=22",
+        "--",
+        "cavemem",
+        "mcp"
+      ],
+      "enabled": true
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp@0.0.78"
+      ],
+      "enabled": true
+    },
+    "chrome_devtools": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@1.8.0",
+        "--headless",
+        "--isolated",
+        "--no-usage-statistics",
+        "--no-performance-crux"
+      ],
+      "environment": {
+        "CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS": "1"
+      },
+      "timeout": 60000,
+      "enabled": true
+    },
+    "cloudflare": {
+      "type": "remote",
+      "url": "https://mcp.cloudflare.com/mcp",
+      "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_MCP_TOKEN}",
+        "X-MCP-Toolsets": "repos,issues,pull_requests,actions"
+      },
+      "enabled": true
+    }
+  },
+  "permission": {
+    "github_*": "ask",
+    "cloudflare_*": "ask",
+    "chrome_devtools_*": "allow",
+    "playwright_*": "allow",
+    "external_directory": {
+      "~/proj/**": "allow"
+    },
+    "bash": {
+      "*": "allow",
+      "gh auth token*": "ask",
+      "rtk gh auth token*": "ask",
+      "git reset --hard*": "ask",
+      "git clean *": "ask",
+      "git restore *": "ask",
+      "git checkout -- *": "ask",
+      "rtk git reset --hard*": "ask",
+      "rtk git clean *": "ask",
+      "rtk git restore *": "ask",
+      "rtk git checkout -- *": "ask"
+    }
+  },
+  "default_agent": "build"
+}
