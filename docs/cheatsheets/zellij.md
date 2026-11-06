@@ -3,6 +3,10 @@
 Panes and tabs in the terminal, with its default keys. The bar at the bottom always
 shows the current mode and its keys. `Esc` or `Enter` leaves a mode.
 
+Both bars are [zjstatus](https://github.com/dj95/zjstatus), a plugin that
+`dots install zellij` downloads. On a new machine it asks for permission inside the
+bars, where keys do not reach it: click a bar, then press `y`.
+
 ## Added here
 
 | Key | Action |
