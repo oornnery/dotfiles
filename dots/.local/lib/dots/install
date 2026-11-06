@@ -23,7 +23,9 @@ zig|zig|Zig|zig
 node|fnm|fnm with Node LTS|fnm
 herdr|herdr|herdr and its plugins|herdr-bin
 delta|delta|Colored git diffs|git-delta
-hyprland|hyprctl|Desktop: compositor, bar, tools, and links the config|hyprland hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin grim slurp wf-recorder satty hyprpicker brightnessctl wl-clipboard tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects'
+hyprland|hyprctl|Desktop: compositor, bar, tools, and links the config|hyprland alacritty hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin libnotify grim slurp wf-recorder satty hyprpicker brightnessctl power-profiles-daemon wl-clipboard jq tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects
+webapp|firefoxpwa|Web apps as windows|firefox firefoxpwa
+voxtype|voxtype|Voice dictation with a local model|wtype voxtype-bin'
 
 post_docker() {
     dots sudo systemctl enable --now docker
@@ -37,6 +39,10 @@ post_herdr() {
     for p in thanhdat77/herdr-navigator nicosuave/memex rjyo/herdr-window-title-sync; do
         herdr plugin install "$p" --yes || err "plugin failed: $p"
     done
+}
+post_voxtype() {
+    voxtype setup --download --no-post-install || return 1
+    voxtype setup systemd
 }
 post_hyprland() {
     dots stow hyprland
