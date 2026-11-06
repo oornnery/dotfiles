@@ -1,0 +1,19 @@
+/* themes/kanagawa/waybar.css */
+
+@define-color bg       #1f1f28;
+@define-color bg-alt   #2a2a37;
+@define-color bg-darker #16161d;
+@define-color fg       #dcd7ba;
+@define-color muted    #727169;
+@define-color border   rgba(149, 127, 184, 0.18);
+
+@define-color accent   #957fb8;
+@define-color mauve    #957fb8;
+@define-color blue     #7e9cd8;
+@define-color sky      #7fb4ca;
+@define-color yellow   #c0a36e;
+@define-color peach    #ffa066;
+@define-color green    #76946a;
+@define-color teal     #6a9589;
+@define-color sapphire #7e9cd8;
+@define-color red      #c34043;

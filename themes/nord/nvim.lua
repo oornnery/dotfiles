@@ -1,0 +1,21 @@
+return {
+  name = "nord",
+  background = "dark",
+  colorscheme = "dotfiles",
+  colors = {
+    bg = "#2e3440",
+    fg = "#d8dee9",
+    surface = "#3b4252",
+    surface2 = "#434c5e",
+    muted = "#4c566a",
+    accent = "#88c0d0",
+    accent2 = "#81a1c1",
+    yellow = "#ebcb8b",
+    red = "#bf616a",
+    blue = "#5e81ac",
+    green = "#a3be8c",
+    cyan = "#88c0d0",
+    magenta = "#b48ead",
+    orange = "#d08770",
+  },
+}

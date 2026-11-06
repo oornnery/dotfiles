@@ -1,0 +1,19 @@
+/* themes/nord/waybar.css */
+
+@define-color bg       #2e3440;
+@define-color bg-alt   #3b4252;
+@define-color bg-darker #242933;
+@define-color fg       #d8dee9;
+@define-color muted    #4c566a;
+@define-color border   rgba(136, 192, 208, 0.18);
+
+@define-color accent   #88c0d0;
+@define-color mauve    #b48ead;
+@define-color blue     #5e81ac;
+@define-color sky      #88c0d0;
+@define-color yellow   #ebcb8b;
+@define-color peach    #d08770;
+@define-color green    #a3be8c;
+@define-color teal     #8fbcbb;
+@define-color sapphire #81a1c1;
+@define-color red      #bf616a;

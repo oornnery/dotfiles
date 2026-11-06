@@ -1,0 +1,19 @@
+/* themes/rose-pine/waybar.css */
+
+@define-color bg       #191724;
+@define-color bg-alt   #1f1d2e;
+@define-color bg-darker #161320;
+@define-color fg       #e0def4;
+@define-color muted    #6e6a86;
+@define-color border   rgba(235, 188, 186, 0.18);
+
+@define-color accent   #ebbcba;
+@define-color mauve    #c4a7e7;
+@define-color blue     #31748f;
+@define-color sky      #9ccfd8;
+@define-color yellow   #f6c177;
+@define-color peach    #ebbcba;
+@define-color green    #31748f;
+@define-color teal     #9ccfd8;
+@define-color sapphire #9ccfd8;
+@define-color red      #eb6f92;

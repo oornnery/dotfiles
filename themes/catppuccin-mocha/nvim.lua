@@ -1,0 +1,21 @@
+return {
+  name = "catppuccin-mocha",
+  background = "dark",
+  colorscheme = "dotfiles",
+  colors = {
+    bg = "#1e1e2e",
+    fg = "#cdd6f4",
+    surface = "#313244",
+    surface2 = "#45475a",
+    muted = "#6c7086",
+    accent = "#f5c2e7",
+    accent2 = "#94e2d5",
+    yellow = "#f9e2af",
+    red = "#f38ba8",
+    blue = "#89b4fa",
+    green = "#a6e3a1",
+    cyan = "#94e2d5",
+    magenta = "#f5c2e7",
+    orange = "#fab387",
+  },
+}

@@ -1,0 +1,7 @@
+/* themes/catppuccin-latte/walker.css */
+
+@define-color text          #4c4f69;
+@define-color base          #eff1f5;
+@define-color border        rgba(234, 118, 203, 0.5);
+@define-color selected-text #ea76cb;
+@define-color background    #eff1f5;

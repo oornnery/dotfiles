@@ -1,0 +1,21 @@
+return {
+  name = "gruvbox",
+  background = "dark",
+  colorscheme = "dotfiles",
+  colors = {
+    bg = "#282828",
+    fg = "#ebdbb2",
+    surface = "#3c3836",
+    surface2 = "#504945",
+    muted = "#928374",
+    accent = "#d79921",
+    accent2 = "#83a598",
+    yellow = "#fabd2f",
+    red = "#fb4934",
+    blue = "#83a598",
+    green = "#b8bb26",
+    cyan = "#8ec07c",
+    magenta = "#d3869b",
+    orange = "#fe8019",
+  },
+}
