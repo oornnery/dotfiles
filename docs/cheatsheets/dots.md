@@ -1,0 +1,22 @@
+# dots
+
+Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` marks,
+`Enter` confirms and `Esc` cancels.
+
+| Task | Command |
+| ---- | ------- |
+| See what is wrong and fix it | `dots doctor` |
+| Choose which configs are linked | `dots stow` |
+| Add a config to the repo | `dots stow add` |
+| Edit a config | `dots edit` |
+| Install a package and save it | `dots pkg add <name>` |
+| Remove a package and save it | `dots pkg remove [name]` |
+| Compare installed and saved | `dots pkg diff` |
+| Install a ready-made setup | `dots install` |
+| Upgrade everything | `dots update` |
+| Run one-time changes | `dots migrate` |
+| Switch colors | `dots theme` |
+| Open a TUI | `dots tui` |
+| Set up a machine | `dots setup` |
+| Copy configs to Windows | `dots wsl windows` |
+| Read these pages | `dots help` |
