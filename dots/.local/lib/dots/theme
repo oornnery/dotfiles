@@ -58,11 +58,23 @@ sequence() {  # the escape codes that set the terminal palette, as printf text
     printf '%s' "$out"
 }
 
+terminals() {  # where to send colors. Zellij does not pass them on, so its clients get them directly.
+    local pid tty
+    if [[ -z ${ZELLIJ:-} ]]; then echo /dev/tty; return; fi
+    for pid in $(pgrep -u "$USER" -x zellij); do
+        tty=$(readlink "/proc/$pid/fd/0")
+        [[ $tty == /dev/pts/* ]] && echo "$tty"
+    done
+}
+
 send() {  # change the colors of this terminal now, without saving anything
-    [[ -z ${TMUX:-}${ZELLIJ:-} ]] || return 0
-    { : >/dev/tty; } 2>/dev/null || return 0
-    # shellcheck disable=SC2059  # the format is the palette itself
-    printf "$(sequence "$1")" >/dev/tty
+    local seq tty
+    [[ -z ${TMUX:-} ]] || return 0
+    seq=$(sequence "$1")
+    for tty in $(terminals); do
+        # shellcheck disable=SC2059  # the format is the palette itself
+        { printf "$seq" >"$tty"; } 2>/dev/null
+    done
 }
 
 sample() {  # the preview pane: ANSI colors, so it changes with the palette
@@ -90,6 +102,33 @@ pick() {  # choose with the terminal showing each theme; Esc goes back
         --bind "focus:execute-silent(\"$0\" preview {})")
     if [[ -z $choice ]]; then send "$now"; return 1; fi
     printf '%s\n' "$choice"
+}
+
+zellij_theme() {  # zellij_theme <name>: the same palette, in the format Zellij reads
+    local dir="${XDG_CONFIG_HOME:-$HOME/.config}/zellij" key value
+    local -A color
+    [[ -d $dir ]] || return 0
+    while read -r key value; do color[$key]=$value; done < <(palette "$1")
+    mkdir -p "$dir/themes"
+    cat > "$dir/themes/dots.kdl" <<EOF
+// Written by dots theme.
+themes {
+    dots {
+        fg "${color[fg]}"
+        bg "${color[bg]}"
+        black "${color[0]}"
+        red "${color[1]}"
+        green "${color[2]}"
+        yellow "${color[3]}"
+        blue "${color[4]}"
+        magenta "${color[5]}"
+        cyan "${color[6]}"
+        white "${color[7]}"
+        orange "${color[11]}"
+    }
+}
+EOF
+    touch "$dir/config.kdl"  # running sessions reload when it changes
 }
 
 put() {  # put <theme file> <destination>: only when that tool is set up here
@@ -124,6 +163,7 @@ EOF
     put "$name/mako.config" "$HOME/.config/mako/theme.config"
     put "$name/walker.css"  "$HOME/.config/walker/themes/default/theme.css"
     put "$name/alacritty.toml" "$HOME/.config/alacritty/theme.toml"
+    zellij_theme "$name"
     send "$name"
     if have hyprctl && [[ -x ${DOTS_LIB:-}/hypr ]]; then dots hypr reload >/dev/null 2>&1; fi
     ok "theme: $name"

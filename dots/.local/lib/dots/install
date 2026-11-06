@@ -90,6 +90,7 @@ post_zsh()       { dots sudo chsh -s /usr/bin/zsh "$USER"; }
 post_helix()     { uv tool install basedpyright; }
 post_nvim()      { dots theme apply; nvim --headless '+Lazy! sync' +qa; }
 post_tmux()      { dots theme apply; }
+post_zellij()    { dots theme apply; }
 post_vim()       { dots theme apply; }
 post_hyprland()  { dots theme apply; }
 post_docker()    { dots sudo systemctl enable --now docker && dots sudo usermod -aG docker "$USER"; }
