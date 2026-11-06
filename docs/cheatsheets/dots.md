@@ -20,3 +20,6 @@ Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` mark
 | Set up a machine | `dots setup` |
 | Copy configs to Windows | `dots wsl windows` |
 | Read these pages | `dots help` |
+
+With the `hyprland` package linked, also: `dots capture`, `dots display`,
+`dots hypr`, `dots notifications`, `dots system` and `dots webapp`.
