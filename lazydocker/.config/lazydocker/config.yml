@@ -1,0 +1,35 @@
+
+gui:
+  language: auto
+  scrollHeight: 2
+  border: rounded
+  showIcons: true
+  nerdFontsVersion: "3"
+  showCommandLog: false
+  showBottomLine: true
+  wrapMainPanel: true
+  returnImmediately: false
+  showPanelJumps: false
+  startRealTimeLogs: false
+  startHidden: false
+  expandFocusedSidePanel: false
+
+  # Terminal colors, so it follows dots theme.
+  theme:
+    activeBorderColor:
+      - magenta
+      - bold
+    inactiveBorderColor:
+      - default
+
+command:
+  dockerCompose:
+    executable: docker
+    configPath: docker-compose.yml
+
+confirmOnQuit: true
+disableStartupPopups: false
+
+update:
+    method: background
+    days: 14

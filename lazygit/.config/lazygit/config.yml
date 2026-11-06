@@ -1,0 +1,65 @@
+
+gui:
+  showIcons: true
+  nerdFontsVersion: "3"
+  border: rounded
+  animateExplosion: true
+  language: auto
+  showRandomTip: false
+  showCommandLog: false
+  skipDiscardChangeWarning: false
+  skipRewordInEditorWarning: false
+  scrollHeight: 2
+  scrollPastBottom: true
+  expandFocusedSidePanel: false
+  mainPanelSplitMode: flexible
+  enlargedSideViewLocation: left
+  showFileIcons: true
+  showFileTree: true
+  showNumstatInFilesView: false
+  showBottomLine: true
+  showPanelJumps: false
+  commitAuthorShortLength: 6
+
+  # Terminal colors, so it follows dots theme.
+  theme:
+    activeBorderColor:
+      - magenta
+      - bold
+    inactiveBorderColor:
+      - default
+
+git:
+  paging:
+    colorArg: always
+    useConfig: true
+  commit:
+    signOff: false
+    autoWrapCommitMessage: true
+    autoWrapWidth: 72
+  merging:
+    manualCommit: false
+    squashMergeMessage: "Squash merge {{selectedRef}} into {{currentBranch}}"
+  mainBranches:
+    - master
+    - main
+  autoFetch: true
+  autoRefresh: true
+  fetchAll: true
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --"
+  allBranchesLogCmds:
+    - "git log --graph --all --color=always --abbrev-commit --decorate --date=relative --pretty=medium"
+  log:
+    order: topo-order
+    showGraph: always
+  disableForcePushing: false
+  parseEmoji: false
+
+update:
+  method: background
+  days: 14
+
+confirmOnQuit: false
+disableStartupPopups: false
+notARepository: prompt
+promptToReturnFromSubprocess: true
