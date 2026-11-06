@@ -42,7 +42,8 @@ keybinds {
         bind "Alt /" {
             Run "dots" "palette" { floating true; close_on_exit true; }
         }
-        bind "Alt ?" {
+        // Some terminals report ? as Shift /, and then only the second name matches.
+        bind "Alt ?" "Alt Shift /" {
             Run "dots" "palette" "help" { floating true; close_on_exit true; }
         }
         bind "Alt u" {
