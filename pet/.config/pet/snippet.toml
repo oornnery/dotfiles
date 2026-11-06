@@ -230,6 +230,33 @@
   command = "pacman -Qdtq | sudo pacman -Rns -"
   tag = ["pacman"]
 
+# ── Media ───────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "download a video in the best quality (yt-dlp)"
+  command = "yt-dlp -f 'bv*+ba/b' --merge-output-format <format=mp4> '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "download only the audio (yt-dlp)"
+  command = "yt-dlp -x --audio-format <format=mp3> '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "list the formats of a video (yt-dlp)"
+  command = "yt-dlp -F '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "download a playlist, numbered (yt-dlp)"
+  command = "yt-dlp -o '%(playlist_index)03d-%(title)s.%(ext)s' '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "download only the subtitles (yt-dlp)"
+  command = "yt-dlp --skip-download --write-subs --write-auto-subs --sub-langs '<langs=pt,en>' '<url>'"
+  tag = ["media", "yt-dlp"]
+
 # ── Herdr ───────────────────────────────────────────────────────────────────
 
 [[snippets]]
