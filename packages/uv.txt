@@ -1,0 +1,2 @@
+# uv packages, saved 2026-11-06 from DESKTOP-T8DL9CB
+basedpyright

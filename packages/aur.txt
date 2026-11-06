@@ -1,0 +1,7 @@
+# aur packages, saved 2026-11-06 from DESKTOP-T8DL9CB
+herdr-bin
+pacsea-bin
+paru
+paru-debug
+pay-respects-bin
+pet-bin
