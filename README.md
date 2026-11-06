@@ -45,7 +45,7 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 | `dots theme` | Switch colors, with a live preview |
 | `dots doctor` | Report what is wrong |
 | `dots edit`, `dots tui`, `dots help` | Open a config, a TUI or a page |
-| `dots palette` | Command palette inside Zellij |
+| `dots palette` | Search help, TUIs and commands with tv, inside Zellij |
 | `dots setup` | Set up a machine |
 | `dots wsl` | WSL report, and copy configs to Windows |
 
@@ -63,8 +63,7 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 - Kept for later, not linked: `hyprland`, `tmux`, `vim`.
 - Written but never run for real: the `hyprland` commands, `windows/`, and the setups
   in `dots install` that start services.
-- Zellij: a bar with the mode and its keys, modes on Alt keys, and a command palette
-  (`Alt /`).
+- Zellij: as it comes, plus help (`Alt ?`) and a tv palette (`Alt /`).
 - `ai/` is copied from the old repo and still needs a review.
 - This repo has no remote yet. The old one is `oornnery/dotfiles`, branch `master`.
 
@@ -72,6 +71,5 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 
 - Back to Arch on the desktop: `dots install hyprland`, then test its commands.
 - Review `ai/` and link what stays.
-- Try `tv` (television) in the Zellij palette, in place of fzf.
 - Rebuild `self-hosted/`.
 - One-time changes between machines, if more than one machine ever needs them.

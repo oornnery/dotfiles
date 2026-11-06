@@ -1,119 +1,59 @@
 #!/usr/bin/env bash
-# dots:summary=Zellij command palette: actions, TUIs and dots commands
-# dots:args=[tui | run | project]
+# dots:summary=Search help, TUIs and dots commands with tv, inside Zellij
+# dots:args=[tui]
 #
-# Opens from Zellij in a floating pane (see config.kdl), like the command palette
-# in Helix: a searchable table of name, keys and what it does.
+#   dots palette      everything
+#   dots palette tui  only the TUIs
 #
-#   dots palette          everything
-#   dots palette tui      only the TUIs; the chosen one opens in a floating pane
-#   dots palette run      any command, in a new pane
-#   dots palette project  a folder from zoxide, in a new tab
+# Zellij opens it in a floating pane (see config.kdl). What you pick runs in that
+# same pane, which closes when it ends.
 set -uo pipefail
 
 # shellcheck source=/dev/null
 . "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+need tv
 
-FZF=(fzf --reverse --no-border --delimiter=$'\t' --with-nth=2.. --tabstop=1)
+row() { printf '%-6s %-14s %s\n' "$1" "$2" "$3"; }  # row <kind> <name> <description>
 
-# The palette is a floating pane, and a new pane opens where the focus is. Hiding
-# it first makes new panes join the tiled layout.
-tiled() { zellij action toggle-floating-panes; zellij action "$@"; }
-floating() { zellij run --floating --close-on-exit -- "$@"; }
-
-# id<TAB>name<TAB>keys<TAB>description. Padding the columns keeps the table aligned.
-row() { printf '%s\t%-24s %-10s %s\n' "$1" "$2" "$3" "$4"; }
-
-actions() {
-    row pane       'new pane'           'Alt n' 'Open a pane; the layout tiles it'
-    row pane-right 'new pane right'     ''      'Open a pane on the right'
-    row pane-down  'new pane below'     ''      'Open a pane below'
-    row close      'close pane'         'Alt x' 'Close the focused pane'
-    row full       'fullscreen pane'    'Alt f' 'Toggle fullscreen for the pane'
-    row float      'floating panes'     'Alt w' 'Show or hide the floating panes'
-    row tab        'new tab'            'Alt t' 'Open a tab'
-    row tab-close  'close tab'          ''      'Close this tab'
-    row dev        'dev layout'         ''      'A tab with editor and shell, a tab with lazygit'
-    row project    'open project'       'Alt o' 'A folder from zoxide, in a new tab'
-    row run        'run command'        'Alt r' 'Any command, in a new pane'
-    row tuis       'open TUI'           'Alt u' 'Pick a TUI, in a floating pane'
-    row snippet    'run snippet'        ''      'Pick a pet snippet and run it'
-    row sessions   'sessions'           'Alt g' 'Session mode: switch, create, detach'
-    row help       'help'               'Alt ?' 'All the keys'
-    row scrollback 'scrollback'         'Alt e' 'Open what this pane printed in the editor'
-    row detach     'detach'             'Alt d' 'Leave; the session keeps running'
-    row quit       'quit'               'Alt q' 'End this session'
-}
-
-tuis() {
+rows_tui() {
     local name desc
-    while read -r name desc; do
-        row "tui:$name" "tui: $name" '' "$desc"
-    done < <(dots tui --list)
+    while read -r name desc; do row tui "$name" "$desc"; done < <(dots tui --list)
 }
 
-commands() {
+rows_dots() {
     local line
-    while IFS= read -r line; do
-        row "dots:${line%%:*}" "dots ${line%%:*}" '' "${line#*:}"
-    done < <(dots --describe)
+    while IFS= read -r line; do row dots "${line%%:*}" "${line#*:}"; done < <(dots --describe)
 }
 
-# Runs what was picked. Each case is one thing the table offers.
-act() {
+rows_all() {
+    row help keys 'All the keys of Zellij and of this palette'
+    rows_tui
+    rows_dots
+    row run command 'Run any command'
+}
+
+pick() { tv --no-remote --no-preview --input-header "$1"; }  # the chosen line of stdin
+
+act() {  # act <kind> <name>
+    local cmd
     case $1 in
-        pane)       tiled new-pane ;;
-        pane-right) tiled new-pane --direction right ;;
-        pane-down)  tiled new-pane --direction down ;;
-        close)      tiled close-pane ;;
-        full)       tiled toggle-fullscreen ;;
-        float)      zellij action toggle-floating-panes ;;
-        tab)        tiled new-tab ;;
-        tab-close)  tiled close-tab ;;
-        dev)        tiled new-tab --layout dev ;;
-        project)    project ;;
-        run)        run ;;
-        tuis)       pick_tui ;;
-        snippet)    pet exec ;;
-        sessions)   zellij action launch-or-focus-plugin session-manager --floating ;;
-        help)       floating dots help zellij ;;
-        scrollback) tiled edit-scrollback ;;
-        detach)     zellij action detach ;;
-        quit)       zellij action quit ;;
-        tui:*)      floating "${1#tui:}" ;;
-        dots:*)     floating bash -c 'dots "$1"; read -rsn1 -p "Press a key to close"' _ "${1#dots:}" ;;
+        help) dots help zellij ;;
+        tui)  exec "$2" ;;
+        run)
+            cmd=$(compgen -c | sort -u | pick run)
+            [[ -n $cmd ]] && exec "$cmd" ;;
+        dots)
+            dots "$2"
+            read -rsn1 -p 'Press a key to close' ;;
     esac
 }
 
-pick() {  # pick <prompt>: rows on stdin, the id of the chosen one on stdout
-    "${FZF[@]}" --prompt="$1> " --header="$(printf '%-24s %-10s %s' name keys description)" | cut -f1
-}
-
-pick_tui() {
-    local id
-    id=$(tuis | pick tui) || return 0
-    [[ -n $id ]] && floating "${id#tui:}"
-}
-
-run() {
-    local cmd
-    cmd=$(compgen -c | sort -u | fzf --reverse --no-border --prompt='run> ') || return 0
-    [[ -n $cmd ]] && tiled new-pane -- "$cmd"
-}
-
-project() {
-    local dir
-    dir=$(zoxide query -l | fzf --reverse --no-border --prompt='project> ') || return 0
-    [[ -n $dir ]] && tiled new-tab --cwd "$dir"
-}
-
 case "${1:-}" in
-    '')
-        id=$({ actions; tuis; commands; } | pick palette) || exit 0
-        [[ -n $id ]] && act "$id" ;;
-    tui)     pick_tui ;;
-    run)     run ;;
-    project) project ;;
-    -h|--help) sed -n '8,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+    '')  choice=$(rows_all | pick palette) ;;
+    tui) choice=$(rows_tui | pick tui) ;;
+    -h|--help) sed -n '5,6p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) err "dots palette: unknown action: $1"; exit 1 ;;
 esac
+[[ -n $choice ]] || exit 0
+read -r kind name _ <<< "$choice"
+act "$kind" "$name"

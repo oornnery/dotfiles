@@ -1,33 +1,12 @@
-// Zellij, kept simple and in the spirit of Helix.
-//
-// The bar shows the current mode and its keys, like the statusline in Helix. Modes
-// open with Alt keys, because the usual Ctrl ones belong to Helix and the shell.
-// Alt / searches everything, Alt ? shows all the keys, Esc leaves a mode.
+// Zellij as it comes, with its own keys, modes and bars. Only these additions:
+// help, and a palette to search help, TUIs and dots commands with tv.
 // The theme is written by dots theme, from the same palette as everything else.
 theme "dots"
-default_mode "normal"
-default_layout "main"
-default_shell "zsh"
-pane_frames false
-scroll_buffer_size 10000
-copy_on_select true
 show_startup_tips false
 show_release_notes false
 
 keybinds {
-    // The usual mode keys collide with Helix and the shell, so they move to Alt.
-    unbind "Ctrl g" "Ctrl p" "Ctrl n" "Ctrl t" "Ctrl s" "Ctrl o" "Ctrl b" "Ctrl h" "Ctrl q"
-
     shared_except "locked" {
-        // Modes: the bar lists the keys of each one
-        bind "Alt p" { SwitchToMode "Pane"; }
-        bind "Alt b" { SwitchToMode "Tab"; }
-        bind "Alt z" { SwitchToMode "Resize"; }
-        bind "Alt m" { SwitchToMode "Move"; }
-        bind "Alt v" { SwitchToMode "Scroll"; }
-        bind "Alt g" { SwitchToMode "Session"; }
-
-        // Help and menus, each in a floating pane that closes when you are done
         bind "Alt /" {
             Run "dots" "palette" { floating true; close_on_exit true; }
         }
@@ -37,32 +16,5 @@ keybinds {
         bind "Alt u" {
             Run "dots" "palette" "tui" { floating true; close_on_exit true; }
         }
-        bind "Alt r" {
-            Run "dots" "palette" "run" { floating true; close_on_exit true; }
-        }
-        bind "Alt o" {
-            Run "dots" "palette" "project" { floating true; close_on_exit true; }
-        }
-
-        // Direct keys for the most common actions
-        bind "Alt h" { MoveFocusOrTab "Left"; }
-        bind "Alt l" { MoveFocusOrTab "Right"; }
-        bind "Alt j" { MoveFocus "Down"; }
-        bind "Alt k" { MoveFocus "Up"; }
-        bind "Alt n" { NewPane; }
-        bind "Alt x" { CloseFocus; }
-        bind "Alt f" { ToggleFocusFullscreen; }
-        bind "Alt w" { ToggleFloatingPanes; }
-        bind "Alt e" { EditScrollback; }
-        bind "Alt t" { NewTab; }
-        bind "Alt [" { GoToPreviousTab; }
-        bind "Alt ]" { GoToNextTab; }
-        bind "Alt 1" { GoToTab 1; }
-        bind "Alt 2" { GoToTab 2; }
-        bind "Alt 3" { GoToTab 3; }
-        bind "Alt 4" { GoToTab 4; }
-        bind "Alt 5" { GoToTab 5; }
-        bind "Alt d" { Detach; }
-        bind "Alt q" { Quit; }
     }
 }
