@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Map installed packages to ~/dotfiles/packages and reinstall them
 # dots:args=[status | list [mgr] | add [-m mgr] <pkg>... | remove [pkg...] | save | diff | install [-y]]
-# dots:actions=status,list,add,remove,save,diff,install
+# dots:actions=status=Installed and saved, per manager|list=What is installed now|add=Install packages and save the list|remove=Remove packages and save the list|save=Write the package lists|diff=Compare installed and saved|install=Install what is saved but missing
 #
 #   dots pkg            per manager: installed, saved, new (+) and missing (-)
 #   dots pkg list [m]   what is installed now (all managers, or one)

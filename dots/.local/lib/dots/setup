@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Set up a machine: link configs, install packages, check
 # dots:args=[-n]
-# dots:actions=run,-n
+# dots:actions=run=Set up this machine|-n=Show what it would do
 #
 #   dots setup      link, install what is missing (asks first), then doctor
 #   dots setup -n   dry run: show what would change

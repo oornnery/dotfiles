@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Brightness, night light, zoom, wallpaper and screensaver
 # dots:args=brightness [raise|lower|set <n>|get] | night [on|off] | magnify [in|out|reset|set <n>] | wallpaper [next|prev|random|list|set <path>] | screensaver
-# dots:actions=night,magnify,wallpaper next,wallpaper random,wallpaper list,screensaver
+# dots:actions=night=Toggle the night light|magnify=Toggle the screen zoom|wallpaper next=Next wallpaper|wallpaper random=Random wallpaper|wallpaper list=List wallpapers|screensaver=Start the screensaver
 set -uo pipefail
 
 # shellcheck source=/dev/null

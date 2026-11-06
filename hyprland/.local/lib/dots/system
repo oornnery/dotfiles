@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Power menu and profiles, volume, GPU usage and hibernation
 # dots:args=power | profile [cycle|set <mode>|list] | volume [raise|lower|mute|mic-mute|set <n>|get] | gpu | hibernation <status|setup|remove>
-# dots:actions=power,profile,profile cycle,volume mute,volume mic-mute,hibernation status
+# dots:actions=power=Lock, suspend, reboot, shut down|profile=The power profile|profile cycle=Next power profile|volume mute=Toggle mute|volume mic-mute=Toggle the microphone|hibernation status=Is hibernation ready
 set -uo pipefail
 
 # shellcheck source=/dev/null

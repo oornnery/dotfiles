@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=WSL report (safe to paste) and wslc passthrough
 # dots:args=[info | windows [-n] | wslc <args...>]
-# dots:actions=info,windows,windows -n,wslc
+# dots:actions=info=WSL report, safe to paste|windows=Copy configs to Windows|windows -n=Compare configs with Windows|wslc=Run wslc.exe
 #
 # `windows` copies the configs in windows/ to the Windows side: pick which ones,
 # and whatever it replaces is kept as <file>.bak.<timestamp>. -n only compares.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Hyprland: look, layout, monitors, gamemode, keybinds and reload
 # dots:args=gaps | layout | transparency | corners <sharp|round> | gamemode [on|off|status] | scale <+n|-n|=n> | mirror [on|off] | focus <pattern> [command] | scratch | keys | reload | exit
-# dots:actions=gaps,layout,transparency,corners sharp,corners round,gamemode,mirror,scratch,keys,reload,exit
+# dots:actions=gaps=Toggle gaps and borders|layout=Switch dwindle and master|transparency=Toggle transparency|corners sharp=Square corners|corners round=Round corners|gamemode=Toggle gaming mode|mirror=Toggle the monitor mirror|scratch=Toggle the scratch terminal|keys=Search the keybinds|reload=Reload Hyprland, bar and notifications|exit=Leave Hyprland
 set -uo pipefail
 
 # shellcheck source=/dev/null

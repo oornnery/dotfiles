@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Screenshots, screen recording, OCR and color picker
 # dots:args=screenshot [region [--copy]|full|window|delay <sec>] | record [region|stop|status] | ocr [lang] | color
-# dots:actions=screenshot region,screenshot full,screenshot window,record,record region,record stop,ocr,color
+# dots:actions=screenshot region=Pick an area and annotate it|screenshot full=The whole screen|screenshot window=The active window|record=Start or stop recording|record region=Record an area|record stop=Stop recording|ocr=Copy the text in an area|color=Pick a color from the screen
 set -uo pipefail
 
 # shellcheck source=/dev/null

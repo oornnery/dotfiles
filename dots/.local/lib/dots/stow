@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Keep configs in ~/dotfiles and link them into $HOME
 # dots:args=[list | add [path...] [-p pkg] | sync [-n|--adopt] | <pkg>... | -D <pkg>...]
-# dots:actions=pick,add,list,sync,sync -n
+# dots:actions=pick=Choose what is linked here|add=Add a config to the repo|list=List the packages|sync=Link every package in the list|sync -n=Show what sync would do
 #
 #   dots stow                  pick what is linked here (a list when piped)
 #   dots stow list             list packages (* = synced on this machine)

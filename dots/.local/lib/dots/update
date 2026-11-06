@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Pending updates for system and dev tools; upgrade them all
 # dots:args=[run] | list [--refresh] | refresh | motd
-# dots:actions=run,list,refresh
+# dots:actions=run=Upgrade everything|list=What has updates|refresh=Scan for updates now
 #
 # Managers are in _managers. Results are cached in ~/.cache/dots/updates.tsv.
 # `motd` is the shell startup line: it reads the cache and rescans in the

@@ -1,10 +1,14 @@
 #compdef dots
-# Tab completion for dots: commands, then the actions of each command.
-# A file in fpath because Antigen's stand-in compdef loses the arguments.
+# Tab completion for dots: commands, then the actions of each command, both with
+# their descriptions. A file in fpath because Antigen's stand-in compdef loses the
+# arguments.
+local -a items
 if (( CURRENT == 2 )); then
-    compadd -- ${(f)"$(dots --commands)"}
-elif (( CURRENT == 3 )) && [[ -n $(dots --actions $words[2]) ]]; then
-    compadd -- ${(f)"$(dots --actions $words[2])"}
+    items=(${(f)"$(dots --describe)"})
+    _describe command items
+elif (( CURRENT == 3 )); then
+    items=(${(f)"$(dots --describe $words[2])"})
+    if (( $#items )); then _describe action items; else _files; fi
 else
     _files
 fi

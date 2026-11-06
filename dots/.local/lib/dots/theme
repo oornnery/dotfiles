@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Switch the color theme: terminal, TUIs, prompt and editors
 # dots:args=[list | get | set [name] | apply]
-# dots:actions=set,list,get,apply
+# dots:actions=set=Pick a theme, previewing it live|list=Themes and their colors|get=The active theme|apply=Write the active theme again
 #
 #   dots theme             pick a theme
 #   dots theme list        themes with their colors (* = active)

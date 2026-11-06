@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Run one-time changes that a config link cannot carry
 # dots:args=[run | list | new <name>]
-# dots:actions=run,list,new
+# dots:actions=run=Run what is pending|list=All migrations and their state|new=Create a migration
 #
 #   dots migrate             run what is pending on this machine
 #   dots migrate list        all of them (✓ done here, • pending)
