@@ -1,0 +1,16 @@
+# A mode of dots palette, which gives the lines and the preview. Tab shows the others.
+[metadata]
+name = "dots-keys"
+description = "Keyboard shortcuts"
+
+[source]
+command = "dots palette --rows keys"
+no_sort = true
+frecency = false
+display = "{split: :1..}"
+
+[preview]
+command = "dots palette --preview '{split: :0}' '{split: :1}'"
+
+[keybindings]
+tab = "toggle_remote_control"
