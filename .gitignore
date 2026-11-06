@@ -1,0 +1,6 @@
+# Real environment files; only the *.example versions are tracked.
+self-hosted/**/.env
+self-hosted/**/*.env
+# Backups made by dots stow, and caches.
+*.bak.*
+__pycache__/
