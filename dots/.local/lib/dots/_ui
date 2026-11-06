@@ -45,6 +45,16 @@ choose() {
     gum choose --no-limit --height 20 "${marks[@]}" --header "$1"
 }
 
+need() {  # need <command...>: stop with a clear message when one is missing
+    local cmd
+    for cmd in "$@"; do
+        have "$cmd" && continue
+        err "$cmd is not installed"
+        have notify-send && notify-send -a dots -u critical "$cmd is not installed"
+        exit 1
+    done
+}
+
 spin() {  # spin <title> <command...>
     local title=$1; shift
     if have gum && [[ -t 1 ]]; then
