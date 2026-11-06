@@ -33,6 +33,30 @@ rows() {  # name<TAB>args<TAB>summary, hidden commands left out
     done
 }
 
+icon() {  # the Nerd Font icon of a command, as a hex code
+    case $1 in
+        capture) echo f030 ;;
+        display|hypr) echo f108 ;;
+        doctor) echo f0f1 ;;
+        edit) echo f044 ;;
+        help) echo f059 ;;
+        install) echo f019 ;;
+        notifications|notify) echo f0f3 ;;
+        palette) echo f002 ;;
+        pane) echo f2d0 ;;
+        pkg) echo f187 ;;
+        setup) echo f013 ;;
+        stow) echo f0c1 ;;
+        system) echo f011 ;;
+        theme) echo f1fc ;;
+        tui) echo f26c ;;
+        update) echo f021 ;;
+        webapp) echo f0ac ;;
+        wsl) echo f17a ;;
+        *) echo f120 ;;
+    esac
+}
+
 usage() {
     if [[ -n $N ]] && have gum; then
         gum style --bold --foreground 212 --border rounded --border-foreground 99 --padding '0 2' 'dots · dotfiles CLI'
@@ -41,8 +65,8 @@ usage() {
     printf '%sUsage:%s dots [<cmd> [args...]]\n\n' "$H" "$N"
     # \037 because read merges repeated tabs, which would shift an empty args.
     rows | tr '\t' '\037' | while IFS=$'\037' read -r n a s; do
-        printf '  %s%-8s%s %s\n' "$G" "$n" "$N" "$s"
-        if [[ -n $a ]]; then printf '           %s%s%s\n' "$D" "$a" "$N"; fi
+        printf "  %s\\u$(icon "$n") %-13s%s %s\n" "$G" "$n" "$N" "$s"
+        if [[ -n $a ]]; then printf '                  %s%s%s\n' "$D" "$a" "$N"; fi
     done
 }
 

@@ -14,11 +14,11 @@ else
     H='' G='' Y='' R='' D='' N=''
 fi
 
-ok()      { printf '%s✓%s %s\n' "$G" "$N" "$*"; }
-warn()    { printf '%s•%s %s\n' "$Y" "$N" "$*"; }
-err()     { printf '%s✗%s %s\n' "$R" "$N" "$*" >&2; }
+ok()      { printf '%s%s %s\n' "$G" "$N" "$*"; }
+warn()    { printf '%s%s %s\n' "$Y" "$N" "$*"; }
+err()     { printf '%s%s %s\n' "$R" "$N" "$*" >&2; }
 note()    { printf '%s%s%s\n' "$D" "$*" "$N"; }
-section() { printf '\n%s── %s ──%s\n' "$H" "$1" "$N"; }
+section() { printf '\n%s %s%s\n' "$H" "$1" "$N"; }
 
 # True when gum can draw here. Test it before `$(...)` or `< <(...)`, where
 # stdout or stdin is a pipe.

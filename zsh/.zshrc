@@ -28,7 +28,7 @@ zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compcache
 zstyle ':completion:*' rehash true             # see new commands without rehash
 zstyle ':completion:*' group-name ''
 zstyle ':fzf-tab:complete:*' use-fzf-default-opts yes
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -A $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --icons=always --color=always $realpath 2>/dev/null || ls -A $realpath'
 
 # --- Key bindings -----------------------------------------------------------
 bindkey -e

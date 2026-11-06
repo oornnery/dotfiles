@@ -5,7 +5,7 @@ layout {
         children
         pane size=1 borderless=true { plugin location="zellij:status-bar"; }
     }
-    tab name="code" focus=true {
+    tab name="\u{f121} code" focus=true {
         pane split_direction="vertical" {
             // cd . because yazi believes $PWD, and Zellij hands down an old one
             pane size="25%" name="yazi" command="sh" {
@@ -14,10 +14,10 @@ layout {
             pane focus=true command="helix"
         }
     }
-    tab name="git" {
+    tab name="\u{e0a0} git" {
         pane command="lazygit"
     }
-    tab name="shell" {
+    tab name="\u{f120} shell" {
         pane
     }
 }
