@@ -20,7 +20,9 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 | `pacsea` | `pacsea-bin` (aur) | Search and install pacman and AUR packages |
 | `glow` | `glow` | Browse and read Markdown |
 | `herdr` | `herdr-bin` (aur) | Workspaces for AI coding agents |
+| `zellij` | `zellij` | Panes and tabs, with a command palette |
 | `yazi` | `yazi` | File manager |
+| `tv` | `television` | Fuzzy finder with channels |
 | `epycell` | `epycell` (cargo) | Jupyter notebooks in the terminal |
 
 ## Shell
@@ -159,7 +161,7 @@ Kept but not linked. Turn one on with `dots stow <name>`.
 | --- | --- |
 | `vim` | Small `.vimrc` without plugins, same keys as Helix |
 | `tmux` | Small `.tmux.conf`, same theme as Helix |
-| `zellij` | Small `config.kdl` |
+| `zellij` | Config, `dev` layout and the `dots palette` command |
 | `hyprland` | Hyprland, Alacritty, Waybar, Mako, Walker, Wofi and the commands `capture`, `display`, `hypr`, `notifications`, `system`, `webapp`; not used on WSL |
 
 In the repo, but not stow packages:

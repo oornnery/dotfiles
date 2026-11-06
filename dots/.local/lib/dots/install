@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # dots:summary=Full setups: packages, config links, permissions and services
-# dots:args=[name... | --list | --remove name...]
+# dots:args=[-y] [name...] | --list | --remove name...
 #
 #   dots install                 pick in a list, with details on the side
 #   dots install <name>...       set those up; a group name sets up the group
+#   dots install -y <name>...    same, with every package and option
 #   dots install --remove <name> unlink its config and remove its packages
 #   dots install --list          everything, by group
 #
-# A setup runs: packages, config links, then post_<name>. It always runs every
-# step, so each one must be safe to repeat. A failure does not stop the others.
+# A setup runs: packages, config links, then post_<name>. When it has more than one
+# part, a checklist lets you leave some out. It always runs what is marked, so each
+# step must be safe to repeat. A failure does not stop the others.
 #
 # To add one: a line in RECIPES, plus post_<name> if it needs more than that.
 set -uo pipefail
@@ -28,10 +30,11 @@ tools|glow|Markdown in the terminal|glow|glow
 tools|lazygit|Git TUI|lazygit|lazygit
 tools|btop|System monitor|btop|btop
 tools|yazi|File manager|yazi|yazi
+tools|television|Fuzzy finder with channels, the tv command|television|
 tools|epycell|Jupyter notebooks in the terminal|rust|
 tools|cli-extras|bottom, dust, duf, procs, sd, tealdeer, jless, yt-dlp|bottom dust duf procs sd tealdeer jless yt-dlp|
 terminal|tmux|tmux with config and theme|tmux|tmux
-terminal|zellij|Zellij with config|zellij|zellij
+terminal|zellij|Zellij with config, palette and layout|zellij fzf zoxide|zellij
 editors|helix|Helix with language servers and config|helix bash-language-server shfmt shellcheck taplo-cli marksman yaml-language-server ruff uv|helix
 editors|nvim|Neovim with plugins and config for any language|neovim git ripgrep fd tree-sitter-cli|nvim
 editors|vim|Small Vim config|vim|vim
@@ -90,10 +93,11 @@ post_tmux()      { dots theme apply; }
 post_vim()       { dots theme apply; }
 post_hyprland()  { dots theme apply; }
 post_docker()    { dots sudo systemctl enable --now docker && dots sudo usermod -aG docker "$USER"; }
-post_distrobox() { dots install docker; }
+post_distrobox() { dots install -y docker; }
 post_epycell()   { cargo install --locked epycell; }
 post_node()      { fnm install --lts; }
 post_python()    { uv python install; }
+post_cli-extras() { have tldr && tldr --update; return 0; }
 post_ollama()    { dots sudo systemctl enable --now ollama; }
 post_tailscale() { dots sudo systemctl enable --now tailscaled; }
 post_openssh()   { dots sudo systemctl enable --now sshd; }
@@ -161,18 +165,30 @@ expand() {  # names and group names in, setup names out
     done
 }
 
+parts_of() {  # parts_of <name>: its packages, config links and setup step, one per line
+    local part
+    for part in $(field "$1" 4); do echo "package  $part"; done
+    for part in $(field "$1" 5); do echo "config   $part"; done
+    if declare -F "post_$1" >/dev/null; then echo "setup    $1"; fi
+}
+
 # Steps read from the terminal: questions from pacman are yours to answer, and
 # they must not eat the list of names that is still being read.
 setup() {  # setup <name>
-    local name=$1 pkgs links
-    pkgs=$(field "$name" 4); links=$(field "$name" 5)
-    [[ -n $pkgs ]] || { err "no such setup: $name (dots install --list)"; return 1; }
+    local name=$1 parts pkgs links
+    parts=$(parts_of "$name")
+    [[ -n $parts ]] || { err "no such setup: $name (dots install --list)"; return 1; }
     section "$name"
+    if [[ -z ${YES:-} ]] && can_prompt && (( $(wc -l <<< "$parts") > 1 )); then
+        parts=$(choose --all "$name: x toggles, enter continues, esc skips" <<< "$parts") || { note "skipped"; return 0; }
+    fi
+    pkgs=$(awk '$1 == "package" {print $2}' <<< "$parts")
+    links=$(awk '$1 == "config" {print $2}' <<< "$parts")
     # shellcheck disable=SC2086  # package names, one per word
-    dots pkg add $pkgs </dev/tty || return 1
+    if [[ -n $pkgs ]]; then dots pkg add $pkgs </dev/tty || return 1; fi
     # shellcheck disable=SC2086  # package names, one per word
     if [[ -n $links ]]; then dots stow $links </dev/tty || return 1; fi
-    if declare -F "post_$name" >/dev/null; then "post_$name" </dev/tty || return 1; fi
+    if grep -q '^setup' <<< "$parts"; then "post_$name" </dev/tty || return 1; fi
 }
 
 remove() {  # remove <name>
@@ -193,8 +209,10 @@ each() {  # each <function> <name>...: run for all of them, then say what failed
         "$action" "$name" || failed+=("$name")
     done
     if (( ${#failed[@]} )); then section failed; err "${failed[*]}"; exit 1; fi
-    echo; ok "done: $*"
+    echo; ok "finished: $*"
 }
+
+if [[ ${1:-} == -y ]]; then YES=1; shift; fi
 
 case "${1:-}" in
     '')
@@ -213,7 +231,7 @@ case "${1:-}" in
         confirm "Remove: $*?" || exit 0
         mapfile -t names < <(expand "$@")
         each remove "${names[@]}" ;;
-    -h|--help) sed -n '5,8p' "$0" | sed 's/^# \{0,1\}//' ;;
+    -h|--help) sed -n '5,9p' "$0" | sed 's/^# \{0,1\}//' ;;
     -*) err "dots install: unknown option: $1"; exit 1 ;;
     *)
         mapfile -t names < <(expand "$@")
