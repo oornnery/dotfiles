@@ -1,0 +1,86 @@
+# shellcheck shell=bash
+# The package managers, used by `dots pkg` and `dots update`. Source _ui first.
+#
+# To add a manager: put it in MANAGERS and write its five functions.
+#   list_<m>       installed packages, one name per line
+#   install_<m>    install the packages given as arguments
+#   uninstall_<m>  remove the packages given as arguments
+#   scan_<m>       pending updates: eco<TAB>name<TAB>current<TAB>latest
+#   upgrade_<m>    upgrade everything
+
+# shellcheck disable=SC2034  # read by the commands that source this file
+MANAGERS=(pacman aur npm pnpm bun uv cargo)
+
+available() { case $1 in aur) have paru || have yay ;; *) have "$1" ;; esac; }
+now()       { "list_$1" 2>/dev/null | sort -u; }
+
+# paru or yay, with sudo asking through the gum prompt.
+aur() {
+    local helper
+    helper=$(command -v paru || command -v yay) || return 1
+    SUDO_ASKPASS="$DOTS_LIB/askpass" "$helper" --sudoflags=-A "$@"
+}
+
+# Tools without an "outdated" command: stdin "name version", ask the registry.
+# Plain != comparison, so a pre-release can show up as an update.
+remote() {  # remote <eco> <url, @@ = name> <jq filter>
+    R_ECO=$1 R_URL=$2 R_JQ=$3 xargs -r -P8 -L1 bash -c '
+        n=${0//\//%2F}; l=$(curl -fsm10 -A dots-update "${R_URL/@@/$n}" | jq -r "$R_JQ") || exit 0
+        [[ -n $l && $l != null && $l != "$1" ]] && printf "%s\t%s\t%s\t%s\n" "$R_ECO" "$0" "$1" "$l"
+    ' || true
+}
+
+# pacman
+list_pacman()    { pacman -Qqen; }
+install_pacman() { dots sudo pacman -S --needed "$@"; }
+uninstall_pacman() { dots sudo pacman -Rns "$@"; }
+scan_pacman()    { have checkupdates && checkupdates 2>/dev/null | awk '{print "pacman\t"$1"\t"$2"\t"$4}'; }
+upgrade_pacman() { dots sudo pacman -Syu; }
+
+# AUR
+list_aur()    { pacman -Qqem; }
+install_aur() { aur -S --needed "$@"; }
+uninstall_aur() { aur -Rns "$@"; }
+scan_aur()    { "$(command -v paru || command -v yay)" -Qua 2>/dev/null | awk '{print "aur\t"$1"\t"$2"\t"$4}'; }
+upgrade_aur() { aur -Syu; }
+
+# npm
+list_npm()    { npm ls -g --depth=0 --parseable 2>/dev/null | tail -n +2 | sed 's#.*/node_modules/##' | grep -vxE 'npm|corepack'; }
+install_npm() { npm install -g "$@"; }
+uninstall_npm() { npm uninstall -g "$@"; }
+scan_npm()    { npm outdated -g --json 2>/dev/null | jq -r 'to_entries[]|"npm\t\(.key)\t\(.value.current)\t\(.value.latest)"'; }
+upgrade_npm() { npm update -g; }
+
+# pnpm
+list_pnpm()    { pnpm ls -g --depth=0 --json 2>/dev/null | jq -r '.[0].dependencies // {} | keys[]'; }
+install_pnpm() { pnpm add -g "$@"; }
+uninstall_pnpm() { pnpm remove -g "$@"; }
+scan_pnpm()    { pnpm outdated -g --format json 2>/dev/null | jq -r 'to_entries[]|"pnpm\t\(.key)\t\(.value.current)\t\(.value.latest)"'; }
+upgrade_pnpm() { pnpm update -g; }
+
+# bun
+list_bun()    { bun pm ls -g 2>/dev/null | sed -nE 's/^[^A-Za-z@]*(.+)@[^@ ]+$/\1/p'; }
+install_bun() { bun add -g "$@"; }
+uninstall_bun() { bun remove -g "$@"; }
+scan_bun()    { bun pm ls -g 2>/dev/null | sed -nE 's/^[^A-Za-z@]*(.+)@([^@ ]+)$/\1 \2/p' | remote bun 'https://registry.npmjs.org/@@/latest' .version; }
+upgrade_bun() { bun update -g; }
+
+# uv tools
+list_uv()    { uv tool list 2>/dev/null | awk '/^[^- ]/{print $1}'; }
+install_uv() { local p; for p in "$@"; do uv tool install "$p"; done; }
+uninstall_uv() { local p; for p in "$@"; do uv tool uninstall "$p"; done; }
+scan_uv()    { uv tool list 2>/dev/null | awk '/^[^- ]/{sub(/^v/,"",$2); print $1, $2}' | remote uv 'https://pypi.org/pypi/@@/json' .info.version; }
+upgrade_uv() { uv tool upgrade --all; }
+
+# cargo
+list_cargo()    { cargo install --list 2>/dev/null | awk '/^[^ ]/{print $1}'; }
+install_cargo() { cargo install --locked "$@"; }
+uninstall_cargo() { cargo uninstall "$@"; }
+scan_cargo()    { cargo install --list 2>/dev/null | awk '/^[^ ]/ && !/\(/{v=$2; sub(/^v/,"",v); sub(/:$/,"",v); print $1, v}' | remote cargo 'https://crates.io/api/v1/crates/@@' .crate.max_stable_version; }
+upgrade_cargo() {
+    if have cargo-install-update; then
+        cargo install-update -a
+    else
+        warn "cargo packages not upgraded: needs cargo-update (cargo install cargo-update)"
+    fi
+}

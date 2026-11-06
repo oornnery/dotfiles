@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# dots: dotfiles CLI.
+#   dots                  pick a command, then its action
+#   dots <cmd> [args...]  run ~/.local/lib/dots/<cmd>
+#   dots -h | --help      list commands
+#
+# Each command is one executable in ../lib/dots/. Header keys it reads:
+#   # dots:summary=...   # dots:args=...   # dots:hidden=true
+#   # dots:actions=a,b -n,c   offered by the menu and by Tab completion
+# Commands call each other through `dots <cmd>`, never by sourcing. Only the
+# shared non-executable helpers (_ui, _managers) are sourced.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+self=$(realpath "${BASH_SOURCE[0]}")
+lib=${DOTS_LIB:-$(dirname "$self")/../lib/dots}
+[[ -d $lib ]] || lib=$HOME/.local/lib/dots
+DOTS_LIB=$(cd "$lib" 2>/dev/null && pwd) || { echo "dots: no command dir: $lib" >&2; exit 1; }
+export DOTS_LIB DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+bin=$(dirname "$self")
+case ":$PATH:" in *":$bin:"*) ;; *) PATH="$bin:$PATH" ;; esac
+# shellcheck source=/dev/null
+. "$DOTS_LIB/_ui"
+
+meta() { sed -n "1,15s/^# dots:$2=//p" "$1" | head -1; }
+
+rows() {  # name<TAB>args<TAB>summary, hidden commands left out
+    local f
+    for f in "$DOTS_LIB"/*; do
+        [[ -f $f && -x $f && $(meta "$f" hidden) != true ]] || continue
+        printf '%s\t%s\t%s\n' "${f##*/}" "$(meta "$f" args)" "$(meta "$f" summary)"
+    done
+}
+
+usage() {
+    if [[ -n $N ]] && have gum; then
+        gum style --bold --foreground 212 --border rounded --border-foreground 99 --padding '0 2' 'dots · dotfiles CLI'
+        echo
+    fi
+    printf '%sUsage:%s dots [<cmd> [args...]]\n\n' "$H" "$N"
+    # \037 because read merges repeated tabs, which would shift an empty args.
+    rows | tr '\t' '\037' | while IFS=$'\037' read -r n a s; do
+        printf '  %s%-8s%s %s\n' "$G" "$n" "$N" "$s"
+        if [[ -n $a ]]; then printf '           %s%s%s\n' "$D" "$a" "$N"; fi
+    done
+}
+
+actions() {  # one per line, for completion: first word only
+    [[ -x $DOTS_LIB/$1 ]] || return 0
+    if [[ $1 == help ]]; then
+        "$DOTS_LIB/help" --list
+    elif [[ $1 == install ]]; then
+        "$DOTS_LIB/install" --names
+    else
+        meta "$DOTS_LIB/$1" actions | tr ',' '\n' | awk 'NF{print $1}' | sort -u
+    fi
+}
+
+case "${1:-}" in
+    '')
+        pick=$(rows | awk -F'\t' '{printf "%-8s %s\n", $1, $3}' | dots menu dots) || exit 0
+        [[ -n $pick ]] || exit 0
+        cmd=${pick%% *}
+        list=$(meta "$DOTS_LIB/$cmd" actions)
+        [[ -n $list ]] || exec "$DOTS_LIB/$cmd"
+        act=$(tr ',' '\n' <<< "$list" | dots menu "$cmd") || exit 0
+        [[ -n $act ]] || exit 0
+        read -ra args <<< "$act"
+        exec "$DOTS_LIB/$cmd" "${args[@]}"
+        ;;
+    -h|--help) usage ;;
+    --commands) rows | cut -f1 ;;
+    --actions) actions "${2:-}" ;;
+    *)
+        cmd=$1; shift
+        [[ -x $DOTS_LIB/$cmd ]] || { err "dots: unknown command: $cmd (dots --help)"; exit 127; }
+        exec "$DOTS_LIB/$cmd" "$@"
+        ;;
+esac

@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+# dots:summary=Check that this machine matches the dotfiles
+#
+# Links, tools, scripts, PATH, active Node, saved packages, the packages
+# cheatsheet and Helix language servers. Changes nothing. Exits 1 on problems.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_ui"
+
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+LIST="${XDG_CONFIG_HOME:-$HOME/.config}/dots/packages"
+problems=0
+bad() { warn "$*"; problems=$(( problems + 1 )); }
+fix() { [[ -n ${DOTS_FIXES:-} ]] && echo "$1" >> "$DOTS_FIXES"; }  # a command that solves it
+
+# On a terminal: check under a spinner, then offer the fixes it found.
+if can_prompt && [[ -z ${DOTS_SPUN:-} && -z ${DOTS_NO_FIX:-} ]]; then
+    fixes=$(mktemp)
+    DOTS_COLOR=1 DOTS_SPUN=1 DOTS_FIXES=$fixes gum spin --show-output --spinner dot \
+        --spinner.foreground 212 --title 'Checking...' -- "$0"
+    code=$?
+    if [[ -s $fixes ]]; then
+        echo
+        picked=$(sort -u "$fixes" | choose --all 'Run these fixes? (x toggles, enter runs)') || picked=''
+        if [[ -n $picked ]]; then
+            while IFS= read -r line; do
+                section "$line"
+                read -ra cmd <<< "$line"
+                "${cmd[@]}" </dev/tty
+            done <<< "$picked"
+            rm -f "$fixes"
+            section 'check again'
+            DOTS_NO_FIX=1 exec "$0"
+        fi
+    fi
+    rm -f "$fixes"
+    exit "$code"
+fi
+
+check_links() {
+    section links
+    local pkg f rel before=$problems
+    while IFS= read -r pkg; do
+        [[ -d $DOTFILES/$pkg ]] || { bad "package in the list but not in the repo: $pkg"; continue; }
+        while IFS= read -r f; do
+            rel=${f#"$DOTFILES/$pkg/"}
+            [[ $HOME/$rel -ef $f ]] || { bad "not linked: ~/$rel (dots stow $pkg)"; fix "dots stow $pkg"; }
+        done < <(find "$DOTFILES/$pkg" -type f)
+    done < <(sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" 2>/dev/null | grep -v '^$')
+    while IFS= read -r f; do
+        bad "broken link: ${f/#$HOME/\~}"
+    done < <(find "$HOME" -maxdepth 1 -xtype l 2>/dev/null; find "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/lib/dots" -xtype l 2>/dev/null)
+    (( problems == before )) && ok "every package file is linked, no broken links"
+}
+
+check_tools() {
+    section tools
+    local t missing=()
+    for t in stow git zsh bash fzf fd bat eza gum helix pet jq checkupdates; do
+        have "$t" || missing+=("$t")
+    done
+    have paru || have yay || missing+=(paru)
+    [[ -r $HOME/.antigen/antigen.zsh ]] || missing+=("antigen (~/.antigen)")
+    if (( ${#missing[@]} )); then
+        bad "missing: ${missing[*]}"
+        fix "dots pkg install"
+    else
+        ok "required tools are installed"
+    fi
+}
+
+check_scripts() {
+    section scripts
+    local f before=$problems
+    for f in "$DOTS_LIB"/*; do
+        [[ -x $f ]] || continue
+        [[ $(head -c 2 "$f") == '#!' ]] || bad "no shebang on line 1: ${f##*/}"
+        bash -n "$f" 2>/dev/null || bad "syntax error: ${f##*/}"
+    done
+    [[ -x ${SUDO_ASKPASS:-$DOTS_LIB/askpass} ]] || bad "askpass is not executable"
+    (( problems == before )) && ok "dots commands parse, askpass is executable"
+}
+
+check_path() {
+    section PATH
+    local d before=$problems
+    while IFS= read -r d; do
+        [[ -z $d || -d $d || $d == */fnm_multishells/* ]] && continue
+        # Outside $HOME it comes from the system (WSL adds /usr/games), not from here.
+        if [[ $d == "$HOME"/* ]]; then bad "PATH entry does not exist: $d"; else note "from the system, does not exist: $d"; fi
+    done < <(tr ':' '\n' <<< "$PATH")
+    while IFS= read -r d; do
+        bad "PATH entry repeated: $d"
+    done < <(tr ':' '\n' <<< "$PATH" | sort | uniq -d)
+    (( problems == before )) && ok "no missing or repeated entries"
+}
+
+check_node() {
+    section node
+    local node; node=$(command -v node) || { bad "node not found"; return; }
+    case $node in
+        *fnm*)        ok "fnm is active: $(node --version)" ;;
+        *vite-plus*)  bad "vite-plus is active, fnm is the main one (open an interactive shell)" ;;
+        *)            bad "unexpected node: $node" ;;
+    esac
+    have vp && note "vite-plus is installed, in testing: $(vp --version 2>/dev/null | head -1)"
+}
+
+check_packages() {
+    section packages
+    local before=$problems sheet="$DOTFILES/docs/cheatsheets/packages.md" p
+    [[ -z $(dots pkg diff 2>/dev/null) ]] || { bad "packages differ from the saved lists (dots pkg diff)"; fix "dots pkg diff"; }
+    if [[ -f $sheet ]]; then
+        while IFS= read -r p; do
+            grep -qF "\`$p\`" "$sheet" || bad "not in packages.md: $p"
+        done < <(cat "$DOTFILES"/packages/*.txt 2>/dev/null | grep -v '^#' | sort -u)
+    else
+        bad "cheatsheet missing: docs/cheatsheets/packages.md"
+    fi
+    (( problems == before )) && ok "saved lists and packages.md are up to date"
+}
+
+check_migrations() {
+    section migrations
+    local n; n=$(dots migrate --count 2>/dev/null)
+    if [[ ${n:-0} != 0 ]]; then
+        bad "$n pending migration(s)"
+        fix "dots migrate"
+    else
+        ok "nothing pending"
+    fi
+}
+
+check_helix() {
+    section helix
+    have helix || { bad "helix not found"; return; }
+    local lang before=$problems
+    for lang in python bash toml markdown yaml typescript json; do
+        # A language lists alternatives, so one working server is enough.
+        helix --health "$lang" 2>&1 | awk '
+            /Configured language servers/ { on = 1; next }
+            /Configured debug/            { on = 0 }
+            on && /✓/ { found = 1 }
+            on && /✘/ { missing = 1 }
+            END { exit !(missing && !found) }
+        ' && bad "no language server found for $lang"
+    done
+    (( problems == before )) && ok "every language has a working language server"
+}
+
+check_links
+check_tools
+check_scripts
+check_path
+check_node
+check_packages
+check_migrations
+check_helix
+
+echo
+[[ -d $DOTFILES/.git ]] || note "${DOTFILES/#$HOME/\~} is not a git repository yet"
+if (( problems )); then
+    err "$problems problem(s) found"
+    exit 1
+fi
+ok "all good"

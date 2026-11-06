@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# dots:summary=Set up a machine: link configs, install packages, check
+# dots:args=[-n]
+# dots:actions=run,-n
+#
+#   dots setup      link, install what is missing (asks first), then doctor
+#   dots setup -n   dry run: show what would change
+#
+# Needs paru for the AUR list. vite-plus has its own installer, not covered here.
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_ui"
+
+case "${1:-run}" in
+    run)
+        have paru || have yay || warn "no AUR helper: AUR packages will be skipped"
+        steps=$'link configs\ninstall packages\ntheme\nmigrations\ncheck'
+        if can_prompt; then
+            steps=$(choose --all 'Which steps? (x toggles, enter runs)' <<< "$steps") || exit 0
+        fi
+        while IFS= read -r step; do
+            [[ -n $step ]] || continue
+            section "$step"
+            case $step in
+                'link configs')     dots stow sync </dev/tty || err "some packages did not link" ;;
+                'install packages') dots pkg install </dev/tty ;;
+                theme)              dots theme apply ;;
+                migrations)         dots migrate --init </dev/tty ;;
+                check)              dots doctor </dev/tty ;;
+            esac
+        done <<< "$steps"
+        ;;
+    -n)
+        section 'link configs (dry run)'
+        dots stow sync -n
+        section 'packages (+ not saved, - would be installed)'
+        dots pkg diff
+        section 'check'
+        dots doctor
+        ;;
+    -h|--help) sed -n '6,7p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) err "dots setup: unknown option: $1"; exit 1 ;;
+esac

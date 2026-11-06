@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# dots:summary=WSL report (safe to paste) and wslc passthrough
+# dots:args=[info | windows [-n] | wslc <args...>]
+# dots:actions=info,windows,windows -n,wslc
+#
+# `windows` copies the configs in windows/ to the Windows side: pick which ones,
+# and whatever it replaces is kept as <file>.bak.<timestamp>. -n only compares.
+#
+# `info` prints markdown: versions, /etc/wsl.conf, package counts and the
+# $HOME layout. Secret files are counted, never named, and Windows user names
+# are masked, so the output can go into docs or an issue.
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_ui"
+
+WSLC="${WSLC_EXE:-/mnt/c/Program Files/WSL/wslc.exe}"
+mask() { tr -d '\0\r' | sed -E 's#/mnt/c/Users/[^/ ]+#/mnt/c/Users/<user>#g; s#C:\\Users\\[^\\ ]+#C:\\Users\\<user>#g'; }
+
+info() {
+    echo "# WSL"; echo
+    echo "- distro: $(. /etc/os-release && echo "$PRETTY_NAME"), kernel $(uname -r)"
+    echo "- init: $(ps -p 1 -o comm=)"
+    if have wsl.exe; then
+        wsl.exe --version 2>/dev/null | tr -d '\0\r' | awk -F': ' 'NR<=3 {printf "- %s: %s\n", $1, $2}'
+    fi
+    [[ -x $WSLC ]] && echo "- wslc: present" || echo "- wslc: not found"
+
+    echo; echo "## /etc/wsl.conf"; echo; echo '```ini'
+    cat /etc/wsl.conf 2>/dev/null || echo "(none)"
+    echo '```'
+
+    if have dots; then echo; echo "## Packages"; echo; echo '```'; dots pkg 2>/dev/null; echo '```'; fi
+
+    echo; echo "## \$HOME"; echo
+    local e n t linked=() local_=() secrets=0 win=0 dirs=0
+    local secret_re='^\.(ssh|gnupg|aws|azure|kube|docker|netrc|npmrc|.*history|claude\.json)$'
+    shopt -s dotglob nullglob
+    for e in "$HOME"/*; do
+        n=${e##*/}
+        if [[ $n =~ $secret_re ]]; then secrets=$((secrets + 1)); continue; fi
+        if [[ -L $e ]]; then
+            t=$(readlink "$e")
+            case $t in /mnt/*) win=$((win + 1)) ;; *dotfiles/*) linked+=("$n") ;; *) local_+=("$n") ;; esac
+        elif [[ $n == .* ]]; then local_+=("$n")
+        elif [[ -d $e ]]; then dirs=$((dirs + 1))
+        fi
+    done
+    echo "- linked from dotfiles: ${linked[*]:-none}"
+    echo "- only on this machine: ${local_[*]:-none}"
+    echo "- links into Windows: $win"
+    echo "- secret files (not listed): $secrets"
+    echo "- folders (projects etc.): $dirs"
+}
+
+win_home() {  # the Windows user folder; override with WIN_HOME
+    local d
+    if [[ -n ${WIN_HOME:-} ]]; then echo "$WIN_HOME"; return; fi
+    for d in /mnt/c/Users/*/; do
+        case ${d%/} in */Public|*/Default|*"/Default User"|*"/All Users") continue ;; esac
+        [[ -d $d/AppData ]] && { echo "${d%/}"; return; }
+    done
+    return 1
+}
+
+windows() {  # windows [-n]
+    local home src="${DOTFILES_DIR:-$HOME/dotfiles}/windows" row from to state stamp picks=() labels=()
+    home=$(win_home) || { err "dots wsl: Windows user folder not found (set WIN_HOME)"; return 1; }
+    local rows=(
+        "glazewm/config.yaml|$home/.glzr/glazewm/config.yaml"
+        "yasb/config.yaml|$home/.config/yasb/config.yaml"
+        "yasb/styles.css|$home/.config/yasb/styles.css"
+        "terminal/settings.json|$home/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
+        "Powershell/Microsoft.PowerShell_profile.ps1|$home/Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
+        "wsl/.wslconfig|$home/.wslconfig"
+    )
+    for row in "${rows[@]}"; do
+        from=${row%%|*}; to=${row#*|}
+        if [[ ! -e $to ]]; then state=new
+        elif cmp -s "$src/$from" "$to"; then state=same
+        else state=different
+        fi
+        case $state in
+            same) ok "$from: same" ;;
+            *)    warn "$from: $state"; labels+=("$from") ;;
+        esac
+    done
+    [[ ${1:-} == -n ]] && return 0
+    (( ${#labels[@]} )) || return 0
+    if can_prompt; then
+        mapfile -t picks < <(printf '%s\n' "${labels[@]}" | choose 'Copy to Windows? (x toggles)')
+    else
+        err "dots wsl windows: needs a terminal, or use -n to compare"; return 1
+    fi
+    stamp=$(date +%Y%m%d-%H%M%S)
+    for row in "${rows[@]}"; do
+        from=${row%%|*}; to=${row#*|}
+        [[ " ${picks[*]:-} " == *" $from "* ]] || continue
+        mkdir -p "$(dirname "$to")"
+        [[ -e $to ]] && cp "$to" "$to.bak.$stamp"
+        cp "$src/$from" "$to" && ok "copied $from"
+    done
+}
+
+case "${1:-info}" in
+    info)  # colored in a terminal, plain markdown when piped or redirected
+        if [[ -t 1 ]] && have gum; then info | mask | gum format; else info | mask; fi ;;
+    windows) shift; windows "$@" ;;
+    wslc)
+        shift
+        [[ -x $WSLC ]] || { err "dots wsl: wslc.exe not found at $WSLC"; exit 1; }
+        exec "$WSLC" "$@" ;;
+    -h|--help) sed -n '2,3p' "$0" ;;
+    *) err "dots wsl: unknown action: $1"; exit 1 ;;
+esac

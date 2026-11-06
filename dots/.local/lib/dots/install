@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# dots:summary=Install a ready-made setup: packages plus what they need after
+# dots:args=[name... | --list]
+#
+#   dots install            pick from a checklist
+#   dots install <name>...  install those
+#   dots install --list     what is available
+#
+# To add one: a line in RECIPES, and a post_<name> function when it needs more
+# than packages. Packages go through `dots pkg add`, so the lists stay current.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_ui"
+
+# name|command that shows it is installed|description|packages
+RECIPES='docker|docker|Docker, Compose, service and group|docker docker-buildx docker-compose
+rust|cargo|rustup with the stable toolchain|rustup
+go|go|Go|go
+java|java|OpenJDK|jdk-openjdk
+zig|zig|Zig|zig
+node|fnm|fnm with Node LTS|fnm
+herdr|herdr|herdr and its plugins|herdr-bin
+delta|delta|Colored git diffs|git-delta
+hyprland|hyprctl|Desktop: compositor, bar, tools, and links the config|hyprland hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin grim slurp wf-recorder satty hyprpicker brightnessctl wl-clipboard tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects'
+
+post_docker() {
+    dots sudo systemctl enable --now docker
+    id -nG | grep -qw docker || dots sudo usermod -aG docker "$USER"
+    note "open a new session for the docker group to apply"
+}
+post_rust()  { rustup default stable; }
+post_node()  { fnm install --lts; }
+post_herdr() {
+    local p
+    for p in thanhdat77/herdr-navigator nicosuave/memex rjyo/herdr-window-title-sync; do
+        herdr plugin install "$p" --yes || err "plugin failed: $p"
+    done
+}
+post_hyprland() {
+    dots stow hyprland
+    dots theme apply
+}
+
+rows() {  # "name  description (installed)"
+    local name check desc pkgs
+    while IFS='|' read -r name check desc pkgs; do
+        if have "$check"; then desc+=' (installed)'; fi
+        printf '%-10s %s\n' "$name" "$desc"
+    done <<< "$RECIPES"
+}
+
+run() {  # run <name>
+    local name=$1 check desc pkgs
+    IFS='|' read -r _ check desc pkgs < <(grep "^$name|" <<< "$RECIPES")
+    if [[ -z ${pkgs:-} ]]; then err "dots install: no such recipe: $name (dots install --list)"; return 1; fi
+    section "$name"
+    # shellcheck disable=SC2086  # package names, one per word
+    dots pkg add $pkgs || { err "$name: packages failed"; return 1; }
+    if declare -F "post_$name" >/dev/null; then "post_$name" || { err "$name: setup step failed"; return 1; }; fi
+    ok "$name"
+}
+
+case "${1:-}" in
+    '')
+        if ! can_prompt; then rows; exit 0; fi
+        picked=$(rows | choose 'Install what? (x toggles, enter installs)') || exit 0
+        status=0
+        while read -r name _; do
+            [[ -z ${name:-} ]] || run "$name" || status=1
+        done <<< "$picked"
+        exit "$status" ;;
+    --list)  rows ;;
+    --names) cut -d'|' -f1 <<< "$RECIPES" ;;
+    -h|--help) sed -n '5,7p' "$0" | sed 's/^# \{0,1\}//' ;;
+    -*) err "dots install: unknown option: $1"; exit 1 ;;
+    *)
+        status=0
+        for name in "$@"; do run "$name" || status=1; done
+        exit "$status" ;;
+esac
