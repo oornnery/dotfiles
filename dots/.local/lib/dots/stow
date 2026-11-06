@@ -88,11 +88,16 @@ link() {  # link <pkg>...
 }
 
 enable() {  # link packages and keep them in the list
-    local pkg
+    local pkg status=0
     ensure_list
     for pkg in "$@"; do
-        link "$pkg" && { grep -qx "$pkg" "$LIST" || echo "$pkg" >> "$LIST"; }
+        if link "$pkg"; then
+            grep -qx "$pkg" "$LIST" || echo "$pkg" >> "$LIST"
+        else
+            status=1
+        fi
     done
+    return "$status"
 }
 
 disable() {  # unlink packages and take them off the list
