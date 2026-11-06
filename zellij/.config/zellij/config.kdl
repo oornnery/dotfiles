@@ -2,6 +2,7 @@
 // help, and a palette to search help, TUIs and dots commands with tv.
 // The theme is written by dots theme, from the same palette as everything else.
 theme "dots"
+simplified_ui true  // square bars, without arrows
 show_startup_tips false
 show_release_notes false
 
