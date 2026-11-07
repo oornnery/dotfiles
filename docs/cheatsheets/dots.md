@@ -21,7 +21,10 @@ Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` mark
 | Search TUIs, commands, keys, help, man pages, snippets | `dots palette [mode]` (`Alt /` in Zellij); `Tab` switches modes |
 | Run in a new Zellij pane, or here outside it | `dots pane [--float \| --tab] [command]` |
 | Set up a machine | `dots setup` |
-| Copy configs to Windows | `dots wsl windows` |
+| Copy configs to Windows, or only compare | `dots wsl windows [-n]` |
+| Bring back configs changed on Windows | `dots wsl windows pull` |
+| Save the winget package list | `dots wsl windows export` |
+| Install the saved winget packages | `dots wsl windows install` |
 | Read these pages | `dots help` |
 
 With the `hyprland` package linked, also: `dots capture`, `dots display`,

@@ -28,7 +28,7 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 | `themes/` | Palettes and theme files, used by `dots theme` |
 | `packages/` | Saved package lists, written by `dots pkg save` |
 | `docs/cheatsheets/` | Pages for `dots help` |
-| `windows/` | GlazeWM, YASB, Windows Terminal, PowerShell and WSL configs |
+| `windows/` | GlazeWM, YASB, Windows Terminal, PowerShell and WSL configs, and the winget packages |
 | `ai/` | Agent configs, skills and prompts, mapped in `ai/README.md`; not linked |
 | `self-hosted/`, `templates/` | Compose files and editor templates |
 
