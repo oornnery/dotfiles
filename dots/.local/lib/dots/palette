@@ -39,7 +39,7 @@ rows_dots() {
 
 rows_keys() {  # the tables of keys of these sheets; the name is the sheet
     local sheet
-    for sheet in zellij neovim herdr; do
+    for sheet in keys zellij neovim herdr; do
         awk -F'|' -v sheet="$sheet" '/^\| `/ {
             gsub(/`/, "", $2); gsub(/^ +| +$/, "", $2); gsub(/^ +| +$/, "", $3)
             printf "keys %-8s %-20s %s\n", sheet, $2, $3

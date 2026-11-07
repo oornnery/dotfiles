@@ -17,6 +17,7 @@ Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` mark
 | Upgrade everything | `dots update` |
 | Switch colors | `dots theme` |
 | Open a TUI | `dots tui` |
+| See all the keys, of every tool | `dots help keys` |
 | Search TUIs, commands, keys, help, man pages, snippets | `dots palette [mode]` (`Alt /` in Zellij); `Tab` switches modes |
 | Run in a new Zellij pane, or here outside it | `dots pane [--float \| --tab] [command]` |
 | Set up a machine | `dots setup` |
