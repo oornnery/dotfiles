@@ -1,5 +1,5 @@
-# Microsoft.PowerShell_profile.ps1 - mirrors the Linux .zshrc as closely as
-# PowerShell allows. Linked into $PROFILE by dev/shell.ps1.
+# Microsoft.PowerShell_profile.ps1 - mirrors the Linux shell as closely as
+# PowerShell allows. Copied by `dots wsl windows`.
 #
 # Expects pwsh 7+. Tools are gated by Get-Command so missing binaries no-op.
 
@@ -38,7 +38,7 @@ if (Get-Module -ListAvailable -Name Terminal-Icons) {
 # Only load if BOTH the module AND the fzf binary exist - PSFzf throws a
 # terminating error at import-time if fzf isn't in PATH, and -ErrorAction
 # SilentlyContinue doesn't suppress that. (Symptom: profile spams red text
-# until you run dev/tools to install fzf.)
+# until fzf is installed.)
 if ((Have fzf) -and (Get-Module -ListAvailable -Name PSFzf)) {
     try {
         Import-Module PSFzf -ErrorAction Stop
@@ -80,7 +80,7 @@ if (Have procs) { Set-Alias ps procs  -Force -Option AllScope -ErrorAction Silen
 if (Have xh)    { Set-Alias http xh   -Force }
 
 # Quick tools
-Set-Alias v   nvim       -Force -ErrorAction SilentlyContinue
+Set-Alias v   hx         -Force -ErrorAction SilentlyContinue
 Set-Alias g   git        -Force -ErrorAction SilentlyContinue
 Set-Alias lg  lazygit    -Force -ErrorAction SilentlyContinue
 Set-Alias ld  lazydocker -Force -ErrorAction SilentlyContinue
@@ -105,29 +105,17 @@ function clean   { if (Have scoop) { scoop cleanup *; scoop cache rm * }; Clear-
 # Reload profile (alias for `exec zsh`).
 function reload  { . $PROFILE }
 
-# ─── dots: master CLI (analog of bin/dots on Linux) ───────────────────────
-# `dots setup core`, `dots theme set tokyo-night`, `dots update`, etc.
-# Run `dots` (no args) for the full help.
-function dots {
-    $dotfiles = if ($Env:DOTFILES_DIR) { $Env:DOTFILES_DIR } else { "$Env:USERPROFILE\dotfiles" }
-    & "$dotfiles\scripts\win\dots.ps1" @args
-}
-
-# Shortcuts (so `theme`, `update` keep working as standalone verbs too)
-function theme { dots theme @args }
-
 # Quick edit shortcuts
-function editp   { nvim $PROFILE }
-function editv   { nvim "$Env:LOCALAPPDATA\nvim\init.lua" }
+function editp   { hx $PROFILE }
 
 # Navigation
 function ..      { Set-Location .. }
 function ...     { Set-Location ..\.. }
 function ....    { Set-Location ..\..\.. }
 
-# pay-respects (typo corrector). `f` after a failed command -> fix it.
+# pay-respects (typo corrector). `fuck` after a failed command -> fix it.
 if (Have pay-respects) {
-    Invoke-Expression (pay-respects powershell --alias f | Out-String)
+    Invoke-Expression (pay-respects powershell --alias fuck | Out-String)
 }
 
 # ─── Functions ────────────────────────────────────────────────────────────
@@ -150,18 +138,23 @@ if (Have zoxide) {
     Invoke-Expression (& { (zoxide init powershell --cmd cd) -join "`n" })
 }
 
-# Prompt: starship is primary. Oh My Posh is a fallback that uses a JSON
-# crafted to mimic the active starship theme (themes/<theme>/oh-my-posh.json,
-# linked to ~/.config/oh-my-posh.json by dev/shell.ps1 / desktop/theme.ps1).
-if (Have starship) {
-    Invoke-Expression (& { (starship init powershell --print-full-init) -join "`n" })
-} elseif (Have oh-my-posh) {
-    $omp = "$Env:USERPROFILE\.config\oh-my-posh.json"
-    if (Test-Path $omp) {
-        oh-my-posh init pwsh --config $omp | Invoke-Expression
-    } else {
-        oh-my-posh init pwsh | Invoke-Expression
+# Prompt: same layout as the Linux one, in terminal colors.
+#   ~\dotfiles main *
+#   ❯
+function prompt {
+    $code = $?
+    $dir = $PWD.Path.Replace($HOME, '~')
+    Write-Host $dir -NoNewline -ForegroundColor Blue
+    if (Have git) {
+        $branch = git branch --show-current 2>$null
+        if ($branch) {
+            Write-Host " $branch" -NoNewline -ForegroundColor Magenta
+            if (git status --porcelain 2>$null) { Write-Host ' *' -NoNewline -ForegroundColor Yellow }
+        }
     }
+    Write-Host ''
+    Write-Host ([char]0x276F) -NoNewline -ForegroundColor $(if ($code) { 'Green' } else { 'Red' })
+    return ' '
 }
 
 # Deferred (not as critical on Windows - just init inline):

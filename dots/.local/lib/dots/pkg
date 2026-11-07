@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+# dots:summary=Map installed packages to ~/dotfiles/packages and reinstall them
+# dots:args=[status | list [mgr] | add [-m mgr] <pkg>... | remove [pkg...] | save | diff | install [-y]]
+# dots:actions=status=Installed and saved, per manager|list=What is installed now|add=Install packages and save the list|remove=Remove packages and save the list|save=Write the package lists|diff=Compare installed and saved|install=Install what is saved but missing
+#
+#   dots pkg            per manager: installed, saved, new (+) and missing (-)
+#   dots pkg list [m]   what is installed now (all managers, or one)
+#   dots pkg save       write ~/dotfiles/packages/<manager>.txt
+#   dots pkg diff       + installed but not saved   - saved but not installed
+#   dots pkg install    install what is saved but missing (asks first; -y skips)
+#   dots pkg add <pkg>  install and save; finds repo or AUR, -m picks another manager
+#   dots pkg remove     remove and save; with no name, pick from what is installed
+#
+# Managers are in _managers. Only explicitly installed packages are listed, not
+# their dependencies. A manager missing here is skipped.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+here=$(dirname "$(realpath "$0")")
+# shellcheck source=/dev/null
+. "$here/_ui"
+# shellcheck source=/dev/null
+. "$here/_managers"
+
+DIR="${DOTS_PKG_DIR:-${DOTFILES_DIR:-$HOME/dotfiles}/packages}"
+
+num() { local c=$1; [[ $3 =~ ^[1-9] ]] || c=$D; printf '%s%*s%s' "$c" "$2" "$3" "$N"; }  # num <color> <width> <value>
+
+saved() { [[ -f $DIR/$1.txt ]] && grep -v '^#' "$DIR/$1.txt" | sort -u; }
+only_now()   { comm -23 <(now "$1") <(saved "$1"); }
+only_saved() { comm -13 <(now "$1") <(saved "$1"); }
+
+status() {
+    local m n s
+    printf '%s%-8s %9s %7s %5s %7s%s\n' "$H" manager installed saved new missing "$N"
+    for m in "${MANAGERS[@]}"; do
+        available "$m" || [[ -f $DIR/$m.txt ]] || continue
+        n=$(now "$m" | wc -l); s=$(saved "$m" | wc -l)
+        (( n + s )) || continue
+        available "$m" || n='-'
+        printf '%-8s %9s %7s %s %s\n' "$m" "$n" "$s" \
+            "$(num "$G" 5 "$(only_now "$m" | wc -l)")" \
+            "$(num "$R" 7 "$( available "$m" && only_saved "$m" | wc -l || echo -)")"
+    done
+    echo; note "saved in ${DIR/#$HOME/\~}   (dots pkg save | diff | install)"
+}
+
+list() {
+    local m
+    for m in "${@:-${MANAGERS[@]}}"; do
+        available "$m" && [[ -n $(now "$m") ]] || continue
+        printf '%s── %s (%s) ──%s\n' "$H" "$m" "$(now "$m" | wc -l)" "$N"
+        now "$m" | { if have column; then column; else cat; fi; }
+    done
+}
+
+save() {  # save [--changed]: --changed leaves out what did not change
+    local m was is a b only=${1:-}
+    mkdir -p "$DIR"
+    for m in "${MANAGERS[@]}"; do
+        available "$m" || continue
+        was=$(saved "$m" | wc -l); a=$(only_now "$m"); b=$(only_saved "$m")
+        if [[ -z $(now "$m") ]]; then  # likely the wrong environment (npm under another Node)
+            (( was )) && printf '%s• %-7s %4s  kept: found 0 installed here%s\n' "$R" "$m" "$was" "$N"
+            continue
+        fi
+        { echo "# $m packages, saved $(date +%F) from ${HOSTNAME:-$(uname -n)}"; now "$m"; } > "$DIR/$m.txt"
+        is=$(saved "$m" | wc -l)
+        if [[ -z $a$b ]]; then
+            [[ -n $only ]] || note "$(printf '= %-7s %4s  unchanged' "$m" "$is")"
+            continue
+        fi
+        printf '%s✓%s %-7s %4s -> %-4s %s+%s%s %s-%s%s\n' "$G" "$N" "$m" "$was" "$is" \
+            "$G" "$(wc -w <<< "$a")" "$N" "$R" "$(wc -w <<< "$b")" "$N"
+        [[ -n $a ]] && printf "    $G+$N %s\n" $a
+        [[ -n $b ]] && printf "    $R-$N %s\n" $b
+    done
+    [[ -n $only ]] || note "saved in ${DIR/#$HOME/\~}"
+}
+
+source_of() {  # where a package comes from: pacman or aur
+    if pacman -Si "$1" >/dev/null 2>&1; then
+        echo pacman
+    elif available aur && "$(command -v paru || command -v yay)" -Si "$1" >/dev/null 2>&1; then
+        echo aur
+    else
+        return 1
+    fi
+}
+
+add_() {  # add_ [-m manager] <package>...
+    local manager='' p m names failed=0 pkgs=()
+    while (( $# )); do
+        case $1 in
+            -m) manager=${2:?-m needs a manager}; shift 2 ;;
+            *)  pkgs+=("$1"); shift ;;
+        esac
+    done
+    if (( ! ${#pkgs[@]} )) && can_prompt; then
+        read -ra pkgs <<< "$(gum input --placeholder 'packages to install')" || return 0
+    fi
+    (( ${#pkgs[@]} )) || { err "Usage: dots pkg add [-m manager] <package>..."; return 1; }
+    if [[ -n $manager ]]; then
+        printf '%s\n' "${MANAGERS[@]}" | grep -qx "$manager" || { err "unknown manager: $manager"; return 1; }
+        "install_$manager" "${pkgs[@]}" || failed=1
+    else
+        local repo=() aur_pkgs=()
+        for p in "${pkgs[@]}"; do
+            case $(source_of "$p") in
+                pacman) repo+=("$p") ;;
+                aur)    aur_pkgs+=("$p") ;;
+                *)      err "not found in the repos or the AUR: $p"; failed=1 ;;
+            esac
+        done
+        (( ${#repo[@]} )) && { install_pacman "${repo[@]}" || failed=1; }
+        (( ${#aur_pkgs[@]} )) && { install_aur "${aur_pkgs[@]}" || failed=1; }
+    fi
+    save --changed
+    return "$failed"
+}
+
+remove_() {  # remove_ [package...]
+    local p m line picked names failed=0 rows=()
+    if (( $# )); then
+        for p in "$@"; do
+            m=$(for m in "${MANAGERS[@]}"; do available "$m" && now "$m" | grep -qx "$p" && { echo "$m"; break; }; done)
+            if [[ -n $m ]]; then rows+=("$m $p"); else err "not installed: $p"; failed=1; fi
+        done
+    elif can_prompt && have fzf; then
+        picked=$(for m in "${MANAGERS[@]}"; do available "$m" && now "$m" | sed "s/^/$m /"; done \
+            | fzf --multi --height=60% --reverse --prompt='remove> ' --header='Tab marks, Enter removes') || return 0
+        mapfile -t rows <<< "$picked"
+        [[ -n ${rows[0]:-} ]] || return 0
+        confirm "Remove ${#rows[@]} package(s)?" || return 0
+    else
+        err "Usage: dots pkg remove <package>..."; return 1
+    fi
+    for m in "${MANAGERS[@]}"; do
+        names=$(for line in "${rows[@]:-}"; do [[ ${line%% *} == "$m" ]] && echo "${line#* }"; done)
+        [[ -n $names ]] || continue
+        # shellcheck disable=SC2086  # package names, one per word
+        "uninstall_$m" $names || failed=1
+    done
+    save --changed
+    return "$failed"
+}
+
+diff_() {  # a real diff per manager: - saved but not installed, + installed but not saved
+    local m
+    for m in "${MANAGERS[@]}"; do
+        available "$m" || continue
+        diff -U0 --color=auto --label "$m saved" --label "$m installed" <(saved "$m") <(now "$m")
+    done
+    return 0
+}
+
+install() {
+    local m missing yes=0
+    [[ ${1:-} == -y ]] && yes=1
+    for m in "${MANAGERS[@]}"; do
+        if [[ ! -f $DIR/$m.txt ]] || ! available "$m"; then continue; fi
+        mapfile -t missing < <(only_saved "$m")
+        (( ${#missing[@]} )) || continue
+        printf '%s── %s: %d to install ──%s\n' "$H" "$m" "${#missing[@]}" "$N"
+        if (( yes )); then
+            printf '%s\n' "${missing[*]}"
+        elif can_prompt; then
+            mapfile -t missing < <(printf '%s\n' "${missing[@]}" | choose --all "$m: x toggles, enter installs")
+            (( ${#missing[@]} )) || continue
+        else
+            printf '%s\n' "${missing[*]}"
+            confirm "install?" || continue
+        fi
+        "install_$m" "${missing[@]}" || err "some $m installs failed"
+    done
+}
+
+case "${1:-status}" in
+    status)  spin_self 'Checking packages...' status; status ;;
+    list)    shift; list "$@" ;;
+    save)    spin_self 'Saving packages...' save; save ;;
+    add)     shift; add_ "$@" ;;
+    remove)  shift; remove_ "$@" ;;
+    diff)    diff_ ;;
+    install) shift; install "$@" ;;
+    -h|--help) sed -n '6,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) err "dots pkg: unknown action: $1"; exit 1 ;;
+esac

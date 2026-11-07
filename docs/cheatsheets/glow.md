@@ -77,7 +77,7 @@ glow README.md | less -R -X +/Installation
 diff <(glow a.md) <(glow b.md) | less -R
 
 # Pipe a man page through glow? No — use bat:
-man tmux | col -bx | bat -l man --paging=always
+man git | col -bx | bat -l man --paging=always
 
 # Read a remote README
 curl -s https://raw.githubusercontent.com/u/r/main/README.md | glow -s dark -p

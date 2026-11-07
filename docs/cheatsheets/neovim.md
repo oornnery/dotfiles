@@ -1,7 +1,6 @@
 # Neovim Cheatsheet
 
-The native config is the base. `nvim.lazy/` loads the same base first and then
-adds plugins with lazy.nvim.
+The full config. Open the complete keys inside it with `<leader>?`.
 
 ## Core
 
@@ -40,7 +39,7 @@ adds plugins with lazy.nvim.
 
 | Bind          | Action |
 | ------------- | ------ |
-| `Ctrl-h/j/k/l`| Move between windows |
+| `Ctrl-h/j/k/l`| Move between windows; at a split edge, into the [herdr](herdr.md) pane |
 | `<Space>sv`   | Vertical split |
 | `<Space>sh`   | Horizontal split |
 | `<Space>=`    | Equalize windows |
@@ -58,23 +57,6 @@ adds plugins with lazy.nvim.
 | `<Space>tw`   | Toggle wrap |
 | `<Space>ts`   | Toggle spell |
 
-## lazy.nvim Extras
-
-Only in `nvim.lazy/`:
-
-| Bind           | Action |
-| -------------- | ------ |
-| `:Lazy`        | Plugin manager UI |
-| `<leader>ha`   | Harpoon add file |
-| `<leader>hh`   | Harpoon menu |
-| `<leader>1..4` | Harpoon jump to pinned slot |
-| `<leader>hn`   | Harpoon next |
-| `<leader>hp`   | Harpoon previous |
-| `zR`           | Open all folds with nvim-ufo |
-| `zM`           | Close all folds with nvim-ufo |
-| `zK`           | Peek fold or LSP hover |
-| `Ctrl-a`       | dial.nvim increment |
-| `Ctrl-x`       | dial.nvim decrement |
 
 ## Useful Commands
 

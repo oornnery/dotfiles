@@ -1,0 +1,177 @@
+{
+  "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+  "CreationDate": "2026-11-07T10:47:30.601-00:00",
+  "Sources": [
+    {
+      "Packages": [
+        {
+          "PackageIdentifier": "9PDSCC711RVF"
+        },
+        {
+          "PackageIdentifier": "9PM860492SZD"
+        },
+        {
+          "PackageIdentifier": "9WZDNCRFJ3PT"
+        }
+      ],
+      "SourceDetails": {
+        "Argument": "https://storeedgefd.dsx.mp.microsoft.com/v9.0",
+        "Identifier": "StoreEdgeFD",
+        "Name": "msstore",
+        "Type": "Microsoft.Rest"
+      }
+    },
+    {
+      "Packages": [
+        {
+          "PackageIdentifier": "Ablaze.Floorp"
+        },
+        {
+          "PackageIdentifier": "Anthropic.Claude"
+        },
+        {
+          "PackageIdentifier": "Blitz.Blitz"
+        },
+        {
+          "PackageIdentifier": "Brave.Brave"
+        },
+        {
+          "PackageIdentifier": "DEVCOM.JetBrainsMonoNerdFont"
+        },
+        {
+          "PackageIdentifier": "Devolutions.UniGetUI"
+        },
+        {
+          "PackageIdentifier": "Discord.Discord"
+        },
+        {
+          "PackageIdentifier": "ElectronicArts.EADesktop"
+        },
+        {
+          "PackageIdentifier": "EpicGames.EpicGamesLauncher"
+        },
+        {
+          "PackageIdentifier": "EpicGames.EpicOnlineServices"
+        },
+        {
+          "PackageIdentifier": "Git.Git"
+        },
+        {
+          "PackageIdentifier": "GitHub.cli"
+        },
+        {
+          "PackageIdentifier": "Google.GoogleDrive"
+        },
+        {
+          "PackageIdentifier": "Helix.Helix"
+        },
+        {
+          "PackageIdentifier": "Microsoft.AppInstaller"
+        },
+        {
+          "PackageIdentifier": "Microsoft.DSC"
+        },
+        {
+          "PackageIdentifier": "Microsoft.DotNet.DesktopRuntime.8"
+        },
+        {
+          "PackageIdentifier": "Microsoft.DotNet.Native.Runtime"
+        },
+        {
+          "PackageIdentifier": "Microsoft.Edge"
+        },
+        {
+          "PackageIdentifier": "Microsoft.GameInput"
+        },
+        {
+          "PackageIdentifier": "Microsoft.PowerShell"
+        },
+        {
+          "PackageIdentifier": "Microsoft.UI.Xaml.2.8"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCLibs.14"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCLibs.Desktop.14"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCRedist.2010.x86"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCRedist.2012.x86"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCRedist.2013.x64"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCRedist.2013.x86"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCRedist.2015+.x64"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VCRedist.2015+.x86"
+        },
+        {
+          "PackageIdentifier": "Microsoft.WSL"
+        },
+        {
+          "PackageIdentifier": "Microsoft.WindowsAppRuntime.1.8"
+        },
+        {
+          "PackageIdentifier": "Microsoft.WindowsAppRuntime.2"
+        },
+        {
+          "PackageIdentifier": "Microsoft.WindowsTerminal"
+        },
+        {
+          "PackageIdentifier": "Modrinth.ModrinthApp"
+        },
+        {
+          "PackageIdentifier": "Mojang.MinecraftLauncher"
+        },
+        {
+          "PackageIdentifier": "Nefarius.HidHide"
+        },
+        {
+          "PackageIdentifier": "OBSProject.OBSStudio"
+        },
+        {
+          "PackageIdentifier": "RiotGames.LeagueOfLegends.BR"
+        },
+        {
+          "PackageIdentifier": "RockstarGames.Launcher"
+        },
+        {
+          "PackageIdentifier": "TheDocumentFoundation.LibreOffice"
+        },
+        {
+          "PackageIdentifier": "Valve.Steam"
+        },
+        {
+          "PackageIdentifier": "ViGEm.ViGEmBus"
+        },
+        {
+          "PackageIdentifier": "VideoLAN.VLC"
+        },
+        {
+          "PackageIdentifier": "astral-sh.uv"
+        },
+        {
+          "PackageIdentifier": "flick9000.WinScript"
+        },
+        {
+          "PackageIdentifier": "qBittorrent.qBittorrent"
+        }
+      ],
+      "SourceDetails": {
+        "Argument": "https://cdn.winget.microsoft.com/cache",
+        "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
+        "Name": "winget",
+        "Type": "Microsoft.PreIndexed.Package"
+      }
+    }
+  ],
+  "WinGetVersion": "1.29.380"
+}

@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# dots:summary=Cheatsheets, plus your live aliases, functions and snippets
+# dots:args=[aliases | functions | pet | <sheet> | --list]
+#
+# Sheets are ~/dotfiles/docs/cheatsheets/<name>.md. The aliases, functions and
+# pet pages are built from the live config on every run, so they never go stale.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_ui"
+
+DOCS="${DOTFILES_DIR:-$HOME/dotfiles}/docs/cheatsheets"
+SHELL_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/shell"
+
+topics() {
+    printf 'aliases\nfunctions\npet\n'
+    [[ -d $DOCS ]] && find "$DOCS" -maxdepth 1 -name '*.md' -printf '%f\n' | sed 's/\.md$//' | sort
+}
+
+# The comment above a group of aliases names its section. An alias defined
+# twice (eza or plain ls) shows the first, the one normally in use.
+aliases() {
+    printf '%sAliases%s\n' "$H" "$N"
+    cat "$SHELL_DIR"/aliases.sh "$SHELL_DIR"/conf.d/*.sh 2>/dev/null \
+        | awk -v h="$H" -v g="$G" -v n="$N" '
+            /^# / { s = $0; sub(/^# /, "", s); sub(/ \(.*/, "", s); next }
+            match($0, /alias [^= ]+=\047/) {
+                name = substr($0, RSTART + 6, RLENGTH - 8)
+                cmd = substr($0, RSTART + RLENGTH); sub(/\047[^\047]*$/, "", cmd)
+                if (name == "sudo" || seen[name]++) next
+                if (s != last) { printf "\n%s── %s ──%s\n", h, s, n; last = s }
+                printf "  %s%-10s%s %s\n", g, name, n, cmd
+            }'
+}
+
+functions() {  # the "# name args  -> what it does" comment above each function
+    printf '%sFunctions%s\n\n' "$H" "$N"
+    awk -v g="$G" -v n="$N" '
+        /^# [a-z][a-z-]* .*->/ {
+            line = substr($0, 3); i = index(line, "->")
+            use = substr(line, 1, i - 1); sub(/ +$/, "", use)
+            printf "  %s%-20s%s %s\n", g, use, n, substr(line, i + 3)
+        }' "$SHELL_DIR"/functions.sh
+}
+
+pet() {  # snippets, grouped by the section comments in snippet.toml
+    printf '%sPet snippets%s  %srun them with Ctrl-X Ctrl-R%s\n' "$H" "$N" "$D" "$N"
+    awk -v h="$H" -v g="$G" -v n="$N" '
+        /^# ── / { s = $0; sub(/^# ── /, "", s); sub(/ ─+$/, "", s); printf "\n%s── %s ──%s\n", h, s, n; next }
+        /^ *description = / { d = $0; sub(/^ *description = "/, "", d); sub(/"$/, "", d); next }
+        /^ *command = / {
+            c = $0; sub(/^ *command = /, "", c)
+            sub(/^("|\047\047\047)/, "", c); sub(/ *("|\047\047\047)$/, "", c)
+            printf "  %s\n    %s%s%s\n", d, g, c, n
+        }' "${XDG_CONFIG_HOME:-$HOME/.config}/pet/snippet.toml"
+}
+
+# Build the page first: less shows "Waiting for data" on a slow pipe.
+page() {
+    local text; text=$(cat)
+    if [[ -t 1 ]]; then less -FRX <<< "$text"; else printf '%s\n' "$text"; fi
+}
+
+render() {  # markdown on stdin, paged
+    if have glow; then glow -p -w 100 -
+    elif have bat; then bat -l md --style=plain --paging=always
+    else less -R
+    fi
+}
+
+show() {
+    case $1 in
+        aliases|functions|pet) "$1" | page ;;
+        *)
+            [[ -f $DOCS/$1.md ]] || { err "dots help: no sheet: $1 (dots help --list)"; return 1; }
+            render < "$DOCS/$1.md" ;;
+    esac
+}
+
+case "${1:-}" in
+    '') while pick=$(topics | dots menu help) && [[ -n $pick ]]; do show "$pick"; done ;;
+    --list) topics ;;
+    -h|--help) sed -n '2,3p' "$0" ;;
+    *) show "$1" ;;
+esac

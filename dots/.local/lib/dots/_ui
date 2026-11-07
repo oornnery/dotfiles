@@ -1,0 +1,75 @@
+# shellcheck shell=bash
+# Shared by the dots commands, which source it. Not executable, so it is not a
+# command: `dots` lists executables only.
+
+export DOTS_LIB="${DOTS_LIB:-$(dirname "$(realpath "$0")")}"
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# Colors only on a terminal, and never with NO_COLOR. DOTS_COLOR keeps them when
+# the output goes through a spinner.
+if [[ ( -t 1 || -n ${DOTS_COLOR:-} ) && -z ${NO_COLOR:-} ]]; then
+    H=$'\033[1;36m' G=$'\033[32m' Y=$'\033[33m' R=$'\033[31m' D=$'\033[2m' N=$'\033[0m'
+else
+    H='' G='' Y='' R='' D='' N=''
+fi
+
+ok()      { printf '%s%s %s\n' "$G" "$N" "$*"; }
+warn()    { printf '%s%s %s\n' "$Y" "$N" "$*"; }
+err()     { printf '%s%s %s\n' "$R" "$N" "$*" >&2; }
+note()    { printf '%s%s%s\n' "$D" "$*" "$N"; }
+section() { printf '\n%s %s%s\n' "$H" "$1" "$N"; }
+
+# True when gum can draw here. Test it before `$(...)` or `< <(...)`, where
+# stdout or stdin is a pipe.
+can_prompt() { have gum && [[ -t 0 && -t 1 ]]; }
+
+confirm() {  # confirm <question>
+    if can_prompt; then
+        gum confirm --affirmative Yes --negative No "$1"
+    else
+        local answer
+        read -rp "$1 [y/N] " answer </dev/tty || return 1
+        [[ $answer == [yY]* ]]
+    fi
+}
+
+# choose [--all | --selected=a,b] <header>: pick from stdin (needs can_prompt).
+# Esc returns non-zero, so callers can tell cancelling from picking nothing.
+choose() {
+    local marks=()
+    case $1 in
+        --all)        marks=(--selected='*'); shift ;;
+        --selected=*) marks=("$1"); shift ;;
+    esac
+    gum choose --no-limit --height 20 "${marks[@]}" --header "$1"
+}
+
+need() {  # need <command...>: stop with a clear message when one is missing
+    local cmd
+    for cmd in "$@"; do
+        have "$cmd" && continue
+        err "$cmd is not installed"
+        have notify-send && notify-send -a dots -u critical "$cmd is not installed"
+        exit 1
+    done
+}
+
+spin() {  # spin <title> <command...>
+    local title=$1; shift
+    if have gum && [[ -t 1 ]]; then
+        gum spin --spinner dot --spinner.foreground 212 --title "$title" -- "$@"
+    else
+        "$@"
+    fi
+}
+
+# spin_self <title> <args...>: run this same command under a spinner, show its
+# output, and exit with its code. Does nothing when already under one, or piped.
+spin_self() {
+    local title=$1; shift
+    [[ -z ${DOTS_SPUN:-} && -t 1 ]] && have gum || return 0
+    DOTS_COLOR=1 DOTS_SPUN=1 gum spin --show-output --spinner dot --spinner.foreground 212 \
+        --title "$title" -- "$0" "$@"
+    exit $?
+}

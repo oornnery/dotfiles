@@ -1,16 +1,21 @@
-theme = "catppuccin_mocha"
+theme = "tokyonight"
 
 [editor]
 line-number = "relative"
 cursorline = true
 color-modes = true
-auto-pairs = true
 auto-completion = true
 auto-format = true
 idle-timeout = 250
 completion-timeout = 500
 insert-final-newline = true
 popup-border = "all"
+bufferline = "multiple"
+true-color = true
+end-of-line-diagnostics = "hint"
+
+[editor.inline-diagnostics]
+cursor-line = "warning"
 
 [editor.cursor-shape]
 insert = "bar"
@@ -28,7 +33,7 @@ skip-levels = 1
 
 [editor.statusline]
 left = ["mode", "spacer", "file-name", "file-modification-indicator"]
-right = ["diagnostics", "selections-count", "position-percentage", "file-encoding", "file-line-ending", "file-type"]
+right = ["diagnostics", "selections", "position-percentage", "file-encoding", "file-line-ending", "file-type"]
 separator = "│"
 mode.normal = "NORMAL"
 mode.insert = "INSERT"
@@ -39,9 +44,32 @@ display-messages = true
 display-inlay-hints = true
 
 [keys.normal]
-"g" = { "g" = "goto_file_start", "d" = "goto_definition", "D" = "goto_type_definition", "r" = "goto_reference", "i" = "goto_implementation" }
-"space" = { "space" = "file_picker", "v" = "vsplit", "s" = "hsplit", "w" = ":w", "q" = ":q", "f" = "file_picker", "F" = "file_picker_in_current_buffer_directory", "/" = "global_search" }
-"esc" = "collapse_selection"
-"C" = "copy_selection_on_next_line"
-"tab" = "cycle_next"
-"S-Tab" = "cycle_previous"
+esc = "collapse_selection"
+tab = "goto_next_buffer"      # replaces jump_forward, also on Ctrl-i
+S-tab = "goto_previous_buffer"
+# Pick a file with yazi (recipe from its docs). insert-output is what lets it use
+# the terminal; the printf gives the screen back to Helix afterwards.
+C-y = [
+    ':sh rm -f /tmp/yazi-pick',
+    ':insert-output yazi "%{buffer_name}" --chooser-file=/tmp/yazi-pick',
+    ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+    ':open %sh{cat /tmp/yazi-pick}',
+    ':redraw',
+    ':set mouse false',
+    ':set mouse true',
+]
+
+[keys.normal.space]
+space = "file_picker"
+# Read this file with glow: a floating pane in Zellij, the whole terminal outside.
+m = [
+    ':insert-output dots pane --float glow -p "%{buffer_name}"',
+    ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+    ':redraw',
+    ':set mouse false',
+    ':set mouse true',
+]
+v = "vsplit"
+w = ":write"                  # window menu is still on Ctrl-w
+q = ":quit"
+F = "file_picker_in_current_buffer_directory"

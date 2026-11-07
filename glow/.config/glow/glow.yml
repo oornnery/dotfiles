@@ -1,0 +1,4 @@
+# The style comes from GLOW_STYLE in env.sh: glow does not expand ~ here.
+mouse: false
+pager: false
+width: 100

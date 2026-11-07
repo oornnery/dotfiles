@@ -1,102 +1,69 @@
-# Zellij Cheatsheet
+# Zellij
 
-Config in `~/.config/zellij/config.kdl`. **Vim-flavored, Catppuccin Mocha.**
+Panes and tabs in the terminal, with its default keys. The bar at the bottom always
+shows the current mode and its keys. `Esc` or `Enter` leaves a mode.
 
-## Prefix / Modes
+Both bars are [zjstatus](https://github.com/dj95/zjstatus), a plugin that
+`dots install zellij` downloads. On a new machine it asks for permission inside the
+bars, where keys do not reach it: click a bar, then press `y`.
 
-Zellij is mode-based. Most keys pass through in `normal` mode.
+## Added here
 
-| Bind     | Action                          |
-| -------- | ------------------------------- |
-| `Ctrl+b` | Enter **pane** mode             |
-| `Ctrl+t` | Enter **tab** mode              |
-| `Ctrl+r` | Enter **resize** mode           |
-| `Ctrl+m` | Enter **move** mode             |
-| `Ctrl+s` | Enter **scroll** mode           |
-| `Ctrl+o` | Enter **session** mode          |
-| `Ctrl+n` | Return to **normal** mode       |
-| `Ctrl+g` | Lock session                    |
+| Key | Action |
+| --- | ------ |
+| `Alt /` | Search everything with tv; `Tab` there switches modes |
+| `Alt u` | Pick a TUI |
+| `Alt ?` | Search the help pages with tv, this one included |
+| `Alt e` | Yazi |
+| `Alt g` | Lazygit |
+| `Alt 1` `2` `3` | Go to that tab |
 
-## Pane Mode (`Ctrl+b`)
+Each one opens in a floating pane that closes when you are done, except the tabs.
 
-| Bind     | Action                                |
-| -------- | ------------------------------------- |
-| `h/j/k/l`| Move focus left/down/up/right         |
-| `H/J/K/L`| Move focus (alternative)              |
-| `n`      | New pane (default split)              |
-| `d`      | New pane (horizontal split)           |
-| `r`      | New pane (vertical split)             |
-| `s`      | New pane (stacked)                    |
-| `x`      | Close current pane                    |
-| `p`      | Switch focus to next pane             |
-| `e`      | Toggle pane embed/floating            |
-| `f`      | Toggle fullscreen                     |
-| `z`      | Toggle pane frames                    |
-| `c`      | Rename pane                           |
-| `Ctrl+b` | Return to **normal** mode             |
+## With yazi and Helix
 
-## Tab Mode (`Ctrl+t`)
+These work inside and outside Zellij. Inside, what opens gets its own pane; outside,
+it takes over the terminal until it ends. `Alt e` and `Alt g` also work on the shell
+prompt, and there `y` leaves the shell in the folder you were in.
 
-| Bind     | Action                                |
-| -------- | ------------------------------------- |
-| `h/l`    | Previous / next tab                   |
-| `1..9`   | Jump to tab 1-9                       |
-| `n`      | New tab                               |
-| `x`      | Close current tab                     |
-| `r`      | Rename tab                            |
-| `tab`    | Toggle previous/next tab              |
-| `Ctrl+t` | Return to **normal** mode             |
+| Where | Key | Action |
+| ----- | --- | ------ |
+| Yazi | `Enter` | Open the file in Helix |
+| Yazi | `W` | A shell here |
+| Yazi | `T` | A shell here, as a tab |
+| Helix | `Ctrl y` | Pick a file with yazi |
+| Helix | `Space m` | Read this file with glow |
+| Shell | `dev` | This folder as a session: yazi and Helix, lazygit, a shell |
 
-## Resize Mode (`Ctrl+r`)
+Each tool has its own tabs:
 
-| Bind     | Action                                |
-| -------- | ------------------------------------- |
-| `h/j/k/l`| Increase left/down/up/right           |
-| `H/J/K/L`| Decrease left/down/up/right           |
-| `+` / `-`| Increase / decrease overall size      |
-| `Ctrl+r` | Return to **normal** mode             |
+| Action | Zellij | Yazi | Helix |
+| ------ | ------ | ---- | ----- |
+| New | `Ctrl t` `n` | `t` `t` | `:new` |
+| Next, previous | `Ctrl t` `l` `h` | `]` `[` | `Tab` `Shift Tab` |
+| Go to number | `Alt 1` `2` `3` | `1` to `9` | |
+| Close | `Ctrl t` `x` | `Ctrl c` | `:bc` |
 
-## Move Mode (`Ctrl+m`)
+## Modes
 
-| Bind     | Action                                |
-| -------- | ------------------------------------- |
-| `h/j/k/l`| Move pane left/down/up/right          |
-| `tab`    | Cycle pane position                   |
-| `Ctrl+m` | Return to **normal** mode             |
+| Key | Mode | For |
+| --- | ---- | --- |
+| `Ctrl p` | Pane | New, close, rename, fullscreen, floating |
+| `Ctrl t` | Tab | New, close, rename, move |
+| `Ctrl n` | Resize | Change the size of a pane |
+| `Ctrl h` | Move | Move a pane around |
+| `Ctrl s` | Scroll | Scroll and search what a pane printed |
+| `Ctrl o` | Session | Detach, switch and manage sessions |
+| `Ctrl g` | Locked | Send every key to the app, as in Helix; `Ctrl g` again unlocks |
 
-## Scroll Mode (`Ctrl+s`)
+## Direct keys
 
-| Bind     | Action                                |
-| -------- | ------------------------------------- |
-| `j/k`    | Scroll down / up (line by line)       |
-| `h/l`    | Page up / down                        |
-| `Ctrl+u/d`| Half-page up / down                  |
-| `g/G`    | Scroll to top / bottom                |
-| `Ctrl+s` | Return to **normal** mode             |
+| Key | Action |
+| --- | ------ |
+| `Alt n` | New pane |
+| `Alt h` `j` `k` `l` | Move between panes |
+| `Alt f` | Show or hide floating panes |
+| `Alt +` `-` | Resize the pane |
+| `Ctrl q` | Quit |
 
-## Session Mode (`Ctrl+o`)
-
-| Bind     | Action                                |
-| -------- | ------------------------------------- |
-| `d`      | Detach from session                   |
-| `Ctrl+o` | Return to **normal** mode             |
-
-## CLI Commands
-
-| Command                    | Action                          |
-| -------------------------- | ------------------------------- |
-| `zellij`                   | Start new session or attach     |
-| `zellij attach <name>`     | Attach to named session         |
-| `zellij ls`                | List active sessions            |
-| `zellij kill-session`      | Kill current session            |
-| `zellij setup --check`     | Verify configuration            |
-
-## Active Settings
-
-| Setting            | Value             | Why                                |
-| ------------------ | ----------------- | ---------------------------------- |
-| `theme`            | `catppuccin-mocha`| Consistent color palette           |
-| `pane_frames`      | `false`           | Cleaner look, no borders           |
-| `simplified_ui`    | `true`            | Avoids nerdfont `>>>` rendering    |
-| `default_shell`    | `zsh`             | Consistent shell environment       |
-| `scroll_buffer_size`| `10000`          | Long scrollback history            |
+Use `Ctrl g` inside Helix when a Zellij key gets in the way, like `Ctrl s` or `Ctrl o`.

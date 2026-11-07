@@ -4,12 +4,12 @@
 
 | Command                        | What it does                 |
 | ------------------------------ | ---------------------------- |
-| `cat <file>`                   | Alias to `batcat <file>`     |
-| `catp <file>`                  | Plain output via `batcat -p` |
-| `batcat --style=plain <file>`  | No decorations               |
-| `batcat --paging=never <file>` | Disable pager                |
-| `batcat -n <file>`             | Show line numbers            |
-| `batcat -A <file>`             | Show invisible characters    |
+| `b <file>`                     | Alias to `bat <file>`        |
+| `bat -p <file>`                | Plain output                 |
+| `bat --style=plain <file>`  | No decorations               |
+| `bat --paging=never <file>` | Disable pager                |
+| `bat -n <file>`             | Show line numbers            |
+| `bat -A <file>`             | Show invisible characters    |
 
 ## Shortcuts
 
@@ -22,20 +22,20 @@
 
 ```bash
 # Read config with syntax highlighting
-cat ~/.zshrc
+bat ~/.zshrc
 
 # Use plain output for scripts/pipes
-catp README.md
+bat -p README.md
 
 # Inspect whitespace problems
-batcat -A docs/README.md
+bat -A docs/README.md
 ```
 
 ## Tips
 
 | Tip                                     | Why it helps                              |
 | --------------------------------------- | ----------------------------------------- |
-| Use `catp` for scripts/pipes            | Cleaner output for tooling                |
-| Use highlighted `cat` for config review | Faster spotting of syntax issues          |
+| Use `bat -p` for scripts/pipes            | Cleaner output for tooling                |
+| Use `bat` for config review | Faster spotting of syntax issues          |
 | Disable paging in scripts               | Prevents blocking CI/non-interactive runs |
 | Use line numbers during reviews         | Easier discussion and navigation          |

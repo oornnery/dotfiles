@@ -21,7 +21,7 @@
   "link_text": { "color": "35", "bold": true },
   "image": { "color": "212", "underline": true },
   "image_text": { "color": "243", "format": "Image: {{.text}} →" },
-  "code": { "prefix": " ", "suffix": " ", "color": "203", "background_color": "236" },
+  "code": { "color": "5" },
   "code_block": {
     "color": "244",
     "margin": 2,

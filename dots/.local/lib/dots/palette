@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# dots:summary=Search TUIs, commands, keys, help, man pages and snippets, with a preview
+# dots:args=[all | tui | dots | keys | help | run | linux | pet]
+# dots:actions=tui=Only the TUIs|dots=Only dots commands|keys=Only keyboard shortcuts|help=Only help pages|run=Any command|linux=Man pages|pet=Pet snippets
+#
+#   dots palette        everything
+#   dots palette <mode> only one mode; inside, Tab switches to another
+#
+# Each mode is a tv channel (television/.config/television/cable) that calls this
+# script back for its lines and for the preview. A line is "<kind> <name> <text>".
+# The preview never runs what it shows: asking any command for --help on hover could
+# just as well run it.
+#
+# What you pick runs right here. Zellij opens this in a floating pane (see its
+# config.kdl), so there it closes when what you picked ends.
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+
+SHEETS="${DOTFILES_DIR:-$HOME/dotfiles}/docs/cheatsheets"
+LIB="${DOTS_LIB:-$HOME/.local/lib/dots}"
+
+# The preview takes half of the terminal, less its borders.
+read -r _ columns < <(stty size 2>/dev/null </dev/tty)
+WIDTH=$(( ${columns:-120} / 2 - 4 ))
+
+row() { printf '%s %-16s %s\n' "$1" "$2" "${3:-}"; }  # row <kind> <name> <text>
+
+rows_tui() {
+    local name desc
+    while read -r name desc; do row tui "$name" "$desc"; done < <(dots tui --list)
+}
+
+rows_dots() {
+    local line
+    while IFS= read -r line; do row dots "${line%%:*}" "${line#*:}"; done < <(dots --describe)
+}
+
+rows_keys() {  # the tables of keys of these sheets; the name is the sheet
+    local sheet
+    for sheet in keys zellij neovim herdr; do
+        awk -F'|' -v sheet="$sheet" '/^\| `/ {
+            gsub(/`/, "", $2); gsub(/^ +| +$/, "", $2); gsub(/^ +| +$/, "", $3)
+            printf "keys %-8s %-20s %s\n", sheet, $2, $3
+        }' "$SHEETS/$sheet.md"
+    done
+}
+
+rows_help() {
+    local topic
+    while read -r topic; do row help "$topic"; done < <(dots help --list)
+}
+
+rows_run() {
+    local name
+    while read -r name; do row run "$name"; done < <(compgen -c | sort -u)
+}
+
+rows_linux() {  # "ls (1) - list files" becomes "linux ls.1 list files"
+    man -k . 2>/dev/null | sort -u | awk '{
+        name = $1; section = $2; gsub(/[()]/, "", section)
+        sub(/^.* \([^)]*\) +- /, "")
+        printf "linux %-24s %s\n", name "." section, $0
+    }'
+}
+
+snippets() {  # "description<tab>command", one per snippet
+    pet list | awk '
+        /^ *Description:/ { sub(/^ *Description: */, ""); desc = $0 }
+        /^ *Command:/     { sub(/^ *Command: */, ""); print desc "\t" $0 }'
+}
+
+rows_pet() {
+    local n=0 desc _
+    while IFS=$'\t' read -r desc _; do printf 'pet %d %s\n' "$((n += 1))" "$desc"; done < <(snippets)
+}
+
+rows_all() {
+    row mode help 'Help pages'
+    row mode keys 'Keyboard shortcuts'
+    row mode tui 'TUIs'
+    row mode dots 'dots commands'
+    row mode run 'Any command'
+    row mode linux 'Man pages'
+    row mode pet 'Pet snippets'
+    rows_tui
+    rows_dots
+    rows_help
+}
+
+markdown() { CLICOLOR_FORCE=1 glow -s "${GLOW_STYLE:-dark}" -w "$WIDTH" "$1"; }
+
+manual() { MANWIDTH=$WIDTH man "$@" 2>/dev/null | col -bx; }  # manual [section] <name>
+
+about() {  # a program, without running it: where it is, then its sheet or man page
+    printf '%s\n%s\n\n' "$1" "$(type -P "$1" || echo 'not a file: shell built-in or alias')"
+    if [[ -f $SHEETS/$1.md ]]; then markdown "$SHEETS/$1.md"; else manual "$1"; fi
+}
+
+preview() {  # preview <kind> <name>
+    case $1 in
+        tui|run) about "$2" ;;
+        keys)    markdown "$SHEETS/$2.md" ;;
+        help)
+            if [[ -f $SHEETS/$2.md ]]; then markdown "$SHEETS/$2.md"
+            else DOTS_COLOR=1 dots help "$2"
+            fi ;;
+        dots)
+            sed -n 's/^# dots:summary=//p' "$LIB/$2"
+            sed -n 's/^# dots:args=/\ndots '"$2"' /p' "$LIB/$2"
+            sed -n '/^# dots:/d; 2,/^set /{/^#/s/^# \{0,1\}//p}' "$LIB/$2" ;;
+        linux)   manual "${2##*.}" "${2%.*}" ;;
+        pet)
+            snippets | sed -n "$2p" | awk -F'\t' '{ print $1 "\n\n" $2 }' ;;
+        mode)    printf 'Open only this mode.\n\ndots palette %s\n' "$2" ;;
+    esac
+}
+
+act() {  # act <kind> <name> <text>
+    case $1 in
+        tui|run) exec "$2" ;;
+        mode)    exec "$0" "$2" ;;
+        help)    dots help "$2" ;;
+        keys)    dots help "$2" ;;
+        linux)   exec man "${2##*.}" "${2%.*}" ;;
+        pet)     exec pet exec --query "$3" ;;
+        dots)
+            dots "$2"
+            read -rsn1 -p 'Press a key to close' ;;
+    esac
+}
+
+case "${1:-all}" in
+    --rows)    "rows_$2"; exit ;;
+    --preview) preview "$2" "$3"; exit 0 ;;  # on failure, tv would show only stderr
+    all|tui|dots|keys|help|run|linux|pet) need tv; choice=$(tv "dots-${1:-all}") ;;
+    -h|--help) sed -n '6,7p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) err "dots palette: unknown mode: $1"; exit 1 ;;
+esac
+[[ -n $choice ]] || exit 0
+# Tab can lead to a channel of tv itself: what comes back is a file or just a line.
+if [[ -f $choice ]]; then exec "${EDITOR:-helix}" "$choice"; fi
+read -r kind name text <<< "$choice"
+case $kind in
+    tui|run|mode|help|keys|linux|pet|dots) ;;
+    *) printf '%s\n' "$choice"; read -rsn1 -p 'Press a key to close'; exit 0 ;;
+esac
+act "$kind" "$name" "$text"

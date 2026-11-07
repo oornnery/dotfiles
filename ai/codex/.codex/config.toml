@@ -1,0 +1,130 @@
+model = "gpt-5.6-luna"
+model_reasoning_effort = "high"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+approvals_reviewer = "auto_review"
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 4
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "medium"
+
+[mcp_servers.cavemem]
+command = "fnm"
+args = ["exec", "--using=22", "--", "cavemem", "mcp"]
+enabled = true
+default_tools_approval_mode = "writes"
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+enabled = true
+default_tools_approval_mode = "auto"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@0.0.78"]
+enabled = true
+default_tools_approval_mode = "approve"
+
+[mcp_servers.chrome_devtools]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@1.8.0", "--headless", "--isolated", "--no-usage-statistics", "--no-performance-crux"]
+env = { CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1" }
+enabled = true
+startup_timeout_sec = 60
+default_tools_approval_mode = "approve"
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_MCP_TOKEN"
+http_headers = { "X-MCP-Toolsets" = "repos,issues,pull_requests,actions" }
+enabled = true
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.cloudflare]
+url = "https://mcp.cloudflare.com/mcp"
+enabled = true
+default_tools_approval_mode = "prompt"
+
+[projects."/home/oornnery/friday-os"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/voicelab"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/no-jinjax"]
+trust_level = "trusted"
+
+[projects."/home/oornnery"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/ve-tools"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/ve-abr"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/friday"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/fb"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/proj/pyhtx"]
+trust_level = "trusted"
+
+[projects."/home/oornnery/labs"]
+trust_level = "trusted"
+
+[projects."/mnt/c/Users/fabio/Downloads/harness"]
+trust_level = "trusted"
+
+[tui]
+status_line = ["model-with-reasoning", "current-dir", "git-branch"]
+status_line_use_colors = true
+
+[tui.model_availability_nux]
+gpt-6-astra = 4
+
+[features]
+hooks = true
+
+[hooks.state]
+
+# Keep the newer shared ~/.agents/skills copies; retain unique plugin skills.
+# Recheck these paths after upgrading the Cloudflare plugin (currently 0.1.2).
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/agents-sdk/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/cloudflare/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/durable-objects/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/sandbox-sdk/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/web-perf/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/workers-best-practices/SKILL.md"
+enabled = false
+
+[[skills.config]]
+path = "/home/oornnery/.codex/plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills/wrangler/SKILL.md"
+enabled = false
+
+[hooks.state."/home/oornnery/.codex/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:375f1427ce7a98088c7435ee6fe75bf9bf780f8aaea85728eabc144d972e3acf"

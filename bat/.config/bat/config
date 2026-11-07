@@ -1,0 +1,5 @@
+# Terminal colors, so bat follows `dots theme`.
+--theme="ansi"
+--style="plain"
+--paging=never
+--tabs=4

@@ -1,16 +1,37 @@
 local M = {}
 
 function M.setup(spec)
-  local c = spec.colors or {}
+  spec = spec or {}
+  local c = vim.tbl_extend("force", {
+    bg = "#1e1e2e",
+    fg = "#cdd6f4",
+    surface = "#313244",
+    surface2 = "#45475a",
+    muted = "#6c7086",
+    accent = "#f5c2e7",
+    accent2 = "#94e2d5",
+    yellow = "#f9e2af",
+    red = "#f38ba8",
+    blue = "#89b4fa",
+    green = "#a6e3a1",
+    cyan = "#94e2d5",
+    magenta = "#f5c2e7",
+    orange = "#fab387",
+  }, spec.colors or {})
 
   M.name = spec.name or "dotfiles"
   M.colorscheme = spec.colorscheme or "dotfiles"
+  M.background = spec.background or "dark"
+  M.colors = c
 
   local function hl(group, opts)
     pcall(vim.api.nvim_set_hl, 0, group, opts)
   end
 
   local function set_highlights()
+    if not vim.o.termguicolors then
+      return
+    end
     local bg = c.bg or "#1e1e2e"
     local fg = c.fg or "#cdd6f4"
     local surface = c.surface or bg
@@ -26,7 +47,6 @@ function M.setup(spec)
     local magenta = c.magenta or accent
     local orange = c.orange or yellow
 
-    vim.o.termguicolors = true
     vim.g.colors_name = "dotfiles"
 
     hl("Normal", { fg = fg, bg = bg })
@@ -160,10 +180,140 @@ function M.setup(spec)
     hl("DiffChange", { fg = yellow, bg = surface })
     hl("DiffDelete", { fg = red, bg = surface })
     hl("DiffText", { fg = blue, bg = surface2, bold = true })
+
+    -- Plugin surfaces ---------------------------------------------------------
+    hl("GitSignsAdd", { fg = green, bg = bg })
+    hl("GitSignsChange", { fg = yellow, bg = bg })
+    hl("GitSignsDelete", { fg = red, bg = bg })
+    hl("GitSignsCurrentLineBlame", { fg = muted, bg = bg, italic = true })
+
+    hl("IblIndent", { fg = surface2 })
+    hl("IblScope", { fg = accent })
+
+    hl("NeoTreeNormal", { fg = fg, bg = bg })
+    hl("NeoTreeNormalNC", { fg = fg, bg = bg })
+    hl("NeoTreeWinSeparator", { fg = surface2, bg = bg })
+    hl("NeoTreeDirectoryName", { fg = blue, bold = true })
+    hl("NeoTreeDirectoryIcon", { fg = blue })
+    hl("NeoTreeFileName", { fg = fg })
+    hl("NeoTreeFileNameOpened", { fg = accent, bold = true })
+    hl("NeoTreeRootName", { fg = accent, bold = true })
+    hl("NeoTreeGitAdded", { fg = green })
+    hl("NeoTreeGitModified", { fg = yellow })
+    hl("NeoTreeGitDeleted", { fg = red })
+    hl("NeoTreeGitUntracked", { fg = cyan })
+    hl("NeoTreeIndentMarker", { fg = surface2 })
+
+    hl("BufferLineFill", { fg = muted, bg = bg })
+    hl("BufferLineBackground", { fg = muted, bg = bg })
+    hl("BufferLineBufferVisible", { fg = muted, bg = bg })
+    hl("BufferLineBufferSelected", { fg = fg, bg = surface, bold = true })
+    hl("BufferLineModified", { fg = yellow, bg = bg })
+    hl("BufferLineModifiedVisible", { fg = yellow, bg = bg })
+    hl("BufferLineModifiedSelected", { fg = yellow, bg = surface })
+    hl("BufferLineIndicatorSelected", { fg = accent, bg = surface })
+    hl("BufferLineSeparator", { fg = surface2, bg = bg })
+    hl("BufferLineSeparatorSelected", { fg = surface2, bg = surface })
+    hl("BufferLineCloseButton", { fg = muted, bg = bg })
+    hl("BufferLineCloseButtonSelected", { fg = red, bg = surface })
+    hl("BufferLineDiagnostic", { fg = muted, bg = bg })
+    hl("BufferLineError", { fg = red, bg = bg })
+    hl("BufferLineErrorSelected", { fg = red, bg = surface, bold = true })
+    hl("BufferLineWarning", { fg = yellow, bg = bg })
+    hl("BufferLineWarningSelected", { fg = yellow, bg = surface, bold = true })
+    hl("BufferLineInfo", { fg = blue, bg = bg })
+    hl("BufferLineInfoSelected", { fg = blue, bg = surface, bold = true })
+    hl("BufferLineHint", { fg = cyan, bg = bg })
+    hl("BufferLineHintSelected", { fg = cyan, bg = surface, bold = true })
+    hl("BufferLineOffsetSeparator", { fg = surface2, bg = bg })
+
+    hl("WhichKey", { fg = cyan })
+    hl("WhichKeyGroup", { fg = accent, bold = true })
+    hl("WhichKeyDesc", { fg = fg })
+    hl("WhichKeySeparator", { fg = muted })
+    hl("WhichKeyFloat", { fg = fg, bg = surface })
+    hl("WhichKeyBorder", { fg = accent, bg = surface })
+    hl("WhichKeyValue", { fg = muted })
+
+    hl("NoiceCmdlinePopup", { fg = fg, bg = surface })
+    hl("NoiceCmdlinePopupBorder", { fg = accent, bg = surface })
+    hl("NoiceCmdlineIcon", { fg = accent, bg = surface })
+    hl("NoiceMini", { fg = fg, bg = surface })
+    hl("NoiceConfirm", { fg = fg, bg = surface })
+    hl("NoiceFormatProgressDone", { fg = bg, bg = green })
+    hl("NoiceFormatProgressTodo", { fg = muted, bg = surface2 })
+
+    for _, level in ipairs({ "ERROR", "WARN", "INFO", "DEBUG", "TRACE" }) do
+      local color = ({ ERROR = red, WARN = yellow, INFO = blue, DEBUG = muted, TRACE = cyan })[level]
+      hl("Notify" .. level .. "Border", { fg = color, bg = bg })
+      hl("Notify" .. level .. "Icon", { fg = color, bg = bg })
+      hl("Notify" .. level .. "Title", { fg = color, bg = bg, bold = true })
+      hl("Notify" .. level .. "Body", { fg = fg, bg = bg })
+    end
+
+    hl("FzfLuaNormal", { fg = fg, bg = surface })
+    hl("FzfLuaBorder", { fg = accent, bg = surface })
+    hl("FzfLuaTitle", { fg = bg, bg = accent, bold = true })
+    hl("FzfLuaPreviewNormal", { fg = fg, bg = bg })
+    hl("FzfLuaPreviewBorder", { fg = surface2, bg = bg })
+    hl("FzfLuaCursor", { fg = bg, bg = accent })
+    hl("FzfLuaSearch", { fg = bg, bg = yellow, bold = true })
+
+    hl("BlinkCmpMenu", { fg = fg, bg = surface })
+    hl("BlinkCmpMenuBorder", { fg = accent, bg = surface })
+    hl("BlinkCmpMenuSelection", { fg = bg, bg = accent, bold = true })
+    hl("BlinkCmpLabel", { fg = fg })
+    hl("BlinkCmpLabelMatch", { fg = accent, bold = true })
+    hl("BlinkCmpKind", { fg = cyan })
+    hl("BlinkCmpSource", { fg = muted })
+    hl("BlinkCmpGhostText", { fg = muted, italic = true })
+    hl("BlinkCmpDoc", { fg = fg, bg = surface })
+    hl("BlinkCmpDocBorder", { fg = accent, bg = surface })
+    hl("BlinkCmpSignatureHelp", { fg = fg, bg = surface })
+    hl("BlinkCmpSignatureHelpBorder", { fg = accent, bg = surface })
+
+    hl("FlashLabel", { fg = bg, bg = red, bold = true })
+    hl("FlashMatch", { fg = bg, bg = yellow, bold = true })
+    hl("FlashCurrent", { fg = bg, bg = green, bold = true })
+
+    hl("MiniSurround", { fg = bg, bg = accent, bold = true })
+
+    hl("TroubleNormal", { fg = fg, bg = bg })
+    hl("TroubleNormalNC", { fg = fg, bg = bg })
+    hl("TroubleCount", { fg = bg, bg = accent, bold = true })
+    hl("TroubleText", { fg = fg })
+
+    hl("RenderMarkdownH1", { fg = accent, bold = true })
+    hl("RenderMarkdownH2", { fg = blue, bold = true })
+    hl("RenderMarkdownH3", { fg = cyan, bold = true })
+    hl("RenderMarkdownH4", { fg = green, bold = true })
+    hl("RenderMarkdownH5", { fg = yellow, bold = true })
+    hl("RenderMarkdownH6", { fg = orange, bold = true })
+    hl("RenderMarkdownH1Bg", { fg = accent, bg = bg, bold = true })
+    hl("RenderMarkdownH2Bg", { fg = blue, bg = bg, bold = true })
+    hl("RenderMarkdownH3Bg", { fg = cyan, bg = bg, bold = true })
+    hl("RenderMarkdownH4Bg", { fg = green, bg = bg, bold = true })
+    hl("RenderMarkdownH5Bg", { fg = yellow, bg = bg, bold = true })
+    hl("RenderMarkdownH6Bg", { fg = orange, bg = bg, bold = true })
+    hl("RenderMarkdownCode", { fg = fg, bg = bg })
+    hl("RenderMarkdownCodeBorder", { fg = surface2, bg = bg })
+    hl("RenderMarkdownCodeInfo", { fg = muted, bg = bg })
+    hl("RenderMarkdownCodeInline", { fg = cyan, bg = bg })
+    hl("RenderMarkdownBullet", { fg = accent })
+    hl("RenderMarkdownQuote", { fg = muted, italic = true })
+    hl("RenderMarkdownTableHead", { fg = accent, bg = bg, bold = true })
+    hl("RenderMarkdownTableRow", { fg = fg, bg = bg })
+    hl("RenderMarkdownLink", { fg = blue, underline = true })
+    hl("RenderMarkdownTodo", { fg = bg, bg = yellow, bold = true })
+    hl("RenderMarkdownChecked", { fg = green })
   end
 
   function M.apply()
-    vim.o.background = spec.background or "dark"
+    vim.o.background = M.background
+    if not vim.o.termguicolors then
+      vim.cmd.colorscheme("habamax")
+      return
+    end
     if M.colorscheme and not M._setting_colorscheme then
       M._setting_colorscheme = true
       pcall(vim.cmd.colorscheme, M.colorscheme)
@@ -177,29 +327,25 @@ function M.setup(spec)
     group = group,
     callback = set_highlights,
   })
+  -- Nvim enables 'termguicolors' on VimEnter, after init.lua has already
+  -- applied the theme without truecolor (habamax); re-apply once it flips.
+  vim.api.nvim_create_autocmd("OptionSet", {
+    group = group,
+    pattern = "termguicolors",
+    callback = function()
+      M.apply()
+    end,
+  })
 
   M.apply()
   return M
 end
 
 local home = vim.env.HOME or ""
-local data_home = vim.env.XDG_DATA_HOME or (home .. "/.local/share")
-local state_file = data_home .. "/dotfiles/active-theme"
 local dotfiles_dir = vim.env.DOTFILES_DIR or (home .. "/dotfiles")
 
-local function read_first_line(path)
-  local file = io.open(path, "r")
-  if not file then
-    return nil
-  end
-
-  local line = file:read("*l")
-  file:close()
-  return line
-end
-
-local name = read_first_line(state_file) or "catppuccin-mocha"
-name = vim.trim(name)
+-- Set by `dots theme` in every interactive shell.
+local name = vim.trim(vim.env.DOTS_THEME or "catppuccin-mocha")
 
 if not name:match("^[%w_.-]+$") then
   name = "catppuccin-mocha"

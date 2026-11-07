@@ -1,0 +1,244 @@
+#!/usr/bin/env bash
+# dots:summary=Keep configs in ~/dotfiles and link them into $HOME
+# dots:args=[list | add [path...] [-p pkg] | sync [-n|--adopt] | <pkg>... | -D <pkg>...]
+# dots:actions=pick=Choose what is linked here|add=Add a config to the repo|list=List the packages|sync=Link every package in the list|sync -n=Show what sync would do
+#
+#   dots stow                  pick what is linked here (a list when piped)
+#   dots stow list             list packages (* = synced on this machine)
+#   dots stow add [path...]    move a config into ~/dotfiles, link it back;
+#                              with no path, pick from ~/.config
+#                              ~/.config/helix -> ~/dotfiles/helix/.config/helix
+#   dots stow add -p zsh ~/.zshrc ~/.zshenv     pick the package name
+#   dots stow sync             link every package in ~/.config/dots/packages
+#   dots stow sync -n          dry run
+#   dots stow sync --adopt     pull conflicting files INTO ~/dotfiles (git diff)
+#   dots stow <pkg>...         link some packages
+#   dots stow -D <pkg>...      unlink
+#
+# Real files in the way are renamed to <file>.bak.<timestamp> first.
+# --no-folding: only files become links, never folders, so whatever apps write
+# later (~/.local, tokens in ~/.config/gh...) stays out of the repo.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_ui"
+
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+LIST="${XDG_CONFIG_HOME:-$HOME/.config}/dots/packages"
+STOW=(stow --no-folding -d "$DOTFILES" -t "$HOME")
+have stow || { err "dots stow: stow is not installed"; exit 1; }
+mkdir -p "$DOTFILES"
+
+short() { printf '%s' "${1/#$HOME/\~}"; }
+# column miscounts color codes, so colored output stays one per line.
+cols()  { if [[ -z $N ]] && have column; then column; else cat; fi; }
+
+packages() {  # folders in ~/dotfiles holding at least one dotfile at the top
+    local d
+    for d in "$DOTFILES"/*/; do
+        d=${d%/}
+        compgen -G "$d/.[!.]*" >/dev/null && echo "${d##*/}"
+    done
+}
+
+ensure_list() {
+    [[ -f $LIST ]] && return
+    mkdir -p "$(dirname "$LIST")"
+    { echo "# Packages \`dots stow sync\` links on this machine. One per line, # to skip."
+      packages; } > "$LIST"
+    ok "created $(short "$LIST")"
+}
+
+chosen() { sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" | grep -v '^$'; }
+
+backup_conflicts() {  # backup_conflicts <pkg>
+    local ts f; ts=$(date +%Y%m%d-%H%M%S)
+    # stow 2.3: "existing target is ...: FILE"   stow 2.4: "over existing target FILE since"
+    "${STOW[@]}" -n -R "$1" 2>&1 \
+        | grep -oE 'existing target is [^:]*: [^ ]+|over existing target [^ ]+' \
+        | awk '{print $NF}' | sort -u \
+        | while IFS= read -r f; do
+            [[ -e $HOME/$f && ! -L $HOME/$f ]] || continue
+            if (( DRY )); then warn "would back up ~/$f"; continue; fi
+            warn "backup: ~/$f -> ~/$f.bak.$ts"
+            mv "$HOME/$f" "$HOME/$f.bak.$ts"
+        done
+}
+
+link() {  # link <pkg>...
+    local pkg failed=()
+    for pkg in "$@"; do
+        [[ -d $DOTFILES/$pkg ]] || { warn "skip $pkg: no such package"; failed+=("$pkg"); continue; }
+        if (( ADOPT )); then
+            "${STOW[@]}" --adopt -R "$pkg" && ok "$pkg" || failed+=("$pkg")
+            continue
+        fi
+        backup_conflicts "$pkg"
+        if (( DRY )); then
+            "${STOW[@]}" -n -R "$pkg" 2>/dev/null && ok "$pkg" || warn "conflict $pkg"
+        elif "${STOW[@]}" -R "$pkg"; then
+            ok "$pkg"
+        else
+            failed+=("$pkg")
+        fi
+    done
+    (( ADOPT )) && warn "adopted files are now in $(short "$DOTFILES"): review with git diff"
+    (( ${#failed[@]} == 0 )) || { err "failed: ${failed[*]}"; return 1; }
+}
+
+enable() {  # link packages and keep them in the list
+    local pkg status=0
+    ensure_list
+    for pkg in "$@"; do
+        if link "$pkg"; then
+            grep -qx "$pkg" "$LIST" || echo "$pkg" >> "$LIST"
+        else
+            status=1
+        fi
+    done
+    return "$status"
+}
+
+disable() {  # unlink packages and take them off the list
+    local pkg
+    for pkg in "$@"; do
+        "${STOW[@]}" -D "$pkg" || { err "could not unlink $pkg"; continue; }
+        [[ -f $LIST ]] && sed -i "/^$pkg\$/d" "$LIST"
+        ok "unlinked $pkg"
+    done
+}
+
+list_packages() {
+    local in='' p
+    [[ -f $LIST ]] && in=" $(chosen | tr '\n' ' ') "
+    for p in $(packages); do
+        if [[ $in == *" $p "* ]]; then echo "$G* $p$N"; else echo "$D  $p$N"; fi
+    done | cols
+}
+
+pick_packages() {  # the checklist: marked = linked here
+    local now picked added removed p core=''
+    ensure_list
+    now=$(chosen | sort -u)
+    picked=$(packages | choose --selected="$(paste -sd, <<< "$now")" \
+        'Packages on this machine (x toggles, enter applies)') || return 0
+    added=$(comm -13 <(sed '/^$/d' <<< "$now") <(sed '/^$/d' <<< "$picked" | sort -u))
+    removed=$(comm -23 <(sed '/^$/d' <<< "$now") <(sed '/^$/d' <<< "$picked" | sort -u))
+    if [[ -z $added$removed ]]; then note "nothing to change"; return 0; fi
+    for p in $added;   do printf '%s+%s %s\n' "$G" "$N" "$p"; done
+    for p in $removed; do
+        printf '%s-%s %s\n' "$R" "$N" "$p"
+        case $p in dots|shell|zsh|bash) core+=" $p" ;; esac
+    done
+    if [[ -n $core ]]; then
+        warn "your shell and this command depend on:$core"
+        confirm "Unlink them anyway?" || return 0
+    fi
+    confirm "Apply?" || return 0
+    # shellcheck disable=SC2086  # package names, one per word
+    { enable $added; disable $removed; }
+    if [[ -n $added ]]; then dots theme apply >/dev/null 2>&1 || true; fi  # tmux, vim and the desktop read it
+}
+
+addable() {  # things in ~/.config that are not in the repo, without secrets
+    local d n hit
+    for d in "$HOME/.config"/*; do
+        [[ -e $d && ! -L $d ]] || continue
+        n=${d##*/}
+        case $n in gh|vite-plus|dots|shell) continue ;; esac
+        compgen -G "$DOTFILES/*/.config/$n" >/dev/null && continue
+        hit=$(secret_in "$d")
+        if [[ -n $hit ]]; then warn "skipped ~/.config/$n: $(short "$hit") looks like a secret" >&2; continue; fi
+        echo "$d"
+    done
+}
+
+pkg_for() {  # guess the package from a path relative to $HOME
+    local p
+    case $1 in
+        .config/*)                p=${1#.config/}; echo "${p%%/*}" ;;
+        .zsh*)                    echo zsh ;;
+        .bash*|.inputrc|.profile) echo bash ;;
+        .git*)                    echo git ;;
+        .local/*)                 return 1 ;;
+        .*)                       p=${1#.}; echo "${p%%[./]*}" ;;
+        *)                        return 1 ;;
+    esac
+}
+
+secret_in() {  # first file under $1 that looks like a secret
+    find "$1" \( -name '*history*' -o -name hosts.yml -o -name '*.pem' -o -name 'id_*' \
+        -o -name '*token*' -o -name .netrc -o -name 'credentials*' -o -name '*.key' \) \
+        -print -quit 2>/dev/null
+}
+
+add() {
+    local pkg='' force=0 src rel p dest hit paths=()
+    while (( $# )); do
+        case $1 in
+            -p) pkg=${2:?-p needs a package name}; shift 2 ;;
+            -f|--force) force=1; shift ;;
+            *) paths+=("$1"); shift ;;
+        esac
+    done
+    if (( ! ${#paths[@]} )) && can_prompt; then
+        local picked candidates
+        candidates=$(addable)
+        if [[ -z $candidates ]]; then note "nothing new in ~/.config"; return 0; fi
+        picked=$(choose 'Add to the dotfiles (x toggles, enter adds)' <<< "$candidates") || return 0
+        [[ -n $picked ]] || return 0
+        mapfile -t paths <<< "$picked"
+    fi
+    (( ${#paths[@]} )) || { echo "Usage: dots stow add [-p pkg] [--force] <path>..." >&2; return 1; }
+    ensure_list
+    for src in "${paths[@]}"; do
+        src=$(realpath -s "$src")
+        [[ $src == "$HOME"/* ]] || { warn "skip $src: not under \$HOME"; continue; }
+        [[ -L $src ]] && { warn "skip $(short "$src"): already a link"; continue; }
+        [[ -e $src ]] || { warn "skip $(short "$src"): does not exist"; continue; }
+        rel=${src#"$HOME"/}
+        p=${pkg:-$(pkg_for "$rel")} || { warn "skip ~/$rel: give the package with -p <name>"; continue; }
+        if (( ! force )) && hit=$(secret_in "$src") && [[ -n $hit ]]; then
+            warn "skip ~/$rel: $(short "$hit") looks like a secret (--force to add anyway)"; continue
+        fi
+        dest=$DOTFILES/$p/$rel
+        [[ -e $dest ]] && { warn "skip ~/$rel: $(short "$dest") already exists"; continue; }
+        mkdir -p "$(dirname "$dest")"
+        mv "$src" "$dest"
+        "${STOW[@]}" -R "$p" || { err "stow failed; the file is at $(short "$dest")"; continue; }
+        grep -qx "$p" "$LIST" || echo "$p" >> "$LIST"
+        ok "added ~/$rel -> $p/"
+    done
+}
+
+DRY=0 ADOPT=0
+case "${1:-}" in
+    ''|pick) if can_prompt; then pick_packages; else list_packages; fi ;;
+    list) list_packages ;;
+    add) shift; add "$@" ;;
+    sync)
+        shift
+        for a in "$@"; do
+            case $a in
+                -n|--dry-run) DRY=1 ;;
+                --adopt) ADOPT=1 ;;
+                *) echo "dots stow sync: unknown option: $a" >&2; exit 1 ;;
+            esac
+        done
+        ensure_list
+        mapfile -t pkgs < <(chosen)
+        link "${pkgs[@]}" ;;
+    -D)
+        shift
+        if (( ! $# )) && can_prompt; then
+            mapfile -t sel < <(chosen | choose 'Unlink which packages? (x toggles)')
+            (( ${#sel[@]} )) || exit 0
+            set -- "${sel[@]}"
+        fi
+        (( $# )) || { echo "Usage: dots stow -D <pkg>..." >&2; exit 1; }
+        disable "$@" ;;
+    -h|--help) sed -n '6,16p' "$0" | sed 's/^# \{0,1\}//' ;;
+    -*) err "dots stow: unknown option: $1"; exit 1 ;;
+    *) enable "$@" ;;
+esac

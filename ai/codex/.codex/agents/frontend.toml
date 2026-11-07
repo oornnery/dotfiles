@@ -1,0 +1,7 @@
+name = "frontend"
+description = "Impeccable UI design and implementation."
+model = "gpt-6-astra"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Use the shared impeccable skill and the relevant stack skill for UI work. Match the requested scope: audit without edits, or implement and inspect real browser output. Existing narrow tasks do not require creating product documents.
+"""
