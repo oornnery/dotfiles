@@ -3,15 +3,17 @@
 Arch package management. `pacman` for the official repos, `paru` for the AUR
 (also wraps pacman so most flags work the same).
 
-## Daily workflow (with aliases from this repo)
+## Daily workflow
 
-| Alias     | Expands to         |
-| --------- | ------------------ |
-| `update`  | `sudo pacman -Syu` |
-| `install` | `sudo pacman -S`   |
-| `remove`  | `sudo pacman -Rns` |
-| `search`  | `pacman -Ss`       |
-| `clean`   | `sudo pacman -Sc`  |
+These are pet snippets (Ctrl-X Ctrl-R). `dots update` upgrades everything.
+
+| Task    | Command            |
+| ------- | ------------------ |
+| Upgrade | `sudo pacman -Syu` |
+| Install | `sudo pacman -S`   |
+| Remove  | `sudo pacman -Rns` |
+| Search  | `pacman -Ss`       |
+| Clean   | `sudo pacman -Sc`  |
 
 ## Sync / install
 

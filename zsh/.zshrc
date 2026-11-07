@@ -1,523 +1,84 @@
 # ~/.zshrc
-# This file is sourced for interactive shells.
-# Put aliases, completions, plugins, keybindings, prompt, and interactive UX here.
-typeset -U path PATH
+# Interactive zsh only. Environment comes from ~/.zshenv; aliases, functions and
+# tool integrations are shared with bash in ~/.config/shell/.
+[[ -o interactive ]] || return
 
-# -------------------------------
-# Zellij (manual start — no auto-attach)
-# -------------------------------
-# Zellij is available but not auto-started.
-# Run `zellij` manually when you want the multiplexer.
-# Install with: sudo pacman -S zellij
+SHELL_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/shell"
 
-# -------------------------------
-# Antigen + Oh My Zsh
-# -------------------------------
+# --- History ----------------------------------------------------------------
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt SHARE_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
+setopt HIST_FIND_NO_DUPS HIST_VERIFY EXTENDED_HISTORY
 
-# Antigen is the plugin manager. It can load Oh My Zsh plugins and themes
-# without requiring a separate ~/.oh-my-zsh install.
-export ANTIGEN_HOME="${ANTIGEN_HOME:-$HOME/.antigen}"
+# --- Behaviour --------------------------------------------------------------
+# EXTENDED_GLOB is left off on purpose: it breaks `git show HEAD^`.
+setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT
+setopt INTERACTIVE_COMMENTS COMPLETE_IN_WORD NO_BEEP NOTIFY
+WORDCHARS=${WORDCHARS//\//}   # Ctrl-W / Alt-Backspace stop at "/"
 
-# Oh My Zsh's gh plugin writes generated completions here on first load.
-# Fresh Antigen installs may not have created the directory yet.
-export ZSH_CACHE_DIR="${ZSH_CACHE_DIR:-$ANTIGEN_HOME/bundles/robbyrussell/oh-my-zsh/cache}"
-mkdir -p "$ZSH_CACHE_DIR/completions" 2>/dev/null || true
-export ZSH_COMPDUMP="${ZSH_COMPDUMP:-$ZSH_CACHE_DIR/.zcompdump-${HOST:-host}-${ZSH_VERSION}}"
-
-# Debian/Arch package changes can leave stale compinit dumps pointing at removed
-# vendor completions (common: /usr/share/zsh/vendor-completions/_docker).
-if [[ -f "$ZSH_COMPDUMP" ]] \
-  && grep -q '/usr/share/zsh/vendor-completions/_docker' "$ZSH_COMPDUMP" 2>/dev/null \
-  && [[ ! -e /usr/share/zsh/vendor-completions/_docker ]]; then
-  rm -f "$ZSH_COMPDUMP" "$ZSH_COMPDUMP.zwc" 2>/dev/null || true
-fi
-
-# Active theme drop-in written by the `theme` command.
-# It may set ANTIGEN_THEME and terminal-tool color variables before plugins load.
-[[ -f "$HOME/.config/zsh/theme.zsh" ]] && source "$HOME/.config/zsh/theme.zsh"
-
-# Change this before starting zsh to try another Oh My Zsh theme:
-#   ANTIGEN_THEME=agnoster zsh
-export ANTIGEN_THEME="${ANTIGEN_THEME:-robbyrussell}"
-
-# Try multiple antigen locations (dots default, manual download, system install)
-_antigen_found=
-for _antigen_path in \
-  "$ANTIGEN_HOME/antigen.zsh" \
-  "$HOME/antigen.zsh" \
-  "$HOME/dotfiles/antigen.zsh" \
-  "/usr/share/antigen/antigen.zsh" \
-  "$HOME/.local/share/antigen/antigen.zsh"; do
-  if [[ -f "$_antigen_path" ]]; then
-    _antigen_found="$_antigen_path"
-    break
-  fi
-done
-
-if [[ -n "$_antigen_found" ]]; then
-  source "$_antigen_found"
-
-  antigen use oh-my-zsh
-
-  # Bundles are loaded in order. Keep zsh-vi-mode early because it remaps keys,
-  # and keep highlighting/history search near the end because they wrap widgets.
-  antigen bundle romkatv/zsh-defer
-  antigen bundle jeffreytse/zsh-vi-mode
-  antigen bundle git
-  antigen bundle gh
-  antigen bundle sudo
-  antigen bundle zsh-users/zsh-completions
-  antigen bundle zsh-users/zsh-autosuggestions
-  antigen bundle Aloxaf/fzf-tab
-  # Install/repair forgit through setup, never delete and clone it on shell startup.
-  if [[ -f "$ANTIGEN_HOME/bundles/wfxr/forgit/forgit.plugin.zsh" ]]; then
-    antigen bundle wfxr/forgit
-  fi
-  antigen bundle zdharma-continuum/fast-syntax-highlighting
-  antigen bundle zsh-users/zsh-history-substring-search
-
-  # Prompt: Starship drives it when installed (see the Starship block below);
-  # otherwise fall back to the Antigen/Oh-My-Zsh theme.
-  command -v starship >/dev/null 2>&1 || antigen theme "$ANTIGEN_THEME"
-  antigen apply
-else
-  print -P "%F{yellow}Antigen not found at $ANTIGEN_HOME/antigen.zsh%f"
-fi
-
-# -------------------------------
-# Starship prompt
-# -------------------------------
-# Borderless prompt with git/lang icons, themed per palette via
-# ~/.config/starship.toml (linked by `dots theme set`). Deferred through
-# zsh-vi-mode's init hook so vi-mode can't clobber it; immediate when zvm absent.
-if command -v starship >/dev/null 2>&1; then
-  _dotfiles_starship_init() { eval "$(starship init zsh)"; }
-  if (( $+parameters[zvm_after_init_commands] )); then
-    zvm_after_init_commands+=(_dotfiles_starship_init)
-  else
-    _dotfiles_starship_init
-  fi
-fi
-
-# zsh-history-substring-search: bind ↑/↓ to substring search after a query.
-# Both Emacs (default) and vi insert/normal mode covered.
-if (( $+widgets[history-substring-search-up] )); then
-  bindkey '^[[A' history-substring-search-up
-  bindkey '^[[B' history-substring-search-down
-  bindkey -M vicmd 'k' history-substring-search-up
-  bindkey -M vicmd 'j' history-substring-search-down
-fi
-
-# -------------------------------
-# Extra keybindings (insert mode)
-# -------------------------------
-
-# Word navigation
-bindkey '^[[1;5D' backward-word   # Ctrl+Left
-bindkey '^[[1;5C' forward-word    # Ctrl+Right
-
-# Line navigation
-bindkey '^A' beginning-of-line    # Ctrl+A: home
-bindkey '^E' end-of-line          # Ctrl+E: end
-
-# Delete words
-bindkey '^W' backward-kill-word   # Ctrl+W: delete word behind
-bindkey '^[d' kill-word           # Alt+D: delete word ahead
-
-# History search
-bindkey '^R' history-incremental-search-backward # Ctrl+R: fuzzy history
-
-# Snippet library (pet, config in the pet/ package). Ctrl+X Ctrl+R inserts the
-# selected command at the cursor instead of running it, so you can still edit it.
-# The upstream docs bind Ctrl+S and disable flow control with `stty -ixon`; this
-# uses the Ctrl-X prefix so ^S stays available for its shell job.
-if command -v pet >/dev/null 2>&1; then
-  function pet-select() {
-    BUFFER=$(pet search --query "$LBUFFER" || true)
-    CURSOR=$#BUFFER
-    zle redisplay
-  }
-  zle -N pet-select
-  bindkey '^X^R' pet-select
-fi
-
-# Vi mode belongs in the shell prompt. Zellij's write-chars sends pane input,
-# so it must not be used to publish a status label on mode changes.
-
-# -------------------------------
-# Completion and navigation
-# -------------------------------
-
-# fzf shell integration
-# This enables keybindings and fuzzy completion features.
-if command -v fzf >/dev/null 2>&1; then
-  # Try modern --zsh flag first, fallback to legacy source
-  if _dotfiles_fzf_init="$(fzf --zsh 2>/dev/null)"; then
-    eval "$_dotfiles_fzf_init"
-  else
-    # Legacy fzf (<0.48): source system-installed files
-    [[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
-    [[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
-  fi
-  unset _dotfiles_fzf_init
-fi
-
-# Better completion styling
+# --- Completion styles ------------------------------------------------------
 zstyle ':completion:*' menu select
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' group-name ''
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' special-dirs true
-zstyle ':completion:*' rehash true
-zstyle ':completion:*' completer _expand _complete _ignored _approximate
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'if command -v eza >/dev/null 2>&1; then eza --tree --color=always $realpath; else ls -la --color=auto $realpath; fi'
+zstyle ':completion:*' use-cache yes
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compcache"
+zstyle ':completion:*' rehash true             # see new commands without rehash
+zstyle ':completion:*' group-name ''
 zstyle ':fzf-tab:complete:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' fzf-pad 4                  # room for our border and prompt, or a line hides
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --icons=always --color=always $realpath 2>/dev/null || ls -A $realpath'
 
-# -------------------------------
-# History
-# -------------------------------
+# --- Key bindings -----------------------------------------------------------
+bindkey -e
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search edit-command-line
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+zle -N edit-command-line
 
-# History file location
-HISTFILE="$HOME/.zhistory"
-HISTSIZE=10000
-SAVEHIST=10000
+bindkey '^[[A' up-line-or-beginning-search      # Up: history by prefix
+bindkey '^[OA' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search    # Down
+bindkey '^[OB' down-line-or-beginning-search
+bindkey '^[[1;5D' backward-word                 # Ctrl+Left
+bindkey '^[[1;5C' forward-word                  # Ctrl+Right
+bindkey '^[[H'  beginning-of-line               # Home
+bindkey '^[[1~' beginning-of-line
+bindkey '^[[F'  end-of-line                     # End
+bindkey '^[[4~' end-of-line
+bindkey '^[[3~'   delete-char                   # Delete
+bindkey '^[[3;5~' kill-word                     # Ctrl+Delete
+bindkey '^[[Z' reverse-menu-complete            # Shift+Tab
+bindkey '^X^E' edit-command-line                # edit the line in $EDITOR
 
-# History behavior
-setopt INC_APPEND_HISTORY
-setopt SHARE_HISTORY
-setopt HIST_IGNORE_DUPS
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_SAVE_NO_DUPS
-setopt HIST_FIND_NO_DUPS
-setopt HIST_REDUCE_BLANKS
-setopt HIST_VERIFY
-setopt EXTENDED_HISTORY
-
-# -------------------------------
-# Shell behavior
-# -------------------------------
-
-# Auto change into a directory by typing its name
-setopt AUTO_CD
-
-# Complete in the middle of words
-setopt COMPLETE_IN_WORD
-
-# Correct minor spelling mistakes in commands
-#setopt CORRECT
-#setopt CORRECT_ALL
-
-# Notify of background job completion immediately
-setopt NOTIFY
-
-# Enable recursive globbing with **
-setopt EXTENDED_GLOB
-
-# -------------------------------
-# Aliases
-# -------------------------------
-
-# Safer core commands
-alias cp='cp -i'
-alias mv='mv -i'
-alias rm='rm -i'
-
-# Sudo with a gum-based TUI password prompt (no fragile echo|sudo -S pipe).
-# Use a zsh function instead of an alias: aliases don't expand inside
-# other functions (e.g. `sudo-unlock` below), but functions do — so the
-# gum prompt fires consistently for interactive commands AND for any
-# helper that wraps sudo. Bash scripts still get the plain prompt
-# (they don't inherit zsh functions); use `sudo -A` explicitly there.
-if [[ -x "$HOME/.local/lib/dots/askpass" ]]; then
-    export SUDO_ASKPASS="$HOME/.local/lib/dots/askpass"
-    sudo() { command sudo -A "$@" }
+# --- Plugins: Antigen -------------------------------------------------------
+fpath=("$SHELL_DIR/completions" $fpath)   # before compinit, which Antigen runs
+ANTIGEN_HOME="${ANTIGEN_HOME:-$HOME/.antigen}"
+if [[ ! -r $ANTIGEN_HOME/antigen.zsh ]] && (( $+commands[git] )); then
+    git clone --depth 1 https://github.com/zsh-users/antigen.git "$ANTIGEN_HOME"
+fi
+ANTIGEN_COMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+mkdir -p "${ANTIGEN_COMPDUMP:h}"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+if [[ -r $ANTIGEN_HOME/antigen.zsh ]]; then
+    source "$ANTIGEN_HOME/antigen.zsh"
+    antigen bundle zsh-users/zsh-completions
+    (( $+commands[fzf] )) && antigen bundle Aloxaf/fzf-tab
+    antigen bundle zsh-users/zsh-autosuggestions
+    antigen bundle zsh-users/zsh-syntax-highlighting   # keep last
+    antigen apply                                      # runs compinit
 fi
 
-# Clear PAM faillock counters after canceling a sudo prompt locks you out.
-# Usage: sudo-unlock           (current user)
-#        sudo-unlock alice     (another user)
-sudo-unlock() {
-    sudo faillock --user "${1:-$USER}" --reset
-}
+# --- Shared config (same files bash uses) -----------------------------------
+# conf.d: *.sh runs in both shells, *.zsh only here.
+for _f in "$SHELL_DIR"/{aliases,functions,tools}.sh "$SHELL_DIR"/conf.d/*.(sh|zsh)(N) "$SHELL_DIR"/local.sh; do
+    [[ -r $_f ]] && source "$_f"
+done
+unset _f
 
-# Better listing — eza if available, else classic ls
-if command -v eza >/dev/null 2>&1; then
-  alias ls='eza --icons=always'
-  alias ll='eza -la --icons=always --git'
-  alias la='eza -la --icons=always'
-  alias lsa='eza -la --icons=always'
-  alias lt='eza --tree --icons=always'
-  alias lta='eza --tree -la --icons=always'
-else
-  alias ls='ls --color=auto -hv'
-  alias ll='ls -lh'
-  alias la='ls -lha'
-fi
+alias compreset='rm -f "${XDG_CACHE_HOME:-$HOME/.cache}"/zsh/zcompdump* && exec zsh'
 
-# fzf with bat preview (fallback to cat if bat missing)
-if command -v bat >/dev/null 2>&1; then
-  alias ff='fzf --preview "bat --style=numbers --color=always {} 2>/dev/null || cat {}"'
-elif command -v batcat >/dev/null 2>&1; then
-  alias ff='fzf --preview "batcat --style=numbers --color=always {} 2>/dev/null || cat {}"'
-else
-  alias ff='fzf --preview "cat {}"'
-fi
-
-# Better cat with bat (or batcat on Debian)
-if command -v bat >/dev/null 2>&1; then
-  alias cat='bat'
-  alias catp='bat -p'
-elif command -v batcat >/dev/null 2>&1; then
-  alias cat='batcat'
-  alias catp='batcat -p'
-fi
-
-# Nice-to-have CLI shortcuts
-alias grep='grep --color=auto'
-alias diff='diff --color=auto'
-alias -g G='| grep'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-
-# Network (classic names, modern tools)
-alias ip='ip -c'
-alias ifconfig='ip -c a'
-alias netstat='ip -s'
-alias ping='ping -c 4'
-alias traceroute='traceroute -m 15'
-
-# System info
-alias uptime='uptime -p'
-alias free='free -h'
-alias list='pacman -Q'
-
-# Reload shell config quickly
-alias reload='exec zsh'
-
-# Quick editor shortcuts
-alias editz='$EDITOR ~/.zshrc'
-alias edit-zenv='$EDITOR ~/.zshenv'
-alias edit-zprofile='$EDITOR ~/.zprofile'
-alias edit-zlogin='$EDITOR ~/.zlogin'
-
-# Arch package management
-alias update='sudo pacman -Syu'
-alias install='sudo pacman -S'
-alias remove='sudo pacman -Rns'
-alias search='pacman -Ss'
-alias clean='sudo pacman -Sc'
-
-# Modern tooling
-alias py='python'
-alias v='nvim'
-alias g='git'
-alias lg='lazygit'
-alias ld='lazydocker'
-
-# Modern CLI replacements (all gated → no-op if tool missing)
-command -v btm   >/dev/null && alias top='btm'
-command -v dust  >/dev/null && alias du='dust'
-command -v duf   >/dev/null && alias df='duf'
-command -v procs >/dev/null && alias ps='procs'
-command -v xh    >/dev/null && alias http='xh'
-# `sd` keeps original name — no alias (would shadow sed which is still useful)
-# `tldr` keeps original name
-# `jless` keeps original name (used inline: `cat file.json | jless`)
-
-# pay-respects (typo corrector) — type `f` after a failed command to fix it
-if command -v pay-respects >/dev/null 2>&1; then
-    eval "$(pay-respects zsh --alias f)"
-fi
-
-# -------------------------------
-# Functions
-# -------------------------------
-
-# Library: compress, decompress, iso2sd, format-drive, fip, dip, lip, rfwd
-[[ -f "$HOME/.zsh_functions" ]] && source "$HOME/.zsh_functions"
-
-# Create a directory and enter it
-mkcd() {
-  mkdir -p "$1" && builtin cd "$1"
-}
-
-# Extract archives with auto-detection
-extract() {
-  if [ -f "$1" ] ; then
-    has_command() { command -v "$1" &>/dev/null; }
-    case "$1" in
-      *.tar.bz2|*.tbz2) has_command tar && tar xjf "$1" || echo "tar not found" ;;
-      *.tar.gz|*.tgz)   has_command tar && tar xzf "$1" || echo "tar not found" ;;
-      *.bz2)            has_command bunzip2 && bunzip2 "$1" || echo "bunzip2 not found" ;;
-      *.rar)            has_command unrar && unrar x "$1" || echo "unrar not found" ;;
-      *.gz)             has_command gunzip && gunzip "$1" || echo "gunzip not found" ;;
-      *.tar)            has_command tar && tar xf "$1" || echo "tar not found" ;;
-      *.zip)            has_command unzip && unzip "$1" || echo "unzip not found" ;;
-      *.Z)              has_command uncompress && uncompress "$1" || echo "uncompress not found" ;;
-      *) echo "'$1' cannot be extracted via extract()" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
-
-# Quick directory jump with fzf
-z() {
-  local dir
-  dir=$(find "${1:-$HOME}" -type d 2>/dev/null | fzf)
-  [[ -n "$dir" ]] && builtin cd "$dir"
-}
-
-# Find file and open in editor
-fe() {
-  local file
-  file=$(find . -type f -name "*$1*" 2>/dev/null | fzf)
-  [[ -n "$file" ]] && ${EDITOR:-nvim} "$file"
-}
-
-# -------------------------------
-# Prompt / UI extras
-# -------------------------------
-
-# Show fastfetch once per "terminal": once per tmux window (not on every split
-# pane), else once per non-tmux shell tree. Inside tmux we key off a *window*
-# option instead of an exported env var — an exported var gets captured into
-# tmux's global environment and would then suppress fastfetch in every pane.
-if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
-  if [[ -n "${ZELLIJ:-}" ]]; then
-    # inside zellij — fastfetch once per session, no unused IPC query
-    [[ -z "${ZELLIJ_FASTFETCH_SHOWN:-}" ]] && export ZELLIJ_FASTFETCH_SHOWN=1 && fastfetch
-  elif [[ -n "${TMUX:-}" ]]; then
-    if [[ "$(tmux show-options -wqv @fastfetch_shown 2>/dev/null)" != 1 ]]; then
-      tmux set-option -w @fastfetch_shown 1 2>/dev/null
-      fastfetch
-    fi
-  elif [[ -z "${FASTFETCH_SHOWN:-}" ]]; then
-    export FASTFETCH_SHOWN=1
-    fastfetch
-  fi
-fi
-
-# -------------------------------
-# Optional tool initializations
-# -------------------------------
-
-# Tool initializations (each gated by `command -v` so missing tools are no-ops).
-# Default keeps builtin `cd` untouched. Set DOTFILES_ZOXIDE_CD=1 if you want
-# zoxide to replace `cd`; some distro/plugin combinations recurse with --cmd cd.
-if command -v zoxide >/dev/null 2>&1; then
-  if [[ "${DOTFILES_ZOXIDE_CD:-0}" == "1" ]]; then
-    eval "$(zoxide init zsh --cmd cd)"
-  else
-    eval "$(zoxide init zsh)"
-  fi
-fi
-
-# Bare-word fallback: typing just `ve-tools` (no `cd` prefix) → if it's not
-# a command AND not a subdir of $PWD AND zoxide has a frecent match, rewrite
-# the buffer to `cd <word>` before submitting. Restores autojump-style UX.
-#
-# NB: a command_not_found_handler would not work — zsh runs that in a context
-# where `cd` doesn't persist. Intercepting accept-line (Enter) at the ZLE
-# layer lets us rewrite the buffer in the parent shell.
-if command -v zoxide >/dev/null 2>&1; then
-  _zoxide_accept_line() {
-    # Single bare word with no special chars / args / pipes? Try it.
-    if [[ "$BUFFER" =~ ^[[:space:]]*([^[:space:]/$\|\&\;\<\>]+)[[:space:]]*$ ]]; then
-      local word="${match[1]}"
-      # Skip if it's already a known command, builtin, alias, function, or dir.
-      if ! command -v "$word" >/dev/null 2>&1 && [[ ! -d "$word" ]]; then
-        local target
-        if target="$(zoxide query "$word" 2>/dev/null)" && [[ -n "$target" ]]; then
-          BUFFER="builtin cd ${(q)target}"
-        fi
-      fi
-    fi
-    zle .accept-line
-  }
-  zle -N accept-line _zoxide_accept_line
-fi
-# Make the fnm default available before deferred shell integrations run.
-# `fnm env --use-on-cd` can still override this for project-local versions.
-export FNM_DIR="$HOME/.fnm"
-export PATH="$FNM_DIR:$FNM_DIR/aliases/default/bin:$PATH"
-
-# WSL sessions without systemd may export an unavailable runtime directory.
-# fnm needs a private writable location for its multishell links.
-if [[ -z "${XDG_RUNTIME_DIR:-}" || ! -d "$XDG_RUNTIME_DIR" ]]; then
-    export XDG_RUNTIME_DIR="$HOME/.cache/runtime"
-    mkdir -p "$XDG_RUNTIME_DIR"
-    chmod 700 "$XDG_RUNTIME_DIR"
-fi
-
-# Generate initialization code inside the callback, not before scheduling it.
-_dotfiles_init_tool() {
-    local tool_name="$1" init_code
-    shift
-    init_code="$(command "$tool_name" "$@")" || return
-    eval "$init_code"
-}
-
-# direnv must establish the directory environment before the first command.
-command -v direnv >/dev/null && _dotfiles_init_tool direnv hook zsh
-if (( $+functions[zsh-defer] )); then
-    command -v fnm    >/dev/null && zsh-defer _dotfiles_init_tool fnm env --use-on-cd
-    command -v atuin  >/dev/null && zsh-defer _dotfiles_init_tool atuin init zsh
-    command -v mise   >/dev/null && zsh-defer _dotfiles_init_tool mise activate zsh
-else
-    command -v fnm    >/dev/null && _dotfiles_init_tool fnm env --use-on-cd
-    command -v atuin  >/dev/null && _dotfiles_init_tool atuin init zsh
-    command -v mise   >/dev/null && _dotfiles_init_tool mise activate zsh
-fi
-
-# opencode
-export PATH="$HOME/.opencode/bin:$PATH"
-
-# Cache generated completions; rebuilding the CLI's output costs about a second.
-# A binary replacement invalidates the cache without running `opencode --version`.
-_dotfiles_opencode_completion() {
-  local binary_path=${commands[opencode]:A} cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/zsh
-  local cache_file=$cache_dir/opencode-completion.zsh signature cached_signature temporary_file
-  local -A binary_stat
-  [[ -n $binary_path && -f $binary_path ]] || return 0
-  zmodload -F zsh/stat b:zstat || return
-  zstat -H binary_stat -- "$binary_path" || return
-  signature="# $binary_path $binary_stat[mtime] $binary_stat[size] $binary_stat[ctime]"
-  [[ -r $cache_file ]] && IFS= read -r cached_signature < "$cache_file"
-  if [[ ${1:-0} != 1 && $cached_signature == $signature ]]; then
-    source "$cache_file"
-    return
-  fi
-  (
-    umask 077
-    mkdir -p -- "$cache_dir" || exit
-    temporary_file=$(mktemp "$cache_dir/opencode-completion.XXXXXXXX") || exit
-    trap 'command rm -f -- "$temporary_file"' EXIT
-    print -r -- "$signature" > "$temporary_file"
-    command "$binary_path" completion zsh >> "$temporary_file" || exit
-    command zsh -f -n "$temporary_file" || exit
-    command mv -f -- "$temporary_file" "$cache_file"
-  ) && source "$cache_file"
-}
-opencode-completion-refresh() { _dotfiles_opencode_completion 1 }
-
-if command -v opencode >/dev/null 2>&1; then
-  _dotfiles_opencode_completion
-fi
-
-# oh-my-opencode-slim background subagents
-export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
-
-# ForgeCode shell plugin and prompt theme
-if command -v forge >/dev/null 2>&1; then
-  export NERD_FONT=0 FORGE_EDITOR=nvim
-  [[ -n "${_FORGE_PLUGIN_LOADED:-}" ]] || eval "$(forge zsh plugin)"
-  [[ -n "${_FORGE_THEME_LOADED:-}" ]] || eval "$(forge zsh theme)"
-fi
-
-# wslc (WSL containers) lives on the Windows side and is not on the Linux PATH.
-[[ -x "/mnt/c/Program Files/WSL/wslc.exe" ]] && alias wslc='dots wsl wslc'
-
-# Pending-updates line (cached; re-scans in the background every 6h).
-[[ -o interactive ]] && dots update motd 2>/dev/null
+# fzf's integration rebinds Tab; give it back to fzf-tab.
+(( $+functions[enable-fzf-tab] )) && enable-fzf-tab

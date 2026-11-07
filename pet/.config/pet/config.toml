@@ -1,0 +1,36 @@
+[GHEGist]
+  Public = false
+  access_token = ""
+  auto_sync = false
+  base_url = ""
+  file_name = ""
+  gist_id = ""
+  upload_url = ""
+
+[General]
+  Backend = "gist"
+  Cmd = []
+  Color = true
+  Column = 40
+  Editor = "helix"
+  Format = "$description  $tags  ›  $command"
+  SelectCmd = "fzf --ansi --layout=reverse --border --height=70% --cycle --prompt='snippet> ' --preview='echo {}' --preview-window=down,4,wrap"
+  SnippetDirs = []
+  SnippetFile = "/home/oornnery/.config/pet/snippet.toml"
+  SortBy = ""
+
+[Gist]
+  Public = false
+  access_token = ""
+  auto_sync = false
+  file_name = "pet-snippet.toml"
+  gist_id = ""
+
+[GitLab]
+  ID = ""
+  Url = ""
+  Visibility = "private"
+  access_token = ""
+  auto_sync = false
+  file_name = "pet-snippet.toml"
+  skip_ssl = false

@@ -16,9 +16,9 @@ vim.g.dotfiles_plugins = require("config.lazy")
 require("config.autocmds")
 require("config.keymaps")
 
--- Active theme drop-in written by the `dots theme` command.
--- Falls back to habamax if the theme module is absent.
+-- colors/dotfiles.lua applies themes/<DOTS_THEME>/nvim.lua.
+-- Falls back to habamax if it fails.
 pcall(vim.cmd.colorscheme, "habamax")
-pcall(require, "theme")
+pcall(vim.cmd.colorscheme, "dotfiles")
 pcall(function() require("statusline").setup() end)
 pcall(function() require("cheatsheet").setup() end)

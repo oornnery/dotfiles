@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# dots:summary=Pick one line from stdin (fzf, gum or a numbered list)
+# dots:args=[prompt] < lines
+# dots:hidden=true
+set -uo pipefail
+
+prompt=${1:-pick}
+if command -v fzf >/dev/null 2>&1; then
+    exec fzf --height=40% --reverse --prompt="$prompt> " \
+        --color='prompt:green,pointer:magenta,marker:magenta,hl:yellow,hl+:yellow'
+elif command -v gum >/dev/null 2>&1; then
+    exec gum filter --placeholder "$prompt"
+fi
+
+mapfile -t items
+(( ${#items[@]} )) || exit 1
+PS3="$prompt> "
+select item in "${items[@]}"; do
+    [[ -n $item ]] && { printf '%s\n' "$item"; exit 0; }
+done </dev/tty
+exit 1

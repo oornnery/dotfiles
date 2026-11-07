@@ -84,9 +84,8 @@ herdr --default-config           # every config key with its default
 
 `working` · `blocked` (waiting for input) · `done` · `idle` · `unknown`, shown per
 pane border and rolled up per workspace in the sidebar. Integrations add lifecycle
-state and native session restore: this setup installs **codex**, **opencode** and
-**pi**; `claude` is installed only when the CLI exists. `scripts/arch/dev/herdr.sh`
-does it all, including pinned plugin installs.
+state and native session restore: `herdr integration install <agent>`. Installing
+herdr and its plugins is in the pet snippets.
 
 ## Runtime files (never committed)
 
@@ -96,5 +95,3 @@ does it all, including pinned plugin installs.
 ## See also
 
 - [herdr.dev/docs/keyboard](https://herdr.dev/docs/keyboard/) — full default keymap
-- [Applications → Herdr](../applications/herdr.md) — setup, plugins, integrations
-- [TUIs](../applications/05-tuis.md) — lazygit/lazydocker inside panes

@@ -12,4 +12,14 @@ if basic then
   vim.opt.listchars = { tab = "> ", trail = ".", nbsp = "+", extends = ">", precedes = "<" }
 end
 -- Do not force RGB support or change TERM. Let Neovim negotiate capabilities.
+
+-- System clipboard everywhere: over SSH through the terminal (OSC 52), which
+-- needs no tool on the server; locally through whatever Neovim detects.
+if vim.env.SSH_TTY then
+  vim.g.clipboard = "osc52"
+end
+vim.schedule(function()
+  vim.opt.clipboard = "unnamedplus"
+end)
+
 return { basic = basic }

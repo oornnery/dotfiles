@@ -272,6 +272,8 @@ return {
         { "<leader>a", group = "ai" },
         { "<leader>b", group = "buffer" },
         { "<leader>c", group = "code/quickfix" },
+        { "<leader>D", group = "debug" },
+        { "<leader>T", group = "test" },
         { "<leader>d", group = "diagnostics" },
         { "<leader>f", group = "find" },
         { "<leader>g", group = "git" },

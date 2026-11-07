@@ -1,26 +1,5 @@
-# bat/.config/bat/config
-# Stowed + overwritten by `dots theme set`.
-
-# Use catppuccin-mocha theme by default
---theme="Catppuccin Mocha"
-
-# Show line numbers
---number
-
-# Pager disabled (plain output)
+# Terminal colors, so bat follows `dots theme`.
+--theme="ansi"
+--style="plain"
 --paging=never
-
-# Style: changes, header, grid
---style=plain
-
-# Wrap long lines
---wrap=auto
-
-# Use italic text
---italic-text=always
-
-# Tabs: 4 spaces
 --tabs=4
-
-# Diff context
---diff-context=5

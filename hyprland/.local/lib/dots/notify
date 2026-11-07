@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# dots:summary=Send a notification
+# dots:args=<title> [body] [-g glyph] [-u urgency] [-t ms] [-a app] [-i icon] [-r id] [-h hint]
+# dots:hidden=true
+#
+# Thin notify-send wrapper. -r and -h go straight through, so progress bars work:
+# dots notify Volume -h int:value:60
+set -uo pipefail
+
+title='' body='' glyph='' urgency=normal timeout=3000 app=dots icon='' replace='' hints=()
+while (( $# )); do
+    case $1 in
+        -g|--glyph)      glyph=$2; shift 2 ;;
+        -u|--urgency)    urgency=$2; shift 2 ;;
+        -t|--timeout)    timeout=$2; shift 2 ;;
+        -a|--app)        app=$2; shift 2 ;;
+        -i|--icon)       icon=$2; shift 2 ;;
+        -r|--replace-id) replace=$2; shift 2 ;;
+        -h|--hint)       hints+=(-h "$2"); shift 2 ;;
+        *) if [[ -z $title ]]; then title=$1; elif [[ -z $body ]]; then body=$1; fi; shift ;;
+    esac
+done
+[[ -n $title ]] || { echo "Usage: dots notify <title> [body] [options]" >&2; exit 1; }
+[[ -n $glyph ]] && title="$glyph  $title"
+
+args=(-a "$app" -u "$urgency" -t "$timeout" "${hints[@]}")
+[[ -n $icon ]] && args+=(-i "$icon")
+[[ -n $replace ]] && args+=(-r "$replace")
+notify-send "${args[@]}" "$title" "$body"

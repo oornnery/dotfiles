@@ -1,26 +1,14 @@
 # AI tools
 
-The [maintained setup guide](../configuration/ai-agents.md) contains modes, model routing,
-skills, MCP servers, installation and recovery instructions.
+The old Claude, Codex, OpenCode and Pi setup is in `ai/`, mapped in
+`ai/README.md`. Nothing there is linked yet.
 
-| Task                          | Command                              |
-| ----------------------------- | ------------------------------------ |
-| Claude Code                   | `claude`                             |
-| Pick model or output style    | `/config`                            |
-| Compressed prose              | `/caveman`                           |
-| Token savings report          | `rtk gain`                           |
-| Codex                         | `codex`                              |
-| Codex login                   | `codex login`                        |
-| OpenCode                      | `opencode`                           |
-| Authenticate OpenCode         | `/connect`                           |
-| Choose OpenCode mode          | Tab or leader+a                      |
-| Available OpenAI models       | `opencode --pure models openai`      |
-| UI design                     | frontend mode or `/impeccable`       |
-| Apply versioned configuration | `bash scripts/ai-setup.sh --apply`   |
-| Archive the retired setup     | `bash scripts/ai-setup.sh --migrate` |
-| Validate adapters             | `python3 scripts/validate-ai.py`     |
-| Terminal picker               | `dots llm`                           |
-| Local model runtime           | `ollama`                             |
+| Task | Command |
+| ---- | ------- |
+| Claude Code | `claude` |
+| Codex | `codex` |
+| OpenCode | `opencode` |
+| Link one setup after reviewing it | `stow --no-folding -d ~/dotfiles/ai -t ~ claude` |
 
-The terminal picker includes Claude Code, Codex and OpenCode. Authentication and memory
-databases remain private.
+API keys go in `~/.config/ai/env` (see `ai/env.example`). It is sourced by
+`env.sh` and never tracked.

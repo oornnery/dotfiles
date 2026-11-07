@@ -342,23 +342,10 @@ function M.setup(spec)
 end
 
 local home = vim.env.HOME or ""
-local data_home = vim.env.XDG_DATA_HOME or (home .. "/.local/share")
-local state_file = data_home .. "/dotfiles/active-theme"
 local dotfiles_dir = vim.env.DOTFILES_DIR or (home .. "/dotfiles")
 
-local function read_first_line(path)
-  local file = io.open(path, "r")
-  if not file then
-    return nil
-  end
-
-  local line = file:read("*l")
-  file:close()
-  return line
-end
-
-local name = read_first_line(state_file) or "catppuccin-mocha"
-name = vim.trim(name)
+-- Set by `dots theme` in every interactive shell.
+local name = vim.trim(vim.env.DOTS_THEME or "catppuccin-mocha")
 
 if not name:match("^[%w_.-]+$") then
   name = "catppuccin-mocha"

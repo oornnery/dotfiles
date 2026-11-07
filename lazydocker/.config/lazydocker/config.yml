@@ -1,5 +1,3 @@
-# lazydocker/.config/lazydocker/config.yml
-# Stow-managed lazydocker config.
 
 gui:
   language: auto
@@ -16,19 +14,13 @@ gui:
   startHidden: false
   expandFocusedSidePanel: false
 
+  # Terminal colors, so it follows dots theme.
   theme:
     activeBorderColor:
-      - "#cba6f7"
+      - magenta
       - bold
     inactiveBorderColor:
-      - "#6c7086"
-    searchingActiveBorderColor:
-      - "#89b4fa"
-      - bold
-    optionsTextColor:
-      - "#89b4fa"
-    selectedLineBgColor:
-      - "#313244"
+      - default
 
 command:
   dockerCompose:

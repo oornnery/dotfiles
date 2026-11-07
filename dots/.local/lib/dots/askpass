@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# dots:summary=Password prompt for sudo -A (SUDO_ASKPASS)
+# dots:hidden=true
+#
+# sudo runs this with the prompt as $1 and reads the password from stdout.
+# If a cancelled prompt locks you out: sudo faillock --user "$USER" --reset
+set -uo pipefail
+
+prompt=${1:-Password}
+prompt=${prompt%: }; prompt=${prompt%:}; prompt=${prompt#\[sudo\] }
+
+if command -v gum >/dev/null 2>&1; then
+    gum input --password --header "$prompt" --width 60 --prompt '› ' \
+        --prompt.foreground 212 --header.foreground 99 </dev/tty
+else
+    read -rsp "$prompt: " pw </dev/tty
+    printf '\n' >/dev/tty
+    printf '%s\n' "$pw"
+fi

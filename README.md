@@ -1,174 +1,75 @@
-# Dotfiles
+# dotfiles
 
-Personal Linux dotfiles and bootstrap scripts, managed primarily with GNU Stow.
+Personal setup for Arch Linux on WSL, ready to go back to Arch on the desktop. Simple
+scripts that just run, with every step safe to repeat. Start with `dots`.
 
-## Table of contents
-
-- [Manual](docs/README.md) — full reference, omarchy-style topics
-- [What is included](#what-is-included)
-- [Quick install](#quick-install)
-- [Windows and WSL](#windows-and-wsl)
-- [Stow usage (manual)](#stow-usage-manual)
-- [Neovim](#neovim)
-- [What I use (stack)](#what-i-use-stack)
-- [Cheatsheet](#cheatsheet)
-- [Notes](#notes)
-
-## What is included
-
-- `bash/` → `.bashrc`
-- `zsh/` → `.zshrc`, `.zshenv`, Antigen plugins, and `zsh/setup.sh`
-- `nvim/` → Neovim configuration and `nvim/setup.sh`
-- `nvim.lazy/`, `nvim.mini/` → older Neovim variants kept for now
-- `editor/` → VS Code and Zed settings for the Windows setup
-- `docs/` → Full reference (basics, applications, configuration, cheatsheets)
-- `scripts/debian.sh` → Debian bootstrap script
-- `scripts/arch/arch.sh` → Arch Linux bootstrap (native + WSL + VMs, hardware-aware)
-- `tmux/` → `.tmux.conf`
-- `wsl/` → WSL `etc/wsl.conf`; `windows/.wslconfig` → VM profile; docs in `docs/wsl/`
-- `gdm/`, `greetd/`, `iwd/`, `zram/` → system stow packages handled by Arch modules
-- `git/` → `.gitconfig`
-- `hyprland/` → Hyprland config
-- `claude/` → Claude Code config: global contract, subagents, skills, output styles, MCP list
-- `opencode/` → Active OpenCode config, agents, commands, skills, and templates
-- `pi/` → Pi config: contract, settings, subagents, prompt templates, MCP servers
-- `agents/` → Skills shared by OpenCode, Codex and Pi through `~/.agents/skills`
-- `codex/` → Codex config, global guidance, custom agents, and MCP definitions
-- [AI setup](docs/configuration/ai-agents.md) → model tiers, OpenCode/Pi modes, Impeccable, migration and recovery
-- `zsh/.config/ai/` → shared, private API-key environment template and guide
-
-## Quick install
-
-### 1) Clone the repository
+## New machine
 
 ```bash
-git clone https://github.com/oornnery/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone <this repo> ~/dotfiles
+stow --no-folding -d ~/dotfiles -t ~ dots
+dots setup
 ```
 
-### 2) Run bootstrap
+## How it works
 
-```bash
-bash scripts/debian.sh
-```
+Each folder with dotfiles inside is a GNU Stow package, linked into `$HOME` file by
+file. `~/.config/dots/packages` lists what is linked on this machine.
 
-This script installs base Debian packages, developer tools, language runtimes, and desktop helpers. It does not replace the focused package setup scripts below.
+| Path | What it is |
+| ---- | ---------- |
+| `dots/` | The `dots` command: one script per subcommand in `.local/lib/dots/` |
+| `shell/`, `zsh/`, `bash/` | Shell config; `shell/` is shared by zsh and bash |
+| `helix/`, `nvim/`, `vim/` | Editors |
+| `tmux/`, `zellij/` | Terminal multiplexers |
+| `git/`, `pet/`, `atuin/`, `fastfetch/`, `bat/`, `glow/` | Tools |
+| `lazygit/`, `lazydocker/`, `btop/`, `yazi/`, `mpv/`, `herdr/`, `distrobox/` | Apps |
+| `hyprland/` | Desktop: Hyprland, Waybar, Mako, Walker, Wofi, and its `dots` commands |
+| `themes/` | Palettes and theme files, used by `dots theme` |
+| `packages/` | Saved package lists, written by `dots pkg save` |
+| `docs/cheatsheets/` | Pages for `dots help` |
+| `windows/` | GlazeWM, YASB, Windows Terminal, PowerShell and WSL configs, and the winget packages |
+| `ai/` | Agent configs, skills and prompts, mapped in `ai/README.md`; not linked |
+| `self-hosted/`, `templates/` | Compose files and editor templates |
 
-### 3) Focused setup scripts
+## Commands
 
-- `bash zsh/setup.sh` installs/configures the zsh stack on Arch or Debian.
-- `bash nvim/setup.sh` installs Neovim dependencies and stows the main `nvim/` config.
-- `./scripts/arch/arch.sh` bootstraps an Arch Linux environment. Run after `archinstall`.
+`dots help dots` lists them; `dots --help` shows the arguments.
 
-## Windows and WSL
+| Command | What it does |
+| ------- | ------------ |
+| `dots install` | Full setups: packages, config links, permissions, services |
+| `dots stow` | Choose what is linked here |
+| `dots pkg` | Install, remove, save and compare packages |
+| `dots update` | Upgrade everything |
+| `dots theme` | Switch colors, with a live preview |
+| `dots doctor` | Report what is wrong |
+| `dots edit`, `dots tui`, `dots help` | Open a config, a TUI or a page |
+| `dots palette` | Search help, TUIs and commands with tv |
+| `dots setup` | Set up a machine |
+| `dots wsl` | WSL report, and copy configs to Windows |
 
-The repository also includes Windows-oriented setup files:
+## Rules
 
-- `editor/README.md` documents the shared VS Code and Zed setup, required tools, and frontend defaults.
-- `editor/Code/.vscode/` contains workspace recommendations and settings for VS Code.
-- `editor/Zed/.zed/settings.json` contains the Zed profile used in this setup.
-- `windows/.wslconfig` contains the local WSL2 resource profile; see `docs/wsl/`.
+- The simple thing that works. A command runs; it does not check first.
+- Clean, readable and commented. Everything in English.
+- One script per command. Shared helpers only in `_ui` and `_managers`.
+- Never commit tokens, history or real `.env` files.
 
-Then review the editor docs:
+## Current state
 
-```text
-editor/README.md
-```
+- Daily use: Arch on WSL, with zsh, Helix, fnm and Windows Terminal.
+- In testing: vite-plus, next to fnm.
+- Kept for later, not linked: `hyprland`, `tmux`, `vim`.
+- Written but never run for real: the `hyprland` commands, `windows/`, and the setups
+  in `dots install` that start services.
+- Zellij: as it comes, plus help (`Alt ?`) and a tv palette (`Alt /`).
+- `ai/` is copied from the old repo and still needs a review.
+- This repo has no remote yet. The old one is `oornnery/dotfiles`, branch `master`.
 
-## Stow usage (manual)
+## Future
 
-If you want to apply packages manually:
-
-```bash
-stow -v -t ~ zsh
-stow -v -t ~ bash
-stow -v -t ~ nvim
-stow -v -t ~ tmux
-stow --no-folding -v -t ~ claude
-stow --no-folding -v -t ~ opencode
-stow --no-folding -v -t ~ pi
-stow --no-folding -v -t ~ agents
-stow --no-folding -v -t ~ codex
-```
-
-API keys are kept outside Git in `~/.config/ai/env` and loaded by `.zshenv`.
-Start from `~/dotfiles/zsh/.config/ai/env.example`; the complete variable list
-and permissions are documented in `zsh/.config/ai/README.md`.
-
-To remove symlinks for a module:
-
-```bash
-stow -D -v -t ~ zsh
-```
-
-## Neovim
-
-- `nvim/` is the main config.
-- `nvim.lazy/` and `nvim.mini/` are older variants kept for now.
-- All variants target `~/.config/nvim`, so stow only one at a time.
-- Use `bash nvim/setup.sh` for the main config.
-
-## What I use (stack)
-
-| Category             | Tool                                                                                                                                                           | Usage                                  |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| Shell                | [zsh](https://www.zsh.org/) + [Oh My Zsh](https://ohmyz.sh/)                                                                                                   | Main shell and terminal productivity   |
-| Shell fallback       | [bash](https://www.gnu.org/software/bash/)                                                                                                                     | Compatibility and scripting            |
-| Editor               | [Neovim](https://neovim.io/) with native/lazy.nvim/mini.nvim dotfile variants                                                                                  | Development and text editing           |
-| GUI editors          | [VS Code](https://code.visualstudio.com/) + [Zed](https://zed.dev/)                                                                                            | Windows editor setup                   |
-| Multiplexer          | [tmux](https://github.com/tmux/tmux)                                                                                                                           | Terminal sessions and splits           |
-| Terminal UI          | [fastfetch](https://github.com/fastfetch-cli/fastfetch)                                                                                                        | System summary on terminal startup     |
-| File navigation      | [eza](https://github.com/eza-community/eza) + tree                                                                                                             | Modern directory listing               |
-| File viewing         | [bat](https://github.com/sharkdp/bat) (`batcat`)                                                                                                               | `cat` with syntax highlighting         |
-| Search               | [fzf](https://github.com/junegunn/fzf) + [ripgrep](https://github.com/BurntSushi/ripgrep) + [fd](https://github.com/sharkdp/fd)                                | Fuzzy search, text search, file search |
-| VCS                  | [git](https://git-scm.com/) + [gh](https://cli.github.com/)                                                                                                    | Version control and GitHub CLI         |
-| OS packages          | [nala](https://gitlab.com/volian/nala) + [apt](https://wiki.debian.org/Apt)                                                                                    | Debian package install and updates     |
-| Dotfiles             | [stow](https://www.gnu.org/software/stow/)                                                                                                                     | Symlink-based dotfile management       |
-| Windows packages     | [winget](https://learn.microsoft.com/windows/package-manager/winget/)                                                                                          | Windows bootstrap and app installs     |
-| JavaScript runtime   | [node](https://nodejs.org/) + [npm](https://www.npmjs.com/) + [pnpm](https://pnpm.io/) + [bun](https://bun.sh/)                                                | JS/TS projects                         |
-| Python               | [python3](https://www.python.org/) + [pip](https://pip.pypa.io/) + [uv](https://docs.astral.sh/uv/)                                                            | Scripts and Python environments        |
-| Python quality/tools | [ruff](https://docs.astral.sh/ruff/) + [ty](https://docs.astral.sh/ty/)                                                                                        | Lint/format and type checking          |
-| Markdown tooling     | [rumdl](https://rumdl.dev/)                                                                                                                                    | Markdown linting and formatting        |
-| Other languages      | [golang](https://go.dev/) + [rustc](https://www.rust-lang.org/)                                                                                                | Go and Rust development                |
-| Build tools          | [make](https://www.gnu.org/software/make/) + [cmake](https://cmake.org/) + [ninja](https://ninja-build.org/) + [gcc](https://gcc.gnu.org/) (`build-essential`) | Compilation and tooling                |
-
-## Cheatsheet
-
-### rumdl workflow (Markdown)
-
-- Format docs: `uvx rumdl fmt .`
-- Lint docs: `uvx rumdl check .`
-- CI-friendly check (no file changes): `uvx rumdl fmt --check . && uvx rumdl check .`
-- Show what would change: `uvx rumdl fmt --diff .`
-
-### Shell (zsh)
-
-- `update` → `sudo nala update && sudo nala upgrade -y`
-- `install <pkg>` → `sudo nala install <pkg>`
-- `reload` → reload zsh (`exec zsh`)
-- `edit` → open `.zshrc` in Neovim
-- `ls` / `ll` / `tree` → `eza`-based versions
-- `cat` / `catp` → `batcat`-based versions
-
-### Neovim (useful shortcuts)
-
-- `<Space>` = leader
-- `<Space>ff` → find files
-- `<Space>sg` → grep in project with native quickfix
-- `<Space>e` → file explorer
-- `<Space>w` → save
-- `<Space>q` → quit window
-- `<Space>?` → cheatsheet
-
-### mini.nvim (active modules)
-
-- `mini.comment` → `gcc` (line), `gc` (motion/selection)
-- `mini.surround` → `gsa` (add), `gsd` (delete), `gsr` (replace)
-- `mini.basics` → utilities such as `gdelete`, `gwipe`, `gmove`
-
-## Notes
-
-- `scripts/debian.sh` installs broad Debian packages; focused setup lives in package-local `setup.sh` files.
-- The Windows side is intentionally separate from the Linux `stow` flow and is documented under `editor/`.
-- `windows/.wslconfig` is machine-level configuration and should be adapted to the RAM/CPU available on the host.
-- If a destination file already exists (for example `~/.zshrc`), back it up first to avoid conflicts.
+- Back to Arch on the desktop: `dots install hyprland`, then test its commands.
+- Review `ai/` and link what stays.
+- Rebuild `self-hosted/`.
+- One-time changes between machines, if more than one machine ever needs them.

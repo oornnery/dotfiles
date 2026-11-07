@@ -1,0 +1,13 @@
+# A mode of dots palette, which gives the lines and the preview.
+[metadata]
+name = "dots-help"
+description = "Help pages"
+
+[source]
+command = "dots palette --rows help"
+no_sort = true
+frecency = false
+display = "{split: :1..}"
+
+[preview]
+command = "dots palette --preview '{split: :0}' '{split: :1}'"

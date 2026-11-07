@@ -248,3 +248,17 @@ opencode.nvim needs the `opencode` CLI on PATH. First use starts a server in a v
 3. Use `gd`, `K`, `<leader>ca`, `<leader>cf` for code.
 4. Use `<leader>fk` when you forget a keymap.
 5. Use `:help <topic>` for official help, example: `:help motion.txt`.
+
+## Debug, tests and git
+
+| Bind                  | Action                  |
+| --------------------- | ----------------------- |
+| `<F5>`, `<leader>Dc`  | Debug: start/continue   |
+| `<F10>`, `<F11>`      | Step over, step into    |
+| `<leader>Db`          | Toggle breakpoint       |
+| `<leader>Du`          | Toggle debug UI         |
+| `<leader>Tt`          | Run nearest test        |
+| `<leader>Tf`          | Run tests in this file  |
+| `<leader>Ts`          | Toggle test summary     |
+| `<leader>gd`          | Diff working tree       |
+| `<leader>gh`          | File history            |

@@ -1,9 +1,0 @@
-poetry
-rich-cli
-dolphie
-git+https://github.com/darrenburns/elia
-frogmouth
-baca
-recoverpy
-toolong
-gitignore

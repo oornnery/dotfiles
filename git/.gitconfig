@@ -1,44 +1,28 @@
-[credential "https://github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
-
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
-
 [user]
 	name = Fabio Souza
 	email = dev@fabiohcsouza.dev
-
-[alias]
-  st = status
-  co = checkout
-  br = branch
-  cm = commit
-  lg = log --oneline --graph --decorate
-
-[diff]
-  colorMoved = default
-
-[merge]
-  tool = nvim
-
+[init]
+	defaultBranch = main
 [core]
+	editor = helix
 	quotepath = false
-	# delta as pager: syntax-highlighted diffs everywhere (git log/show/diff,
-	# blame, etc.). lazygit picks this up automatically too.
-	pager = delta
-	# Global excludes for every repo; `~` keeps this portable across users/machines.
-	excludesFile = ~/.config/git/ignore
-
-[interactive]
-	diffFilter = delta --color-only
-
+[fetch]
+	prune = true
+[diff]
+	colorMoved = default
 [delta]
-	navigate = true            # n/N to jump between hunks
-	light = false
+	navigate = true
 	line-numbers = true
-	syntax-theme = base16
-
-[pager]
-	delta = delta
+	syntax-theme = ansi
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	cm = commit
+	lg = log --oneline --graph --decorate
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential

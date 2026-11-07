@@ -1,0 +1,20 @@
+# Only what differs from atuin's defaults. Data stays in ~/.atuin/data, out of the repo.
+enter_accept = true
+search_mode = "fuzzy"
+filter_mode = "directory"
+style = "compact"
+inline_height = 0
+show_tabs = false
+
+[search]
+filters = ["global", "host", "session", "workspace", "directory"]
+
+[keys]
+scroll_exits = true
+
+[stats]
+common_prefix = ["sudo"]
+ignored_commands = ["cd", "ls", "ll", "la"]
+
+[ui]
+columns = ["duration", "time", "command"]

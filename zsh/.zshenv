@@ -1,66 +1,11 @@
 # ~/.zshenv
-# This file is sourced by every zsh instance.
-# Keep it small and fast.
-# Use it for environment variables that must always exist.
+# Read by EVERY zsh, scripts included. Keep it tiny.
+# The real environment is shared with bash in ~/.config/shell/env.sh.
 
-# Preferred editor
-export EDITOR="nvim"
-export VISUAL="code"
-
-# Locale
-export LANG="en_US.UTF-8"
-
-# XDG base directories
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
-
-# Private AI/API credentials. This file is local, chmod 600, and never tracked.
-[[ -r "$XDG_CONFIG_HOME/ai/env" ]] && source "$XDG_CONFIG_HOME/ai/env"
-
-# Local user binaries
 typeset -U path PATH
-path=(
-  "$HOME/.local/bin"
-  "$HOME/bin"
-  "$HOME/.npm-global/bin"
-  "$HOME/.local/npm/bin"
-  "$HOME/.local/share/fnm"
-  "$HOME/.opencode/bin"
-  "$HOME/.atuin/bin"
-  "$HOME/.cargo/bin"
-  "$HOME/go/bin"
-  $path
-)
 
-# Bun
-export BUN_INSTALL="$HOME/.bun"
-path=(
-  "$BUN_INSTALL/bin"
-  $path
-)
+_env="${XDG_CONFIG_HOME:-$HOME/.config}/shell/env.sh"
 
-# pnpm
-export PNPM_HOME="$HOME/.local/share/pnpm"
-path=(
-  "$PNPM_HOME"
-  $path
-)
+[[ -r $_env ]] && source "$_env"
 
-# uv installer helper path
-# The Astral installer may create this helper file.
-[[ -f "$HOME/.local/bin/env" ]] && source "$HOME/.local/bin/env"
-
-# WSL appends Windows PATH entries when appendWindowsPath=true. Keep useful
-# interop, but do not let Windows npm shims shadow Linux CLIs such as codex.
-if [[ -n ${WSL_INTEROP:-}${WSL_DISTRO_NAME:-} ]] \
-  || [[ -r /proc/sys/kernel/osrelease && "$(</proc/sys/kernel/osrelease)" == *[Mm]icrosoft* ]]; then
-  path=(${path:#/mnt/c/Users/*/AppData/Roaming/npm})
-fi
-
-export PATH
-[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
-
-# archify (vendored skill): no network update check; bump the pinned revision instead.
-export ARCHIFY_UPDATE_CHECK_DISABLED=1
+unset _env

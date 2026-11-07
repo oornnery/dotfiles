@@ -1,12 +1,12 @@
 -- ~/.config/hypr/lua/events.lua — event hooks reativos (Hyprland 0.55+ Lua API).
 --
--- hl.on(event, callback) — callback roda quando o evento dispara.
+-- hl.on(event, callback) — the callback runs when the event fires.
 -- Limite: 100ms timeout por callback, max recursion depth 5 (anti-loop).
--- Erros não interrompem outros handlers.
+-- Errors do not stop the other handlers.
 
 -- ─── Monitor plug/unplug ───────────────────────────────────────────────────
--- Quando monitor é conectado/desconectado, re-aplica monitors.lua via reload.
--- Notifica o usuário pra não pensar que tela bugou.
+-- When a monitor is plugged in or out, apply monitors.lua again through a reload.
+-- Notify, so a flicker does not look like a broken screen.
 
 hl.on("monitor.added", function(monitor)
   hl.exec_cmd("notify-send -a hyprland 'Monitor conectado' '" .. (monitor.name or "?") .. "' -t 3000")
@@ -19,7 +19,7 @@ hl.on("monitor.removed", function(monitor)
 end)
 
 -- ─── Screenshare privacy indicator ────────────────────────────────────────
--- Avisa quando você começa/termina screencast (paranoid mode).
+-- Warn when a screencast starts or stops (paranoid mode).
 
 hl.on("screenshare.state", function(state)
   if state == "started" or state == true then
@@ -30,15 +30,15 @@ hl.on("screenshare.state", function(state)
 end)
 
 -- ─── Config reload feedback ────────────────────────────────────────────────
--- Confirma que `hyprctl reload` funcionou (visual feedback).
+-- Confirm that `hyprctl reload` worked (visual feedback).
 
 hl.on("config.reloaded", function()
   hl.exec_cmd("notify-send -a hyprland 'Config reloaded' '' -t 1500")
 end)
 
 -- ─── Shutdown cleanup ─────────────────────────────────────────────────────
--- Mata daemons que não terminam sozinhos quando Hyprland sai
--- (evita processes órfãos em logout).
+-- Kill daemons that do not stop by themselves when Hyprland exits
+-- (avoids orphaned processes on logout).
 
 hl.on("hyprland.shutdown", function()
   hl.exec_cmd("pkill -TERM walker")
