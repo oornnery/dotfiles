@@ -45,4 +45,15 @@ t_status_shows_tools_not_set_up_here() {
     has '1 tool(s) of this machine not set up here' "$(dots status)"
 }
 
+t_status_leaves_out_state_files_beside_links() {
+    git init -q "$DOTFILES_DIR"
+    mkdir -p "$DOTFILES_DIR/home/foo/.config/foo" "$HOME/.config/foo"
+    echo x > "$DOTFILES_DIR/home/foo/.config/foo/foo.conf"
+    printf 'tools:\nlinks: foo\n' > "$DOTFILES_DIR/machines/test"
+    ln -s "$DOTFILES_DIR/home/foo/.config/foo/foo.conf" "$HOME/.config/foo/foo.conf"
+    touch "$HOME/.config/foo/.plugins.lock" "$HOME/.config/foo/new.conf"
+    local out; out=$(dots status)
+    has 'foo: ~/.config/foo/new.conf' "$out" && lacks plugins.lock "$out"
+}
+
 check

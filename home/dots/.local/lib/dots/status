@@ -18,6 +18,8 @@ set -uo pipefail
 . "$DOTS_LIB/_managers"
 
 SAVED="$DOTFILES/packages"
+# Files apps write next to their config that are state, not config: never pending.
+STATE_FILES=(! -name '*.bak.*' ! -name '*.lock' ! -name '*.log' ! -name '*.db' ! -name '*history*')
 FETCH=0; [[ ${1:-} == -f ]] && FETCH=1
 pending=0
 
@@ -59,7 +61,7 @@ links() {
             rel=${dir#"$PKGS/$pkg/"}
             case $rel in .config|.local|.local/*|.config/shell/completions) continue ;; esac
             while IFS= read -r f; do echo "$pkg: ${f/#$HOME/\~}"; done \
-                < <(find "$HOME/$rel" -maxdepth 1 -type f ! -name '*.bak.*' 2>/dev/null)
+                < <(find "$HOME/$rel" -maxdepth 1 -type f "${STATE_FILES[@]}" 2>/dev/null)
         done < <(find "$PKGS/$pkg" -mindepth 1 -type d -path "$PKGS/$pkg/.*")
     done < <(linked_packages))
     if [[ -n $missing ]]; then todo "$(wc -l <<< "$missing") file(s) in the repo, not linked here" "dots link sync"; items "$missing"; fi
@@ -106,23 +108,34 @@ migrations() {
 windows() {  # only on WSL: configs that differ from the Windows side
     [[ -d /mnt/c/Windows ]] || return 0
     section "windows"
-    local out
-    out=$(NO_COLOR=1 "$DOTS_LIB/wsl" windows -n 2>&1 | grep -v ': same$' | sed 's/^[^ ]* //')
-    if [[ -n $out ]]; then
-        todo "$(wc -l <<< "$out") config(s) differ from Windows" "dots wsl windows (send) or dots wsl windows pull (bring)"
-        items "$out"
+    local out diff new
+    out=$(NO_COLOR=1 "$DOTS_LIB/wsl" windows -n 2>&1 | sed 's/^[^ ]* //')
+    diff=$(grep ': different$' <<< "$out" | sed 's/: different$//')
+    # A config with nothing on Windows is an app not installed there: nothing to do yet.
+    new=$(grep ': new$' <<< "$out" | sed 's/: new$//' | paste -sd' ')
+    if [[ -n $diff ]]; then
+        todo "$(wc -l <<< "$diff") config(s) differ from Windows" "dots wsl windows -n, then send (dots wsl windows) or bring (dots wsl windows pull)"
+        items "$diff"
     else
         ok "Windows has the same configs"
     fi
+    [[ -z $new ]] || note "nothing on Windows yet, dots wsl windows sends them: $new"
 }
 
+# The parts run at the same time, each into its own file, and print in this order.
+# A part prints its count of pending things on the last line of its file.
 spin_self 'Looking for what is pending...' "$@"
-repo
-tools
-links
-migrations
-packages
-windows
+tmp=$(mktemp -d)
+parts=(repo tools links migrations packages windows)
+for p in "${parts[@]}"; do
+    ( "$p"; echo "$pending" ) > "$tmp/$p" 2>&1 &
+done
+wait
+for p in "${parts[@]}"; do
+    sed '$d' "$tmp/$p"
+    pending=$(( pending + $(tail -1 "$tmp/$p") ))
+done
+rm -rf "$tmp"
 echo
 if (( pending )); then note "$pending pending"; else ok "nothing pending"; fi
 (( FETCH )) || note "dots status -f also asks the remote and the repos"

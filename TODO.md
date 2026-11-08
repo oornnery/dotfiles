@@ -37,7 +37,6 @@ Ideas:
 ## dots
 
 - [ ] `dots status` on a timer, or in the prompt, as a small count.
-- [ ] `dots status` runs its parts at the same time; today it takes about 4 seconds.
 - [ ] Review `machines/DESKTOP-T8DL9CB`: migration 002 guessed the tools from what
       is installed (openssh counts, though sshd may not run here).
 - [ ] `dots theme` for Yazi icons, which keep fixed colors.
