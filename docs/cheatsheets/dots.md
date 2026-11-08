@@ -3,7 +3,7 @@
 Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` marks,
 `Enter` confirms and `Esc` cancels. Each command takes `-h` for its help.
 
-Keys: `Alt /` searches all of it with fzf, `Alt ?` opens these pages (`dots help keys`
+Keys: `Alt /` searches all of it with fzf (`dots help palette`), `Alt ?` opens these pages (`dots help keys`
 lists every key). A new machine starts with `./bootstrap`.
 
 The tables below come from the header of each command (`docs/generate`). The

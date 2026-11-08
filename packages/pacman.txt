@@ -1,4 +1,6 @@
 # pacman packages, saved 2026-11-08 from DESKTOP-T8DL9CB
+7zip
+arch-audit
 atuin
 base
 base-devel
@@ -10,6 +12,8 @@ distrobox
 docker
 docker-buildx
 docker-compose
+duf
+dust
 eza
 fastfetch
 fd
@@ -20,7 +24,9 @@ github-cli
 glow
 gum
 helix
+htmlq
 hyperfine
+jless
 jq
 lazydocker
 lazygit
@@ -33,14 +39,19 @@ ncdu
 neovim
 openssh
 pacman-contrib
+pkgfile
+procs
 ripgrep
+rsync
 ruff
 rust
+sd
 shellcheck
 shfmt
 stow
 sudo
 taplo-cli
+tealdeer
 television
 tmux
 tokei
@@ -52,9 +63,11 @@ vim
 wget
 wl-clipboard
 xh
+xmlstarlet
 yaml-language-server
 yazi
 yq
+yt-dlp
 zellij
 zip
 zoxide

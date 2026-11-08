@@ -162,7 +162,9 @@ while out=$(pick "$mode") && [[ -n $out ]]; do
     mode=${out%%$'\n'*}; mode=${mode%> }
     read -r kind name text <<< "${out#*$'\n'}"
     case $kind in
-        help|keys|linux) act "$kind" "$name" "$text" ;;
+        # The pager in a screen of its own, waiting for q even on a short page: back
+        # in the palette, the list is as it was. LESS in the shell says otherwise.
+        help|keys|linux) LESS=-Ri BAT_PAGER='less -Ri' act "$kind" "$name" "$text" ;;
         *) act "$kind" "$name" "$text"; exit ;;
     esac
 done

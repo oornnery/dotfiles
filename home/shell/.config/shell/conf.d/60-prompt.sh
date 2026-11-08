@@ -2,14 +2,14 @@
 # The prompt, the same in zsh and bash: everything about it is in this file.
 # Terminal colors only, so it follows `dots theme`; icons from a Nerd Font.
 #
-#   [box] user  ~/dotfiles  main +1 *2 ?3 ↑1 ↓2 ≡1    ✗INT 3  12s  ⚙2  app  py 3.14  14:32  Alt / ? e
+#   [box] user  ~/dotfiles  main +1 *2 ?3 ↑1 ↓2 ≡1    ✗INT 3  12s  ⚙2  app  py 3.14  14:32  Alt / ? u
 #   ❯
 #
 # Left, who and where: container, user (@host on SSH), folder, git.
 # Git: staged, changed, untracked, conflicts, ahead, behind, stashes, each with its count.
 # Right, what happened and with what: error, what dots status left pending, time from
 # 3s, background jobs, Python venv, the languages of this project, clock, and outside
-# Zellij (its bar has them) three keys: Alt / search, Alt ? help, Alt e files;
+# Zellij (its bar has them) three keys: Alt / search, Alt ? help, Alt u TUIs;
 # DOTS_PROMPT_KEYS=0 hides them. When the line does not fit, they leave from the
 # right; the error goes last. The pending count is read from the cache of dots
 # status, which a new shell refreshes in the background (30-dots.sh).
@@ -155,7 +155,7 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
     # What dots status left pending, from its cache: a read, no command.
     [ -r "${XDG_CACHE_HOME:-$HOME/.cache}/dots/pending" ] && read -r pending < "${XDG_CACHE_HOME:-$HOME/.cache}/dots/pending"
     [ "${pending:-0}" = 0 ] && pending=''
-    [ -z "${ZELLIJ:-}" ] && [ "${DOTS_PROMPT_KEYS:-1}" != 0 ] && keys="$_PI_KEYS Alt / search  ? help  e files"
+    [ -z "${ZELLIJ:-}" ] && [ "${DOTS_PROMPT_KEYS:-1}" != 0 ] && keys="$_PI_KEYS Alt / search  ? help  u tui"
 
     max=$(( ${COLUMNS:-80} - 1 ))   # the last column would wrap in some terminals
     while [ "$level" -ge 0 ]; do

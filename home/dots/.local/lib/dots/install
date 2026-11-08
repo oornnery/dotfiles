@@ -78,7 +78,9 @@ list() {
 show() {  # show <name>: what a setup does, for the side panel
     local name=$1 body
     printf '%s%s%s\n%s\n' "$H" "$name" "$N" "$(field "$name" 3)"
-    printf '\n%sPackages%s\n' "$H" "$N"; field "$name" 4 | tr ' ' '\n'
+    printf '\n%sPackages%s\n' "$H" "$N"
+    # shellcheck disable=SC2046  # package names, one per word
+    origin $(field "$name" 4) | awk '{p = $1; $1 = ""; printf "%-16s%s\n", p, $0}'
     if [[ -n $(field "$name" 5) ]]; then
         printf '\n%sConfig links%s\n' "$H" "$N"; field "$name" 5 | tr ' ' '\n'
     fi
@@ -111,9 +113,26 @@ expand() {  # names and group names in, setup names out
     done
 }
 
-parts_of() {  # parts_of <name>: its packages, config links and setup step, one per line
-    local part
-    for part in $(field "$1" 4); do echo "package  $part"; done
+origin() {  # origin <package>...: "<package> <where it comes from>", installed or not
+    local p where repo=() found='' installed=''
+    for p in "$@"; do [[ $p == *:* ]] || repo+=("$p"); done
+    # One call to pacman for all of them: the repo of each, and what is installed.
+    # With no names, pacman -Si would list the whole repo: hence the test.
+    if (( ${#repo[@]} )); then
+        found=$(pacman -Si "${repo[@]}" 2>/dev/null | awk '/^Repository/ {r = $3} /^Name/ {print $3, r}')
+        installed=" $(pacman -Qq "${repo[@]}" 2>/dev/null | tr '\n' ' ') "
+    fi
+    for p in "$@"; do
+        if [[ $p == *:* ]]; then echo "$p ${p%%:*}"; continue; fi
+        where=$(awk -v p="$p" '$1 == p {print $2}' <<< "$found")
+        printf '%s %s%s\n' "$p" "${where:-aur}" "$([[ $installed == *" $p "* ]] && echo ', installed')"
+    done
+}
+
+parts_of() {  # parts_of <name>: its packages (and where from), config links and setup step
+    local part p where
+    # shellcheck disable=SC2046  # package names, one per word
+    origin $(field "$1" 4) | while read -r p where; do printf 'package  %-16s %s\n' "$p" "($where)"; done
     for part in $(field "$1" 5); do echo "config   $part"; done
     if declare -F "post_$1" >/dev/null; then echo "setup    $1"; fi
 }

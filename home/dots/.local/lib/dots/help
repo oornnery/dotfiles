@@ -57,10 +57,11 @@ pet() {  # snippets, grouped by the section comments in snippet.toml
         }' "${XDG_CONFIG_HOME:-$HOME/.config}/pet/snippet.toml"
 }
 
-# Build the page first: less shows "Waiting for data" on a slow pipe.
+# Build the page first: less shows "Waiting for data" on a slow pipe. The rest of
+# its flags come from LESS (-FRXi in the shell, set by the palette for its pages).
 page() {
     local text; text=$(cat)
-    if [[ -t 1 ]]; then less -FRX <<< "$text"; else printf '%s\n' "$text"; fi
+    if [[ -t 1 ]]; then less -R <<< "$text"; else printf '%s\n' "$text"; fi
 }
 
 render() {  # markdown on stdin, paged
