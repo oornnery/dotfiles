@@ -176,8 +176,12 @@ setup() {  # setup <name>
     section "$name"
     if [[ -z ${YES:-} ]] && can_prompt && (( $(wc -l <<< "$parts") > 1 )); then
         parts=$(choose --all "$name: x toggles, enter continues, esc skips" <<< "$parts") || { note "skipped"; return 0; }
+    else
+        note "$(sed 's/^/  /' <<< "$parts")"   # what it is about to do, and where from
     fi
-    pkgs=$(awk '$1 == "package" {print $2}' <<< "$parts")
+    # What is installed already is left out: pacman would only say it is up to date.
+    pkgs=$(awk '$1 == "package" && !/installed\)$/ {print $2}' <<< "$parts")
+    if grep -q '^package' <<< "$parts" && [[ -z $pkgs ]]; then note "its packages are installed"; fi
     links=$(awk '$1 == "config" {print $2}' <<< "$parts")
     # A package named manager:name comes from that manager; the others, pacman or the AUR.
     local p system=()
@@ -205,9 +209,32 @@ remove() {  # remove <name>
     [[ -f $STATE/tools ]] && sed -i "/^$name\$/d" "$STATE/tools"
 }
 
+plan() {  # plan <setup>...: a table of what they bring and where each part comes from
+    local name
+    {
+        printf 'setup\tpart\tfrom\n'
+        for name in "$@"; do
+            parts_of "$name" | awk -v s="$name" '{
+                from = $0; sub(/^[a-z]+ +[^ ]+ */, "", from); gsub(/[()]/, "", from)
+                if ($1 == "config") from = "home/" $2
+                if ($1 == "setup")  { from = "post_" $2 " in install"; $2 = "its step" }
+                print s "\t" $2 "\t" from }'
+        done
+    } | table
+}
+
 each() {  # each <function> <name>...: run for all of them, then say what failed
     local action=$1 name failed=()
     shift
+    # Several setups: the whole plan first, then all of them, or a checklist each.
+    if [[ $action == setup && -z ${YES:-} ]] && (( $# > 1 )) && can_prompt; then
+        plan "$@"
+        case $(gum choose --header "Set up these $#?" 'All of them' 'Ask for the parts of each' 'Cancel') in
+            'All of them') YES=1 ;;
+            'Ask for the parts of each') ;;
+            *) return 0 ;;
+        esac
+    fi
     for name in "$@"; do
         "$action" "$name" || failed+=("$name")
     done

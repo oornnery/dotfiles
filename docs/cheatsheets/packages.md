@@ -43,9 +43,9 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 | --- | --- | --- | --- |
 | `btop` | `btop` | CPU, memory, processes | [aristocratos/btop](https://github.com/aristocratos/btop) |
 | `systemctl-tui` | `systemctl-tui` | systemd units: start, stop, their logs | [rgwood/systemctl-tui](https://github.com/rgwood/systemctl-tui) |
-| `lazyjournal` | `lazyjournal` (aur) | Logs: journal, files, Docker and Podman | [Lifailon/lazyjournal](https://github.com/Lifailon/lazyjournal) |
+| `lazyjournal` | `lazyjournal-bin` (aur) | Logs: journal, files, Docker and Podman | [Lifailon/lazyjournal](https://github.com/Lifailon/lazyjournal) |
 | `lazydocker` / `ld` | `lazydocker` | Docker containers, logs, stats | [jesseduffield/lazydocker](https://github.com/jesseduffield/lazydocker) |
-| `oxker` | `oxker` (aur) | Docker containers, lighter | [mrjackwills/oxker](https://github.com/mrjackwills/oxker) |
+| `oxker` | `oxker-bin` (aur) | Docker containers, lighter | [mrjackwills/oxker](https://github.com/mrjackwills/oxker) |
 | `pacsea` | `pacsea-bin` (aur) | Search and install pacman and AUR packages | [Firstp1ck/Pacsea](https://github.com/Firstp1ck/Pacsea) |
 
 ### Network
@@ -54,14 +54,14 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 | --- | --- | --- | --- |
 | `trip` | `trippy` | traceroute and ping together, with graphs | [fujiapple852/trippy](https://github.com/fujiapple852/trippy) |
 | `termshark` | `termshark` | Packets, like Wireshark | [gcla/termshark](https://github.com/gcla/termshark) |
-| `lazyssh` | `lazyssh` (aur) | SSH hosts: pick, add, connect | [Adembc/lazyssh](https://github.com/Adembc/lazyssh) |
+| `lazyssh` | `lazyssh-bin` (aur) | SSH hosts: pick, add, connect | [Adembc/lazyssh](https://github.com/Adembc/lazyssh) |
 
 ### Data and APIs
 
 | Run | Package | For | Project |
 | --- | --- | --- | --- |
 | `posting` | `posting` (aur) | HTTP APIs, like Postman | [darrenburns/posting](https://github.com/darrenburns/posting) |
-| `lazysql` | `lazysql` (aur) | Databases: Postgres, MySQL, SQLite... | [jorgerojas26/lazysql](https://github.com/jorgerojas26/lazysql) |
+| `lazysql` | `lazysql-bin` (aur) | Databases: Postgres, MySQL, SQLite... | [jorgerojas26/lazysql](https://github.com/jorgerojas26/lazysql) |
 | `fx` | `fx` | JSON, to browse and query | [antonmedv/fx](https://github.com/antonmedv/fx) |
 | `tw` | `tabiew` | CSV, Parquet and JSON tables, with SQL | [shshemi/tabiew](https://github.com/shshemi/tabiew) |
 | `epycell` | `epycell` (cargo) | Jupyter notebooks in the terminal | [crates.io/crates/epycell](https://crates.io/crates/epycell) |
@@ -71,7 +71,7 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 | Run | Package | For | Project |
 | --- | --- | --- | --- |
 | `taskwarrior-tui` | `taskwarrior-tui` | Tasks of taskwarrior (`task add ...`) | [kdheepak/taskwarrior-tui](https://github.com/kdheepak/taskwarrior-tui) |
-| `dooit` | `dooit` (aur) | Todo lists, nested | [dooit-org/dooit](https://github.com/dooit-org/dooit) |
+| `dooit` | `dooit-bin` (aur) | Todo lists, nested | [dooit-org/dooit](https://github.com/dooit-org/dooit) |
 | `calcure` | `calcure` (aur) | Calendar and tasks | [anufrievroman/calcure](https://github.com/anufrievroman/calcure) |
 | `zk` | `zk` | Notes as a Zettelkasten, searched with fzf | [zk-org/zk](https://github.com/zk-org/zk) |
 | `nb` | `nb` (aur) | Notes, bookmarks and to-dos, synced with git | [xwmx/nb](https://github.com/xwmx/nb) |

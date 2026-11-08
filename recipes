@@ -19,15 +19,15 @@ tools|yazi|File manager|yazi|yazi
 tools|television|Fuzzy finder with channels, the tv command|television|television
 tools|epycell|Jupyter notebooks in the terminal|rust|
 tuis|tui-api|HTTP APIs, like Postman: posting|posting|
-tuis|tui-db|Databases, like lazygit: lazysql|lazysql|
+tuis|tui-db|Databases, like lazygit: lazysql|lazysql-bin|
 tuis|tui-data|JSON (fx) and CSV (tabiew, tw)|fx tabiew|
 tuis|tui-git|The commit graph: serie|serie|
 tuis|tui-network|traceroute and ping with graphs (trippy, trip), packets (termshark)|trippy termshark|
-tuis|tui-system|systemd units (systemctl-tui), logs (lazyjournal), containers (oxker)|systemctl-tui lazyjournal oxker|
+tuis|tui-system|systemd units (systemctl-tui), logs (lazyjournal), containers (oxker)|systemctl-tui lazyjournal-bin oxker-bin|
 tuis|tui-dev|Commands side by side (mprocs), slides from Markdown (presenterm)|mprocs presenterm|
-tuis|tui-ssh|SSH hosts: lazyssh|lazyssh|
+tuis|tui-ssh|SSH hosts: lazyssh|lazyssh-bin|
 tuis|tui-fun|Spotify (spotify_player), typing test (ttyper)|spotify-player ttyper|
-tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior-tui dooit|
+tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior-tui dooit-bin|
 tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar)|zk nb calcure|
 secrets|vaultwarden|Vaultwarden and Bitwarden: rbw (with an agent, rbw config set base_url) and bw|rbw bitwarden-cli|
 secrets|env-files|.env files encrypted in git: sops with age keys, and dotenvx|sops age npm:@dotenvx/dotenvx|
@@ -82,7 +82,7 @@ network|tailscale|Tailscale, service running|tailscale|
 wsl|automount|Mount Windows drives plugged in after WSL started (a service)||
 network|openssh|OpenSSH server, service running|openssh|
 network|net-tools|DNS lookups, ping with a graph, traceroute, whois, port relay, scans|doggo gping mtr whois socat nmap|
-network|voip|SIP: a softphone, call flows, load tests, captures, codecs, SCTP|baresip sngrep-bin sipp wireshark-cli bcg729 opus lksctp-tools|
+network|voip|SIP: a softphone, call flows, load tests, captures, codecs, SCTP|baresip sngrep-bin sipp-bin wireshark-cli bcg729 opus lksctp-tools|
 network|cloudflare|Cloudflare Tunnel (cloudflared) and Workers (wrangler)|cloudflared npm:wrangler|
 desktop|fonts|JetBrains Mono Nerd Font and emoji|ttf-jetbrains-mono-nerd noto-fonts-emoji|
 desktop|hyprland|Compositor, bar, tools, commands, config and theme|hyprland alacritty hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin libnotify grim slurp wf-recorder satty hyprpicker brightnessctl power-profiles-daemon wl-clipboard jq tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects|hyprland
