@@ -43,7 +43,7 @@ post_distrobox() { dots install -y docker; }
 post_epycell()   { cargo install --locked epycell; }
 post_node()      { mise install; }   # the Node of ~/.config/mise/config.toml
 post_python()    { uv python install; }
-post_cli-extras() { have tldr && tldr --update; return 0; }
+post_cli-extras() { have tldr && tldr --update; dots sudo pkgfile --update; return 0; }   # tldr pages, pkgfile index
 post_ollama()    { dots sudo systemctl enable --now ollama; }
 post_tailscale() { dots sudo systemctl enable --now tailscaled; }
 post_openssh()   { dots sudo systemctl enable --now sshd; }
