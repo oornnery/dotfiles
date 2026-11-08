@@ -24,7 +24,8 @@ section() { printf '\n%s %s%s\n' "$H" "$1" "$N"; }
 # colors, aligned columns without (a pipe, NO_COLOR). Empty cells need a "-".
 table() {
     if [[ -n $N ]] && have gum; then
-        gum table --print --separator $'\t' --border rounded --border.foreground 99 --header.foreground 212
+        # No borders: what is left of them are blank lines, dropped too.
+        gum table --print --separator $'\t' --border none --header.foreground 212 | sed '/^ *$/d'
     else
         column -t -s $'\t'
     fi
