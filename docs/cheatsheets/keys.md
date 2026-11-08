@@ -18,7 +18,7 @@ Zellij, Zellij takes them first and opens the same things floating.
 
 | Key | Action |
 | --- | ------ |
-| `Alt /` | Search everything with tv |
+| `Alt /` | Search everything with fzf |
 | `Alt ?` | Help pages |
 | `Alt u` | Pick a TUI |
 | `Alt e` | Yazi; the shell stays in the folder you were in |

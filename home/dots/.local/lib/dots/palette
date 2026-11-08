@@ -5,15 +5,12 @@
 # dots:actions=tui=Only the TUIs|dots=Only dots commands|keys=Only keyboard shortcuts|help=Only help pages|run=Any command|linux=Man pages|pet=Pet snippets
 #
 #   dots palette        everything
-#   dots palette <mode> only one mode; inside, Tab switches to another
+#   dots palette <mode> only one mode; inside, Tab goes to the next one
 #
-# Each mode is a tv channel (television/.config/television/cable) that calls this
-# script back for its lines and for the preview. A line is "<kind> <name> <text>".
-# The preview never runs what it shows: asking any command for --help on hover could
-# just as well run it.
-#
-# What you pick runs right here. Zellij opens this in a floating pane (see its
-# config.kdl), so there it closes when what you picked ends.
+# fzf, under the prompt in a shell, and the whole floating pane in Zellij (see its
+# config.kdl). This script also gives fzf its lines and its preview. A line is
+# "<kind> <name> <text>". The preview never runs what it shows: asking any
+# command for --help on hover could just as well run it. What you pick runs here.
 set -uo pipefail
 
 # shellcheck source=/dev/null
@@ -22,9 +19,8 @@ set -uo pipefail
 SHEETS="${DOTFILES_DIR:-$HOME/dotfiles}/docs/cheatsheets"
 LIB="${DOTS_LIB:-$HOME/.local/lib/dots}"
 
-# The preview takes half of the terminal, less its borders.
-read -r _ columns < <(stty size 2>/dev/null </dev/tty)
-WIDTH=$(( ${columns:-120} / 2 - 4 ))
+MODES=(all help keys tui dots run linux pet)
+WIDTH=${FZF_PREVIEW_COLUMNS:-80}   # fzf tells the preview its width
 
 row() { printf '%s %-16s %s\n' "$1" "$2" "${3:-}"; }  # row <kind> <name> <text>
 
@@ -132,18 +128,30 @@ act() {  # act <kind> <name> <text>
     esac
 }
 
+next() {  # next <prompt> [-1]: the fzf actions that go to the next (or previous) mode
+    local i mode=${1%> } step=${2:-1}
+    for i in "${!MODES[@]}"; do [[ ${MODES[$i]} == "$mode" ]] && break; done
+    mode=${MODES[$(( (i + step + ${#MODES[@]}) % ${#MODES[@]} ))]}
+    printf 'change-prompt(%s> )+reload(%q --rows %s)+first' "$mode" "$0" "$mode"
+}
+
+pick() {  # pick <mode>: the line picked, empty when cancelled
+    local size=(--height=60% --min-height=20)
+    [[ -n ${ZELLIJ:-} ]] && size=()  # the floating pane is already the right size
+    "rows_$1" | fzf "${size[@]}" --reverse --border=rounded --ansi \
+        --prompt="$1> " --with-nth=2.. --header='Tab next mode · Shift-Tab back' \
+        --preview="$(printf '%q' "$0") --preview {1} {2}" --preview-window=right,55%,wrap \
+        --bind="tab:transform:$(printf '%q' "$0") --next {fzf:prompt}" \
+        --bind="shift-tab:transform:$(printf '%q' "$0") --next {fzf:prompt} -1"
+}
+
 case "${1:-all}" in
     --rows)    "rows_$2"; exit ;;
-    --preview) preview "$2" "$3"; exit 0 ;;  # on failure, tv would show only stderr
-    all|tui|dots|keys|help|run|linux|pet) need tv; choice=$(tv "dots-${1:-all}") ;;
+    --preview) preview "$2" "$3"; exit 0 ;;  # on failure, fzf would show only stderr
+    --next)    next "$2" "${3:-1}"; exit ;;
+    all|tui|dots|keys|help|run|linux|pet) need fzf; choice=$(pick "${1:-all}") ;;
     *) die "unknown mode: $1" ;;
 esac
 [[ -n $choice ]] || exit 0
-# Tab can lead to a channel of tv itself: what comes back is a file or just a line.
-if [[ -f $choice ]]; then exec "${EDITOR:-helix}" "$choice"; fi
 read -r kind name text <<< "$choice"
-case $kind in
-    tui|run|mode|help|keys|linux|pet|dots) ;;
-    *) printf '%s\n' "$choice"; read -rsn1 -p 'Press a key to close'; exit 0 ;;
-esac
 act "$kind" "$name" "$text"

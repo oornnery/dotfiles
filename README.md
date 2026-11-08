@@ -117,7 +117,7 @@ the header of each command (`docs/generate`).
 | `nvim` * | `~/.config/nvim/` |
 | `zellij` * | `~/.config/zellij/`: config with zjstatus, layout `dev` |
 | `yazi` * | `~/.config/yazi/` |
-| `television` * | `~/.config/television/`: the `dots palette` channels |
+| `television` * | `~/.config/television/`: tv, on its own |
 | `lazygit` *, `lazydocker` * | `~/.config/lazygit/`, `~/.config/lazydocker/` |
 | `atuin` *, `pet` * | `~/.atuin/`, `~/.config/pet/` |
 | `bat` *, `glow` *, `btop` *, `fastfetch` * | `~/.config/<name>/` |
@@ -148,7 +148,7 @@ Saved in `packages/` by `dots pkg save`; `dots pkg restore` brings them back.
 
 ## Current state
 
-- Daily use: Arch on WSL, with zsh, Helix, Zellij, Yazi, tv and Windows Terminal.
+- Daily use: Arch on WSL, with zsh, Helix, Zellij, Yazi, fzf and Windows Terminal.
 - Node: fnm, with vite-plus in testing. Both set up a Node, so only one stays (TODO.md).
 - Kept for later, not linked: `hyprland`, `tmux`, `vim`.
 - Written but never run for real: the `hyprland` commands, `dots wsl windows install`,

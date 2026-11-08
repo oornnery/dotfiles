@@ -1,4 +1,4 @@
-// Zellij with its own keys and modes. Only these additions: help, a palette with tv,
+// Zellij with its own keys and modes. Only these additions: help, a palette with fzf,
 // yazi and lazygit on top, going straight to a tab, and bars with a color per item.
 // The theme is written by dots theme, from the same palette as everything else.
 theme "dots"

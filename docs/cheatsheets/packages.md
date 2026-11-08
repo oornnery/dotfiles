@@ -162,7 +162,7 @@ Kept but not linked. Turn one on with `dots link <name>`.
 | `vim` | Small `.vimrc` without plugins, same keys as Helix |
 | `tmux` | Small `.tmux.conf`, same theme as Helix |
 | `zellij` | Theme, help, the keys for `dots palette` and the `dev` layout |
-| `television` | The modes of `dots palette`, as tv channels |
+| `television` | tv and its config; `dots palette` uses fzf |
 | `hyprland` | Hyprland, Alacritty, Waybar, Mako, Walker, Wofi and the commands `capture`, `display`, `hypr`, `notifications`, `system`, `webapp`; not used on WSL |
 
 In the repo, but not stow packages:

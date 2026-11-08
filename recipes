@@ -18,7 +18,7 @@ tools|television|Fuzzy finder with channels, the tv command|television|televisio
 tools|epycell|Jupyter notebooks in the terminal|rust|
 tools|cli-extras|bottom, dust, duf, procs, sd, tealdeer, jless, yt-dlp|bottom dust duf procs sd tealdeer jless yt-dlp|
 terminal|tmux|tmux with config and theme|tmux|tmux
-terminal|zellij|Zellij with its theme, help and a tv palette|zellij television|zellij television
+terminal|zellij|Zellij with its theme, help and a palette|zellij fzf|zellij
 editors|helix|Helix with language servers and config|helix bash-language-server shfmt shellcheck taplo-cli marksman yaml-language-server ruff uv|helix
 editors|nvim|Neovim with plugins and config for any language|neovim git ripgrep fd tree-sitter-cli|nvim
 editors|vim|Small Vim config|vim|vim
