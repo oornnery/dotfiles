@@ -29,6 +29,14 @@ case ${1:-} in -h|--help) usage; exit 0 ;; esac
 
 # --- The machine --------------------------------------------------------------
 
+packages() {  # every config package: a folder holding at least one dotfile at the top
+    local d
+    for d in "$PKGS"/*/; do
+        d=${d%/}
+        compgen -G "$d/.[!.]*" >/dev/null && echo "${d##*/}"
+    done
+}
+
 linked_packages() {  # the config packages this machine links, one per line
     sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" 2>/dev/null | grep -v '^$'
 }

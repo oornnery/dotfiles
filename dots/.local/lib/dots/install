@@ -195,7 +195,7 @@ setup() {  # setup <name>
     # shellcheck disable=SC2086  # package names, one per word
     if [[ -n $pkgs ]]; then dots pkg add $pkgs </dev/tty || return 1; fi
     # shellcheck disable=SC2086  # package names, one per word
-    if [[ -n $links ]]; then dots stow $links </dev/tty || return 1; fi
+    if [[ -n $links ]]; then dots link $links </dev/tty || return 1; fi
     if grep -q '^setup' <<< "$parts"; then "post_$name" </dev/tty || return 1; fi
 }
 
@@ -205,7 +205,7 @@ remove() {  # remove <name>
     [[ -n $pkgs ]] || { err "no such setup: $name"; return 1; }
     section "$name"
     # shellcheck disable=SC2086  # package names, one per word
-    if [[ -n $links ]]; then dots stow -D $links; fi
+    if [[ -n $links ]]; then dots link -D $links; fi
     # shellcheck disable=SC2086  # package names, one per word
     dots pkg remove $pkgs </dev/tty
 }

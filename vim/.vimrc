@@ -1,5 +1,5 @@
 " ~/.vimrc
-" Kept for machines with only vim; not linked by default (dots stow vim).
+" Kept for machines with only vim; not linked by default (dots link vim).
 " No plugins. Same behaviour and Space keys as the Helix config.
 set nocompatible
 filetype plugin indent on

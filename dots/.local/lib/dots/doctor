@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# dots:summary=Check that this machine matches the dotfiles
+# dots:summary=What is broken: links, tools, scripts, PATH, Node, language servers
 # dots:group=machine
 #
-# Links, tools, scripts, PATH, active Node, saved packages, the packages
-# cheatsheet and Helix language servers. Changes nothing. Exits 1 on problems.
+# Broken links, missing tools, scripts that do not parse, PATH, the active Node,
+# saved packages missing from packages.md and Helix language servers. Changes
+# nothing. Exits 1 on problems. What is only pending is in dots status.
 # shellcheck disable=SC2154  # colors come from _ui
 set -uo pipefail
 
@@ -20,12 +21,9 @@ check_links() {
         [[ -d $PKGS/$pkg ]] || bad "package in the list but not in the repo: $pkg"
     done < <(linked_packages)
     while IFS= read -r line; do
-        bad "not linked: ~/${line#* } (dots stow ${line%% *})"
-    done < <(unlinked)
-    while IFS= read -r line; do
         bad "broken link: ${line/#$HOME/\~}"
     done < <(stale_links | sort -u)
-    (( problems == before )) && ok "every package file is linked, no broken links"
+    (( problems == before )) && ok "every linked package exists, no broken links"
 }
 
 check_tools() {
@@ -79,7 +77,6 @@ check_node() {
 check_packages() {
     section packages
     local before=$problems sheet="$DOTFILES/docs/cheatsheets/packages.md" p
-    [[ -z $(dots pkg diff 2>/dev/null) ]] || bad "packages differ from the saved lists (dots pkg diff)"
     if [[ -f $sheet ]]; then
         while IFS= read -r p; do
             grep -qF "\`$p\`" "$sheet" || bad "not in packages.md: $p"
@@ -87,7 +84,7 @@ check_packages() {
     else
         bad "cheatsheet missing: docs/cheatsheets/packages.md"
     fi
-    (( problems == before )) && ok "saved lists and packages.md are up to date"
+    (( problems == before )) && ok "every saved package is in packages.md"
 }
 
 check_helix() {

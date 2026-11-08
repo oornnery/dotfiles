@@ -124,7 +124,7 @@ Check them with `helix --health`.
 | `man-db`, `man-pages` | `man` |
 | `paru` (aur) | AUR helper |
 | `pacman-contrib` | `checkupdates`, used by `dots update` |
-| `stow` | Links the dotfiles, used by `dots stow` |
+| `stow` | Links the dotfiles, used by `dots link` |
 
 ## To review
 
@@ -136,7 +136,7 @@ Installed, but not part of the setup described above.
 
 ## Dotfiles
 
-Stow packages, linked by `dots stow sync` from `~/.config/dots/packages`.
+Stow packages, linked by `dots link sync` from `~/.config/dots/packages`.
 
 | Package | Holds |
 | --- | --- |
@@ -155,7 +155,7 @@ Stow packages, linked by `dots stow sync` from `~/.config/dots/packages`.
 | `lazygit`, `lazydocker`, `btop`, `yazi` | TUI configs |
 | `bat`, `glow`, `mpv` | Tool configs |
 
-Kept but not linked. Turn one on with `dots stow <name>`.
+Kept but not linked. Turn one on with `dots link <name>`.
 
 | Package | Holds |
 | --- | --- |

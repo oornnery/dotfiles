@@ -4,19 +4,21 @@
 # dots:args=[list | add [path...] [-p pkg] | sync [-n|--adopt] | <pkg>... | -D <pkg>...]
 # dots:actions=pick=Choose what is linked here|add=Add a config to the repo|list=List the packages|sync=Link every package in the list|sync -n=Show what sync would do
 #
-#   dots stow                  pick what is linked here (a list when piped)
-#   dots stow list             list packages (* = synced on this machine)
-#   dots stow add [path...]    move a config into ~/dotfiles, link it back;
+#   dots link                  pick what is linked here (a list when piped)
+#   dots link list             list packages (* = linked on this machine)
+#   dots link add [path...]    move a config into ~/dotfiles, link it back;
 #                              with no path, pick from ~/.config
 #                              ~/.config/helix -> ~/dotfiles/helix/.config/helix
-#   dots stow add -p zsh ~/.zshrc ~/.zshenv     pick the package name
-#   dots stow sync             link every package in ~/.config/dots/packages
-#   dots stow sync -n          dry run
-#   dots stow sync --adopt     pull conflicting files INTO ~/dotfiles (git diff)
-#   dots stow <pkg>...         link some packages
-#   dots stow -D <pkg>...      unlink
+#   dots link add -p zsh ~/.zshrc ~/.zshenv     pick the package name
+#   dots link sync             link every package of this machine
+#   dots link sync -n          dry run
+#   dots link sync --adopt     pull conflicting files INTO ~/dotfiles (git diff)
+#   dots link <pkg>...         link some packages
+#   dots link -D <pkg>...      unlink
 #
-# Real files in the way are renamed to <file>.bak.<timestamp> first.
+# Real files in the way are renamed to <file>.bak.<timestamp> first. sync also
+# removes links into the repo that lead nowhere, left by a file renamed or moved.
+# It uses GNU Stow.
 # --no-folding: only files become links, never folders, so whatever apps write
 # later (~/.local, tokens in ~/.config/gh...) stays out of the repo.
 # shellcheck disable=SC2154  # colors come from _ui
@@ -25,31 +27,30 @@ set -uo pipefail
 # shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/_lib"
 
-STOW=(stow --no-folding -d "$DOTFILES" -t "$HOME")
-have stow || { die "stow is not installed"; }
-mkdir -p "$DOTFILES"
+STOW=(stow --no-folding -d "$PKGS" -t "$HOME")
+have stow || die "stow is not installed"
+mkdir -p "$PKGS"
 
 short() { printf '%s' "${1/#$HOME/\~}"; }
 # column miscounts color codes, so colored output stays one per line.
 cols()  { if [[ -z $N ]] && have column; then column; else cat; fi; }
 
-packages() {  # folders in ~/dotfiles holding at least one dotfile at the top
-    local d
-    for d in "$DOTFILES"/*/; do
-        d=${d%/}
-        compgen -G "$d/.[!.]*" >/dev/null && echo "${d##*/}"
-    done
-}
-
 ensure_list() {
     [[ -f $LIST ]] && return
     mkdir -p "$(dirname "$LIST")"
-    { echo "# Packages \`dots stow sync\` links on this machine. One per line, # to skip."
+    { echo "# Packages \`dots link sync\` links on this machine. One per line, # to skip."
       packages; } > "$LIST"
     ok "created $(short "$LIST")"
 }
 
-chosen() { sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" | grep -v '^$'; }
+chosen() { linked_packages; }
+
+prune() {  # remove the links into the repo that lead nowhere
+    local l
+    while IFS= read -r l; do
+        if (( DRY )); then warn "would remove $(short "$l")"; else rm "$l" && note "removed $(short "$l"), it led nowhere"; fi
+    done < <(stale_repo_links)
+}
 
 backup_conflicts() {  # backup_conflicts <pkg>
     local ts f; ts=$(date +%Y%m%d-%H%M%S)
@@ -68,7 +69,7 @@ backup_conflicts() {  # backup_conflicts <pkg>
 link() {  # link <pkg>...
     local pkg failed=()
     for pkg in "$@"; do
-        [[ -d $DOTFILES/$pkg ]] || { warn "skip $pkg: no such package"; failed+=("$pkg"); continue; }
+        [[ -d $PKGS/$pkg ]] || { warn "skip $pkg: no such package"; failed+=("$pkg"); continue; }
         if (( ADOPT )); then
             "${STOW[@]}" --adopt -R "$pkg" && ok "$pkg" || failed+=("$pkg")
             continue
@@ -146,7 +147,7 @@ addable() {  # things in ~/.config that are not in the repo, without secrets
         [[ -e $d && ! -L $d ]] || continue
         n=${d##*/}
         case $n in gh|vite-plus|dots|shell) continue ;; esac
-        compgen -G "$DOTFILES/*/.config/$n" >/dev/null && continue
+        compgen -G "$PKGS/*/.config/$n" >/dev/null && continue
         hit=$(secret_in "$d")
         if [[ -n $hit ]]; then warn "skipped ~/.config/$n: $(short "$hit") looks like a secret" >&2; continue; fi
         echo "$d"
@@ -189,7 +190,7 @@ add() {
         [[ -n $picked ]] || return 0
         mapfile -t paths <<< "$picked"
     fi
-    (( ${#paths[@]} )) || { echo "Usage: dots stow add [-p pkg] [--force] <path>..." >&2; return 1; }
+    (( ${#paths[@]} )) || { echo "Usage: dots link add [-p pkg] [--force] <path>..." >&2; return 1; }
     ensure_list
     for src in "${paths[@]}"; do
         src=$(realpath -s "$src")
@@ -201,7 +202,7 @@ add() {
         if (( ! force )) && hit=$(secret_in "$src") && [[ -n $hit ]]; then
             warn "skip ~/$rel: $(short "$hit") looks like a secret (--force to add anyway)"; continue
         fi
-        dest=$DOTFILES/$p/$rel
+        dest=$PKGS/$p/$rel
         [[ -e $dest ]] && { warn "skip ~/$rel: $(short "$dest") already exists"; continue; }
         mkdir -p "$(dirname "$dest")"
         mv "$src" "$dest"
@@ -222,10 +223,11 @@ case "${1:-}" in
             case $a in
                 -n|--dry-run) DRY=1 ;;
                 --adopt) ADOPT=1 ;;
-                *) echo "dots stow sync: unknown option: $a" >&2; exit 1 ;;
+                *) die "sync: unknown option: $a" ;;
             esac
         done
         ensure_list
+        prune
         mapfile -t pkgs < <(chosen)
         link "${pkgs[@]}" ;;
     -D)
@@ -235,7 +237,7 @@ case "${1:-}" in
             (( ${#sel[@]} )) || exit 0
             set -- "${sel[@]}"
         fi
-        (( $# )) || { echo "Usage: dots stow -D <pkg>..." >&2; exit 1; }
+        (( $# )) || { echo "Usage: dots link -D <pkg>..." >&2; exit 1; }
         disable "$@" ;;
     -*) die "unknown option: $1" ;;
     *) enable "$@" ;;

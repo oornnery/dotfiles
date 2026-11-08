@@ -6,10 +6,10 @@ scripts that just run, with every step safe to repeat. Start with `dots`.
 ## New machine
 
 ```bash
-git clone <this repo> ~/dotfiles
-stow --no-folding -d ~/dotfiles -t ~ dots
-dots setup
+git clone https://github.com/oornnery/dotfiles ~/dotfiles && ~/dotfiles/bootstrap
 ```
+
+It installs git and stow, links the `dots` command, then runs `dots apply`.
 
 ## How it works
 
@@ -39,7 +39,7 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 | Command | What it does |
 | ------- | ------------ |
 | `dots install` | Full setups: packages, config links, permissions, services |
-| `dots stow` | Choose what is linked here |
+| `dots link` | Choose what is linked here |
 | `dots pkg` | Install, remove, save and compare packages |
 | `dots update` | Upgrade everything |
 | `dots theme` | Switch colors, with a live preview |
@@ -47,7 +47,7 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 | `dots doctor` | Report what is wrong |
 | `dots edit`, `dots tui`, `dots help` | Open a config, a TUI or a page |
 | `dots palette` | Search help, TUIs and commands with tv |
-| `dots setup` | Set up a machine |
+| `dots apply` | Make this machine match the repo |
 | `dots wsl` | WSL report, and copy configs to Windows |
 
 ## Rules
@@ -87,7 +87,7 @@ Never in the repo: `~/.config/gh` (token), `~/.config/vite-plus`, shell history.
 
 ### Packages
 
-Saved in `packages/` by `dots pkg save`; `dots pkg install` brings them back.
+Saved in `packages/` by `dots pkg save`; `dots pkg restore` brings them back.
 
 | Manager | Packages |
 | ------- | -------- |

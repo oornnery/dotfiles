@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # dots:summary=Map installed packages to ~/dotfiles/packages and reinstall them
 # dots:group=packages
-# dots:args=[status | list [mgr] | add [-m mgr] <pkg>... | remove [pkg...] | save | diff | install [-y]]
-# dots:actions=status=Installed and saved, per manager|list=What is installed now|add=Install packages and save the list|remove=Remove packages and save the list|save=Write the package lists|diff=Compare installed and saved|install=Install what is saved but missing
+# dots:args=[status | list [mgr] | add [-m mgr] <pkg>... | remove [pkg...] | save | diff | restore [-y]]
+# dots:actions=status=Installed and saved, per manager|list=What is installed now|add=Install packages and save the list|remove=Remove packages and save the list|save=Write the package lists|diff=Compare installed and saved|restore=Install what is saved but missing
 #
 #   dots pkg            per manager: installed, saved, new (+) and missing (-)
 #   dots pkg list [m]   what is installed now (all managers, or one)
 #   dots pkg save       write ~/dotfiles/packages/<manager>.txt
 #   dots pkg diff       + installed but not saved   - saved but not installed
-#   dots pkg install    install what is saved but missing (asks first; -y skips)
+#   dots pkg restore    install what is saved but missing (asks first; -y skips)
 #   dots pkg add <pkg>  install and save; finds repo or AUR, -m picks another manager
 #   dots pkg remove     remove and save; with no name, pick from what is installed
 #
@@ -42,7 +42,7 @@ status() {
             "$(num "$G" 5 "$(only_now "$m" | wc -l)")" \
             "$(num "$R" 7 "$( available "$m" && only_saved "$m" | wc -l || echo -)")"
     done
-    echo; note "saved in ${DIR/#$HOME/\~}   (dots pkg save | diff | install)"
+    echo; note "saved in ${DIR/#$HOME/\~}   (dots pkg save | diff | restore)"
 }
 
 list() {
@@ -154,7 +154,7 @@ diff_() {  # a real diff per manager: - saved but not installed, + installed but
     return 0
 }
 
-install() {
+restore() {
     local m missing yes=0
     [[ ${1:-} == -y ]] && yes=1
     for m in "${MANAGERS[@]}"; do
@@ -182,6 +182,6 @@ case "${1:-status}" in
     add)     shift; add_ "$@" ;;
     remove)  shift; remove_ "$@" ;;
     diff)    diff_ ;;
-    install) shift; install "$@" ;;
+    restore) shift; restore "$@" ;;
     *) die "unknown action: $1" ;;
 esac

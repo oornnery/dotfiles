@@ -62,9 +62,9 @@ links() {
                 < <(find "$HOME/$rel" -maxdepth 1 -type f ! -name '*.bak.*' 2>/dev/null)
         done < <(find "$PKGS/$pkg" -mindepth 1 -type d -path "$PKGS/$pkg/.*")
     done < <(linked_packages))
-    if [[ -n $missing ]]; then todo "$(wc -l <<< "$missing") file(s) in the repo, not linked here" "dots stow sync"; items "$missing"; fi
-    if [[ -n $stale ]]; then todo "$(wc -l <<< "$stale") link(s) into the repo that lead nowhere" "dots stow sync"; items "$stale"; fi
-    if [[ -n $new ]]; then todo "$(wc -l <<< "$new") file(s) the apps wrote next to the links" "dots stow add <file>, or leave them"; items "$new"; fi
+    if [[ -n $missing ]]; then todo "$(wc -l <<< "$missing") file(s) in the repo, not linked here" "dots link sync"; items "$missing"; fi
+    if [[ -n $stale ]]; then todo "$(wc -l <<< "$stale") link(s) into the repo that lead nowhere" "dots link sync"; items "$stale"; fi
+    if [[ -n $new ]]; then todo "$(wc -l <<< "$new") file(s) the apps wrote next to the links" "dots link add <file>, or leave them"; items "$new"; fi
     (( pending == before )) && ok "every package is linked, nothing new beside it"
 }
 
@@ -76,7 +76,7 @@ packages() {
         a=$(comm -23 <(now "$m") <(grep -sv '^#' "$SAVED/$m.txt" | sort -u))
         b=$(comm -13 <(now "$m") <(grep -sv '^#' "$SAVED/$m.txt" | sort -u))
         [[ -n $a ]] && todo "$m: $(wc -l <<< "$a") installed, not saved: $(paste -sd' ' <<< "$a")" "dots pkg save"
-        [[ -n $b ]] && todo "$m: $(wc -l <<< "$b") saved, not installed: $(paste -sd' ' <<< "$b")" "dots pkg install, or dots pkg save to forget them"
+        [[ -n $b ]] && todo "$m: $(wc -l <<< "$b") saved, not installed: $(paste -sd' ' <<< "$b")" "dots pkg restore, or dots pkg save to forget them"
     done
     if (( FETCH )); then
         a=$(checkupdates 2>/dev/null | wc -l)
