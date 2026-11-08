@@ -7,7 +7,8 @@
 #   dots status       what is pending here, from what is on this machine
 #   dots status -f    also fetch the remote and count package updates
 #
-# Each part says what to run next. Nothing is changed here, besides `git fetch`
+# Each part says what to run next. The count goes to ~/.cache/dots/pending, for
+# the prompt; a new shell runs this in the background when it is 30 minutes old. Nothing is changed here, besides `git fetch`
 # with -f. dots doctor is the other half: it reports what is broken.
 # shellcheck disable=SC2154  # colors come from _ui
 set -uo pipefail
@@ -136,6 +137,7 @@ for p in "${parts[@]}"; do
     pending=$(( pending + $(tail -1 "$tmp/$p") ))
 done
 rm -rf "$tmp"
+mkdir -p "$CACHE" && echo "$pending" > "$CACHE/pending"   # the prompt shows it
 echo
 if (( pending )); then note "$pending pending"; else ok "nothing pending"; fi
 (( FETCH )) || note "dots status -f also asks the remote and the repos"

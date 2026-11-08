@@ -2,19 +2,23 @@
 # The prompt, the same in zsh and bash: everything about it is in this file.
 # Terminal colors only, so it follows `dots theme`; icons from a Nerd Font.
 #
-#   [box] user  ~/dotfiles  main +1 *2 ?3 ↑1 ↓2 ≡1    ✗INT  12s  ⚙2  app  py 3.14  14:32
+#   [box] user  ~/dotfiles  main +1 *2 ?3 ↑1 ↓2 ≡1    ✗INT 3  12s  ⚙2  app  py 3.14  14:32  Alt / ? e
 #   ❯
 #
 # Left, who and where: container, user (@host on SSH), folder, git.
 # Git: staged, changed, untracked, conflicts, ahead, behind, stashes, each with its count.
-# Right, what happened and with what: error, time from 3s, background jobs, Python
-# venv, the languages of this project, clock. When the line does not fit, they leave
-# from the right; the error goes last.
+# Right, what happened and with what: error, what dots status left pending, time from
+# 3s, background jobs, Python venv, the languages of this project, clock, and outside
+# Zellij (its bar has them) three keys: Alt / search, Alt ? help, Alt e files;
+# DOTS_PROMPT_KEYS=0 hides them. When the line does not fit, they leave from the
+# right; the error goes last. The pending count is read from the cache of dots
+# status, which a new shell refreshes in the background (30-dots.sh).
 
 _PI_BOX=$'' _PI_SSH=$'' _PI_USER=$'' _PI_HOME=$'' _PI_DIR=$''
 _PI_BRANCH=$'' _PI_STAGED=$'' _PI_CHANGED=$'' _PI_UNTRACKED=$''
 _PI_CONFLICT=$'' _PI_AHEAD=$'' _PI_BEHIND=$'' _PI_STASH=$''
 _PI_ERROR=$'' _PI_TIME=$'' _PI_JOBS=$'' _PI_VENV=$'' _PI_CLOCK=$''
+_PI_PENDING=$'\uf0ae' _PI_KEYS=$'\uf11c'
 
 _prompt_add() {  # _prompt_add <color> <text> [text for the prompt, if it differs]
     out+="$o${e}${1}m$c${3:-$2}$r"
@@ -73,7 +77,7 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
     local code=$1 secs=$2 jobs=$3 clock=$4 o=$5 c=$6 e=$'\033[' r
     local dir safe_dir branch='' safe_branch oid='' ahead=0 behind=0 line ab xy venv arrow=2 icon
     local staged=0 changed=0 untracked=0 conflict=0 out='' plain=''
-    local time='' level=6 right rplain pad=0 spaces='' max stash=0 status_text='' safe_venv=''
+    local time='' level=8 right pending='' keys='' rplain pad=0 spaces='' max stash=0 status_text='' safe_venv=''
     r="$o${e}0m$c"
 
     icon=$_PI_DIR
@@ -148,15 +152,22 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
     fi
     [ "$code" != 0 ] && arrow=1
 
+    # What dots status left pending, from its cache: a read, no command.
+    [ -r "${XDG_CACHE_HOME:-$HOME/.cache}/dots/pending" ] && read -r pending < "${XDG_CACHE_HOME:-$HOME/.cache}/dots/pending"
+    [ "${pending:-0}" = 0 ] && pending=''
+    [ -z "${ZELLIJ:-}" ] && [ "${DOTS_PROMPT_KEYS:-1}" != 0 ] && keys="$_PI_KEYS Alt / search  ? help  e files"
+
     max=$(( ${COLUMNS:-80} - 1 ))   # the last column would wrap in some terminals
     while [ "$level" -ge 0 ]; do
         right=''; rplain=''
         [ "$level" -ge 1 ] && [ "$code" != 0 ] && _prompt_right 31 "$_PI_ERROR $status_text"
-        [ "$level" -ge 2 ] && [ -n "$time" ] && _prompt_right 33 "$_PI_TIME $time"
-        [ "$level" -ge 3 ] && [ "$jobs" != 0 ] && _prompt_right 36 "$_PI_JOBS $jobs"
-        [ "$level" -ge 4 ] && [ -n "${venv:-}" ] && _prompt_right 32 "$_PI_VENV $venv" "$_PI_VENV $safe_venv"
-        [ "$level" -ge 5 ] && [ -n "${_PROMPT_LANGS:-}" ] && _prompt_right 33 "$_PROMPT_LANGS"
-        [ "$level" -ge 6 ] && _prompt_right 2 "$_PI_CLOCK $clock"
+        [ "$level" -ge 2 ] && [ -n "$pending" ] && _prompt_right 35 "$_PI_PENDING $pending"
+        [ "$level" -ge 3 ] && [ -n "$time" ] && _prompt_right 33 "$_PI_TIME $time"
+        [ "$level" -ge 4 ] && [ "$jobs" != 0 ] && _prompt_right 36 "$_PI_JOBS $jobs"
+        [ "$level" -ge 5 ] && [ -n "${venv:-}" ] && _prompt_right 32 "$_PI_VENV $venv" "$_PI_VENV $safe_venv"
+        [ "$level" -ge 6 ] && [ -n "${_PROMPT_LANGS:-}" ] && _prompt_right 33 "$_PROMPT_LANGS"
+        [ "$level" -ge 7 ] && _prompt_right 2 "$_PI_CLOCK $clock"
+        [ "$level" -ge 8 ] && [ -n "$keys" ] && _prompt_right 2 "$keys"
         pad=$(( max - ${#plain} - ${#rplain} ))
         [ "$pad" -ge 0 ] && break
         level=$(( level - 1 ))

@@ -12,3 +12,10 @@ sudo-unlock() { sudo faillock --user "${1:-$USER}" --reset; }
 
 # wslc (WSL containers) lives on the Windows side, outside the Linux PATH.
 [ -x "/mnt/c/Program Files/WSL/wslc.exe" ] && alias wslc='dots wsl wslc'
+
+# The count of dots status in the prompt: refreshed in the background when it is
+# 30 minutes old, so a new shell never waits for it.
+if command -v dots >/dev/null 2>&1 &&
+   [ -z "$(find "${XDG_CACHE_HOME:-$HOME/.cache}/dots/pending" -mmin -30 2>/dev/null)" ]; then
+    (dots status >/dev/null 2>&1 &)
+fi
