@@ -18,6 +18,15 @@ tools|btop|System monitor|btop|btop
 tools|yazi|File manager|yazi|yazi
 tools|television|Fuzzy finder with channels, the tv command|television|television
 tools|epycell|Jupyter notebooks in the terminal|rust|
+tuis|tui-api|HTTP APIs, like Postman: posting|posting|
+tuis|tui-db|Databases, like lazygit: lazysql|lazysql|
+tuis|tui-data|JSON (fx) and CSV (tabiew, tw)|fx tabiew|
+tuis|tui-git|The commit graph: serie|serie|
+tuis|tui-network|traceroute and ping with graphs (trippy, trip), packets (termshark)|trippy termshark|
+tuis|tui-system|systemd units (systemctl-tui), logs (lazyjournal), containers (oxker)|systemctl-tui lazyjournal oxker|
+tuis|tui-dev|Commands side by side (mprocs), slides from Markdown (presenterm)|mprocs presenterm|
+tuis|tui-ssh|SSH hosts: lazyssh|lazyssh|
+tuis|tui-fun|Spotify (spotify_player), typing test (ttyper)|spotify-player ttyper|
 tools|cli-extras|dust, duf, procs, sd, tealdeer, jless, htmlq, xmlstarlet, 7zip, rsync, pkgfile, arch-audit, yt-dlp|dust duf procs sd tealdeer jless htmlq xmlstarlet 7zip rsync pkgfile arch-audit yt-dlp|
 terminal|tmux|tmux with config and theme|tmux|tmux
 terminal|zellij|Zellij with its theme, help and a palette|zellij fzf|zellij
@@ -73,4 +82,5 @@ network|voip|SIP: a softphone, call flows, load tests, captures, codecs, SCTP|ba
 network|cloudflare|Cloudflare Tunnel (cloudflared) and Workers (wrangler)|cloudflared npm:wrangler|
 desktop|fonts|JetBrains Mono Nerd Font and emoji|ttf-jetbrains-mono-nerd noto-fonts-emoji|
 desktop|hyprland|Compositor, bar, tools, commands, config and theme|hyprland alacritty hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin libnotify grim slurp wf-recorder satty hyprpicker brightnessctl power-profiles-daemon wl-clipboard jq tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects|hyprland
+desktop|tui-desktop|Audio (wiremix), Wi-Fi through iwd (impala), Bluetooth (bluetui)|wiremix impala bluetui|
 desktop|webapp|Web apps as windows|firefox firefoxpwa|
