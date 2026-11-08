@@ -10,7 +10,8 @@
 # fzf, under the prompt in a shell, and the whole floating pane in Zellij (see its
 # config.kdl). This script also gives fzf its lines and its preview. A line is
 # "<kind> <name> <text>". The preview never runs what it shows: asking any
-# command for --help on hover could just as well run it. What you pick runs here.
+# command for --help on hover could just as well run it. What you pick runs here;
+# a page you read (help, keys, man) gives you back the list when you close it.
 set -uo pipefail
 
 # shellcheck source=/dev/null
@@ -120,7 +121,7 @@ act() {  # act <kind> <name> <text>
         mode)    exec "$0" "$2" ;;
         help)    dots help "$2" ;;
         keys)    dots help "$2" ;;
-        linux)   exec man "${2##*.}" "${2%.*}" ;;
+        linux)   man "${2##*.}" "${2%.*}" ;;
         pet)     exec pet exec --query "$3" ;;
         dots)
             dots "$2"
@@ -135,23 +136,33 @@ next() {  # next <prompt> [-1]: the fzf actions that go to the next (or previous
     printf 'change-prompt(%s> )+reload(%q --rows %s)+first' "$mode" "$0" "$mode"
 }
 
-pick() {  # pick <mode>: the line picked, empty when cancelled
+pick() {  # pick <mode>: the mode it ended in, then the line picked; nothing when cancelled
     local size=(--height=60% --min-height=20)
     [[ -n ${ZELLIJ:-} ]] && size=()  # the floating pane is already the right size
     "rows_$1" | fzf "${size[@]}" --reverse --border=rounded --ansi \
         --prompt="$1> " --with-nth=2.. --header='Tab next mode · Shift-Tab back' \
         --preview="$(printf '%q' "$0") --preview {1} {2}" --preview-window=right,55%,wrap \
         --bind="tab:transform:$(printf '%q' "$0") --next {fzf:prompt}" \
-        --bind="shift-tab:transform:$(printf '%q' "$0") --next {fzf:prompt} -1"
+        --bind="shift-tab:transform:$(printf '%q' "$0") --next {fzf:prompt} -1" \
+        --bind="enter:become(printf '%s\\n%s\\n' {fzf:prompt} {})"
 }
 
 case "${1:-all}" in
     --rows)    "rows_$2"; exit ;;
     --preview) preview "$2" "$3"; exit 0 ;;  # on failure, fzf would show only stderr
     --next)    next "$2" "${3:-1}"; exit ;;
-    all|tui|dots|keys|help|run|linux|pet) need fzf; choice=$(pick "${1:-all}") ;;
+    all|tui|dots|keys|help|run|linux|pet) need fzf ;;
     *) die "unknown mode: $1" ;;
 esac
-[[ -n $choice ]] || exit 0
-read -r kind name text <<< "$choice"
-act "$kind" "$name" "$text"
+
+# A page (help, keys, man) comes back to the list when you close it, in the same
+# mode; anything else runs and the palette ends.
+mode=${1:-all}
+while out=$(pick "$mode") && [[ -n $out ]]; do
+    mode=${out%%$'\n'*}; mode=${mode%> }
+    read -r kind name text <<< "${out#*$'\n'}"
+    case $kind in
+        help|keys|linux) act "$kind" "$name" "$text" ;;
+        *) act "$kind" "$name" "$text"; exit ;;
+    esac
+done
