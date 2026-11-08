@@ -65,12 +65,12 @@ save() {  # save [--changed]: --changed leaves out what did not change
             (( was )) && printf '%s• %-7s %4s  kept: found 0 installed here%s\n' "$R" "$m" "$was" "$N"
             continue
         fi
-        { echo "# $m packages, saved $(date +%F) from ${HOSTNAME:-$(uname -n)}"; now "$m"; } > "$DIR/$m.txt"
-        is=$(saved "$m" | wc -l)
-        if [[ -z $a$b ]]; then
-            [[ -n $only ]] || note "$(printf '= %-7s %4s  unchanged' "$m" "$is")"
+        if [[ -z $a$b && -f $DIR/$m.txt ]]; then  # left as it is, date included: no noise in git
+            [[ -n $only ]] || note "$(printf '= %-7s %4s  unchanged' "$m" "$was")"
             continue
         fi
+        { echo "# $m packages, saved $(date +%F) from ${HOSTNAME:-$(uname -n)}"; now "$m"; } > "$DIR/$m.txt"
+        is=$(saved "$m" | wc -l)
         printf '%s✓%s %-7s %4s -> %-4s %s+%s%s %s-%s%s\n' "$G" "$N" "$m" "$was" "$is" \
             "$G" "$(wc -w <<< "$a")" "$N" "$R" "$(wc -w <<< "$b")" "$N"
         [[ -n $a ]] && printf "    $G+$N %s\n" $a

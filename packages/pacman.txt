@@ -1,4 +1,4 @@
-# pacman packages, saved 2026-11-06 from DESKTOP-T8DL9CB
+# pacman packages, saved 2026-11-08 from DESKTOP-T8DL9CB
 atuin
 base
 base-devel
@@ -13,7 +13,6 @@ docker-compose
 eza
 fastfetch
 fd
-fnm
 fzf
 git
 git-delta
@@ -28,6 +27,7 @@ lazygit
 man-db
 man-pages
 marksman
+mise
 mpv
 ncdu
 neovim
