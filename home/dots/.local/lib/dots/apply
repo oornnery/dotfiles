@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dots:summary=Make this machine match machines/<host>: links, migrations, tools, packages, theme
+# dots:summary=Make this machine match its file in machines/: links, tools, packages
 # dots:group=machine
 # dots:args=[-n]
 # dots:actions=run=Make this machine match the repo|-n=Show what it would do

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Rewrites the parts of the docs that come from the code, between their markers:
+#   <!-- dots:commands -->  ...  <!-- /dots:commands -->   README.md, one row per command
+#   <!-- dots:actions -->   ...  <!-- /dots:actions -->    dots.md, with every action
+# tests/run fails when they are out of date. --check only compares.
+set -uo pipefail
+
+cd "$(dirname "$(realpath "$0")")/.." || exit 1
+dots=home/dots/.local/bin/dots
+status=0
+
+fill() {  # fill <file> <marker> <dots args...>
+    local file=$1 marker=$2 new; shift 2
+    new=$(awk -v m="$marker" -v body="$(DOTFILES_DIR=$PWD NO_COLOR=1 "$dots" "$@")" '
+        $0 == "<!-- dots:" m " -->"  { print; print body; skip = 1; next }
+        $0 == "<!-- /dots:" m " -->" { skip = 0 }
+        !skip' "$file")
+    if [[ $new == "$(cat "$file")" ]]; then return 0; fi
+    if [[ ${CHECK:-} ]]; then echo "out of date: $file (run docs/generate)"; status=1; return; fi
+    printf '%s\n' "$new" > "$file" && echo "updated $file"
+}
+
+[[ ${1:-} == --check ]] && CHECK=1
+fill README.md commands --markdown
+fill docs/cheatsheets/dots.md actions --markdown --actions
+exit "$status"

@@ -29,13 +29,13 @@ meta() { sed -n "1,15s/^# dots:$2=//p" "$1" | head -1; }
 
 ORDER=(machine config packages use platform desktop other)
 
-rows() {  # name<TAB>args<TAB>summary<TAB>group, by group, hidden commands left out
-    local f g
-    for f in "$DOTS_LIB"/*; do
+rows() {  # rows [dir...]: name<TAB>args<TAB>summary<TAB>group, by group, hidden ones left out
+    local f g d
+    for d in "${@:-$DOTS_LIB}"; do for f in "$d"/*; do
         [[ -f $f && -x $f && $(meta "$f" hidden) != true ]] || continue
         g=$(meta "$f" group)
         printf '%s\t%s\t%s\t%s\n' "${f##*/}" "$(meta "$f" args)" "$(meta "$f" summary)" "${g:-other}"
-    done | awk -F'\t' -v order="${ORDER[*]}" '
+    done; done | awk -F'\t' -v order="${ORDER[*]}" '
         BEGIN { n = split(order, o, " "); for (i = 1; i <= n; i++) rank[o[i]] = i }
         { print rank[$4] "\t" $0 }' | sort -t$'\t' -k1,1n -k2,2 | cut -f2-
 }
@@ -80,6 +80,21 @@ usage() {
     done
 }
 
+markdown() {  # every command in the repo as markdown tables by group; --actions adds them
+    local n a s g act desc last='' dirs=("$DOTFILES_DIR"/home/*/.local/lib/dots)
+    rows "${dirs[@]}" | tr '\t' '\037' | while IFS=$'\037' read -r n a s g; do
+        if [[ $g != "$last" ]]; then
+            [[ -z $last ]] || echo
+            printf '**%s**\n\n| Command | What it does |\n| ------- | ------------ |\n' "$g"; last=$g
+        fi
+        printf '| `dots %s` | %s |\n' "$n" "$s"
+        [[ ${1:-} == --actions ]] || continue
+        meta "$(ls "${dirs[@]/%//$n}" 2>/dev/null | head -1)" actions | tr '|' '\n' | while IFS='=' read -r act desc; do
+            [[ -n $act ]] && printf '| `dots %s %s` | %s |\n' "$n" "$act" "$desc"
+        done
+    done
+}
+
 describe() {  # word:description for Tab completion; empty argument = commands
     [[ -n ${1:-} ]] || { rows | awk -F'\t' '{print $1 ":" $3}'; return; }
     [[ -x $DOTS_LIB/$1 ]] || return 0
@@ -105,6 +120,7 @@ case "${1:-}" in
         ;;
     -h|--help) usage ;;
     --describe) describe "${2:-}" ;;
+    --markdown) markdown "${2:-}" ;;
     *)
         cmd=$1; shift
         [[ -x $DOTS_LIB/$cmd ]] || { err "dots: unknown command: $cmd (dots --help)"; exit 127; }

@@ -2,7 +2,7 @@
 # dots:summary=Keep configs in ~/dotfiles and link them into $HOME
 # dots:group=config
 # dots:args=[list | add [path...] [-p pkg] | sync [-n|--adopt] | <pkg>... | -D <pkg>...]
-# dots:actions=pick=Choose what is linked here|add=Add a config to the repo|list=List the packages|sync=Link every package in the list|sync -n=Show what sync would do
+# dots:actions=pick=Choose what is linked here|add=Add a config to the repo|list=List the packages|sync=Link every package of this machine|sync -n=Show what sync would do
 #
 #   dots link                  pick what is linked here (a list when piped)
 #   dots link list             list packages (* = linked on this machine)

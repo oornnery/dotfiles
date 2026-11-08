@@ -1,7 +1,7 @@
 # TODO
 
 Ideas and improvements, roughly in order. What is already done lives in README.md.
-The reorganization of dots is planned in [docs/plan.md](docs/plan.md).
+The reorganization of dots, done, is in [docs/plan.md](docs/plan.md).
 
 The goal: a system made from what I use, the way I use it. Clear commands that do one
 thing (what Omarchy does for its author), with the freedom of the package managers I
@@ -15,15 +15,6 @@ like.
 - [ ] `dots install hyprland` on the desktop, and test its commands for real.
 - [ ] Decide the Windows Terminal `settings.json` with `dots wsl windows pull`.
 - [ ] Alt keys in zsh as widgets, so they do not type after what is on the line.
-
-## Migrations
-
-Changes that one machine needs once (rename a config, move a folder, drop a package).
-
-- [ ] `dots migrate`: numbered scripts in `migrations/`, run once each, in order;
-      what ran is saved in `~/.local/state/dots/migrations`. `dots status` lists the
-      ones not run yet.
-- [ ] Each one safe to repeat and small, so a machine that is behind can catch up in one go.
 
 ## Packages
 
@@ -47,6 +38,9 @@ Ideas:
 ## dots
 
 - [ ] `dots status` on a timer, or in the prompt, as a small count.
+- [ ] `dots status` runs its parts at the same time; today it takes about 4 seconds.
+- [ ] Review `machines/DESKTOP-T8DL9CB`: migration 002 guessed the tools from what
+      is installed (openssh counts, though sshd may not run here).
 - [ ] `dots theme` for Yazi icons, which keep fixed colors.
 - [ ] `settings.dsc.winget` for Windows settings (dark mode, taskbar, developer mode).
 - [ ] Rebuild `self-hosted/`.

@@ -37,22 +37,61 @@ machine match its file; `dots status` shows what does not match yet.
 
 ## Commands
 
-`dots help dots` lists them; `dots --help` shows the arguments.
+`dots --help` shows the arguments, `dots help dots` every action. This list comes from
+the header of each command (`docs/generate`).
+
+<!-- dots:commands -->
+**machine**
 
 | Command | What it does |
 | ------- | ------------ |
-| `dots install` | Full setups: packages, config links, permissions, services |
-| `dots link` | Choose what is linked here |
-| `dots pkg` | Install, remove, save and compare packages |
-| `dots update` | Upgrade everything |
-| `dots theme` | Switch colors, with a live preview |
-| `dots status` | What is pending: commits, links, new configs, packages, Windows |
-| `dots doctor` | Report what is broken |
+| `dots apply` | Make this machine match its file in machines/: links, tools, packages |
+| `dots doctor` | What is broken: links, tools, scripts, PATH, Node, language servers |
 | `dots migrate` | Run the one-time changes this machine has not run yet |
-| `dots edit`, `dots tui`, `dots help` | Open a config, a TUI or a page |
-| `dots palette` | Search help, TUIs and commands with tv |
-| `dots apply` | Make this machine match the repo |
-| `dots wsl` | WSL report, and copy configs to Windows |
+| `dots status` | What is pending: commits, links, migrations, packages, Windows |
+
+**config**
+
+| Command | What it does |
+| ------- | ------------ |
+| `dots edit` | Pick a file in ~/dotfiles and open it in the editor |
+| `dots link` | Keep configs in ~/dotfiles and link them into $HOME |
+| `dots theme` | Switch the color theme: terminal, TUIs, prompt and editors |
+
+**packages**
+
+| Command | What it does |
+| ------- | ------------ |
+| `dots install` | Set up a tool: its packages, config links, permissions and services |
+| `dots pkg` | Map installed packages to ~/dotfiles/packages and reinstall them |
+| `dots update` | Pending updates for system and dev tools; upgrade them all |
+
+**use**
+
+| Command | What it does |
+| ------- | ------------ |
+| `dots help` | Cheatsheets, plus your live aliases, functions and snippets |
+| `dots palette` | Search TUIs, commands, keys, help, man pages and snippets, with a preview |
+| `dots pane` | Run a command in a new Zellij pane, or right here outside Zellij |
+| `dots tui` | Pick a TUI and open it |
+
+**platform**
+
+| Command | What it does |
+| ------- | ------------ |
+| `dots wsl` | WSL report (safe to paste) and wslc passthrough |
+
+**desktop**
+
+| Command | What it does |
+| ------- | ------------ |
+| `dots capture` | Screenshots, screen recording, OCR and color picker |
+| `dots display` | Brightness, night light, zoom, wallpaper and screensaver |
+| `dots hypr` | Hyprland: look, layout, monitors, gamemode, keybinds and reload |
+| `dots notifications` | Notification history, do not disturb, reminders and info cards |
+| `dots system` | Power menu and profiles, volume, GPU usage and hibernation |
+| `dots webapp` | Web apps as windows (firefoxpwa) |
+<!-- /dots:commands -->
 
 ## Rules
 

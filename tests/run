@@ -12,7 +12,7 @@ fail() { printf 'FAIL %s\n' "$*"; failed=$(( failed + 1 )); }
 
 # The commands: every executable in a dots folder, and the helpers they source.
 mapfile -t commands < <(find home/*/.local -path '*/dots/*' -type f 2>/dev/null; find */.local -path '*/dots/*' -type f 2>/dev/null)
-commands+=(bootstrap)
+commands+=(bootstrap docs/generate)
 
 if (( ! $# )); then
     for f in "${commands[@]}"; do bash -n "$f" || fail "bash -n $f"; done
