@@ -130,8 +130,12 @@ setup() {  # setup <name>
     fi
     pkgs=$(awk '$1 == "package" {print $2}' <<< "$parts")
     links=$(awk '$1 == "config" {print $2}' <<< "$parts")
-    # shellcheck disable=SC2086  # package names, one per word
-    if [[ -n $pkgs ]]; then dots pkg add $pkgs </dev/tty || return 1; fi
+    # A package named manager:name comes from that manager; the others, pacman or the AUR.
+    local p system=()
+    for p in $pkgs; do
+        if [[ $p == *:* ]]; then dots pkg add -m "${p%%:*}" "${p#*:}" </dev/tty || return 1; else system+=("$p"); fi
+    done
+    if (( ${#system[@]} )); then dots pkg add "${system[@]}" </dev/tty || return 1; fi
     # shellcheck disable=SC2086  # package names, one per word
     if [[ -n $links ]]; then dots link $links </dev/tty || return 1; fi
     if grep -q '^setup' <<< "$parts"; then "post_$name" </dev/tty || return 1; fi
@@ -146,8 +150,8 @@ remove() {  # remove <name>
     section "$name"
     # shellcheck disable=SC2086  # package names, one per word
     if [[ -n $links ]]; then dots link -D $links; fi
-    # shellcheck disable=SC2086  # package names, one per word
-    dots pkg remove $pkgs </dev/tty
+    # shellcheck disable=SC2046  # package names, one per word; npm:wrangler is wrangler there
+    dots pkg remove $(for p in $pkgs; do echo "${p#*:}"; done) </dev/tty
     machine_drop tools "$name"
     [[ -f $STATE/tools ]] && sed -i "/^$name\$/d" "$STATE/tools"
 }

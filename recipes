@@ -1,12 +1,14 @@
 # The tools dots install sets up, one per line:
 #   group|name|description|packages|config packages
-# Packages come from pacman or the AUR (dots pkg add finds which). Config packages
+# Packages come from pacman or the AUR (dots pkg add finds which); npm:name, uv:name
+# or cargo:name come from that manager. Config packages
 # are folders in home/, linked by dots link. A tool that needs more than that has a
 # post_<name> step in home/dots/.local/lib/dots/install.
 shell|zsh|Zsh with config, as the default shell|zsh git fzf eza bat fd zoxide direnv|zsh shell
 shell|bash|Bash with completion and config|bash bash-completion fzf|bash shell
 shell|atuin|Searchable shell history|atuin|atuin
 shell|pet|Command snippets|pet-bin fzf|pet
+shell|man-pt|Manual pages in Portuguese too (man -L pt_BR)|man-pages-pt_br|
 shell|fastfetch|System info on new terminals|fastfetch|fastfetch
 tools|git|Git, GitHub CLI and colored diffs|git github-cli git-delta|git
 tools|bat|cat with colors|bat|bat
@@ -65,6 +67,9 @@ apps|vlc|VLC|vlc|
 apps|mpv|mpv with config|mpv|mpv
 network|tailscale|Tailscale, service running|tailscale|
 network|openssh|OpenSSH server, service running|openssh|
+network|net-tools|DNS lookups, ping with a graph, traceroute, whois, port relay, scans|doggo gping mtr whois socat nmap|
+network|voip|SIP: a softphone, call flows, load tests, captures, codecs, SCTP|baresip sngrep-bin sipp wireshark-cli bcg729 opus lksctp-tools|
+network|cloudflare|Cloudflare Tunnel (cloudflared) and Workers (wrangler)|cloudflared npm:wrangler|
 desktop|fonts|JetBrains Mono Nerd Font and emoji|ttf-jetbrains-mono-nerd noto-fonts-emoji|
 desktop|hyprland|Compositor, bar, tools, commands, config and theme|hyprland alacritty hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin libnotify grim slurp wf-recorder satty hyprpicker brightnessctl power-profiles-daemon wl-clipboard jq tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects|hyprland
 desktop|webapp|Web apps as windows|firefox firefoxpwa|
