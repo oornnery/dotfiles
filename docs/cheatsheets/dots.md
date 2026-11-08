@@ -55,6 +55,7 @@ The tables below come from the header of each command (`docs/generate`). The
 | `dots pkg save` | Write the package lists |
 | `dots pkg diff` | Compare installed and saved |
 | `dots pkg restore` | Install what is saved but missing |
+| `dots try` | Try packages in a throwaway container, gone when you leave |
 | `dots update` | Pending updates for system and dev tools; upgrade them all |
 | `dots update run` | Upgrade everything |
 | `dots update list` | What has updates |

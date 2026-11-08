@@ -64,6 +64,7 @@ the header of each command (`docs/generate`).
 | ------- | ------------ |
 | `dots install` | Set up a tool: its packages, config links, permissions and services |
 | `dots pkg` | Map installed packages to ~/dotfiles/packages and reinstall them |
+| `dots try` | Try packages in a throwaway container, gone when you leave |
 | `dots update` | Pending updates for system and dev tools; upgrade them all |
 
 **use**

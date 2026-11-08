@@ -26,8 +26,6 @@ What I like in each one:
 
 Ideas:
 
-- [ ] `dots try <pkg>`: run a package in a throwaway environment (distrobox, or
-      `nix shell` if Nix ever comes), without installing it on the system.
 - [ ] Environments per project: a file in the repo lists its tools, and entering the
       folder makes them available (direnv is installed; mise or Nix could fill it).
 - [ ] `dots pkg` with nala-like output: a table with colors per manager, and the
