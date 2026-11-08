@@ -3,7 +3,7 @@
 # dots:group=packages
 # dots:args=[-y] [name...] | --list | --remove name...
 #
-#   dots install                 pick in a list, with details on the side
+#   dots install                 pick groups, then their setups, then their parts
 #   dots install <name>...       set those up; a group name sets up the group
 #   dots install -y <name>...    same, with every package and option
 #   dots install --remove <name> unlink its config and remove its packages
@@ -98,16 +98,38 @@ show() {  # show <name>: what a setup does, for the side panel
     fi
 }
 
-pick() {  # prints the marked names, one per line; fzf when there is, for the panel
-    local rows
-    rows=$(awk -F'|' '{printf "%-11s %-11s %s\n", $1, $2, $3}' <<< "$RECIPES")
-    if have fzf; then
-        DOTS_COLOR=1 fzf --multi --height=80% --reverse --prompt='install> ' \
-            --header='Tab marks, Enter sets up, Esc cancels' \
-            --preview "\"$0\" --show {2}" --preview-window=right,45%,wrap <<< "$rows"
-    else
-        gum filter --no-limit --height 20 --placeholder 'search, Tab marks, Enter sets up' <<< "$rows"
-    fi | awk '{print $2}'
+groups_view() {  # one line per group: its setups, and how many are set up here
+    awk -F'|' -v done=" $(tools_done | tr '\n' ' ') " '
+        !($1 in n) { order[++k] = $1 }
+        { n[$1]++; if (index(done, " " $2 " ")) d[$1]++ }
+        END { for (i = 1; i <= k; i++) { g = order[i]
+                  printf "%-12s %2d setups%s\n", g, n[g], (d[g] ? sprintf(", %d set up", d[g]) : "") } }' <<< "$RECIPES"
+}
+
+setups_view() {  # setups_view <group>...: its setups, a check on the ones set up here
+    awk -F'|' -v groups=" $* " -v done=" $(tools_done | tr '\n' ' ') " '
+        index(groups, " " $1 " ") { printf "%-13s %s%s\n", $2, $3, (index(done, " " $2 " ") ? "  ✓" : "") }' <<< "$RECIPES"
+}
+
+# pick: the groups, then their setups, marked unless set up here already; then each
+# setup asks for its parts. Prints the setups to run, one per line.
+pick() {
+    local groups rows marks i=0 line
+    groups=$(groups_view | fzf --multi --height=80% --reverse --prompt='groups> ' \
+        --header='Tab marks · Ctrl-a all · Enter goes on · Esc cancels' --bind=ctrl-a:select-all \
+        --preview "\"$0\" --setups {1}" --preview-window=right,55%,wrap) || return 0
+    # shellcheck disable=SC2046  # group names, one per word
+    rows=$(setups_view $(awk '{print $1}' <<< "$groups"))
+    # fzf marks nothing on its own: on load, go to each line not set up yet and mark it.
+    while IFS= read -r line; do
+        i=$(( i + 1 ))
+        [[ $line == *✓ ]] || marks+="pos($i)+select+"
+    done <<< "$rows"
+    DOTS_COLOR=1 fzf --multi --height=80% --reverse --prompt='setups> ' \
+        --header='Marked: not set up yet · Tab toggles · Ctrl-a all · Enter sets up · Esc cancels' \
+        --bind="load:${marks:-}first" --bind=ctrl-a:select-all \
+        --preview "\"$0\" --show {1}" --preview-window=right,45%,wrap <<< "$rows" |
+        awk '{print $1}'
 }
 
 expand() {  # names and group names in, setup names out
@@ -197,13 +219,14 @@ if [[ ${1:-} == -y ]]; then YES=1; shift; fi
 
 case "${1:-}" in
     '')
-        if ! can_prompt; then list; exit 0; fi
+        if ! can_prompt || ! have fzf; then list; exit 0; fi
         picked=$(pick)
         [[ -n $picked ]] || exit 0
         mapfile -t names <<< "$picked"
         each setup "${names[@]}" ;;
     --list)  list ;;
     --show)  show "${2:-}" ;;
+    --setups) setups_view "${2:-}" ;;  # for the preview of a group
     --describe)  # for Tab completion
         cut -d'|' -f1 <<< "$RECIPES" | sort -u | sed 's/$/:a whole group/'
         awk -F'|' '{print $2 ":" $3}' <<< "$RECIPES" ;;

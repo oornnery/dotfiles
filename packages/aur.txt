@@ -1,7 +1,9 @@
-# aur packages, saved 2026-11-06 from DESKTOP-T8DL9CB
+# aur packages, saved 2026-11-08 from DESKTOP-T8DL9CB
 herdr-bin
+lazysql-bin
 pacsea-bin
 paru
 paru-debug
 pay-respects-bin
 pet-bin
+posting

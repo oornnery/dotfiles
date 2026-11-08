@@ -27,6 +27,10 @@ tuis|tui-system|systemd units (systemctl-tui), logs (lazyjournal), containers (o
 tuis|tui-dev|Commands side by side (mprocs), slides from Markdown (presenterm)|mprocs presenterm|
 tuis|tui-ssh|SSH hosts: lazyssh|lazyssh|
 tuis|tui-fun|Spotify (spotify_player), typing test (ttyper)|spotify-player ttyper|
+tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior-tui dooit|
+tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar)|zk nb calcure|
+secrets|vaultwarden|Vaultwarden and Bitwarden: rbw (with an agent, rbw config set base_url) and bw|rbw bitwarden-cli|
+secrets|env-files|.env files encrypted in git: sops with age keys, and dotenvx|sops age npm:@dotenvx/dotenvx|
 tools|cli-extras|dust, duf, procs, sd, tealdeer, jless, htmlq, xmlstarlet, 7zip, rsync, pkgfile, arch-audit, yt-dlp|dust duf procs sd tealdeer jless htmlq xmlstarlet 7zip rsync pkgfile arch-audit yt-dlp|
 terminal|tmux|tmux with config and theme|tmux|tmux
 terminal|zellij|Zellij with its theme, help and a palette|zellij fzf|zellij

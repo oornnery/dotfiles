@@ -66,6 +66,16 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 | `tw` | `tabiew` | CSV, Parquet and JSON tables, with SQL | [shshemi/tabiew](https://github.com/shshemi/tabiew) |
 | `epycell` | `epycell` (cargo) | Jupyter notebooks in the terminal | [crates.io/crates/epycell](https://crates.io/crates/epycell) |
 
+### Notes and tasks
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `taskwarrior-tui` | `taskwarrior-tui` | Tasks of taskwarrior (`task add ...`) | [kdheepak/taskwarrior-tui](https://github.com/kdheepak/taskwarrior-tui) |
+| `dooit` | `dooit` (aur) | Todo lists, nested | [dooit-org/dooit](https://github.com/dooit-org/dooit) |
+| `calcure` | `calcure` (aur) | Calendar and tasks | [anufrievroman/calcure](https://github.com/anufrievroman/calcure) |
+| `zk` | `zk` | Notes as a Zettelkasten, searched with fzf | [zk-org/zk](https://github.com/zk-org/zk) |
+| `nb` | `nb` (aur) | Notes, bookmarks and to-dos, synced with git | [xwmx/nb](https://github.com/xwmx/nb) |
+
 ### Dev
 
 | Run | Package | For | Project |
@@ -89,6 +99,18 @@ On Arch with Hyprland: `dots install tui-desktop`.
 | `wiremix` | `wiremix` | Audio mixer for PipeWire | [tsowell/wiremix](https://github.com/tsowell/wiremix) |
 | `impala` | `impala` | Wi-Fi, through iwd | [pythops/impala](https://github.com/pythops/impala) |
 | `bluetui` | `bluetui` | Bluetooth | [pythops/bluetui](https://github.com/pythops/bluetui) |
+
+## Secrets
+
+`dots install secrets`.
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `rbw` | `rbw` | Vaultwarden and Bitwarden, with an agent that keeps the vault open | [doy/rbw](https://github.com/doy/rbw) |
+| `bw` | `bitwarden-cli` | The official Bitwarden CLI | [bitwarden/clients](https://github.com/bitwarden/clients) |
+| `sops` | `sops` | Encrypted .env, YAML and JSON files, safe in git | [getsops/sops](https://github.com/getsops/sops) |
+| `age` | `age` | The keys sops encrypts with | [FiloSottile/age](https://github.com/FiloSottile/age) |
+| `dotenvx` | `@dotenvx/dotenvx` (npm) | Load and encrypt .env files | [dotenvx/dotenvx](https://github.com/dotenvx/dotenvx) |
 
 ## Shell
 

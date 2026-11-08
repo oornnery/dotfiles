@@ -1,5 +1,5 @@
 # DESKTOP-T8DL9CB: what dots apply sets up on this machine.
 # tools: dots install <name>    links: dots link <package>    folders: in $HOME
-tools: zsh atuin pet fastfetch git bat glow lazygit btop yazi television epycell zellij helix python node rust docker distrobox sqlite herdr mpv openssh cli-extras
+tools: zsh atuin pet fastfetch git bat glow lazygit btop yazi television epycell zellij helix python node rust docker distrobox sqlite herdr mpv openssh cli-extras tui-api tui-db
 links: dots shell helix pet distrobox git zsh bash atuin fastfetch herdr lazygit lazydocker btop bat glow yazi mpv nvim zellij television mise
 folders: labs projects scripts services
