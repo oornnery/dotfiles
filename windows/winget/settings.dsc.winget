@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
 # Windows settings, applied by `dots wsl windows settings` (winget configure).
-# `dots wsl windows settings -n` only tests them. Developer mode asks for admin.
+# `dots wsl windows settings -n` only tests them. Developer mode and long paths ask
+# for admin. What has no resource of its own is a registry value (PSDscResources).
 properties:
   configurationVersion: 0.2.0
   resources:
@@ -39,3 +40,74 @@ properties:
         FileExtensions: Show
         HiddenFiles: Show
         RestartExplorer: true
+
+    - resource: PSDscResources/Registry
+      directives:
+        description: Alt+Tab shows windows only, not the tabs of apps
+      settings:
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+        ValueName: MultiTaskingAltTabFilter
+        ValueType: Dword
+        ValueData: "3"
+        Force: true
+
+    - resource: PSDscResources/Registry
+      directives:
+        description: Shaking a title bar does not minimize the other windows
+      settings:
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+        ValueName: DisallowShaking
+        ValueType: Dword
+        ValueData: "1"
+        Force: true
+
+    - resource: PSDscResources/Registry
+      directives:
+        description: End task in the right click of the taskbar
+      settings:
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings
+        ValueName: TaskbarEndTask
+        ValueType: Dword
+        ValueData: "1"
+        Force: true
+
+    - resource: PSDscResources/Registry
+      directives:
+        description: Clipboard history (Win+V)
+      settings:
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Clipboard
+        ValueName: EnableClipboardHistory
+        ValueType: Dword
+        ValueData: "1"
+        Force: true
+
+    - resource: PSDscResources/Registry
+      directives:
+        description: Paths longer than 260 characters
+        securityContext: elevated
+      settings:
+        Key: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem
+        ValueName: LongPathsEnabled
+        ValueType: Dword
+        ValueData: "1"
+        Force: true
+
+    # Windows Terminal hosts every console app, as the default terminal.
+    - resource: PSDscResources/Registry
+      directives:
+        description: Windows Terminal as the default terminal (console host)
+      settings:
+        Key: HKEY_CURRENT_USER\Console\%%Startup
+        ValueName: DelegationConsole
+        ValueType: String
+        ValueData: "{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}"
+        Force: true
+    - resource: PSDscResources/Registry
+      directives:
+        description: Windows Terminal as the default terminal (terminal)
+      settings:
+        Key: HKEY_CURRENT_USER\Console\%%Startup
+        ValueName: DelegationTerminal
+        ValueType: String
+        ValueData: "{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}"
+        Force: true
