@@ -9,8 +9,6 @@ like.
 
 ## Next
 
-- [ ] One Node manager. vite-plus is in testing and clashes with fnm: both put a Node
-      on the PATH. Pick one, drop the other from `shell/` and `packages/`.
 - [ ] Review `ai/` (claude, codex, opencode, pi) and link what stays.
 - [ ] `dots install hyprland` on the desktop, and test its commands for real.
 - [ ] Decide the Windows Terminal `settings.json` with `dots wsl windows pull`.
@@ -26,8 +24,8 @@ What I like in each one:
 
 Ideas:
 
-- [ ] Environments per project: a file in the repo lists its tools, and entering the
-      folder makes them available (direnv is installed; mise or Nix could fill it).
+- [ ] More tools in mise per project (Python, Go...), now that Node is there; uv
+      keeps Python for now.
 - [ ] `dots pkg` with nala-like output: a table with colors per manager, and the
       size of what installs.
 - [ ] Groups of packages (base, dev, desktop), so a new machine picks a group.

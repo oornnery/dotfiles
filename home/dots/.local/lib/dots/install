@@ -41,7 +41,7 @@ post_hyprland()  { dots theme apply; }
 post_docker()    { dots sudo systemctl enable --now docker && dots sudo usermod -aG docker "$USER"; }
 post_distrobox() { dots install -y docker; }
 post_epycell()   { cargo install --locked epycell; }
-post_node()      { fnm install --lts; }
+post_node()      { mise install; }   # the Node of ~/.config/mise/config.toml
 post_python()    { uv python install; }
 post_cli-extras() { have tldr && tldr --update; return 0; }
 post_ollama()    { dots sudo systemctl enable --now ollama; }

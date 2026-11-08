@@ -1,0 +1,8 @@
+# The tools mise keeps for every folder. A project names its own in a mise.toml
+# (`mise use node@22` writes it), and entering the folder switches to them.
+[tools]
+node = "lts"
+
+[settings]
+# Also read the .nvmrc and .node-version files projects already have.
+idiomatic_version_file_enable_tools = ["node"]

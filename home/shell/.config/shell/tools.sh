@@ -26,8 +26,13 @@ if _has fzf; then
     eval "$(fzf --"$_sh")"
 fi
 
-# Node versions: fnm
-_has fnm && eval "$(fnm env --use-on-cd --shell "$_sh")"
+# Tool versions, per project: mise (Node for now; see ~/.config/mise/config.toml).
+# fnm only until migration 003 installs mise and removes it.
+if _has mise; then
+    eval "$(mise activate "$_sh")"
+elif _has fnm; then
+    eval "$(fnm env --use-on-cd --shell "$_sh")"
+fi
 
 # git-delta as the git pager, set here so git still works without it.
 if _has delta; then

@@ -26,7 +26,7 @@ editors|vscode|Visual Studio Code|visual-studio-code-bin|
 editors|zed|Zed|zed|
 editors|cursor|Cursor|cursor-bin|
 languages|python|Python with uv|python uv|
-languages|node|fnm with Node LTS|fnm|
+languages|node|Node LTS through mise, and the versions of each project|mise|mise
 languages|bun|Bun runtime|bun-bin|
 languages|deno|Deno runtime|deno|
 languages|rust|Rust and Cargo|rust|

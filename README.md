@@ -138,7 +138,7 @@ Saved in `packages/` by `dots pkg save`; `dots pkg restore` brings them back.
 | pacman | Base: `base base-devel sudo openssh man-db man-pages pacman-contrib stow git zsh` |
 | | Shell: `atuin bat eza fd fzf ripgrep zoxide direnv gum jq yq xh tree unzip zip wget wl-clipboard` |
 | | Editors and TUIs: `helix neovim vim zellij tmux yazi television lazygit lazydocker btop glow mpv ncdu fastfetch` |
-| | Dev: `git-delta github-cli docker docker-buildx docker-compose distrobox fnm uv rust ruff shellcheck shfmt hyperfine tokei` |
+| | Dev: `git-delta github-cli docker docker-buildx docker-compose distrobox mise uv rust ruff shellcheck shfmt hyperfine tokei` |
 | | Language servers: `bash-language-server marksman taplo-cli yaml-language-server` |
 | | Fonts: `ttf-firacode-nerd` |
 | aur | `paru herdr-bin pet-bin pay-respects-bin pacsea-bin` |
@@ -150,7 +150,7 @@ Saved in `packages/` by `dots pkg save`; `dots pkg restore` brings them back.
 ## Current state
 
 - Daily use: Arch on WSL, with zsh, Helix, Zellij, Yazi, fzf and Windows Terminal.
-- Node: fnm, with vite-plus in testing. Both set up a Node, so only one stays (TODO.md).
+- Node: mise, also for the versions of each project; vite-plus in testing, its Node after the one of mise.
 - Kept for later, not linked: `hyprland`, `tmux`, `vim`.
 - Written but never run for real: the `hyprland` commands, `dots wsl windows install`,
   and the setups in `dots install` that start services.

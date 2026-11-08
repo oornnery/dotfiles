@@ -83,14 +83,13 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 | Package | For |
 | --- | --- |
 | `uv` | Python projects and tools |
-| `fnm` | Node versions; the main one, active in interactive shells |
+| `mise` | Node, and the tool versions of each project (`mise.toml`) |
 | `pnpm` (npm) | Node packages |
 | `typescript` (npm) | TypeScript compiler |
 | `rust` | Rust and `cargo` |
 
 `vite-plus` (`vp`) is being tested. It comes from its own installer, outside
-these lists, and has its own Node, so `npm` outside an interactive shell is a
-different one with its own global packages.
+these lists. It brings a Node too, but the one of mise comes first in `PATH`.
 
 ## Helix language servers and formatters
 

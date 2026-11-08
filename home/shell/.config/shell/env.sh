@@ -35,6 +35,10 @@ unset _d _new_path
 # ~/.zshrc / ~/.bashrc can be deleted.
 [ -r "$XDG_CONFIG_HOME/vite-plus/env" ] && . "$XDG_CONFIG_HOME/vite-plus/env"
 
+# The Node of mise first, also where the shell is not interactive (editors, scripts):
+# its shims. Interactive shells activate mise itself in tools.sh.
+PATH="$HOME/.local/share/mise/shims:$PATH"
+
 # Editor (Arch names the helix binary `helix`)
 if _has helix; then EDITOR=helix; else EDITOR=vi; fi
 export EDITOR VISUAL="$EDITOR"

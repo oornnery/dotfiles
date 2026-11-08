@@ -53,7 +53,7 @@ check_path() {
     section PATH
     local d before=$problems
     while IFS= read -r d; do
-        [[ -z $d || -d $d || $d == */fnm_multishells/* ]] && continue
+        [[ -z $d || -d $d ]] && continue
         # Outside $HOME it comes from the system (WSL adds /usr/games), not from here.
         if [[ $d == "$HOME"/* ]]; then bad "PATH entry does not exist: $d"; else note "from the system, does not exist: $d"; fi
     done < <(tr ':' '\n' <<< "$PATH")
@@ -67,8 +67,9 @@ check_node() {
     section node
     local node; node=$(command -v node) || { bad "node not found"; return; }
     case $node in
-        *fnm*)        ok "fnm is active: $(node --version)" ;;
-        *vite-plus*)  bad "vite-plus is active, fnm is the main one (open an interactive shell)" ;;
+        *mise*)       ok "mise is active: $(node --version)" ;;
+        *fnm*)        bad "fnm is still active: dots migrate moves Node to mise" ;;
+        *vite-plus*)  bad "the Node of vite-plus is active, mise is the main one (open an interactive shell)" ;;
         *)            bad "unexpected node: $node" ;;
     esac
     have vp && note "vite-plus is installed, in testing: $(vp --version 2>/dev/null | head -1)"
