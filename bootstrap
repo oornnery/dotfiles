@@ -8,6 +8,7 @@ set -euo pipefail
 
 cd "$(dirname "$(realpath "$0")")"
 sudo pacman -S --needed git stow gum fzf
-stow --no-folding -d . -t "$HOME" dots
+stow --no-folding -d home -t "$HOME" dots
 export PATH="$HOME/.local/bin:$PATH"
+dots migrate --done   # a new machine starts current
 exec dots apply

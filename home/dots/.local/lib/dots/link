@@ -8,7 +8,7 @@
 #   dots link list             list packages (* = linked on this machine)
 #   dots link add [path...]    move a config into ~/dotfiles, link it back;
 #                              with no path, pick from ~/.config
-#                              ~/.config/helix -> ~/dotfiles/helix/.config/helix
+#                              ~/.config/helix -> ~/dotfiles/home/helix/.config/helix
 #   dots link add -p zsh ~/.zshrc ~/.zshenv     pick the package name
 #   dots link sync             link every package of this machine
 #   dots link sync -n          dry run

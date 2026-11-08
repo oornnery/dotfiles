@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dots:summary=What is pending: commits, links, new configs, packages, Windows
+# dots:summary=What is pending: commits, links, migrations, packages, Windows
 # dots:group=machine
 # dots:args=[-f]
 # dots:actions=-f=Also ask the remote and the repos (slower)
@@ -85,6 +85,12 @@ packages() {
     (( pending == before )) && ok "the saved lists match what is installed"
 }
 
+migrations() {
+    section "migrations"
+    local m; m=$(pending_migrations)
+    if [[ -n $m ]]; then todo "$(wc -l <<< "$m") migration(s) not run here" "dots migrate"; items "$m"; else ok "every migration ran here"; fi
+}
+
 windows() {  # only on WSL: configs that differ from the Windows side
     [[ -d /mnt/c/Windows ]] || return 0
     section "windows"
@@ -101,6 +107,7 @@ windows() {  # only on WSL: configs that differ from the Windows side
 spin_self 'Looking for what is pending...' "$@"
 repo
 links
+migrations
 packages
 windows
 echo

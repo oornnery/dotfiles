@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dots:summary=Make this machine match the repo: links, packages, theme
+# dots:summary=Make this machine match the repo: links, migrations, packages, theme
 # dots:group=machine
 # dots:args=[-n]
 # dots:actions=run=Make this machine match the repo|-n=Show what it would do
@@ -7,8 +7,8 @@
 #   dots apply      pick the steps, then run them; each one is safe to repeat
 #   dots apply -n   only show what would change
 #
-# The steps, in order: link the configs, install the saved packages, write the
-# theme, then check. dots status shows the same steps as pending. A new machine
+# The steps, in order: link the configs, run the migrations, install the saved
+# packages, write the theme, then check. dots status shows the same steps as pending. A new machine
 # runs ./bootstrap, which ends here.
 set -uo pipefail
 
@@ -19,6 +19,7 @@ set -uo pipefail
 step() {  # step <name>
     case $1 in
         links)    dots link sync </dev/tty || err "some packages did not link" ;;
+        migrations) dots migrate </dev/tty ;;
         packages) dots pkg restore </dev/tty ;;
         theme)    dots theme apply ;;
         check)    dots doctor </dev/tty ;;
@@ -27,11 +28,12 @@ step() {  # step <name>
 
 dry() {
     section 'links (dry run)'; dots link sync -n
+    section 'migrations to run'; dots migrate list | grep -v '^\S*\*' || true
     section 'packages (+ not saved, - would be installed)'; dots pkg diff
 }
 
 run() {
-    local steps=$'links\npackages\ntheme\ncheck' s
+    local steps=$'links\nmigrations\npackages\ntheme\ncheck' s
     have paru || have yay || warn "no AUR helper: AUR packages will be skipped"
     if can_prompt; then
         steps=$(choose --all 'Which steps? (x toggles, enter runs)' <<< "$steps") || return 0

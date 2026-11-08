@@ -13,24 +13,23 @@ It installs git and stow, links the `dots` command, then runs `dots apply`.
 
 ## How it works
 
-Each folder with dotfiles inside is a GNU Stow package, linked into `$HOME` file by
-file. `~/.config/dots/packages` lists what is linked on this machine.
+Each folder in `home/` is a config package, linked into `$HOME` file by file with GNU
+Stow. `~/.config/dots/packages` lists what is linked on this machine.
 
 | Path | What it is |
 | ---- | ---------- |
-| `dots/` | The `dots` command: one script per subcommand in `.local/lib/dots/` |
-| `shell/`, `zsh/`, `bash/` | Shell config; `shell/` is shared by zsh and bash |
-| `helix/`, `nvim/`, `vim/` | Editors |
-| `tmux/`, `zellij/` | Terminal multiplexers |
-| `git/`, `pet/`, `atuin/`, `fastfetch/`, `bat/`, `glow/` | Tools |
-| `lazygit/`, `lazydocker/`, `btop/`, `yazi/`, `mpv/`, `herdr/`, `distrobox/` | Apps |
-| `hyprland/` | Desktop: Hyprland, Waybar, Mako, Walker, Wofi, and its `dots` commands |
-| `themes/` | Palettes and theme files, used by `dots theme` |
+| `home/dots/` | The `dots` command: one script per subcommand in `.local/lib/dots/` |
+| `home/shell/`, `home/zsh/`, `home/bash/` | Shell config; `shell/` is shared by zsh and bash |
+| `home/<app>/` | The other config packages, mapped below |
+| `migrations/` | One-time changes per machine, run by `dots migrate` |
 | `packages/` | Saved package lists, written by `dots pkg save` |
+| `themes/` | Palettes and theme files, used by `dots theme` |
 | `docs/cheatsheets/` | Pages for `dots help` |
 | `windows/` | GlazeWM, YASB, Windows Terminal, PowerShell and WSL configs, and the winget packages |
 | `ai/` | Agent configs, skills and prompts, mapped in `ai/README.md`; not linked |
 | `self-hosted/`, `templates/` | Compose files and editor templates |
+| `tests/` | `tests/run` checks every script and runs the tests; CI runs it too |
+| `bootstrap` | The first run on a new machine |
 
 ## Commands
 
@@ -44,7 +43,8 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 | `dots update` | Upgrade everything |
 | `dots theme` | Switch colors, with a live preview |
 | `dots status` | What is pending: commits, links, new configs, packages, Windows |
-| `dots doctor` | Report what is wrong |
+| `dots doctor` | Report what is broken |
+| `dots migrate` | Run the one-time changes this machine has not run yet |
 | `dots edit`, `dots tui`, `dots help` | Open a config, a TUI or a page |
 | `dots palette` | Search help, TUIs and commands with tv |
 | `dots apply` | Make this machine match the repo |

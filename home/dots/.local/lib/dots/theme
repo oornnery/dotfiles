@@ -144,7 +144,7 @@ helix_theme() {
 }
 
 apply() {  # apply <name>
-    local name=$1 seq config="$DOTFILES/helix/.config/helix/config.toml"
+    local name=$1 seq config="$PKGS/helix/.config/helix/config.toml"
     [[ -f $THEMES/$name/alacritty.toml ]] || { err "dots theme: no such theme: $name (dots theme list)"; return 1; }
     seq=$(sequence "$name")
     mkdir -p "$(dirname "$FILE")"

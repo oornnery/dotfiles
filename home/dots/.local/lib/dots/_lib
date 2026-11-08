@@ -12,7 +12,7 @@
 
 CMD=${0##*/}
 DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
-PKGS="$DOTFILES"                                  # the config packages, linked into $HOME
+PKGS="$DOTFILES/home"                             # the config packages, linked into $HOME
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/dots"   # what this machine chose
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/dots" # what ran here: theme, migrations
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/dots"      # what can be rebuilt
@@ -68,3 +68,9 @@ into_repo() {  # into_repo <link>: true when it points inside the repo
     [[ $(realpath -m "$target") == "$(realpath -m "$DOTFILES")"/* ]]
 }
 stale_repo_links() { local l; stale_links | sort -u | while IFS= read -r l; do into_repo "$l" && echo "$l"; done; }
+
+# --- Migrations ----------------------------------------------------------------
+
+MIGRATIONS="$DOTFILES/migrations"
+all_migrations() { find "$MIGRATIONS" -maxdepth 1 -name '[0-9]*.sh' -printf '%f\n' 2>/dev/null | sed 's/\.sh$//' | sort; }
+pending_migrations() { comm -23 <(all_migrations) <(sort -u "$STATE/migrations" 2>/dev/null); }

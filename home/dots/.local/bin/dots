@@ -16,7 +16,8 @@ set -uo pipefail
 self=$(realpath "${BASH_SOURCE[0]}")
 # The linked folder holds the commands of every package (dots, hyprland...).
 lib=${DOTS_LIB:-$HOME/.local/lib/dots}
-[[ -d $lib ]] || lib=$(dirname "$self")/../lib/dots
+# Run from the repo, or with the links broken (a migration moved the repo): its own folder.
+[[ -r $lib/_lib ]] || lib=$(dirname "$self")/../lib/dots
 DOTS_LIB=$(cd "$lib" 2>/dev/null && pwd) || { echo "dots: no command dir: $lib" >&2; exit 1; }
 export DOTS_LIB DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 bin=$(dirname "$self")
