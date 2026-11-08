@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # dots:summary=Screenshots, screen recording, OCR and color picker
+# dots:group=desktop
 # dots:args=screenshot [region [--copy]|full|window|delay <sec>] | record [region|stop|status] | ocr [lang] | color
 # dots:actions=screenshot region=Pick an area and annotate it|screenshot full=The whole screen|screenshot window=The active window|record=Start or stop recording|record region=Record an area|record stop=Stop recording|ocr=Copy the text in an area|color=Pick a color from the screen
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 SHOTS="${SCREENSHOT_DIR:-$HOME/Pictures/screenshots}"
 VIDEOS="${RECORD_DIR:-$HOME/Videos/recordings}"
@@ -118,6 +119,5 @@ case "${1:-}" in
     record)     shift; record "$@" ;;
     ocr)        shift; ocr "$@" ;;
     color)      color ;;
-    -h|--help)  sed -n '2,3p' "$0" ;;
     *) err "Usage: dots capture <screenshot|record|ocr|color>"; exit 1 ;;
 esac

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Map installed packages to ~/dotfiles/packages and reinstall them
+# dots:group=packages
 # dots:args=[status | list [mgr] | add [-m mgr] <pkg>... | remove [pkg...] | save | diff | install [-y]]
 # dots:actions=status=Installed and saved, per manager|list=What is installed now|add=Install packages and save the list|remove=Remove packages and save the list|save=Write the package lists|diff=Compare installed and saved|install=Install what is saved but missing
 #
@@ -16,11 +17,10 @@
 # shellcheck disable=SC2154  # colors come from _ui
 set -uo pipefail
 
-here=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
-. "$here/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 # shellcheck source=/dev/null
-. "$here/_managers"
+. "$DOTS_LIB/_managers"
 
 DIR="${DOTS_PKG_DIR:-${DOTFILES_DIR:-$HOME/dotfiles}/packages}"
 
@@ -183,6 +183,5 @@ case "${1:-status}" in
     remove)  shift; remove_ "$@" ;;
     diff)    diff_ ;;
     install) shift; install "$@" ;;
-    -h|--help) sed -n '6,12p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) err "dots pkg: unknown action: $1"; exit 1 ;;
+    *) die "unknown action: $1" ;;
 esac

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Cheatsheets, plus your live aliases, functions and snippets
+# dots:group=use
 # dots:args=[aliases | functions | pet | <sheet> | --list]
 #
 # Sheets are ~/dotfiles/docs/cheatsheets/<name>.md. The aliases, functions and
@@ -8,7 +9,7 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 DOCS="${DOTFILES_DIR:-$HOME/dotfiles}/docs/cheatsheets"
 SHELL_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/shell"
@@ -81,6 +82,5 @@ show() {
 case "${1:-}" in
     '') while pick=$(topics | dots menu help) && [[ -n $pick ]]; do show "$pick"; done ;;
     --list) topics ;;
-    -h|--help) sed -n '2,3p' "$0" ;;
     *) show "$1" ;;
 esac

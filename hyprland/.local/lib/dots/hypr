@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # dots:summary=Hyprland: look, layout, monitors, gamemode, keybinds and reload
+# dots:group=desktop
 # dots:args=gaps | layout | transparency | corners <sharp|round> | gamemode [on|off|status] | scale <+n|-n|=n> | mirror [on|off] | focus <pattern> [command] | scratch | keys | reload | exit
 # dots:actions=gaps=Toggle gaps and borders|layout=Switch dwindle and master|transparency=Toggle transparency|corners sharp=Square corners|corners round=Round corners|gamemode=Toggle gaming mode|mirror=Toggle the monitor mirror|scratch=Toggle the scratch terminal|keys=Search the keybinds|reload=Reload Hyprland, bar and notifications|exit=Leave Hyprland
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 need hyprctl jq
 
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/dots/hypr"
@@ -157,6 +158,5 @@ case "${1:-}" in
     keys)         keys ;;
     reload)       reload ;;
     exit)         exec hyprctl dispatch exit ;;
-    -h|--help)    sed -n '2,3p' "$0" ;;
     *) err "Usage: dots hypr <action> (dots hypr --help)"; exit 1 ;;
 esac

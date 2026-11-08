@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Pick a TUI and open it
+# dots:group=use
 # dots:args=[--list]
 #
 # The list is the TUIs table in docs/cheatsheets/packages.md; ones not installed
@@ -7,10 +8,10 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 SHEET="${DOTFILES_DIR:-$HOME/dotfiles}/docs/cheatsheets/packages.md"
-[[ -f $SHEET ]] || { err "dots tui: no list at $SHEET"; exit 1; }
+[[ -f $SHEET ]] || { die "no list at $SHEET"; }
 
 rows() {  # "command  what it is for"
     awk -F'|' '
@@ -30,6 +31,5 @@ case "${1:-}" in
         [[ -n $pick ]] && exec "${pick%% *}"
         ;;
     --list) rows ;;
-    -h|--help) sed -n '2,3p' "$0" ;;
-    *) err "dots tui: unknown option: $1"; exit 1 ;;
+    *) die "unknown option: $1" ;;
 esac

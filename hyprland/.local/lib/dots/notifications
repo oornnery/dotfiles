@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # dots:summary=Notification history, do not disturb, reminders and info cards
+# dots:group=desktop
 # dots:args=pick | restore | clear | dnd [on|off|status] | remind <minutes> [text] | reminders [clear] | info <date|weather|battery|network|system>
 # dots:actions=pick=Act on a notification|restore=Bring back the last one|clear=Dismiss all|dnd=Toggle do not disturb|reminders=Pending reminders|info date=Date and week|info weather=Current weather|info battery=Battery state|info network=IP addresses|info system=Uptime, load, memory, disk
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 REMINDERS="${XDG_STATE_HOME:-$HOME/.local/state}/dots/reminders"
 
@@ -100,6 +101,5 @@ case "${1:-pick}" in
     remind)    shift; remind "$@" ;;
     reminders) shift; reminders "$@" ;;
     info)      shift; info "$@" ;;
-    -h|--help) sed -n '2,3p' "$0" ;;
-    *) err "dots notifications: unknown action: $1"; exit 1 ;;
+    *) die "unknown action: $1" ;;
 esac

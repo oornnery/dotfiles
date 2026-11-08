@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Keep configs in ~/dotfiles and link them into $HOME
+# dots:group=config
 # dots:args=[list | add [path...] [-p pkg] | sync [-n|--adopt] | <pkg>... | -D <pkg>...]
 # dots:actions=pick=Choose what is linked here|add=Add a config to the repo|list=List the packages|sync=Link every package in the list|sync -n=Show what sync would do
 #
@@ -22,12 +23,10 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
-DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
-LIST="${XDG_CONFIG_HOME:-$HOME/.config}/dots/packages"
 STOW=(stow --no-folding -d "$DOTFILES" -t "$HOME")
-have stow || { err "dots stow: stow is not installed"; exit 1; }
+have stow || { die "stow is not installed"; }
 mkdir -p "$DOTFILES"
 
 short() { printf '%s' "${1/#$HOME/\~}"; }
@@ -238,7 +237,6 @@ case "${1:-}" in
         fi
         (( $# )) || { echo "Usage: dots stow -D <pkg>..." >&2; exit 1; }
         disable "$@" ;;
-    -h|--help) sed -n '6,16p' "$0" | sed 's/^# \{0,1\}//' ;;
-    -*) err "dots stow: unknown option: $1"; exit 1 ;;
+    -*) die "unknown option: $1" ;;
     *) enable "$@" ;;
 esac

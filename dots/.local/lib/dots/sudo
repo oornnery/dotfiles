@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # dots:summary=Run a command with sudo, password asked through gum
 # dots:args=<command> [args...]
+# dots:hidden=true
 set -euo pipefail
 
 (( $# )) || { echo "Usage: dots sudo <command> [args...]" >&2; exit 1; }

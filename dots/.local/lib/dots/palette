@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Search TUIs, commands, keys, help, man pages and snippets, with a preview
+# dots:group=use
 # dots:args=[all | tui | dots | keys | help | run | linux | pet]
 # dots:actions=tui=Only the TUIs|dots=Only dots commands|keys=Only keyboard shortcuts|help=Only help pages|run=Any command|linux=Man pages|pet=Pet snippets
 #
@@ -16,7 +17,7 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 SHEETS="${DOTFILES_DIR:-$HOME/dotfiles}/docs/cheatsheets"
 LIB="${DOTS_LIB:-$HOME/.local/lib/dots}"
@@ -135,8 +136,7 @@ case "${1:-all}" in
     --rows)    "rows_$2"; exit ;;
     --preview) preview "$2" "$3"; exit 0 ;;  # on failure, tv would show only stderr
     all|tui|dots|keys|help|run|linux|pet) need tv; choice=$(tv "dots-${1:-all}") ;;
-    -h|--help) sed -n '6,7p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *) err "dots palette: unknown mode: $1"; exit 1 ;;
+    *) die "unknown mode: $1" ;;
 esac
 [[ -n $choice ]] || exit 0
 # Tab can lead to a channel of tv itself: what comes back is a file or just a line.

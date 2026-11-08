@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Set up a machine: link configs, install packages, check
+# dots:group=machine
 # dots:args=[-n]
 # dots:actions=run=Set up this machine|-n=Show what it would do
 #
@@ -10,7 +11,7 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 case "${1:-run}" in
     run)
@@ -38,6 +39,5 @@ case "${1:-run}" in
         section 'check'
         dots doctor
         ;;
-    -h|--help) sed -n '6,7p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) err "dots setup: unknown option: $1"; exit 1 ;;
+    *) die "unknown option: $1" ;;
 esac

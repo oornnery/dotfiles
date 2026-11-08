@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # dots:summary=Pick a file in ~/dotfiles and open it in the editor
+# dots:group=config
 # dots:args=[search text]
 set -uo pipefail
 
-cd "${DOTFILES_DIR:-$HOME/dotfiles}" || exit 1
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+cd "$DOTFILES" || exit 1
 pick=$(fd --type f --hidden --exclude .git --exclude packages \
     | fzf --prompt='edit> ' --query="$*" --preview 'bat -n --color=always {}') || exit 0
 [[ -n $pick ]] && exec "${EDITOR:-helix}" "$pick"

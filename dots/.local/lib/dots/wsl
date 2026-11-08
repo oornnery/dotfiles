@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=WSL report (safe to paste) and wslc passthrough
+# dots:group=platform
 # dots:args=[info | windows [-n | pull | export | install] | wslc <args...>]
 # dots:actions=info=WSL report, safe to paste|windows=Copy configs to Windows|windows -n=Compare configs with Windows|windows pull=Bring back configs changed on Windows|windows export=Save the winget package list|windows install=Install the saved winget packages|wslc=Run wslc.exe
 #
@@ -16,7 +17,7 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 WSLC="${WSLC_EXE:-/mnt/c/Program Files/WSL/wslc.exe}"
 mask() { tr -d '\0\r' | sed -E 's#/mnt/c/Users/[^/ ]+#/mnt/c/Users/<user>#g; s#C:\\Users\\[^\\ ]+#C:\\Users\\<user>#g'; }
@@ -182,8 +183,7 @@ case "${1:-info}" in
         esac ;;
     wslc)
         shift
-        [[ -x $WSLC ]] || { err "dots wsl: wslc.exe not found at $WSLC"; exit 1; }
+        [[ -x $WSLC ]] || { die "wslc.exe not found at $WSLC"; }
         exec "$WSLC" "$@" ;;
-    -h|--help) sed -n '2,3p' "$0" ;;
-    *) err "dots wsl: unknown action: $1"; exit 1 ;;
+    *) die "unknown action: $1" ;;
 esac

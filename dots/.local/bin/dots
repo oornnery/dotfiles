@@ -6,9 +6,10 @@
 #
 # Each command is one executable in ../lib/dots/. Header keys it reads:
 #   # dots:summary=...   # dots:args=...   # dots:hidden=true
+#   # dots:group=machine|config|packages|use|platform|desktop   for the list
 #   # dots:actions=list=What it does|sync -n=Dry run   for the menu and for Tab
-# Commands call each other through `dots <cmd>`, never by sourcing. Only the
-# shared non-executable helpers (_ui, _managers) are sourced.
+# Commands call each other through `dots <cmd>`, never by sourcing. A command
+# sources _lib (and _managers when it needs them), nothing else.
 # shellcheck disable=SC2154  # colors come from _ui
 set -uo pipefail
 
@@ -25,12 +26,17 @@ case ":$PATH:" in *":$bin:"*) ;; *) PATH="$bin:$PATH" ;; esac
 
 meta() { sed -n "1,15s/^# dots:$2=//p" "$1" | head -1; }
 
-rows() {  # name<TAB>args<TAB>summary, hidden commands left out
-    local f
+ORDER=(machine config packages use platform desktop other)
+
+rows() {  # name<TAB>args<TAB>summary<TAB>group, by group, hidden commands left out
+    local f g
     for f in "$DOTS_LIB"/*; do
         [[ -f $f && -x $f && $(meta "$f" hidden) != true ]] || continue
-        printf '%s\t%s\t%s\n' "${f##*/}" "$(meta "$f" args)" "$(meta "$f" summary)"
-    done
+        g=$(meta "$f" group)
+        printf '%s\t%s\t%s\t%s\n' "${f##*/}" "$(meta "$f" args)" "$(meta "$f" summary)" "${g:-other}"
+    done | awk -F'\t' -v order="${ORDER[*]}" '
+        BEGIN { n = split(order, o, " "); for (i = 1; i <= n; i++) rank[o[i]] = i }
+        { print rank[$4] "\t" $0 }' | sort -t$'\t' -k1,1n -k2,2 | cut -f2-
 }
 
 icon() {  # the Nerd Font icon of a command, as a hex code
@@ -63,9 +69,11 @@ usage() {
         gum style --bold --foreground 212 --border rounded --border-foreground 99 --padding '0 2' 'dots · dotfiles CLI'
         echo
     fi
-    printf '%sUsage:%s dots [<cmd> [args...]]\n\n' "$H" "$N"
+    printf '%sUsage:%s dots [<cmd> [args...]]\n' "$H" "$N"
     # \037 because read merges repeated tabs, which would shift an empty args.
-    rows | tr '\t' '\037' | while IFS=$'\037' read -r n a s; do
+    local last=''
+    rows | tr '\t' '\037' | while IFS=$'\037' read -r n a s g; do
+        if [[ $g != "$last" ]]; then printf '\n%s%s%s\n' "$H" "$g" "$N"; last=$g; fi
         printf "  %s\\u$(icon "$n") %-13s%s %s\n" "$G" "$n" "$N" "$s"
         if [[ -n $a ]]; then printf '                  %s%s%s\n' "$D" "$a" "$N"; fi
     done

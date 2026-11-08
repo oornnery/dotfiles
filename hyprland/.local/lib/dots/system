@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # dots:summary=Power menu and profiles, volume, GPU usage and hibernation
+# dots:group=desktop
 # dots:args=power | profile [cycle|set <mode>|list] | volume [raise|lower|mute|mic-mute|set <n>|get] | gpu | hibernation <status|setup|remove>
 # dots:actions=power=Lock, suspend, reboot, shut down|profile=The power profile|profile cycle=Next power profile|volume mute=Toggle mute|volume mic-mute=Toggle the microphone|hibernation status=Is hibernation ready
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 SINK=@DEFAULT_AUDIO_SINK@
 SOURCE=@DEFAULT_AUDIO_SOURCE@
@@ -143,6 +144,5 @@ case "${1:-power}" in
     volume)      shift; volume "$@" ;;
     gpu)         gpu ;;
     hibernation) shift; hibernation "$@" ;;
-    -h|--help)   sed -n '2,3p' "$0" ;;
-    *) err "dots system: unknown action: $1"; exit 1 ;;
+    *) die "unknown action: $1" ;;
 esac

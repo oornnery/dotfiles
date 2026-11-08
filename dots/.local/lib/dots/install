@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Full setups: packages, config links, permissions and services
+# dots:group=packages
 # dots:args=[-y] [name...] | --list | --remove name...
 #
 #   dots install                 pick in a list, with details on the side
@@ -16,7 +17,7 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
 # group|name|description|packages|config packages
 RECIPES='shell|zsh|Zsh with config, as the default shell|zsh git fzf eza bat fd zoxide direnv|zsh shell
@@ -238,8 +239,7 @@ case "${1:-}" in
         confirm "Remove: $*?" || exit 0
         mapfile -t names < <(expand "$@")
         each remove "${names[@]}" ;;
-    -h|--help) sed -n '5,9p' "$0" | sed 's/^# \{0,1\}//' ;;
-    -*) err "dots install: unknown option: $1"; exit 1 ;;
+    -*) die "unknown option: $1" ;;
     *)
         mapfile -t names < <(expand "$@")
         each setup "${names[@]}" ;;

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Run a command in a new Zellij pane, or right here outside Zellij
+# dots:group=use
 # dots:args=[--float | --tab] [command...]
 #
 #   dots pane helix file     a new pane (with no command, a shell)
@@ -10,11 +11,13 @@
 # Outside, the command takes over the terminal until it ends.
 set -uo pipefail
 
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
 where=pane
 case "${1:-}" in
     --float) where=float; shift ;;
     --tab)   where=tab; shift ;;
-    -h|--help) sed -n '5,7p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
 esac
 (( $# )) || set -- "${SHELL:-bash}"
 

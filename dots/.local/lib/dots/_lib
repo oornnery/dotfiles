@@ -1,0 +1,62 @@
+# shellcheck shell=bash
+# shellcheck disable=SC2034  # the paths are read by the commands
+# The one file a command sources: _ui, the paths, the machine, and -h for free.
+#
+#   . "$(dirname "$(realpath "$0")")/_lib"
+#
+# A command's -h prints its header: the comment block at the top, without the
+# "# dots:" lines. So the help is written once, next to the code it describes.
+
+# shellcheck source=/dev/null
+. "$(dirname "${BASH_SOURCE[0]}")/_ui"
+
+CMD=${0##*/}
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+PKGS="$DOTFILES"                                  # the config packages, linked into $HOME
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/dots"   # what this machine chose
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/dots" # what ran here: theme, migrations
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/dots"      # what can be rebuilt
+LIST="$CONFIG/packages"
+
+die() { err "dots $CMD: $*"; exit 1; }
+
+usage() {  # the header of this command, from line 2 to the first line that is not a comment
+    printf 'dots %s %s\n\n' "$CMD" "$(sed -n 's/^# dots:args=//p' "$0")"
+    sed -n 's/^# dots:summary=//p' "$0"
+    awk 'NR > 1 && !/^#/ { exit } NR > 1 && !/^# (dots:|shellcheck)/ { sub(/^# ?/, ""); print }' "$0"
+}
+case ${1:-} in -h|--help) usage; exit 0 ;; esac
+
+# --- The machine --------------------------------------------------------------
+
+linked_packages() {  # the config packages this machine links, one per line
+    sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" 2>/dev/null | grep -v '^$'
+}
+
+package_files() {  # package_files <pkg>: its files, relative to $HOME
+    (cd "$PKGS/$1" 2>/dev/null && find . -type f | sed 's#^\./##')
+}
+
+unlinked() {  # "<pkg> <file>" for each file of a linked package that is not linked here
+    local pkg f
+    while IFS= read -r pkg; do
+        while IFS= read -r f; do
+            [[ $HOME/$f -ef $PKGS/$pkg/$f ]] || echo "$pkg $f"
+        done < <(package_files "$pkg")
+    done < <(linked_packages)
+}
+
+stale_links() {  # links in $HOME into the repo that lead nowhere: a file renamed or moved
+    local root
+    for root in "$HOME"/.config "$HOME"/.local/bin "$HOME"/.local/lib "$HOME"/.local/share; do
+        find "$root" -xtype l 2>/dev/null
+    done
+    find "$HOME" -maxdepth 2 -xtype l 2>/dev/null
+}
+into_repo() {  # into_repo <link>: true when it points inside the repo
+    local target
+    target=$(readlink "$1") || return 1
+    [[ $target == /* ]] || target=$(dirname "$1")/$target
+    [[ $(realpath -m "$target") == "$(realpath -m "$DOTFILES")"/* ]]
+}
+stale_repo_links() { local l; stale_links | sort -u | while IFS= read -r l; do into_repo "$l" && echo "$l"; done; }

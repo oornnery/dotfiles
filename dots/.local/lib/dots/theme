@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Switch the color theme: terminal, TUIs, prompt and editors
+# dots:group=config
 # dots:args=[list | get | set [name] | apply]
 # dots:actions=set=Pick a theme, previewing it live|list=Themes and their colors|get=The active theme|apply=Write the active theme again
 #
@@ -17,9 +18,8 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
-DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
 THEMES="$DOTFILES/themes"
 FILE="${XDG_STATE_HOME:-$HOME/.local/state}/dots/theme.sh"
 DEFAULT=catppuccin-mocha
@@ -206,6 +206,5 @@ case "${1:-pick}" in
     apply) apply "$(current)" ;;
     preview) [[ -f $THEMES/${2:-}/alacritty.toml ]] && send "$2" ;;
     sample) sample ;;
-    -h|--help) sed -n '6,9p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) err "dots theme: unknown action: $1"; exit 1 ;;
+    *) die "unknown action: $1" ;;
 esac

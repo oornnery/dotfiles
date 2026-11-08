@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=Check that this machine matches the dotfiles
+# dots:group=machine
 #
 # Links, tools, scripts, PATH, active Node, saved packages, the packages
 # cheatsheet and Helix language servers. Changes nothing. Exits 1 on problems.
@@ -7,26 +8,23 @@
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 
-DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
-LIST="${XDG_CONFIG_HOME:-$HOME/.config}/dots/packages"
 problems=0
 bad() { warn "$*"; problems=$(( problems + 1 )); }
 
 check_links() {
     section links
-    local pkg f rel before=$problems
+    local pkg line before=$problems
     while IFS= read -r pkg; do
-        [[ -d $DOTFILES/$pkg ]] || { bad "package in the list but not in the repo: $pkg"; continue; }
-        while IFS= read -r f; do
-            rel=${f#"$DOTFILES/$pkg/"}
-            [[ $HOME/$rel -ef $f ]] || bad "not linked: ~/$rel (dots stow $pkg)"
-        done < <(find "$DOTFILES/$pkg" -type f)
-    done < <(sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" 2>/dev/null | grep -v '^$')
-    while IFS= read -r f; do
-        bad "broken link: ${f/#$HOME/\~}"
-    done < <(find "$HOME" -maxdepth 1 -xtype l 2>/dev/null; find "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/lib/dots" -xtype l 2>/dev/null)
+        [[ -d $PKGS/$pkg ]] || bad "package in the list but not in the repo: $pkg"
+    done < <(linked_packages)
+    while IFS= read -r line; do
+        bad "not linked: ~/${line#* } (dots stow ${line%% *})"
+    done < <(unlinked)
+    while IFS= read -r line; do
+        bad "broken link: ${line/#$HOME/\~}"
+    done < <(stale_links | sort -u)
     (( problems == before )) && ok "every package file is linked, no broken links"
 }
 

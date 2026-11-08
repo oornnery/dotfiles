@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # dots:summary=What is pending: commits, links, new configs, packages, Windows
+# dots:group=machine
 # dots:args=[-f]
 # dots:actions=-f=Also ask the remote and the repos (slower)
 #
@@ -11,15 +12,12 @@
 # shellcheck disable=SC2154  # colors come from _ui
 set -uo pipefail
 
-here=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
-. "$here/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 # shellcheck source=/dev/null
-. "$here/_managers"
+. "$DOTS_LIB/_managers"
 
-DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
-LIST="${XDG_CONFIG_HOME:-$HOME/.config}/dots/packages"
-PKGS="$DOTFILES/packages"
+SAVED="$DOTFILES/packages"
 FETCH=0; [[ ${1:-} == -f ]] && FETCH=1
 pending=0
 
@@ -50,31 +48,23 @@ repo() {
 
 links() {
     section "links"
-    local pkg f rel dir before=$pending missing='' new=''
-    while IFS= read -r pkg; do
-        # A file of the repo that is not linked: the package changed after the last sync.
-        while IFS= read -r f; do
-            rel=${f#"$DOTFILES/$pkg/"}
-            [[ $HOME/$rel -ef $f ]] || missing+="$pkg: ~/$rel"$'\n'
-        done < <(find "$DOTFILES/$pkg" -type f)
-        # A real file next to the links: written by the app, and not in the repo yet.
-        # Only in the folders of the app itself, as ~/.config and ~/.local are shared.
+    local pkg f rel dir before=$pending missing new stale
+    # A file of the repo that is not linked: the package changed after the last sync.
+    missing=$(unlinked | awk '{print $1 ": ~/" $2}')
+    stale=$(stale_repo_links | sed "s#^$HOME#~#")
+    # A real file next to the links: written by the app, and not in the repo yet.
+    # Only in the folders of the app itself, as ~/.config and ~/.local are shared.
+    new=$(while IFS= read -r pkg; do
         while IFS= read -r dir; do
-            rel=${dir#"$DOTFILES/$pkg/"}
+            rel=${dir#"$PKGS/$pkg/"}
             case $rel in .config|.local|.local/*|.config/shell/completions) continue ;; esac
-            while IFS= read -r f; do
-                new+="$pkg: ${f/#$HOME/\~}"$'\n'
-            done < <(find "$HOME/$rel" -maxdepth 1 -type f ! -name '*.bak.*' 2>/dev/null)
-        done < <(find "$DOTFILES/$pkg" -mindepth 1 -type d -path "$DOTFILES/$pkg/.*")
-    done < <(sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" 2>/dev/null | grep -v '^$')
-    if [[ -n $missing ]]; then
-        todo "$(grep -c . <<< "$missing") file(s) in the repo, not linked here" "dots stow sync"
-        items "${missing%$'\n'}"
-    fi
-    if [[ -n $new ]]; then
-        todo "$(grep -c . <<< "$new") file(s) the apps wrote next to the links" "dots stow add <file>, or leave them"
-        items "${new%$'\n'}"
-    fi
+            while IFS= read -r f; do echo "$pkg: ${f/#$HOME/\~}"; done \
+                < <(find "$HOME/$rel" -maxdepth 1 -type f ! -name '*.bak.*' 2>/dev/null)
+        done < <(find "$PKGS/$pkg" -mindepth 1 -type d -path "$PKGS/$pkg/.*")
+    done < <(linked_packages))
+    if [[ -n $missing ]]; then todo "$(wc -l <<< "$missing") file(s) in the repo, not linked here" "dots stow sync"; items "$missing"; fi
+    if [[ -n $stale ]]; then todo "$(wc -l <<< "$stale") link(s) into the repo that lead nowhere" "dots stow sync"; items "$stale"; fi
+    if [[ -n $new ]]; then todo "$(wc -l <<< "$new") file(s) the apps wrote next to the links" "dots stow add <file>, or leave them"; items "$new"; fi
     (( pending == before )) && ok "every package is linked, nothing new beside it"
 }
 
@@ -83,8 +73,8 @@ packages() {
     local m a b before=$pending
     for m in "${MANAGERS[@]}"; do
         available "$m" || continue
-        a=$(comm -23 <(now "$m") <(grep -sv '^#' "$PKGS/$m.txt" | sort -u))
-        b=$(comm -13 <(now "$m") <(grep -sv '^#' "$PKGS/$m.txt" | sort -u))
+        a=$(comm -23 <(now "$m") <(grep -sv '^#' "$SAVED/$m.txt" | sort -u))
+        b=$(comm -13 <(now "$m") <(grep -sv '^#' "$SAVED/$m.txt" | sort -u))
         [[ -n $a ]] && todo "$m: $(wc -l <<< "$a") installed, not saved: $(paste -sd' ' <<< "$a")" "dots pkg save"
         [[ -n $b ]] && todo "$m: $(wc -l <<< "$b") saved, not installed: $(paste -sd' ' <<< "$b")" "dots pkg install, or dots pkg save to forget them"
     done
@@ -99,7 +89,7 @@ windows() {  # only on WSL: configs that differ from the Windows side
     [[ -d /mnt/c/Windows ]] || return 0
     section "windows"
     local out
-    out=$(NO_COLOR=1 "$here/wsl" windows -n 2>&1 | grep -v ': same$' | sed 's/^[^ ]* //')
+    out=$(NO_COLOR=1 "$DOTS_LIB/wsl" windows -n 2>&1 | grep -v ': same$' | sed 's/^[^ ]* //')
     if [[ -n $out ]]; then
         todo "$(wc -l <<< "$out") config(s) differ from Windows" "dots wsl windows (send) or dots wsl windows pull (bring)"
         items "$out"

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # dots:summary=Web apps as windows (firefoxpwa)
+# dots:group=desktop
 # dots:args=install <name> <url> [icon] | launch <name> | list | remove [name]
 # dots:actions=list=Installed web apps|remove=Remove a web app
 set -uo pipefail
 
 # shellcheck source=/dev/null
-. "${DOTS_LIB:-$HOME/.local/lib/dots}/_ui"
+. "$(dirname "$(realpath "$0")")/_lib"
 need firefoxpwa
 
 id_of() { firefoxpwa profile list 2>/dev/null | awk -v name="$1" '/^- / {id=$2} $0 ~ "Name: " name "$" {print id; exit}'; }
@@ -30,6 +31,5 @@ case "${1:-list}" in
         id=$(id_of "$name")
         [[ -n $id ]] || { err "no web app named '$name'"; exit 1; }
         firefoxpwa site uninstall "$id" && dots notify "Web app removed" "$name" -a webapp ;;
-    -h|--help) sed -n '2,3p' "$0" ;;
-    *) err "dots webapp: unknown action: $1"; exit 1 ;;
+    *) die "unknown action: $1" ;;
 esac
