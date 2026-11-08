@@ -41,6 +41,7 @@ packages() {  # every config package: a folder holding at least one dotfile at t
 # machines/<host> says what this machine has, one "key: words" line per key:
 #   tools: the tools set up here (dots install)
 #   links: the config packages linked here (dots link)
+#   folders: the folders this machine keeps in $HOME (projects, labs...)
 # dots link and dots install write it; dots apply makes the machine match it.
 
 machine_get() {  # machine_get <key>: its words, one per line
@@ -52,7 +53,7 @@ machine_set() {  # machine_set <key> <word>...: replace the line of that key
     if [[ ! -f $MACHINE ]]; then
         mkdir -p "${MACHINE%/*}"
         printf '%s\n' "# ${MACHINE##*/}: what dots apply sets up on this machine." \
-            "# tools: dots install <name>    links: dots link <package>" > "$MACHINE"
+            "# tools: dots install <name>    links: dots link <package>    folders: in \$HOME" > "$MACHINE"
     fi
     if grep -q "^$key:" "$MACHINE"; then
         sed -i "s|^$key:.*|$key: $*|" "$MACHINE"
@@ -74,6 +75,8 @@ machine_drop() {  # machine_drop <key> <word>...
 }
 
 linked_packages() { machine_get links; }  # the config packages this machine links
+
+missing_folders() { local d; machine_get folders | while IFS= read -r d; do [[ -d $HOME/$d ]] || echo "$d"; done; }
 
 # The tools of this machine already set up here: their post steps ran.
 tools_done() { sort -u "$STATE/tools" 2>/dev/null; }

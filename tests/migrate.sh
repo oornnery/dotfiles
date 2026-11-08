@@ -56,4 +56,12 @@ t_status_leaves_out_state_files_beside_links() {
     has 'foo: ~/.config/foo/new.conf' "$out" && lacks plugins.lock "$out"
 }
 
+t_status_shows_missing_folders() {
+    git init -q "$DOTFILES_DIR"
+    mkdir -p "$HOME/labs"
+    printf 'tools:\nlinks:\nfolders: labs services\n' > "$DOTFILES_DIR/machines/test"
+    local out; out=$(dots status)
+    has '1 folder(s) of this machine missing' "$out" && has services "$out"
+}
+
 check

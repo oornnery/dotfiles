@@ -100,6 +100,13 @@ tools() {
     fi
 }
 
+folders() {
+    section "folders"
+    local f; f=$(missing_folders)
+    if [[ -n $f ]]; then todo "$(wc -l <<< "$f") folder(s) of this machine missing in \$HOME" "dots apply"; items "$f"
+    else ok "$(machine_get folders | paste -sd' ') in place"; fi
+}
+
 migrations() {
     section "migrations"
     local m; m=$(pending_migrations)
@@ -127,7 +134,7 @@ windows() {  # only on WSL: configs that differ from the Windows side
 # A part prints its count of pending things on the last line of its file.
 spin_self 'Looking for what is pending...' "$@"
 tmp=$(mktemp -d)
-parts=(repo tools links migrations packages windows)
+parts=(repo tools folders links migrations packages windows)
 for p in "${parts[@]}"; do
     ( "$p"; echo "$pending" ) > "$tmp/$p" 2>&1 &
 done

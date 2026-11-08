@@ -7,7 +7,7 @@
 #   dots apply      pick the steps, then run them; each one is safe to repeat
 #   dots apply -n   only show what would change
 #
-# The steps, in order: link the configs, run the migrations, set up the tools of
+# The steps, in order: create the folders of the machine in $HOME, link the configs, run the migrations, set up the tools of
 # machines/<host> not set up here yet, install the saved packages, write the
 # theme, then check. A machine with no file starts from another one, or empty. dots status shows the same steps as pending. A new machine
 # runs ./bootstrap, which ends here.
@@ -19,6 +19,9 @@ set -uo pipefail
 # Steps read from the terminal: questions from pacman are yours to answer.
 step() {  # step <name>
     case $1 in
+        folders)
+            local d
+            for d in $(missing_folders); do mkdir -p "$HOME/$d" && ok "created ~/$d"; done ;;
         links)    dots link sync </dev/tty || err "some packages did not link" ;;
         migrations) dots migrate </dev/tty ;;
         tools)
@@ -40,11 +43,13 @@ start_from() {  # a new machine: copy the file of another one, or start with the
     else
         machine_set tools zsh
         machine_set links dots shell zsh bash
+        machine_set folders projects
     fi
     ok "created ${MACHINE#"$DOTFILES"/}: commit it to keep it"
 }
 
 dry() {
+    section 'folders to create'; missing_folders
     section 'links (dry run)'; dots link sync -n
     section 'migrations to run'; dots migrate list | grep -v '^\S*\*' || true
     section 'tools to set up'; pending_tools
@@ -52,7 +57,7 @@ dry() {
 }
 
 run() {
-    local steps=$'links\nmigrations\ntools\npackages\ntheme\ncheck' s
+    local steps=$'folders\nlinks\nmigrations\ntools\npackages\ntheme\ncheck' s
     have paru || have yay || warn "no AUR helper: AUR packages will be skipped"
     [[ -f $MACHINE ]] || start_from
     if can_prompt; then

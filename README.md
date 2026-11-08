@@ -23,7 +23,7 @@ machine match its file; `dots status` shows what does not match yet.
 | `home/dots/` | The `dots` command: one script per subcommand in `.local/lib/dots/` |
 | `home/shell/`, `home/zsh/`, `home/bash/` | Shell config; `shell/` is shared by zsh and bash |
 | `home/<app>/` | The other config packages, mapped below |
-| `machines/` | One file per machine: its tools and its links |
+| `machines/` | One file per machine: its tools, its links and its folders in `$HOME` |
 | `recipes` | The tools `dots install` sets up: packages, config packages, group |
 | `migrations/` | One-time changes per machine, run by `dots migrate` |
 | `packages/` | Saved package lists, written by `dots pkg save` |
