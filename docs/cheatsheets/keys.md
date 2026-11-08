@@ -12,8 +12,9 @@ keys with `dots palette keys`. Each tool also has its own full list:
 
 ## Shell
 
-Use the Alt keys on an empty line: they type the command after what is already there.
-Inside Zellij, Zellij takes them first and opens the same things floating.
+In zsh, the Alt keys set aside what you were typing, run, and give the line back. In
+bash, use them on an empty line: they type the command after what is there. Inside
+Zellij, Zellij takes them first and opens the same things floating.
 
 | Key | Action |
 | --- | ------ |

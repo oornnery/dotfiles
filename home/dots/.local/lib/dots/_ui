@@ -20,6 +20,16 @@ err()     { printf '%s%s %s\n' "$R" "$N" "$*" >&2; }
 note()    { printf '%s%s%s\n' "$D" "$*" "$N"; }
 section() { printf '\n%s %s%s\n' "$H" "$1" "$N"; }
 
+# table: tab-separated lines on stdin, the first one the header. A gum table with
+# colors, aligned columns without (a pipe, NO_COLOR). Empty cells need a "-".
+table() {
+    if [[ -n $N ]] && have gum; then
+        gum table --print --separator $'\t' --border rounded --border.foreground 99 --header.foreground 212
+    else
+        column -t -s $'\t'
+    fi
+}
+
 # True when gum can draw here. Test it before `$(...)` or `< <(...)`, where
 # stdout or stdin is a pipe.
 can_prompt() { have gum && [[ -t 0 && -t 1 ]]; }

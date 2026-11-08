@@ -14,7 +14,6 @@ like.
 - [ ] Review `ai/` (claude, codex, opencode, pi) and link what stays.
 - [ ] `dots install hyprland` on the desktop, and test its commands for real.
 - [ ] Decide the Windows Terminal `settings.json` with `dots wsl windows pull`.
-- [ ] Alt keys in zsh as widgets, so they do not type after what is on the line.
 
 ## Packages
 

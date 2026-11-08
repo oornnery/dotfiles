@@ -36,14 +36,14 @@ count() { [[ -f $CACHE ]] && awk -F'\t' -v e="$1" '$1==e' "$CACHE" | wc -l || ec
 
 list() {
     [[ ${1:-} == --refresh || ! -f $CACHE ]] && spin 'Scanning for updates...' "$0" refresh
-    local m n
-    for m in "${MANAGERS[@]}"; do
-        n=$(count "$m"); (( n )) || continue
-        printf '%s── %s (%s) ──%s\n' "$H" "$m" "$n" "$N"
-        awk -F'\t' -v e="$m" -v d="$D" -v g="$G" -v n="$N" \
-            '$1==e { printf "  %-32s %s%s%s%s\n", $2, d, $3, n, ($4 ? "  ->  " g $4 n : "") }' "$CACHE"
-    done
-    [[ -s $CACHE ]] || ok "everything is up to date"
+    if [[ ! -s $CACHE ]]; then ok "everything is up to date"; return; fi
+    local m
+    {
+        printf 'manager\tpackage\tinstalled\tlatest\n'
+        for m in "${MANAGERS[@]}"; do  # in the order of the managers
+            awk -F'\t' -v e="$m" '$1 == e { print $1 "\t" $2 "\t" $3 "\t" ($4 ? $4 : "-") }' "$CACHE"
+        done
+    } | table
 }
 
 motd() {

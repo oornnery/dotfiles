@@ -24,25 +24,26 @@ set -uo pipefail
 
 DIR="${DOTS_PKG_DIR:-${DOTFILES_DIR:-$HOME/dotfiles}/packages}"
 
-num() { local c=$1; [[ $3 =~ ^[1-9] ]] || c=$D; printf '%s%*s%s' "$c" "$2" "$3" "$N"; }  # num <color> <width> <value>
-
 saved() { [[ -f $DIR/$1.txt ]] && grep -v '^#' "$DIR/$1.txt" | sort -u; }
 only_now()   { comm -23 <(now "$1") <(saved "$1"); }
 only_saved() { comm -13 <(now "$1") <(saved "$1"); }
 
 status() {
     local m n s
-    printf '%s%-8s %9s %7s %5s %7s%s\n' "$H" manager installed saved new missing "$N"
-    for m in "${MANAGERS[@]}"; do
-        available "$m" || [[ -f $DIR/$m.txt ]] || continue
-        n=$(now "$m" | wc -l); s=$(saved "$m" | wc -l)
-        (( n + s )) || continue
-        available "$m" || n='-'
-        printf '%-8s %9s %7s %s %s\n' "$m" "$n" "$s" \
-            "$(num "$G" 5 "$(only_now "$m" | wc -l)")" \
-            "$(num "$R" 7 "$( available "$m" && only_saved "$m" | wc -l || echo -)")"
-    done
-    echo; note "saved in ${DIR/#$HOME/\~}   (dots pkg save | diff | restore)"
+    {
+        printf 'manager\tinstalled\tsaved\tnew\tmissing\n'
+        for m in "${MANAGERS[@]}"; do
+            available "$m" || [[ -f $DIR/$m.txt ]] || continue
+            n=$(now "$m" | wc -l); s=$(saved "$m" | wc -l)
+            (( n + s )) || continue
+            if available "$m"; then
+                printf '%s\t%s\t%s\t%s\t%s\n' "$m" "$n" "$s" "$(only_now "$m" | wc -l)" "$(only_saved "$m" | wc -l)"
+            else
+                printf '%s\t-\t%s\t-\t-\n' "$m" "$s"
+            fi
+        done
+    } | table
+    note "new: installed, not saved (dots pkg save)   missing: saved, not installed (dots pkg restore)"
 }
 
 list() {
