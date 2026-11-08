@@ -87,7 +87,9 @@ The tables below come from the header of each command (`docs/generate`). The
 | `dots wsl windows -n` | Compare configs with Windows |
 | `dots wsl windows pull` | Bring back configs changed on Windows |
 | `dots wsl windows export` | Save the winget package list |
-| `dots wsl windows install` | Install the saved winget packages |
+| `dots wsl windows install` | Install groups of packages (core, dev, game...) |
+| `dots wsl windows install -n` | What each group would install |
+| `dots wsl windows restore` | Install every saved winget package |
 | `dots wsl windows settings` | Apply the Windows settings |
 | `dots wsl windows settings -n` | Test the Windows settings |
 | `dots wsl wslc` | Run wslc.exe |

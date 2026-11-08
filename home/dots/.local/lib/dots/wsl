@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # dots:summary=WSL report (safe to paste) and wslc passthrough
 # dots:group=platform
-# dots:args=[info | windows [-n | pull | export | install | settings [-n]] | wslc <args...>]
-# dots:actions=info=WSL report, safe to paste|windows=Copy configs to Windows|windows -n=Compare configs with Windows|windows pull=Bring back configs changed on Windows|windows export=Save the winget package list|windows install=Install the saved winget packages|windows settings=Apply the Windows settings|windows settings -n=Test the Windows settings|wslc=Run wslc.exe
+# dots:args=[info | windows [-n | pull | export | install [-n] [group...] | restore | settings [-n]] | wslc <args...>]
+# dots:actions=info=WSL report, safe to paste|windows=Copy configs to Windows|windows -n=Compare configs with Windows|windows pull=Bring back configs changed on Windows|windows export=Save the winget package list|windows install=Install groups of packages (core, dev, game...)|windows install -n=What each group would install|windows restore=Install every saved winget package|windows settings=Apply the Windows settings|windows settings -n=Test the Windows settings|wslc=Run wslc.exe
 #
 # `windows` copies the configs in windows/ to the Windows side: pick which ones,
 # and whatever it replaces is kept as <file>.bak.<timestamp>. -n only compares.
 # `windows pull` is the way back: shows what changed there and brings what you pick.
 # `windows export` saves the winget packages in windows/winget/packages.json, and
-# `windows install` installs them on a new machine. `windows settings` applies
+# `windows restore` installs all of them on a new machine. `windows install` installs
+# groups (core, desktop, dev, work, game, ai) from windows/winget/groups instead. `windows settings` applies
 # windows/winget/settings.dsc.winget (dark mode, taskbar, developer mode...) with
 # winget configure; -n only tests what differs. The repo is public: look at what
 # these bring before committing.
@@ -163,6 +164,55 @@ export_packages() {  # sorted, so that a diff shows only real changes
     rm -f "$tmp" "$tmp.sorted"
 }
 
+GROUPS_FILE="$SRC/winget/groups"
+group_names() { grep -v '^#' "$GROUPS_FILE" | cut -d'|' -f1 | awk 'NF && !seen[$0]++'; }
+group_rows()  { awk -F'|' -v g=" $* " '!/^#/ && index(g, " " $1 " ")' "$GROUPS_FILE"; }  # the lines of these groups
+saved_ids()   { jq -r '.Sources[].Packages[].PackageIdentifier' "$SRC/winget/packages.json" 2>/dev/null; }
+
+import_json() {  # ids on stdin -> a winget import file: Store ids (9P..., 12 characters) and winget ones
+    jq -R -s 'split("\n") | map(select(length > 0)) as $ids | {
+        "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+        Sources: [
+          { Packages: [$ids[] | select(test("^[0-9A-Z]{12}$") | not) | {PackageIdentifier: .}],
+            SourceDetails: { Argument: "https://cdn.winget.microsoft.com/cache", Identifier: "Microsoft.Winget.Source_8wekyb3d8bbwe", Name: "winget", Type: "Microsoft.PreIndexed.Package" } },
+          { Packages: [$ids[] | select(test("^[0-9A-Z]{12}$")) | {PackageIdentifier: .}],
+            SourceDetails: { Argument: "https://storeedgefd.dsx.mp.microsoft.com/v9.0", Identifier: "StoreEdgeFD", Name: "msstore", Type: "Microsoft.Rest" } }
+        ] }'
+}
+
+install_groups() {  # install_groups [-n] [group...]: -n lists what is not installed, by group
+    local dry=0 g n saved tmp home rows=() groups=()
+    [[ ${1:-} == -n ]] && { dry=1; shift; }
+    groups=("$@")
+    if (( ! ${#groups[@]} )); then
+        if (( dry )) || ! can_prompt; then
+            mapfile -t groups < <(group_names)
+        else
+            mapfile -t groups < <(group_names | choose 'Install which groups? (x toggles)') || return 0
+        fi
+    fi
+    (( ${#groups[@]} )) || return 0
+    # Not installed, as of the last `dots wsl windows export`.
+    saved=" $(saved_ids | tr '\n' ' ') "
+    for g in "${groups[@]}"; do
+        n=0
+        section "$g"
+        while IFS='|' read -r _ id name; do
+            [[ $saved == *" $id "* ]] && continue
+            printf '  %s %s(%s)%s\n' "$name" "$D" "$id" "$N"; n=$(( n + 1 ))
+        done < <(group_rows "$g")
+        (( n )) || ok "all installed"
+    done
+    (( dry )) && { note "as of the last export (dots wsl windows export)"; return 0; }
+    confirm "Install these groups? What is installed already stays as it is." || return 0
+    win_rows || return 1
+    tmp="$home/AppData/Local/Temp/dots-winget-groups.json"
+    group_rows "${groups[@]}" | cut -d'|' -f2 | import_json > "$tmp"
+    winget import -i "$(wslpath -w "$tmp")" --ignore-unavailable --no-upgrade
+    rm -f "$tmp"
+    export_packages   # the saved list follows what is installed now
+}
+
 install_packages() {  # winget asks for what it needs to ask; packages gone from winget are skipped
     local tmp home rows=()
     win_rows || return 1
@@ -196,7 +246,8 @@ case "${1:-info}" in
         case "${1:-}" in
             pull)    pull ;;
             export)  export_packages ;;
-            install) install_packages ;;
+            install) shift; install_groups "$@" ;;
+            restore) install_packages ;;
             settings) shift; settings "$@" ;;
             *)       windows "$@" ;;
         esac ;;
