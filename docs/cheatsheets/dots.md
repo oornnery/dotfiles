@@ -83,6 +83,7 @@ The tables below come from the header of each command (`docs/generate`). The
 | ------- | ------------ |
 | `dots wsl` | WSL report (safe to paste) and wslc passthrough |
 | `dots wsl info` | WSL report, safe to paste |
+| `dots wsl mount` | Mount the Windows drives plugged in after WSL started |
 | `dots wsl windows` | Copy configs to Windows |
 | `dots wsl windows -n` | Compare configs with Windows |
 | `dots wsl windows pull` | Bring back configs changed on Windows |

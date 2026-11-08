@@ -1,0 +1,13 @@
+# Mounts Windows drives plugged in after WSL started; see /usr/local/bin/dots-automount.
+[Unit]
+Description=Mount Windows drives plugged in after WSL started
+After=local-fs.target
+
+[Service]
+ExecStart=/usr/local/bin/dots-automount
+WorkingDirectory=/mnt/c
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

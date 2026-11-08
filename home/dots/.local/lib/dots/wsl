@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # dots:summary=WSL report (safe to paste) and wslc passthrough
 # dots:group=platform
-# dots:args=[info | windows [-n | pull | export | install [-n] [group...] | restore | settings [-n]] | wslc <args...>]
-# dots:actions=info=WSL report, safe to paste|windows=Copy configs to Windows|windows -n=Compare configs with Windows|windows pull=Bring back configs changed on Windows|windows export=Save the winget package list|windows install=Install groups of packages (core, dev, game...)|windows install -n=What each group would install|windows restore=Install every saved winget package|windows settings=Apply the Windows settings|windows settings -n=Test the Windows settings|wslc=Run wslc.exe
+# dots:args=[info | mount [-n] | windows [-n | pull | export | install [-n] [group...] | restore | settings [-n]] | wslc <args...>]
+# dots:actions=info=WSL report, safe to paste|mount=Mount the Windows drives plugged in after WSL started|windows=Copy configs to Windows|windows -n=Compare configs with Windows|windows pull=Bring back configs changed on Windows|windows export=Save the winget package list|windows install=Install groups of packages (core, dev, game...)|windows install -n=What each group would install|windows restore=Install every saved winget package|windows settings=Apply the Windows settings|windows settings -n=Test the Windows settings|wslc=Run wslc.exe
 #
 # `windows` copies the configs in windows/ to the Windows side: pick which ones,
 # and whatever it replaces is kept as <file>.bak.<timestamp>. -n only compares.
@@ -13,6 +13,10 @@
 # windows/winget/settings.dsc.winget (dark mode, taskbar, developer mode...) with
 # winget configure; -n only tests what differs. The repo is public: look at what
 # these bring before committing.
+#
+# `mount` mounts the Windows drives plugged in after WSL started (WSL mounts them
+# only when it starts), and unmounts the ones taken out; -n only shows it.
+# `dots install automount` does it on its own, as a service.
 #
 # `info` prints markdown: versions, /etc/wsl.conf, package counts and the
 # $HOME layout. Secret files are counted, never named, and Windows user names
@@ -251,6 +255,9 @@ case "${1:-info}" in
             settings) shift; settings "$@" ;;
             *)       windows "$@" ;;
         esac ;;
+    mount)  # the same pass the automount service makes, from the repo
+        if [[ ${2:-} == -n ]]; then "$DOTFILES/system/wsl-automount/dots-automount" -n
+        else dots sudo "$DOTFILES/system/wsl-automount/dots-automount" --once; fi ;;
     wslc)
         shift
         [[ -x $WSLC ]] || { die "wslc.exe not found at $WSLC"; }

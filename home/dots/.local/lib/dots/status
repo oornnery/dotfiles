@@ -128,6 +128,8 @@ windows() {  # only on WSL: configs that differ from the Windows side
         ok "Windows has the same configs"
     fi
     [[ -z $new ]] || note "nothing on Windows yet, dots wsl windows sends them: $new"
+    local drives; drives=$("$DOTFILES/system/wsl-automount/dots-automount" -n 2>/dev/null | sed 's/^would //')
+    if [[ -n $drives ]]; then todo "drives plugged in, not mounted here" "dots wsl mount, or dots install automount to do it always"; items "$drives"; fi
 }
 
 # The parts run at the same time, each into its own file, and print in this order.

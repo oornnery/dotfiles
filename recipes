@@ -66,6 +66,7 @@ apps|spotify|Spotify|spotify|
 apps|vlc|VLC|vlc|
 apps|mpv|mpv with config|mpv|mpv
 network|tailscale|Tailscale, service running|tailscale|
+wsl|automount|Mount Windows drives plugged in after WSL started (a service)||
 network|openssh|OpenSSH server, service running|openssh|
 network|net-tools|DNS lookups, ping with a graph, traceroute, whois, port relay, scans|doggo gping mtr whois socat nmap|
 network|voip|SIP: a softphone, call flows, load tests, captures, codecs, SCTP|baresip sngrep-bin sipp wireshark-cli bcg729 opus lksctp-tools|

@@ -29,6 +29,7 @@ machine match its file; `dots status` shows what does not match yet.
 | `packages/` | Saved package lists, written by `dots pkg save` |
 | `themes/` | Palettes and theme files, used by `dots theme` |
 | `docs/cheatsheets/` | Pages for `dots help` |
+| `system/` | Files installed outside `$HOME` by a setup, as root: the drive automount service |
 | `windows/` | GlazeWM, YASB, Windows Terminal, PowerShell and WSL configs, the winget packages by group and the Windows settings |
 | `ai/` | Agent configs, skills and prompts, mapped in `ai/README.md`; not linked |
 | `self-hosted/`, `templates/` | Compose files and editor templates |

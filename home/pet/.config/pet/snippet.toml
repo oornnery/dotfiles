@@ -415,3 +415,18 @@
   description = "restart WSL, from inside it"
   command = "wsl.exe --shutdown"
   tag = ["wsl"]
+
+[[snippets]]
+  description = "Windows drives connected now (C: D: ...)"
+  command = "/mnt/c/Windows/System32/cmd.exe /c 'fsutil fsinfo drives' | tr -d '\\r'"
+  tag = ["wsl", "disk"]
+
+[[snippets]]
+  description = "mount a Windows drive plugged in after WSL started (dots wsl mount does all)"
+  command = "sudo mkdir -p <dir=/mnt/d> && sudo mount -t drvfs <drive=D>: <dir=/mnt/d> -o metadata,uid=$(id -u),gid=$(id -g)"
+  tag = ["wsl", "disk"]
+
+[[snippets]]
+  description = "unmount a Windows drive before unplugging it"
+  command = "sudo umount <dir=/mnt/d>"
+  tag = ["wsl", "disk"]

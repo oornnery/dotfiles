@@ -47,6 +47,12 @@ post_cli-extras() { have tldr && tldr --update; dots sudo pkgfile --update; retu
 post_ollama()    { dots sudo systemctl enable --now ollama; }
 post_tailscale() { dots sudo systemctl enable --now tailscaled; }
 post_openssh()   { dots sudo systemctl enable --now sshd; }
+post_automount() {  # the watcher of system/wsl-automount, as a root service
+    local src=$DOTFILES/system/wsl-automount
+    dots sudo install -Dm755 "$src/dots-automount" /usr/local/bin/dots-automount &&
+        dots sudo install -Dm644 "$src/dots-automount.service" /etc/systemd/system/dots-automount.service &&
+        dots sudo systemctl daemon-reload && dots sudo systemctl enable --now dots-automount
+}
 post_voxtype()   { voxtype setup --download --no-post-install && voxtype setup systemd; }
 
 post_postgres() {
@@ -78,9 +84,11 @@ list() {
 show() {  # show <name>: what a setup does, for the side panel
     local name=$1 body
     printf '%s%s%s\n%s\n' "$H" "$name" "$N" "$(field "$name" 3)"
-    printf '\n%sPackages%s\n' "$H" "$N"
-    # shellcheck disable=SC2046  # package names, one per word
-    origin $(field "$name" 4) | awk '{p = $1; $1 = ""; printf "%-16s%s\n", p, $0}'
+    if [[ -n $(field "$name" 4) ]]; then
+        printf '\n%sPackages%s\n' "$H" "$N"
+        # shellcheck disable=SC2046  # package names, one per word
+        origin $(field "$name" 4) | awk '{p = $1; $1 = ""; printf "%-16s%s\n", p, $0}'
+    fi
     if [[ -n $(field "$name" 5) ]]; then
         printf '\n%sConfig links%s\n' "$H" "$N"; field "$name" 5 | tr ' ' '\n'
     fi
@@ -165,7 +173,7 @@ setup() {  # setup <name>
 remove() {  # remove <name>
     local name=$1 pkgs links
     pkgs=$(field "$name" 4); links=$(field "$name" 5)
-    [[ -n $pkgs ]] || { err "no such setup: $name"; return 1; }
+    [[ -n $(field "$name" 2) ]] || { err "no such setup: $name"; return 1; }
     section "$name"
     # shellcheck disable=SC2086  # package names, one per word
     if [[ -n $links ]]; then dots link -D $links; fi
