@@ -38,6 +38,7 @@ icon() {  # the Nerd Font icon of a command, as a hex code
         capture) echo f030 ;;
         display|hypr) echo f108 ;;
         doctor) echo f0f1 ;;
+        status) echo f0ae ;;
         edit) echo f044 ;;
         help) echo f059 ;;
         install) echo f019 ;;

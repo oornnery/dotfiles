@@ -43,6 +43,7 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 | `dots pkg` | Install, remove, save and compare packages |
 | `dots update` | Upgrade everything |
 | `dots theme` | Switch colors, with a live preview |
+| `dots status` | What is pending: commits, links, new configs, packages, Windows |
 | `dots doctor` | Report what is wrong |
 | `dots edit`, `dots tui`, `dots help` | Open a config, a TUI or a page |
 | `dots palette` | Search help, TUIs and commands with tv |
@@ -56,20 +57,60 @@ file. `~/.config/dots/packages` lists what is linked on this machine.
 - One script per command. Shared helpers only in `_ui` and `_managers`.
 - Never commit tokens, history or real `.env` files.
 
+## What is mapped
+
+### Configs
+
+`*` = linked on this machine (`~/.config/dots/packages`). The rest is kept for later.
+
+| Package | Links |
+| ------- | ----- |
+| `dots` * | `~/.local/bin/dots`, `~/.local/lib/dots/` |
+| `shell` * | `~/.config/shell/`: aliases, functions, tools, prompt, keys; shared by zsh and bash |
+| `zsh` * | `~/.zshrc`, `~/.zshenv` |
+| `bash` * | `~/.bashrc`, `~/.bash_profile`, `~/.inputrc` |
+| `git` * | `~/.gitconfig` |
+| `helix` * | `~/.config/helix/` |
+| `nvim` * | `~/.config/nvim/` |
+| `zellij` * | `~/.config/zellij/`: config with zjstatus, layout `dev` |
+| `yazi` * | `~/.config/yazi/` |
+| `television` * | `~/.config/television/`: the `dots palette` channels |
+| `lazygit` *, `lazydocker` * | `~/.config/lazygit/`, `~/.config/lazydocker/` |
+| `atuin` *, `pet` * | `~/.atuin/`, `~/.config/pet/` |
+| `bat` *, `glow` *, `btop` *, `fastfetch` * | `~/.config/<name>/` |
+| `herdr` *, `mpv` *, `distrobox` * | `~/.config/<name>/` |
+| `hyprland` | Hyprland, Waybar, Mako, Walker, Wofi, Alacritty, and their `dots` commands |
+| `tmux`, `vim` | `~/.tmux.conf`, `~/.vimrc` |
+
+Not linked, copied by a command: `windows/` (`dots wsl windows`), `themes/` (`dots theme`).
+Never in the repo: `~/.config/gh` (token), `~/.config/vite-plus`, shell history.
+
+### Packages
+
+Saved in `packages/` by `dots pkg save`; `dots pkg install` brings them back.
+
+| Manager | Packages |
+| ------- | -------- |
+| pacman | Base: `base base-devel sudo openssh man-db man-pages pacman-contrib stow git zsh` |
+| | Shell: `atuin bat eza fd fzf ripgrep zoxide direnv gum jq yq xh tree unzip zip wget wl-clipboard` |
+| | Editors and TUIs: `helix neovim vim zellij tmux yazi television lazygit lazydocker btop glow mpv ncdu fastfetch` |
+| | Dev: `git-delta github-cli docker docker-buildx docker-compose distrobox fnm uv rust ruff shellcheck shfmt hyperfine tokei` |
+| | Language servers: `bash-language-server marksman taplo-cli yaml-language-server` |
+| | Fonts: `ttf-firacode-nerd` |
+| aur | `paru herdr-bin pet-bin pay-respects-bin pacsea-bin` |
+| npm | `pnpm typescript typescript-language-server vscode-langservers-extracted` |
+| uv | `basedpyright` |
+| cargo | `epycell` |
+| winget | 50 Windows apps in `windows/winget/packages.json` (`dots wsl windows export`) |
+
 ## Current state
 
-- Daily use: Arch on WSL, with zsh, Helix, fnm and Windows Terminal.
-- In testing: vite-plus, next to fnm.
+- Daily use: Arch on WSL, with zsh, Helix, Zellij, Yazi, tv and Windows Terminal.
+- Node: fnm, with vite-plus in testing. Both set up a Node, so only one stays (TODO.md).
 - Kept for later, not linked: `hyprland`, `tmux`, `vim`.
-- Written but never run for real: the `hyprland` commands, `windows/`, and the setups
-  in `dots install` that start services.
-- Zellij: as it comes, plus help (`Alt ?`) and a tv palette (`Alt /`).
+- Written but never run for real: the `hyprland` commands, `dots wsl windows install`,
+  and the setups in `dots install` that start services.
 - `ai/` is copied from the old repo and still needs a review.
-- This repo has no remote yet. The old one is `oornnery/dotfiles`, branch `master`.
+- Remote: `oornnery/dotfiles`; work goes to `dev`, then a PR to `master`.
 
-## Future
-
-- Back to Arch on the desktop: `dots install hyprland`, then test its commands.
-- Review `ai/` and link what stays.
-- Rebuild `self-hosted/`.
-- One-time changes between machines, if more than one machine ever needs them.
+Ideas and what comes next are in [TODO.md](TODO.md).

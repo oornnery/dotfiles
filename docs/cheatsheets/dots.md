@@ -5,6 +5,7 @@ Run `dots` alone for a menu, or press Tab after `dots`. In a checklist, `x` mark
 
 | Task | Command |
 | ---- | ------- |
+| See what is pending (commits, links, packages) | `dots status` (`-f` asks the remote too) |
 | See what is wrong and fix it | `dots doctor` |
 | Choose which configs are linked | `dots stow` |
 | Add a config to the repo | `dots stow add` |
