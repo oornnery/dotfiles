@@ -88,6 +88,8 @@ The tables below come from the header of each command (`docs/generate`). The
 | `dots wsl windows pull` | Bring back configs changed on Windows |
 | `dots wsl windows export` | Save the winget package list |
 | `dots wsl windows install` | Install the saved winget packages |
+| `dots wsl windows settings` | Apply the Windows settings |
+| `dots wsl windows settings -n` | Test the Windows settings |
 | `dots wsl wslc` | Run wslc.exe |
 
 **desktop**

@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+# Windows settings, applied by `dots wsl windows settings` (winget configure).
+# `dots wsl windows settings -n` only tests them. Developer mode asks for admin.
+properties:
+  configurationVersion: 0.2.0
+  resources:
+    - resource: Microsoft.Windows.Developer/DeveloperMode
+      directives:
+        description: Developer mode on
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.Windows.Developer/EnableDarkMode
+      directives:
+        description: Dark mode, for apps and Windows
+        allowPrerelease: true
+      settings:
+        Ensure: Present
+        RestartExplorer: true
+
+    - resource: Microsoft.Windows.Developer/Taskbar
+      directives:
+        description: Taskbar in the middle, without search, task view and widgets
+        allowPrerelease: true
+      settings:
+        Alignment: Middle
+        SearchboxMode: Hide
+        TaskViewButton: Hide
+        WidgetsButton: Hide
+        RestartExplorer: true
+
+    - resource: Microsoft.Windows.Developer/WindowsExplorer
+      directives:
+        description: Explorer shows file extensions and hidden files
+        allowPrerelease: true
+      settings:
+        FileExtensions: Show
+        HiddenFiles: Show
+        RestartExplorer: true

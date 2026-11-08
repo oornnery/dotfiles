@@ -36,5 +36,4 @@ Ideas:
 
 - [ ] Review `machines/DESKTOP-T8DL9CB`: migration 002 guessed the tools from what
       is installed (openssh counts, though sshd may not run here).
-- [ ] `settings.dsc.winget` for Windows settings (dark mode, taskbar, developer mode).
 - [ ] Rebuild `self-hosted/`.

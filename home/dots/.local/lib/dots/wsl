@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # dots:summary=WSL report (safe to paste) and wslc passthrough
 # dots:group=platform
-# dots:args=[info | windows [-n | pull | export | install] | wslc <args...>]
-# dots:actions=info=WSL report, safe to paste|windows=Copy configs to Windows|windows -n=Compare configs with Windows|windows pull=Bring back configs changed on Windows|windows export=Save the winget package list|windows install=Install the saved winget packages|wslc=Run wslc.exe
+# dots:args=[info | windows [-n | pull | export | install | settings [-n]] | wslc <args...>]
+# dots:actions=info=WSL report, safe to paste|windows=Copy configs to Windows|windows -n=Compare configs with Windows|windows pull=Bring back configs changed on Windows|windows export=Save the winget package list|windows install=Install the saved winget packages|windows settings=Apply the Windows settings|windows settings -n=Test the Windows settings|wslc=Run wslc.exe
 #
 # `windows` copies the configs in windows/ to the Windows side: pick which ones,
 # and whatever it replaces is kept as <file>.bak.<timestamp>. -n only compares.
 # `windows pull` is the way back: shows what changed there and brings what you pick.
 # `windows export` saves the winget packages in windows/winget/packages.json, and
-# `windows install` installs them on a new machine. The repo is public: look at what
+# `windows install` installs them on a new machine. `windows settings` applies
+# windows/winget/settings.dsc.winget (dark mode, taskbar, developer mode...) with
+# winget configure; -n only tests what differs. The repo is public: look at what
 # these bring before committing.
 #
 # `info` prints markdown: versions, /etc/wsl.conf, package counts and the
@@ -170,6 +172,22 @@ install_packages() {  # winget asks for what it needs to ask; packages gone from
     rm -f "$tmp"
 }
 
+settings() {  # settings [-n]: winget configure, or with -n only its test
+    local tmp home rows=() file
+    win_rows || return 1
+    tmp="$home/AppData/Local/Temp/dots-settings.dsc.winget"
+    cp "$SRC/winget/settings.dsc.winget" "$tmp" || return 1
+    file=$(wslpath -w "$tmp")
+    if [[ ${1:-} == -n ]]; then
+        winget configure test -f "$file" --accept-configuration-agreements --disable-interactivity
+    else
+        winget configure -f "$file" --accept-configuration-agreements
+    fi
+    local code=$?
+    rm -f "$tmp"
+    return "$code"
+}
+
 case "${1:-info}" in
     info)  # colored in a terminal, plain markdown when piped or redirected
         if [[ -t 1 ]] && have gum; then info | mask | gum format; else info | mask; fi ;;
@@ -179,6 +197,7 @@ case "${1:-info}" in
             pull)    pull ;;
             export)  export_packages ;;
             install) install_packages ;;
+            settings) shift; settings "$@" ;;
             *)       windows "$@" ;;
         esac ;;
     wslc)
