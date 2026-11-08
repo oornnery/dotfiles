@@ -30,4 +30,19 @@ t_status_shows_the_pending_ones() {
     has '1 migration(s) not run here' "$(dots status)"
 }
 
+t_002_moves_the_list_into_the_machine_file() {
+    mkdir -p "$XDG_CONFIG_HOME/dots" "$DOTFILES_DIR/migrations"
+    printf '# old\nzsh\nshell\n' > "$XDG_CONFIG_HOME/dots/packages"
+    printf 'shell|nothing|A tool with no such package|no-such-package|\n' > "$DOTFILES_DIR/recipes"
+    cp "$REPO/migrations/002-machine-file.sh" "$DOTFILES_DIR/migrations/"
+    dots migrate
+    has 'links: zsh shell' "$(cat "$DOTFILES_DIR/machines/test")" && [[ ! -e $XDG_CONFIG_HOME/dots/packages ]]
+}
+
+t_status_shows_tools_not_set_up_here() {
+    git init -q "$DOTFILES_DIR"
+    printf 'tools: helix\nlinks:\n' > "$DOTFILES_DIR/machines/test"
+    has '1 tool(s) of this machine not set up here' "$(dots status)"
+}
+
 check

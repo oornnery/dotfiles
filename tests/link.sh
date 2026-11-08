@@ -3,7 +3,8 @@
 # shellcheck source=tests/lib.sh
 . "$(dirname "$0")/lib.sh"
 
-machine() { mkdir -p "$XDG_CONFIG_HOME/dots"; printf '%s\n' "$@" > "$XDG_CONFIG_HOME/dots/packages"; }
+machine() { printf 'tools:\nlinks: %s\n' "$*" > "$DOTFILES_DIR/machines/test"; }
+links_of_machine() { sed -n 's/^links: *//p' "$DOTFILES_DIR/machines/test"; }
 
 t_sync_links_the_packages_of_the_machine() {
     make_pkg zsh .zshrc; make_pkg vim .vimrc; machine zsh
@@ -41,8 +42,8 @@ t_sync_leaves_other_broken_links_alone() {
 
 t_link_adds_to_the_machine_and_D_removes() {
     make_pkg zsh .zshrc; machine
-    dots link zsh && is_link "$HOME/.zshrc" && grep -qx zsh "$XDG_CONFIG_HOME/dots/packages" &&
-    dots link -D zsh && [[ ! -e $HOME/.zshrc ]] && ! grep -qx zsh "$XDG_CONFIG_HOME/dots/packages"
+    dots link zsh && is_link "$HOME/.zshrc" && [[ $(links_of_machine) == zsh ]] &&
+    dots link -D zsh && [[ ! -e $HOME/.zshrc ]] && [[ -z $(links_of_machine) ]]
 }
 
 t_add_moves_a_config_into_the_repo() {
@@ -50,6 +51,19 @@ t_add_moves_a_config_into_the_repo() {
     mkdir -p "$HOME/.config/foo"; echo x > "$HOME/.config/foo/foo.conf"
     dots link add "$HOME/.config/foo/foo.conf"
     [[ -f $DOTFILES_DIR/home/foo/.config/foo/foo.conf ]] && is_link "$HOME/.config/foo/foo.conf"
+}
+
+t_a_machine_with_no_file_starts_from_what_is_linked() {
+    make_pkg zsh .zshrc; make_pkg vim .vimrc
+    ln -s "$DOTFILES_DIR/home/zsh/.zshrc" "$HOME/.zshrc"
+    dots link sync
+    [[ $(links_of_machine) == zsh ]]
+}
+
+t_sync_n_writes_nothing() {
+    make_pkg zsh .zshrc
+    dots link sync -n
+    [[ ! -e $DOTFILES_DIR/machines/test && ! -e $HOME/.zshrc ]]
 }
 
 check

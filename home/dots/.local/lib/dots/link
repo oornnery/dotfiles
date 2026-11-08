@@ -10,7 +10,7 @@
 #                              with no path, pick from ~/.config
 #                              ~/.config/helix -> ~/dotfiles/home/helix/.config/helix
 #   dots link add -p zsh ~/.zshrc ~/.zshenv     pick the package name
-#   dots link sync             link every package of this machine
+#   dots link sync             link every package of this machine (machines/<host>)
 #   dots link sync -n          dry run
 #   dots link sync --adopt     pull conflicting files INTO ~/dotfiles (git diff)
 #   dots link <pkg>...         link some packages
@@ -35,12 +35,13 @@ short() { printf '%s' "${1/#$HOME/\~}"; }
 # column miscounts color codes, so colored output stays one per line.
 cols()  { if [[ -z $N ]] && have column; then column; else cat; fi; }
 
-ensure_list() {
-    [[ -f $LIST ]] && return
-    mkdir -p "$(dirname "$LIST")"
-    { echo "# Packages \`dots link sync\` links on this machine. One per line, # to skip."
-      packages; } > "$LIST"
-    ok "created $(short "$LIST")"
+ensure_list() {  # a machine with no file starts from what is linked here now
+    [[ -f $MACHINE ]] && return
+    # shellcheck disable=SC2046  # one word per package
+    machine_set links $(packages | while IFS= read -r p; do
+        package_files "$p" | head -1 | { read -r f && [[ $HOME/$f -ef $PKGS/$p/$f ]] && echo "$p"; }
+    done)
+    ok "created ${MACHINE#"$DOTFILES"/}"
 }
 
 chosen() { linked_packages; }
@@ -92,7 +93,7 @@ enable() {  # link packages and keep them in the list
     ensure_list
     for pkg in "$@"; do
         if link "$pkg"; then
-            grep -qx "$pkg" "$LIST" || echo "$pkg" >> "$LIST"
+            machine_add links "$pkg"
         else
             status=1
         fi
@@ -104,14 +105,14 @@ disable() {  # unlink packages and take them off the list
     local pkg
     for pkg in "$@"; do
         "${STOW[@]}" -D "$pkg" || { err "could not unlink $pkg"; continue; }
-        [[ -f $LIST ]] && sed -i "/^$pkg\$/d" "$LIST"
+        machine_drop links "$pkg"
         ok "unlinked $pkg"
     done
 }
 
 list_packages() {
     local in='' p
-    [[ -f $LIST ]] && in=" $(chosen | tr '\n' ' ') "
+    in=" $(chosen | tr '\n' ' ') "
     for p in $(packages); do
         if [[ $in == *" $p "* ]]; then echo "$G* $p$N"; else echo "$D  $p$N"; fi
     done | cols
@@ -207,7 +208,7 @@ add() {
         mkdir -p "$(dirname "$dest")"
         mv "$src" "$dest"
         "${STOW[@]}" -R "$p" || { err "stow failed; the file is at $(short "$dest")"; continue; }
-        grep -qx "$p" "$LIST" || echo "$p" >> "$LIST"
+        machine_add links "$p"
         ok "added ~/$rel -> $p/"
     done
 }
@@ -226,7 +227,7 @@ case "${1:-}" in
                 *) die "sync: unknown option: $a" ;;
             esac
         done
-        ensure_list
+        (( DRY )) || ensure_list
         prune
         mapfile -t pkgs < <(chosen)
         link "${pkgs[@]}" ;;

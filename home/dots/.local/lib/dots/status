@@ -85,6 +85,18 @@ packages() {
     (( pending == before )) && ok "the saved lists match what is installed"
 }
 
+tools() {
+    section "tools"
+    local t; t=$(pending_tools)
+    if [[ -n $t ]]; then
+        todo "$(wc -l <<< "$t") tool(s) of this machine not set up here" "dots apply, or dots install <name>"; items "$t"
+    elif [[ ! -f $MACHINE ]]; then
+        todo "no file for this machine: ${MACHINE#"$DOTFILES"/}" "dots link sync creates it from what is linked"
+    else
+        ok "every tool of ${MACHINE##*/} is set up"
+    fi
+}
+
 migrations() {
     section "migrations"
     local m; m=$(pending_migrations)
@@ -106,6 +118,7 @@ windows() {  # only on WSL: configs that differ from the Windows side
 
 spin_self 'Looking for what is pending...' "$@"
 repo
+tools
 links
 migrations
 packages

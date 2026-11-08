@@ -14,13 +14,17 @@ It installs git and stow, links the `dots` command, then runs `dots apply`.
 ## How it works
 
 Each folder in `home/` is a config package, linked into `$HOME` file by file with GNU
-Stow. `~/.config/dots/packages` lists what is linked on this machine.
+Stow. `machines/<host>` says what each machine has: the tools set up there (`dots
+install`) and the config packages linked there (`dots link`). `dots apply` makes a
+machine match its file; `dots status` shows what does not match yet.
 
 | Path | What it is |
 | ---- | ---------- |
 | `home/dots/` | The `dots` command: one script per subcommand in `.local/lib/dots/` |
 | `home/shell/`, `home/zsh/`, `home/bash/` | Shell config; `shell/` is shared by zsh and bash |
 | `home/<app>/` | The other config packages, mapped below |
+| `machines/` | One file per machine: its tools and its links |
+| `recipes` | The tools `dots install` sets up: packages, config packages, group |
 | `migrations/` | One-time changes per machine, run by `dots migrate` |
 | `packages/` | Saved package lists, written by `dots pkg save` |
 | `themes/` | Palettes and theme files, used by `dots theme` |
@@ -61,7 +65,7 @@ Stow. `~/.config/dots/packages` lists what is linked on this machine.
 
 ### Configs
 
-`*` = linked on this machine (`~/.config/dots/packages`). The rest is kept for later.
+`*` = linked on this machine (`machines/DESKTOP-T8DL9CB`). The rest is kept for later.
 
 | Package | Links |
 | ------- | ----- |

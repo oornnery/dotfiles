@@ -11,7 +11,7 @@
 #
 # A migration is a change a file cannot describe: rename a config, move a folder,
 # drop a tool. It runs once per machine, with bash, from the repo, with DOTFILES,
-# PKGS and LIST set. Each one must be safe to repeat. What ran is listed in
+# PKGS, LIST, MACHINE and STATE set. Each one must be safe to repeat. What ran is listed in
 # ~/.local/state/dots/migrations. dots status shows the pending ones and dots
 # apply runs them.
 set -uo pipefail
@@ -24,7 +24,7 @@ run() {
     mkdir -p "$STATE"
     for m in $(pending_migrations); do
         section "$m"
-        if (cd "$DOTFILES" && DOTFILES=$DOTFILES PKGS=$PKGS LIST=$LIST bash "$MIGRATIONS/$m.sh"); then
+        if (cd "$DOTFILES" && DOTFILES=$DOTFILES PKGS=$PKGS LIST=$LIST MACHINE=$MACHINE STATE=$STATE bash "$MIGRATIONS/$m.sh"); then
             echo "$m" >> "$STATE/migrations"; ok "$m"
         else
             err "$m failed: fix it and run dots migrate again"; failed=1; break  # the next may need this one
@@ -47,7 +47,7 @@ new() {  # new <name>
     file=$(printf '%s/%03d-%s.sh' "$MIGRATIONS" "$n" "$name")
     mkdir -p "$MIGRATIONS"
     printf '%s\n' '# What changed, and what this does about it. Runs once per machine, from the' \
-        '# repo, with DOTFILES, PKGS and LIST set. Must be safe to repeat.' 'set -euo pipefail' '' > "$file"
+        '# repo, with DOTFILES, PKGS, LIST, MACHINE and STATE set. Must be safe to repeat.' 'set -euo pipefail' '' > "$file"
     ok "wrote ${file#"$DOTFILES"/}"
     "${EDITOR:-helix}" "$file"
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dots:summary=Make this machine match the repo: links, migrations, packages, theme
+# dots:summary=Make this machine match machines/<host>: links, migrations, tools, packages, theme
 # dots:group=machine
 # dots:args=[-n]
 # dots:actions=run=Make this machine match the repo|-n=Show what it would do
@@ -7,8 +7,9 @@
 #   dots apply      pick the steps, then run them; each one is safe to repeat
 #   dots apply -n   only show what would change
 #
-# The steps, in order: link the configs, run the migrations, install the saved
-# packages, write the theme, then check. dots status shows the same steps as pending. A new machine
+# The steps, in order: link the configs, run the migrations, set up the tools of
+# machines/<host> not set up here yet, install the saved packages, write the
+# theme, then check. A machine with no file starts from another one, or empty. dots status shows the same steps as pending. A new machine
 # runs ./bootstrap, which ends here.
 set -uo pipefail
 
@@ -20,21 +21,40 @@ step() {  # step <name>
     case $1 in
         links)    dots link sync </dev/tty || err "some packages did not link" ;;
         migrations) dots migrate </dev/tty ;;
+        tools)
+            # shellcheck disable=SC2046  # one word per tool
+            if [[ -n $(pending_tools) ]]; then dots install $(pending_tools) </dev/tty; else ok "every tool is set up"; fi ;;
         packages) dots pkg restore </dev/tty ;;
         theme)    dots theme apply ;;
         check)    dots doctor </dev/tty ;;
     esac
 }
 
+start_from() {  # a new machine: copy the file of another one, or start with the shell only
+    local from
+    if can_prompt && [[ -n $(ls "$DOTFILES/machines" 2>/dev/null) ]]; then
+        from=$( { ls "$DOTFILES/machines"; echo empty; } | gum choose --header "No file for ${MACHINE##*/}. Start from:") || exit 0
+    fi
+    if [[ -n ${from:-} && $from != empty ]]; then
+        cp "$DOTFILES/machines/$from" "$MACHINE"
+    else
+        machine_set tools zsh
+        machine_set links dots shell zsh bash
+    fi
+    ok "created ${MACHINE#"$DOTFILES"/}: commit it to keep it"
+}
+
 dry() {
     section 'links (dry run)'; dots link sync -n
     section 'migrations to run'; dots migrate list | grep -v '^\S*\*' || true
+    section 'tools to set up'; pending_tools
     section 'packages (+ not saved, - would be installed)'; dots pkg diff
 }
 
 run() {
-    local steps=$'links\nmigrations\npackages\ntheme\ncheck' s
+    local steps=$'links\nmigrations\ntools\npackages\ntheme\ncheck' s
     have paru || have yay || warn "no AUR helper: AUR packages will be skipped"
+    [[ -f $MACHINE ]] || start_from
     if can_prompt; then
         steps=$(choose --all 'Which steps? (x toggles, enter runs)' <<< "$steps") || return 0
     fi

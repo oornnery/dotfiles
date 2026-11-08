@@ -16,7 +16,8 @@ PKGS="$DOTFILES/home"                             # the config packages, linked 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/dots"   # what this machine chose
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/dots" # what ran here: theme, migrations
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/dots"      # what can be rebuilt
-LIST="$CONFIG/packages"
+LIST="$CONFIG/packages"                           # before machines/; read by migration 002
+MACHINE="$DOTFILES/machines/${DOTS_MACHINE:-${HOSTNAME:-$(uname -n)}}"
 
 die() { err "dots $CMD: $*"; exit 1; }
 
@@ -37,9 +38,46 @@ packages() {  # every config package: a folder holding at least one dotfile at t
     done
 }
 
-linked_packages() {  # the config packages this machine links, one per line
-    sed -e 's/#.*//' -e 's/[[:space:]]//g' "$LIST" 2>/dev/null | grep -v '^$'
+# machines/<host> says what this machine has, one "key: words" line per key:
+#   tools: the tools set up here (dots install)
+#   links: the config packages linked here (dots link)
+# dots link and dots install write it; dots apply makes the machine match it.
+
+machine_get() {  # machine_get <key>: its words, one per line
+    sed -n "s/^$1:[[:space:]]*//p" "$MACHINE" 2>/dev/null | tr ' ' '\n' | grep -v '^$'
 }
+
+machine_set() {  # machine_set <key> <word>...: replace the line of that key
+    local key=$1; shift
+    if [[ ! -f $MACHINE ]]; then
+        mkdir -p "${MACHINE%/*}"
+        printf '%s\n' "# ${MACHINE##*/}: what dots apply sets up on this machine." \
+            "# tools: dots install <name>    links: dots link <package>" > "$MACHINE"
+    fi
+    if grep -q "^$key:" "$MACHINE"; then
+        sed -i "s|^$key:.*|$key: $*|" "$MACHINE"
+    else
+        echo "$key: $*" >> "$MACHINE"
+    fi
+}
+
+machine_add() {  # machine_add <key> <word>...: keep the order, no repeats
+    local key=$1; shift
+    # shellcheck disable=SC2046  # one word per package
+    machine_set "$key" $( { machine_get "$key"; printf '%s\n' "$@"; } | awk '!seen[$0]++')
+}
+
+machine_drop() {  # machine_drop <key> <word>...
+    local key=$1; shift
+    # shellcheck disable=SC2046  # one word per package
+    machine_set "$key" $(machine_get "$key" | grep -vxF -f <(printf '%s\n' "$@"))
+}
+
+linked_packages() { machine_get links; }  # the config packages this machine links
+
+# The tools of this machine already set up here: their post steps ran.
+tools_done() { sort -u "$STATE/tools" 2>/dev/null; }
+pending_tools() { comm -23 <(machine_get tools | sort -u) <(tools_done); }
 
 package_files() {  # package_files <pkg>: its files, relative to $HOME
     (cd "$PKGS/$1" 2>/dev/null && find . -type f | sed 's#^\./##')

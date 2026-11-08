@@ -136,7 +136,7 @@ Installed, but not part of the setup described above.
 
 ## Dotfiles
 
-Stow packages, linked by `dots link sync` from `~/.config/dots/packages`.
+Config packages in `home/`, linked by `dots link sync` from `machines/<host>`.
 
 | Package | Holds |
 | --- | --- |

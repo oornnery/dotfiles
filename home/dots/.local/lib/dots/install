@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dots:summary=Full setups: packages, config links, permissions and services
+# dots:summary=Set up a tool: its packages, config links, permissions and services
 # dots:group=packages
 # dots:args=[-y] [name...] | --list | --remove name...
 #
@@ -13,78 +13,16 @@
 # part, a checklist lets you leave some out. It always runs what is marked, so each
 # step must be safe to repeat. A failure does not stop the others.
 #
-# To add one: a line in RECIPES, plus post_<name> if it needs more than that.
+# A tool set up here goes into machines/<host> (tools:), so dots apply sets it up
+# on a new machine too. To add one: a line in ~/dotfiles/recipes, plus post_<name>
+# here if it needs more than packages and config links.
 set -uo pipefail
 
 # shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/_lib"
 
-# group|name|description|packages|config packages
-RECIPES='shell|zsh|Zsh with config, as the default shell|zsh git fzf eza bat fd zoxide direnv|zsh shell
-shell|bash|Bash with completion and config|bash bash-completion fzf|bash shell
-shell|atuin|Searchable shell history|atuin|atuin
-shell|pet|Command snippets|pet-bin fzf|pet
-shell|fastfetch|System info on new terminals|fastfetch|fastfetch
-tools|git|Git, GitHub CLI and colored diffs|git github-cli git-delta|git
-tools|bat|cat with colors|bat|bat
-tools|glow|Markdown in the terminal|glow|glow
-tools|lazygit|Git TUI|lazygit|lazygit
-tools|btop|System monitor|btop|btop
-tools|yazi|File manager|yazi|yazi
-tools|television|Fuzzy finder with channels, the tv command|television|television
-tools|epycell|Jupyter notebooks in the terminal|rust|
-tools|cli-extras|bottom, dust, duf, procs, sd, tealdeer, jless, yt-dlp|bottom dust duf procs sd tealdeer jless yt-dlp|
-terminal|tmux|tmux with config and theme|tmux|tmux
-terminal|zellij|Zellij with its theme, help and a tv palette|zellij television|zellij television
-editors|helix|Helix with language servers and config|helix bash-language-server shfmt shellcheck taplo-cli marksman yaml-language-server ruff uv|helix
-editors|nvim|Neovim with plugins and config for any language|neovim git ripgrep fd tree-sitter-cli|nvim
-editors|vim|Small Vim config|vim|vim
-editors|vscode|Visual Studio Code|visual-studio-code-bin|
-editors|zed|Zed|zed|
-editors|cursor|Cursor|cursor-bin|
-languages|python|Python with uv|python uv|
-languages|node|fnm with Node LTS|fnm|
-languages|bun|Bun runtime|bun-bin|
-languages|deno|Deno runtime|deno|
-languages|rust|Rust and Cargo|rust|
-languages|go|Go|go|
-languages|java|OpenJDK|jdk-openjdk|
-languages|kotlin|Kotlin|kotlin|
-languages|zig|Zig|zig|
-languages|lua|Lua and LuaRocks|lua luarocks|
-languages|php|PHP and Composer|php composer|
-languages|ruby|Ruby|ruby|
-languages|dotnet|.NET SDK|dotnet-sdk|
-languages|elixir|Elixir|elixir|
-containers|docker|Docker, Compose, service, your group and lazydocker|docker docker-buildx docker-compose lazydocker|lazydocker
-containers|distrobox|Distrobox, on top of the Docker setup|distrobox|distrobox
-containers|podman|Podman, Buildah and Skopeo|podman buildah skopeo|
-containers|kubernetes|kubectl, Helm and k9s|kubectl helm k9s|
-cloud|terraform|Terraform|terraform|
-cloud|aws|AWS CLI|aws-cli-v2|
-cloud|azure|Azure CLI|azure-cli|
-cloud|gcloud|Google Cloud CLI|google-cloud-cli|
-data|sqlite|SQLite|sqlite|
-data|postgres|PostgreSQL, initialized and running|postgresql|
-ai|claude|Claude Code|claude-code|
-ai|gemini|Gemini CLI|gemini-cli|
-ai|opencode|OpenCode|opencode-bin|
-ai|ollama|Ollama for local models, service running|ollama|
-ai|herdr|herdr with config and plugins|herdr-bin|herdr
-ai|voxtype|Voice dictation with a local model|wtype voxtype-bin|
-apps|firefox|Firefox|firefox|
-apps|chromium|Chromium|chromium|
-apps|chrome|Google Chrome|google-chrome|
-apps|obsidian|Obsidian|obsidian|
-apps|discord|Discord|discord|
-apps|spotify|Spotify|spotify|
-apps|vlc|VLC|vlc|
-apps|mpv|mpv with config|mpv|mpv
-network|tailscale|Tailscale, service running|tailscale|
-network|openssh|OpenSSH server, service running|openssh|
-desktop|fonts|JetBrains Mono Nerd Font and emoji|ttf-jetbrains-mono-nerd noto-fonts-emoji|
-desktop|hyprland|Compositor, bar, tools, commands, config and theme|hyprland alacritty hyprpaper hyprlock hypridle hyprsunset waybar mako wofi walker-bin libnotify grim slurp wf-recorder satty hyprpicker brightnessctl power-profiles-daemon wl-clipboard jq tesseract tesseract-data-por tesseract-data-eng pipewire wireplumber python-terminaltexteffects|hyprland
-desktop|webapp|Web apps as windows|firefox firefoxpwa|'
+# group|name|description|packages|config packages, from the recipes file.
+RECIPES=$(grep -v '^#' "$DOTFILES/recipes" | grep -v '^$')
 
 # The steps each setup needs after its packages and config links.
 post_zsh()       { dots sudo chsh -s /usr/bin/zsh "$USER"; }
@@ -197,6 +135,8 @@ setup() {  # setup <name>
     # shellcheck disable=SC2086  # package names, one per word
     if [[ -n $links ]]; then dots link $links </dev/tty || return 1; fi
     if grep -q '^setup' <<< "$parts"; then "post_$name" </dev/tty || return 1; fi
+    machine_add tools "$name"
+    mkdir -p "$STATE"; tools_done | grep -qx "$name" || echo "$name" >> "$STATE/tools"
 }
 
 remove() {  # remove <name>
@@ -208,6 +148,8 @@ remove() {  # remove <name>
     if [[ -n $links ]]; then dots link -D $links; fi
     # shellcheck disable=SC2086  # package names, one per word
     dots pkg remove $pkgs </dev/tty
+    machine_drop tools "$name"
+    [[ -f $STATE/tools ]] && sed -i "/^$name\$/d" "$STATE/tools"
 }
 
 each() {  # each <function> <name>...: run for all of them, then say what failed
