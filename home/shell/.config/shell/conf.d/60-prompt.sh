@@ -155,7 +155,7 @@ _prompt_build() {  # _prompt_build <exit code> <seconds> <jobs> <clock> <open> <
     # What dots status left pending, from its cache: a read, no command.
     [ -r "${XDG_CACHE_HOME:-$HOME/.cache}/dots/pending" ] && read -r pending < "${XDG_CACHE_HOME:-$HOME/.cache}/dots/pending"
     [ "${pending:-0}" = 0 ] && pending=''
-    [ -z "${ZELLIJ:-}" ] && [ "${DOTS_PROMPT_KEYS:-1}" != 0 ] && keys="$_PI_KEYS Alt / search  ? help  u tui"
+    [ -z "${ZELLIJ:-}" ] && [ "${DOTS_PROMPT_KEYS:-1}" != 0 ] && keys="$_PI_KEYS Alt / search • ? help • u tui"
 
     max=$(( ${COLUMNS:-80} - 1 ))   # the last column would wrap in some terminals
     while [ "$level" -ge 0 ]; do
