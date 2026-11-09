@@ -67,6 +67,8 @@ The tables below come from the header of each command (`docs/generate`). The
 | ------- | ------------ |
 | `dots help` | Cheatsheets, plus your live aliases, functions and snippets |
 | `dots palette` | Search TUIs, commands, keys, help, man pages and snippets, with a preview |
+| `dots palette files` | Files here, by name |
+| `dots palette grep` | Files here, by what is in them |
 | `dots palette tui` | Only the TUIs |
 | `dots palette dots` | Only dots commands |
 | `dots palette keys` | Only keyboard shortcuts |

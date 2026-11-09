@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # dots:summary=Search TUIs, commands, keys, help, man pages and snippets, with a preview
 # dots:group=use
-# dots:args=[all | tui | dots | keys | help | run | linux | pet]
-# dots:actions=tui=Only the TUIs|dots=Only dots commands|keys=Only keyboard shortcuts|help=Only help pages|run=Any command|linux=Man pages|pet=Pet snippets
+# dots:args=[all | files | grep | tui | dots | keys | help | run | linux | pet]
+# dots:actions=files=Files here, by name|grep=Files here, by what is in them|tui=Only the TUIs|dots=Only dots commands|keys=Only keyboard shortcuts|help=Only help pages|run=Any command|linux=Man pages|pet=Pet snippets
 #
 #   dots palette        everything
 #   dots palette <mode> only one mode; inside, Tab goes to the next one
@@ -20,7 +20,7 @@ set -uo pipefail
 SHEETS="${DOTFILES_DIR:-$HOME/dotfiles}/docs/cheatsheets"
 LIB="${DOTS_LIB:-$HOME/.local/lib/dots}"
 
-MODES=(all help keys tui dots run linux pet)
+MODES=(all files grep help keys tui dots run linux pet)
 WIDTH=${FZF_PREVIEW_COLUMNS:-80}   # fzf tells the preview its width
 
 row() { printf '%s %-16s %s\n' "$1" "$2" "${3:-}"; }  # row <kind> <name> <text>
@@ -74,7 +74,31 @@ rows_pet() {
     while IFS=$'\t' read -r desc _; do printf 'pet %d %s\n' "$((n += 1))" "$desc"; done < <(snippets)
 }
 
+# Files and their text, from the folder the palette opened in. Hidden files too,
+# without what nobody searches: git objects, caches, toolchains.
+SKIP=(.git .cache node_modules .local/share .cargo .rustup .npm .bun go/pkg .antigen)
+
+rows_files() {  # "file <path>"
+    fd --type f --hidden --follow --color=never "${SKIP[@]/#/--exclude=}" | sed 's/^/file /'
+}
+
+rows_grep() {  # rows_grep <text>: "grep <path:line:column> <the line>"; nothing until there is text
+    [[ -n ${1:-} ]] || return 0
+    rg --line-number --column --no-heading --smart-case --hidden --color=never \
+        "${SKIP[@]/#/--glob=!}" -- "$1" . 2>/dev/null |   # the . : with no folder, rg reads stdin
+        awk -F: '{ sub(/^\.\//, ""); where = $1 ":" $2 ":" $3; sub(/^[^:]*:[^:]*:[^:]*:/, ""); print "grep " where " " $0 }'
+}
+
+edit_at() {  # edit_at <path> [line] [column]: Helix takes path:line:column, the others +line
+    case ${EDITOR:-helix} in
+        *helix|*hx) exec "${EDITOR:-helix}" "$1${2:+:$2}${3:+:$3}" ;;
+        *)          exec "$EDITOR" ${2:++$2} "$1" ;;
+    esac
+}
+
 rows_all() {
+    row mode files 'Files here, by name'
+    row mode grep 'Files here, by what is in them'
     row mode help 'Help pages'
     row mode keys 'Keyboard shortcuts'
     row mode tui 'TUIs'
@@ -96,8 +120,14 @@ about() {  # a program, without running it: where it is, then its sheet or man p
     if [[ -f $SHEETS/$1.md ]]; then markdown "$SHEETS/$1.md"; else manual "$1"; fi
 }
 
-preview() {  # preview <kind> <name>
+preview() {  # preview <kind> <name> <name and text>
+    local line
     case $1 in
+        file)    dots preview "$3" ;;
+        grep)
+            line=$(cut -d: -f2 <<< "$2")
+            bat --color=always --style=numbers --highlight-line "$line" \
+                --line-range "$(( line > 10 ? line - 10 : 1 )):" "${2%%:*}" 2>/dev/null ;;
         tui|run) about "$2" ;;
         keys)    markdown "$SHEETS/$2.md" ;;
         help)
@@ -117,6 +147,8 @@ preview() {  # preview <kind> <name>
 
 act() {  # act <kind> <name> <text>
     case $1 in
+        file)    edit_at "$2${3:+ $3}" ;;
+        grep)    IFS=: read -r path line column <<< "$2"; edit_at "$path" "$line" "$column" ;;
         tui|run) exec "$2" ;;
         mode)    exec "$0" "$2" ;;
         help)    dots help "$2" ;;
@@ -133,15 +165,22 @@ next() {  # next <prompt> [-1]: the fzf actions that go to the next (or previous
     local i mode=${1%> } step=${2:-1}
     for i in "${!MODES[@]}"; do [[ ${MODES[$i]} == "$mode" ]] && break; done
     mode=${MODES[$(( (i + step + ${#MODES[@]}) % ${#MODES[@]} ))]}
-    printf 'change-prompt(%s> )+reload(%q --rows %s)+first' "$mode" "$0" "$mode"
+    # grep searches as you type, with rg; the other modes let fzf filter their lines.
+    if [[ $mode == grep ]]; then
+        printf 'change-prompt(grep> )+disable-search+rebind(change)+reload(%q --grep {q})+first' "$0"
+    else
+        printf 'change-prompt(%s> )+enable-search+unbind(change)+reload(%q --rows %s)+first' "$mode" "$0" "$mode"
+    fi
 }
 
 pick() {  # pick <mode>: the mode it ended in, then the line picked; nothing when cancelled
-    local size=(--height=60% --min-height=20)
+    local size=(--height=60% --min-height=20) search=(--bind=start:unbind\(change\))
     [[ -n ${ZELLIJ:-} ]] && size=()  # the floating pane is already the right size
-    "rows_$1" | fzf "${size[@]}" --reverse --border=rounded --ansi \
-        --prompt="$1> " --with-nth=2.. --header='Tab next mode · Shift-Tab back' \
-        --preview="$(printf '%q' "$0") --preview {1} {2}" --preview-window=right,55%,wrap \
+    [[ $1 == grep ]] && search=(--disabled)
+    "rows_$1" | fzf "${size[@]}" "${search[@]}" --reverse --border=rounded --ansi \
+        --prompt="$1> " --with-nth=2.. --header="Tab next mode · Shift-Tab back · in ${PWD/#$HOME/\~}" \
+        --bind="change:reload:$(printf '%q' "$0") --grep {q}" \
+        --preview="$(printf '%q' "$0") --preview {1} {2} {2..}" --preview-window=right,55%,wrap \
         --bind="tab:transform:$(printf '%q' "$0") --next {fzf:prompt}" \
         --bind="shift-tab:transform:$(printf '%q' "$0") --next {fzf:prompt} -1" \
         --bind="enter:become(printf '%s\\n%s\\n' {fzf:prompt} {})"
@@ -149,9 +188,10 @@ pick() {  # pick <mode>: the mode it ended in, then the line picked; nothing whe
 
 case "${1:-all}" in
     --rows)    "rows_$2"; exit ;;
-    --preview) preview "$2" "$3"; exit 0 ;;  # on failure, fzf would show only stderr
+    --preview) preview "$2" "$3" "${4:-}"; exit 0 ;;  # on failure, fzf would show only stderr
+    --grep)    rows_grep "${2:-}"; exit 0 ;;
     --next)    next "$2" "${3:-1}"; exit ;;
-    all|tui|dots|keys|help|run|linux|pet) need fzf ;;
+    all|files|grep|tui|dots|keys|help|run|linux|pet) need fzf ;;
     *) die "unknown mode: $1" ;;
 esac
 
