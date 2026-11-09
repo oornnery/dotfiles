@@ -1,0 +1,7 @@
+-- psql settings (PSQLRC points here).
+\set QUIET 1
+\pset null '∅'
+\x auto
+\set HISTCONTROL ignoredups
+\set COMP_KEYWORD_CASE upper
+\set QUIET 0

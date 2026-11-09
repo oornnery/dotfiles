@@ -14,7 +14,8 @@ It installs git and stow, links the `dots` command, then runs `dots apply`.
 ## How it works
 
 Each folder in `home/` is a config package, linked into `$HOME` file by file with GNU
-Stow. `machines/<host>` says what each machine has: the tools set up there (`dots
+Stow. A setup links the config of what it installs: the env.d/ file of a language
+(read by every shell), the theme of a TUI. `machines/<host>` says what each machine has: the tools set up there (`dots
 install`) and the config packages linked there (`dots link`). `dots apply` makes a
 machine match its file; `dots status` shows what does not match yet.
 
@@ -127,6 +128,8 @@ the header of each command (`docs/generate`).
 | `herdr` *, `mpv` *, `distrobox` * | `~/.config/<name>/` |
 | `hyprland` | Hyprland, Waybar, Mako, Walker, Wofi, Alacritty, and their `dots` commands |
 | `tmux`, `vim` | `~/.tmux.conf`, `~/.vimrc` |
+| `go`, `bun`, `deno`, `python`, `dotnet`, `postgres` | `~/.config/shell/env.d/<name>.sh`: paths and settings of that language; with `python`, `~/.config/uv/` |
+| `sqlite`, `tealdeer`, `posting`, `presenterm`, `task`, `zk`, `eilmeldung` | `~/.config/<name>/`; `mise` also brings `env.d/node.sh` |
 
 Not linked, copied by a command: `windows/` (`dots wsl windows`), `themes/` (`dots theme`).
 Never in the repo: `~/.config/gh` (token), `~/.config/vite-plus`, shell history.

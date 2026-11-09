@@ -32,7 +32,7 @@ tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior
 tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar)|zk nb calcure|zk
 secrets|vaultwarden|Vaultwarden and Bitwarden: rbw (with an agent, rbw config set base_url) and bw|rbw bitwarden-cli|
 secrets|env-files|.env files encrypted in git: sops with age keys, and dotenvx|sops age npm:@dotenvx/dotenvx|
-tools|cli-extras|dust, duf, procs, sd, tealdeer, jless, htmlq, xmlstarlet, 7zip, rsync, pkgfile, arch-audit, yt-dlp|dust duf procs sd tealdeer jless htmlq xmlstarlet 7zip rsync pkgfile arch-audit yt-dlp|
+tools|cli-extras|dust, duf, procs, sd, tealdeer, jless, htmlq, xmlstarlet, 7zip, rsync, pkgfile, arch-audit, yt-dlp|dust duf procs sd tealdeer jless htmlq xmlstarlet 7zip rsync pkgfile arch-audit yt-dlp|tealdeer
 terminal|tmux|tmux with config and theme|tmux|tmux
 terminal|zellij|Zellij with its theme, help and a palette|zellij fzf|zellij
 editors|helix|Helix with language servers and config|helix bash-language-server shfmt shellcheck taplo-cli marksman yaml-language-server ruff uv|helix
@@ -41,19 +41,19 @@ editors|vim|Small Vim config|vim|vim
 editors|vscode|Visual Studio Code|visual-studio-code-bin|
 editors|zed|Zed|zed|
 editors|cursor|Cursor|cursor-bin|
-languages|python|Python with uv|python uv|
+languages|python|Python with uv|python uv|python
 languages|node|Node LTS through mise, and the versions of each project|mise|mise
-languages|bun|Bun runtime|bun-bin|
-languages|deno|Deno runtime|deno|
+languages|bun|Bun runtime|bun-bin|bun
+languages|deno|Deno runtime|deno|deno
 languages|rust|Rust and Cargo|rust|
-languages|go|Go|go|
+languages|go|Go|go|go
 languages|java|OpenJDK|jdk-openjdk|
 languages|kotlin|Kotlin|kotlin|
 languages|zig|Zig|zig|
 languages|lua|Lua and LuaRocks|lua luarocks|
 languages|php|PHP and Composer|php composer|
 languages|ruby|Ruby|ruby|
-languages|dotnet|.NET SDK|dotnet-sdk|
+languages|dotnet|.NET SDK|dotnet-sdk|dotnet
 languages|elixir|Elixir|elixir|
 containers|docker|Docker, Compose, service, your group and lazydocker|docker docker-buildx docker-compose lazydocker|lazydocker
 containers|distrobox|Distrobox, on top of the Docker setup|distrobox|distrobox
@@ -63,8 +63,8 @@ cloud|terraform|Terraform|terraform|
 cloud|aws|AWS CLI|aws-cli-v2|
 cloud|azure|Azure CLI|azure-cli|
 cloud|gcloud|Google Cloud CLI|google-cloud-cli|
-data|sqlite|SQLite|sqlite|
-data|postgres|PostgreSQL, initialized and running|postgresql|
+data|sqlite|SQLite|sqlite|sqlite
+data|postgres|PostgreSQL, initialized and running|postgresql|postgres
 ai|claude|Claude Code|claude-code|
 ai|gemini|Gemini CLI|gemini-cli|
 ai|opencode|OpenCode|opencode-bin|

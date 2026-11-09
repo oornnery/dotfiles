@@ -15,6 +15,16 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 # Tool homes (defined before PATH, which uses them)
 export PNPM_HOME="${PNPM_HOME:-$XDG_DATA_HOME/pnpm}"
 
+# What each tool adds to the environment, in env.d/: one file per setup (go, bun,
+# python...), linked by dots install with it. _path_add puts a folder in PATH once.
+_path_add() { [ -d "$1" ] || return 0; case ":$PATH:" in *":$1:"*) ;; *) PATH="$1:$PATH" ;; esac; }
+_source_dir() {  # every *.sh of a folder; none is fine (zsh would complain without nullglob)
+    [ -n "${ZSH_VERSION:-}" ] && setopt localoptions nullglob
+    for _f in "$1"/*.sh; do [ -r "$_f" ] && . "$_f"; done
+    unset _f
+}
+_source_dir "$XDG_CONFIG_HOME/shell/env.d"
+
 # PATH: first listed = highest priority.
 # Only directories that exist and are not already in PATH are added,
 # so nested shells never accumulate duplicates.

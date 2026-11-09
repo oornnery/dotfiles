@@ -50,6 +50,17 @@ post_openssh()   { dots sudo systemctl enable --now sshd; }
 post_tui-notes() { mkdir -p "$HOME/notes"; [[ -d $HOME/notes/.zk ]] || zk init --no-input "$HOME/notes"; machine_add folders notes; }
 post_tui-network() { dots sudo usermod -aG wireshark "$USER" && note "termshark can capture after you log in again"; }
 post_tui-news() { note "in eilmeldung, pick Local, then :importopml ~/.config/eilmeldung/feeds.opml"; }
+post_vaultwarden() {  # rbw needs your account and, for Vaultwarden, its address
+    local email url
+    email=$(gum input --placeholder 'Bitwarden or Vaultwarden email') || return 0
+    url=$(gum input --placeholder 'Vaultwarden address (empty for bitwarden.com)') || return 0
+    rbw config set email "$email" && { [[ -z $url ]] || rbw config set base_url "$url"; } && rbw login
+}
+post_env-files() {  # the age key sops uses; it never leaves this machine
+    local key=${XDG_CONFIG_HOME:-$HOME/.config}/sops/age/keys.txt
+    [[ -f $key ]] || { mkdir -p "${key%/*}" && age-keygen -o "$key" && chmod 600 "$key"; }
+    note "your public key, for .sops.yaml: $(age-keygen -y "$key")"
+}
 post_automount() {  # the watcher of system/wsl-automount, as a root service
     local src=$DOTFILES/system/wsl-automount
     dots sudo install -Dm755 "$src/dots-automount" /usr/local/bin/dots-automount &&

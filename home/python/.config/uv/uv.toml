@@ -1,0 +1,3 @@
+# uv: Pythons it installs itself are preferred to the system one, so a project gets
+# the version it asks for.
+python-preference = "managed"

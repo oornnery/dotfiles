@@ -1,0 +1,4 @@
+-- sqlite3 reads this from ~/.config/sqlite3/sqliterc (3.44+).
+.headers on
+.mode box
+.nullvalue NULL
