@@ -70,7 +70,7 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 
 | Run | Package | For | Project |
 | --- | --- | --- | --- |
-| `taskwarrior-tui` | `taskwarrior-tui` | Tasks of taskwarrior (`task add ...`) | [kdheepak/taskwarrior-tui](https://github.com/kdheepak/taskwarrior-tui) |
+| `taskwarrior-tui` | `taskwarrior-tui`, `task` | Tasks of taskwarrior (`task add ...`) | [kdheepak/taskwarrior-tui](https://github.com/kdheepak/taskwarrior-tui) |
 | `dooit` | `dooit-bin` (aur) | Todo lists, nested | [dooit-org/dooit](https://github.com/dooit-org/dooit) |
 | `calcure` | `calcure` (aur) | Calendar and tasks | [anufrievroman/calcure](https://github.com/anufrievroman/calcure) |
 | `zk` | `zk` | Notes as a Zettelkasten, searched with fzf | [zk-org/zk](https://github.com/zk-org/zk) |
