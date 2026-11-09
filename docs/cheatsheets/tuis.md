@@ -1,87 +1,79 @@
 # TUIs
 
-How to start each TUI and the few keys to get going. `Alt u` opens the ones
-installed; `dots help packages` has their links. Most show every key on `?`.
-
-Keys marked from the help screen of the TUI itself; the ones it could not open here
-point to where the full list is.
+One page per TUI, named by its command: `dots help <command>`. The palette shows
+the page when you pass over a TUI (`Alt u`). Zellij, Neovim, glow and herdr have
+their own pages too; Helix is in `dots help keys`.
 
 ## Every day
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| lazygit | `lg` in a repo | `space` stage, `c` commit, `P` push, `p` pull, `?` all keys |
-| yazi | `y` or `Alt e` | `Enter` open, `a` new, `r` rename, `d` trash, `.` hidden, `~` all keys |
-| btop | `btop` | `m` menu, `f` filter processes, `k` kill, `q` quit |
-| helix | `hx file` | `Space ?` every command (`dots help keys`) |
-| zellij | `dev` or `zellij` | `Ctrl p` panes, `Ctrl t` tabs, `Alt ?` help (`dots help zellij`) |
+| Page | What |
+| ---- | ---- |
+| `dots help lazygit` | lazygit: Git in panels: status, files, branches, commits, stash. |
+| `dots help yazi` | Yazi: File manager with previews: text, images, PDFs, videos. |
+| `dots help btop` | btop: CPU, memory, disks, network and processes. |
+| `dots help lazydocker` | lazydocker: Docker containers, images, volumes, logs and stats. |
 
 ## Git
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| serie | `serie` in a repo | `j` `k` move, `Enter` commit details, `Tab` refs, `/` search, `n` `N` next match, `?` or `F1` help, `q` quit |
+| Page | What |
+| ---- | ---- |
+| `dots help serie` | serie: The commit graph of a repo, drawn with images of the branches. |
 
 ## System and containers
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| systemctl-tui | `systemctl-tui` | `j` `k` move, `/` or `Ctrl f` search, `Enter` the commands of a unit (start, stop, restart), `f` filter, `Ctrl r` reverse logs, `?` help, `Ctrl q` quit |
-| lazyjournal | `lazyjournal` | `Tab` next window, `Enter` load a log, `/` filter, `Left` `Right` other lists, `[` `]` how many lines, `F1` help |
-| oxker | `oxker` | `Tab` next panel, `Enter` start, stop, restart..., `e` shell in the container, `/` filter, `#` search logs, `s` save logs, `h` help, `q` quit |
-| lazydocker | `ld` | `[` `]` tabs, `Enter` focus, `d` remove, `r` restart, `?` help |
+| Page | What |
+| ---- | ---- |
+| `dots help systemctl-tui` | systemctl-tui: systemd units: their state, logs, and start, stop, restart. |
+| `dots help lazyjournal` | lazyjournal: Logs: journald, files in /var/log, Docker and Podman containers. |
+| `dots help oxker` | oxker: Docker containers: state, logs, and start, stop, restart, exec. |
 
 ## Network
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| trippy | `trip 1.1.1.1` | `h` help, `5` all keys, `s` settings, `q` quit |
-| termshark | `termshark -i eth0`, or `termshark -r file.pcap` | `/` display filter, `Tab` panes, `?` help, `q` quit. Capturing needs the `wireshark` group (`dots install tui-network`) |
-| lazyssh | `lazyssh` (reads `~/.ssh/config`) | `Enter` connect, `a` add, `e` edit, `d` delete, `c` copy the ssh command, `g` ping, `f` port forward, `/` search, `q` quit |
+| Page | What |
+| ---- | ---- |
+| `dots help trip` | trippy: traceroute and ping together: every hop, its loss and its times, with graphs. |
+| `dots help termshark` | termshark: Packets, like Wireshark, in the terminal (tshark underneath). |
+| `dots help lazyssh` | lazyssh: SSH hosts: pick, add, connect, forward ports. Reads and writes `~/.ssh/config`. |
 
 ## Data and APIs
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| posting | `posting` | `Ctrl l` the URL (a curl command pasted there fills the request), `Ctrl j` send, `Ctrl t` method, `Ctrl s` save, `Ctrl n` new, `Ctrl o` jump to any part, `Ctrl p` every command, `F1` help |
-| lazysql | `lazysql` | `n` new connection, `Enter` connect, `H` `L` tree and table, `Ctrl e` SQL editor, `Ctrl r` run it, `Ctrl p` search, `?` help |
-| fx | `fx file.json` or `curl ... \| fx` | `l` `h` expand, collapse, `e` `E` expand, collapse all, `/` search, `n` `N` next match, `y` copy, `?` help |
-| tabiew | `tw file.csv` (also tsv, parquet, json, sqlite, excel) | `h` `j` `k` `l` move, `q` SQL query, `f` filter, `/` search, `t` tabs, `:` every command, `Q` quit |
-| epycell | `epycell notebook.ipynb` | Jupyter in the terminal |
+| Page | What |
+| ---- | ---- |
+| `dots help posting` | posting: HTTP requests, like Postman, saved as YAML files you can keep in git. |
+| `dots help lazysql` | lazysql: Databases in panels, like lazygit: Postgres, MySQL, SQLite, SQL Server. |
+| `dots help fx` | fx: JSON to browse: fold, search, follow paths, copy. |
+| `dots help tw` | tabiew: Tables: CSV, TSV, Parquet, JSON, SQLite, Excel; filter, sort and query them with SQL. |
 
 ## Notes and tasks
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| taskwarrior-tui | `taskwarrior-tui` | `a` add, `d` done, `e` edit, `/` filter, `[` `]` other views, `?` help |
-| task | `task add Buy milk due:fri`, `task`, `task 3 done` | the command line under taskwarrior-tui |
-| dooit | `dooit` | `Tab` workspaces and todos, `a` add, `A` add inside, `i` edit, `d` due date, `c` done, `xx` remove, `/` search, `?` help |
-| calcure | `calcure` | `Space` calendar or tasks, `a` add, `d` done, `x` delete, `n` `p` next and previous month, `?` help, `q` quit |
-| zk | `zk new --title "An idea"`, `zk edit --interactive`, `zk list` | notes in `~/notes`, picked with fzf |
-| nb | `nb add`, `nb`, `nb edit 1`, `nb search word` | notes, bookmarks and to-dos, in git |
+| Page | What |
+| ---- | ---- |
+| `dots help taskwarrior-tui` | taskwarrior-tui: Tasks of taskwarrior, in a list you edit with keys. |
+| `dots help dooit` | dooit: Todo lists with workspaces, nested todos, due dates and urgency. |
+| `dots help calcure` | calcure: Calendar and tasks, side by side. |
+| `dots help zk` | zk: Notes as Markdown files that link to each other, searched with fzf. |
+| `dots help nb` | nb: Notes, bookmarks and to-dos, kept in git and searchable. |
 
 ## News
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| circumflex | `clx` | `Enter` comments, `Space` the article (reader mode), `o` article in the browser, `c` comments in the browser, `Tab` next category, `i` all keys, `q` quit |
-| eilmeldung | `eilmeldung`; the first time pick Local, then `:importopml ~/.config/eilmeldung/feeds.opml` | `s` sync, `j` `k` move, `h` `l` panels, `o` open in the browser, `r` `u` read, unread, `m` star, `/` search, `?` all keys |
+| Page | What |
+| ---- | ---- |
+| `dots help clx` | circumflex: Hacker News: stories, comments as a tree, and the article in reader mode. |
+| `dots help eilmeldung` | eilmeldung: RSS and Atom feeds, read in the terminal. |
 
 ## Dev and fun
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| dekit | `dekit "npm run dev" "npm run worker"` | one pane per command; its keys are in its help ([pvolok/dekit](https://github.com/pvolok/dekit)) |
-| presenterm | `presenterm slides.md` (`docs/slides/dots.md`) | `Right` `Left` next and previous slide; the rest in [its docs](https://github.com/mfontanini/presenterm) |
-| spotify_player | `spotify_player` (Spotify Premium, logs in the first time) | `Space` play and pause, `?` every command |
-| ttyper | `ttyper` | type the text; `Esc` quits |
+| Page | What |
+| ---- | ---- |
+| `dots help dekit` | dekit: Several commands side by side, each in its pane: api, worker, front. Was mprocs. |
+| `dots help presenterm` | presenterm: Slides from a Markdown file. |
+| `dots help spotify_player` | spotify-player: Spotify in the terminal (Premium). |
+| `dots help ttyper` | ttyper: Typing test. |
 
 ## Desktop
 
-| TUI | Start | Keys |
-| --- | ----- | ---- |
-| wiremix | `wiremix` | PipeWire audio: outputs, inputs, volume |
-| impala | `impala` | Wi-Fi through iwd |
-| bluetui | `bluetui` | Bluetooth devices |
-
-These run on the desktop (Hyprland), not on WSL; their keys are in their help.
+| Page | What |
+| ---- | ---- |
+| `dots help wiremix` | wiremix: Audio mixer for PipeWire: outputs, inputs and the volume of each app. |
+| `dots help impala` | impala: Wi-Fi through iwd. |
+| `dots help bluetui` | bluetui: Bluetooth devices: pair, connect, trust. |
