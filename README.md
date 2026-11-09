@@ -75,6 +75,7 @@ the header of each command (`docs/generate`).
 | `dots help` | Cheatsheets, plus your live aliases, functions and snippets |
 | `dots palette` | Search TUIs, commands, keys, help, man pages and snippets, with a preview |
 | `dots pane` | Run a command in a new Zellij pane, or right here outside Zellij |
+| `dots preview` | Preview a file in the terminal: images, PDFs, folders, text |
 | `dots tui` | Pick a TUI and open it |
 
 **platform**

@@ -161,6 +161,8 @@ On Arch with Hyprland: `dots install tui-desktop`.
 | --- | --- |
 | `mpv` | Video and audio player |
 | `yt-dlp` | Download video and audio from sites |
+| `chafa` | Images in the terminal (`img photo.png`), as sixel in Windows Terminal 1.22+ |
+| `ffmpeg`, `poppler`, `resvg`, `imagemagick` | Yazi previews: video frames, PDFs, SVGs, HEIC and fonts |
 | `ttf-firacode-nerd` | Font for Linux GUI apps on WSLg; the terminal uses Windows fonts |
 
 ## Git and network

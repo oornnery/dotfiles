@@ -9,5 +9,5 @@ set -uo pipefail
 
 cd "$DOTFILES" || exit 1
 pick=$(fd --type f --hidden --exclude .git --exclude packages \
-    | fzf --prompt='edit> ' --query="$*" --preview 'bat -n --color=always {}') || exit 0
+    | fzf --prompt='edit> ' --query="$*" --preview 'dots preview {}') || exit 0
 [[ -n $pick ]] && exec "${EDITOR:-helix}" "$pick"

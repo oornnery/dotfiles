@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# dots:summary=Preview a file in the terminal: images, PDFs, folders, text
+# dots:group=use
+# dots:args=<path>
+#
+#   dots preview photo.png    the image itself (sixel in Windows Terminal), via chafa
+#   dots preview file.pdf     its text (pdftotext)
+#   dots preview folder       a tree
+#   dots preview file         bat, with line numbers
+#
+# fzf calls this for its previews (Ctrl-T, fe, dots edit): it reads the size fzf
+# gives it, so an image fills the preview window and no more.
+set -uo pipefail
+
+f=${1:?Usage: dots preview <path>}
+size="${FZF_PREVIEW_COLUMNS:-$(tput cols)}x${FZF_PREVIEW_LINES:-$(( $(tput lines) - 2 ))}"
+
+if [[ -d $f ]]; then
+    eza --tree --level=2 --icons=always --color=always "$f" 2>/dev/null || ls -A "$f"
+    exit 0
+fi
+case $(file --brief --mime-type "$f" 2>/dev/null) in
+    image/*)         chafa --size "$size" --animate off "$f" 2>/dev/null || file "$f" ;;
+    application/pdf) pdftotext -l 5 -layout "$f" - 2>/dev/null || file "$f" ;;
+    text/*|application/json|application/x-shellscript|inode/x-empty)
+                     bat -n --color=always --line-range :300 "$f" 2>/dev/null || head -300 "$f" ;;
+    *)               file "$f" ;;
+esac

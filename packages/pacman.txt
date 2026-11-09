@@ -41,6 +41,7 @@ neovim
 openssh
 pacman-contrib
 pkgfile
+presenterm
 procs
 ripgrep
 rsync

@@ -38,6 +38,7 @@ alias free='free -h'
 alias ip='ip -c'
 alias ping='ping -c 4'
 _has bat && alias b='bat'
+_has chafa && alias img='chafa'   # an image in the terminal: sixel in Windows Terminal
 
 # Editor (Arch names the helix binary `helix`)
 alias v='${EDITOR:-vi}'

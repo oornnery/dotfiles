@@ -20,7 +20,8 @@ if _has fzf; then
     fi
     # Terminal colors, so fzf follows `dots theme`.
     export FZF_DEFAULT_OPTS='--height=40% --layout=reverse --border --info=inline --color=16,hl:yellow,hl+:yellow,prompt:green,pointer:magenta,marker:magenta,border:bright-black'
-    _has bat && export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always --line-range :200 {}'"
+    # Images too: in Windows Terminal (1.22+) chafa draws them as sixel.
+    _has dots && export FZF_CTRL_T_OPTS="--preview 'dots preview {}'"
     _has eza && export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always {}'"
 
     eval "$(fzf --"$_sh")"

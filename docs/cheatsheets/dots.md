@@ -75,6 +75,7 @@ The tables below come from the header of each command (`docs/generate`). The
 | `dots palette linux` | Man pages |
 | `dots palette pet` | Pet snippets |
 | `dots pane` | Run a command in a new Zellij pane, or right here outside Zellij |
+| `dots preview` | Preview a file in the terminal: images, PDFs, folders, text |
 | `dots tui` | Pick a TUI and open it |
 
 **platform**

@@ -41,7 +41,7 @@ bak() {
 # fe [fd-args]  -> fuzzy-find a file and open it in $EDITOR
 fe() {
     local f
-    f=$(fd --type f --hidden --exclude .git "$@" | fzf --preview 'bat -n --color=always {}')
+    f=$(fd --type f --hidden --exclude .git "$@" | fzf --preview 'dots preview {}')
     [ -n "$f" ] && ${EDITOR:-vi} "$f"
 }
 
