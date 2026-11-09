@@ -1,6 +1,8 @@
 # aur packages, saved 2026-11-08 from DESKTOP-T8DL9CB
 herdr-bin
+lazyjournal-bin
 lazysql-bin
+oxker-bin
 pacsea-bin
 paru
 paru-debug

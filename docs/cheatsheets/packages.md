@@ -76,6 +76,13 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 | `zk` | `zk` | Notes as a Zettelkasten, searched with fzf | [zk-org/zk](https://github.com/zk-org/zk) |
 | `nb` | `nb` (aur) | Notes, bookmarks and to-dos, synced with git | [xwmx/nb](https://github.com/xwmx/nb) |
 
+### News
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `clx` | `circumflex-bin` (aur) | Hacker News: stories, comments as a tree, reader mode | [bensadeh/circumflex](https://github.com/bensadeh/circumflex) |
+| `eilmeldung` | `eilmeldung-bin` (aur) | RSS feeds; the list is `~/.config/eilmeldung/feeds.opml` (`:importopml` it) | [christo-auer/eilmeldung](https://github.com/christo-auer/eilmeldung) |
+
 ### Dev
 
 | Run | Package | For | Project |
