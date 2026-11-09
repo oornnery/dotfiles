@@ -57,6 +57,8 @@ sudo
 systemctl-tui
 tabiew
 taplo-cli
+task
+taskwarrior-tui
 tealdeer
 television
 termshark
@@ -79,5 +81,6 @@ yq
 yt-dlp
 zellij
 zip
+zk
 zoxide
 zsh

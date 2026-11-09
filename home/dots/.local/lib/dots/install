@@ -170,6 +170,9 @@ parts_of() {  # parts_of <name>: its packages (and where from), config links and
 
 # Steps read from the terminal: questions from pacman are yours to answer, and
 # they must not eat the list of names that is still being read.
+declare -A WHY   # setup -> what failed in it, for the summary at the end
+fail() { WHY[$1]=$2; err "$1: $2"; return 1; }  # fail <setup> <what failed>
+
 setup() {  # setup <name>
     local name=$1 parts pkgs links
     parts=$(parts_of "$name")
@@ -187,12 +190,21 @@ setup() {  # setup <name>
     # A package named manager:name comes from that manager; the others, pacman or the AUR.
     local p system=()
     for p in $pkgs; do
-        if [[ $p == *:* ]]; then dots pkg add -m "${p%%:*}" "${p#*:}" </dev/tty || return 1; else system+=("$p"); fi
+        if [[ $p == *:* ]]; then
+            dots pkg add -m "${p%%:*}" "${p#*:}" </dev/tty || { fail "$name" "${p%%:*} could not install ${p#*:}"; return 1; }
+        else
+            system+=("$p")
+        fi
     done
-    if (( ${#system[@]} )); then dots pkg add "${system[@]}" </dev/tty || return 1; fi
+    if (( ${#system[@]} )); then
+        dots pkg add "${system[@]}" </dev/tty || {
+            # Which of them is missing: that is the one that failed, its error is above.
+            local missing; missing=$(for p in "${system[@]}"; do pacman -Q "$p" >/dev/null 2>&1 || echo "$p"; done | paste -sd' ')
+            fail "$name" "not installed: ${missing:-${system[*]}} (its error is above, in the pacman or paru output)"; return 1; }
+    fi
     # shellcheck disable=SC2086  # package names, one per word
-    if [[ -n $links ]]; then dots link $links </dev/tty || return 1; fi
-    if grep -q '^setup' <<< "$parts"; then "post_$name" </dev/tty || return 1; fi
+    if [[ -n $links ]]; then dots link $links </dev/tty || { fail "$name" "linking failed: $links"; return 1; }; fi
+    if grep -q '^setup' <<< "$parts"; then "post_$name" </dev/tty || { fail "$name" "its step failed: post_$name"; return 1; }; fi
     machine_add tools "$name"
     mkdir -p "$STATE"; tools_done | grep -qx "$name" || echo "$name" >> "$STATE/tools"
 }
@@ -239,7 +251,11 @@ each() {  # each <function> <name>...: run for all of them, then say what failed
     for name in "$@"; do
         "$action" "$name" || failed+=("$name")
     done
-    if (( ${#failed[@]} )); then section failed; err "${failed[*]}"; exit 1; fi
+    if (( ${#failed[@]} )); then
+        section failed
+        for name in "${failed[@]}"; do err "$name: ${WHY[$name]:-see the errors above}"; done
+        exit 1
+    fi
     echo; ok "finished: $*"
 }
 

@@ -1,8 +1,11 @@
 # aur packages, saved 2026-11-08 from DESKTOP-T8DL9CB
+calcure
+dooit-bin
 herdr-bin
 lazyjournal-bin
 lazysql-bin
 lazyssh-bin
+nb
 oxker-bin
 pacsea-bin
 paru
