@@ -87,7 +87,7 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 
 | Run | Package | For | Project |
 | --- | --- | --- | --- |
-| `mprocs` | `mprocs` (aur) | Several commands side by side: api, worker, front | [pvolok/dekit](https://github.com/pvolok/dekit) |
+| `dekit` | `dekit-bin` (aur) | Several commands side by side: api, worker, front (was mprocs) | [pvolok/dekit](https://github.com/pvolok/dekit) |
 | `presenterm` | `presenterm` | Slides from Markdown; `presenterm docs/slides/dots.md` | [mfontanini/presenterm](https://github.com/mfontanini/presenterm) |
 
 ### Fun

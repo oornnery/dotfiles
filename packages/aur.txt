@@ -2,6 +2,7 @@
 herdr-bin
 lazyjournal-bin
 lazysql-bin
+lazyssh-bin
 oxker-bin
 pacsea-bin
 paru

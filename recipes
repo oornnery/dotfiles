@@ -24,7 +24,7 @@ tuis|tui-data|JSON (fx) and CSV (tabiew, tw)|fx tabiew|
 tuis|tui-git|The commit graph: serie|serie|
 tuis|tui-network|traceroute and ping with graphs (trippy, trip), packets (termshark)|trippy termshark|
 tuis|tui-system|systemd units (systemctl-tui), logs (lazyjournal), containers (oxker)|systemctl-tui lazyjournal-bin oxker-bin|
-tuis|tui-dev|Commands side by side (mprocs), slides from Markdown (presenterm)|mprocs presenterm|
+tuis|tui-dev|Commands side by side (dekit, was mprocs), slides from Markdown (presenterm)|dekit-bin presenterm|
 tuis|tui-ssh|SSH hosts: lazyssh|lazyssh-bin|
 tuis|tui-news|Hacker News (circumflex, clx) and RSS feeds (eilmeldung), with a list of feeds|circumflex-bin eilmeldung-bin|eilmeldung
 tuis|tui-fun|Spotify (spotify_player), typing test (ttyper)|spotify-player ttyper|

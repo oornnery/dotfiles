@@ -51,6 +51,7 @@ sd
 serie
 shellcheck
 shfmt
+spotify-player
 stow
 sudo
 systemctl-tui
@@ -64,6 +65,7 @@ tokei
 tree
 trippy
 ttf-firacode-nerd
+ttyper
 unzip
 uv
 vim
