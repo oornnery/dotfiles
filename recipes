@@ -29,7 +29,7 @@ tuis|tui-ssh|SSH hosts: lazyssh|lazyssh-bin|
 tuis|tui-news|Hacker News (circumflex, clx) and RSS feeds (eilmeldung), with a list of feeds|circumflex-bin eilmeldung-bin|eilmeldung
 tuis|tui-fun|Spotify (spotify_player), typing test (ttyper)|spotify-player ttyper|
 tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior-tui dooit-bin|task
-tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar)|zk nb calcure|zk
+tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar), basalt (Obsidian vaults)|zk nb calcure basalt-bin|zk
 secrets|vaultwarden|Vaultwarden and Bitwarden: rbw (with an agent, rbw config set base_url) and bw|rbw bitwarden-cli|
 secrets|env-files|.env files encrypted in git: sops with age keys, and dotenvx|sops age npm:@dotenvx/dotenvx|
 tools|cli-extras|dust, duf, procs, sd, tealdeer, jless, htmlq, xmlstarlet, 7zip, rsync, pkgfile, arch-audit, yt-dlp|dust duf procs sd tealdeer jless htmlq xmlstarlet 7zip rsync pkgfile arch-audit yt-dlp|tealdeer

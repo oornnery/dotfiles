@@ -52,6 +52,7 @@ their own pages too; Helix is in `dots help keys`.
 | `dots help dooit` | dooit: Todo lists with workspaces, nested todos, due dates and urgency. |
 | `dots help calcure` | calcure: Calendar and tasks, side by side. |
 | `dots help zk` | zk: Notes as Markdown files that link to each other, searched with fzf. |
+| `dots help basalt` | Basalt: Obsidian vaults in the terminal: browse and read their notes. |
 | `dots help nb` | nb: Notes, bookmarks and to-dos, kept in git and searchable. |
 
 ## News

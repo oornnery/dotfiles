@@ -75,6 +75,7 @@ or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desk
 | `calcure` | `calcure` (aur) | Calendar and tasks | [anufrievroman/calcure](https://github.com/anufrievroman/calcure) |
 | `zk` | `zk` | Notes as a Zettelkasten, searched with fzf | [zk-org/zk](https://github.com/zk-org/zk) |
 | `nb` | `nb` (aur) | Notes, bookmarks and to-dos, synced with git | [xwmx/nb](https://github.com/xwmx/nb) |
+| `basalt` | `basalt-bin` (aur) | Obsidian vaults in the terminal: browse and read notes | [erikjuhani/basalt](https://github.com/erikjuhani/basalt) |
 
 ### News
 
