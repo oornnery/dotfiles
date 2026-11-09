@@ -1,8 +1,8 @@
 # Palette
 
 One search for everything: files and what is in them, TUIs, `dots` commands, keys,
-help pages, any command, man pages and pet snippets. fzf, under the prompt in a shell, and in a floating pane in
-Zellij.
+help pages, any command, man pages and pet snippets. fzf, under the prompt in a
+shell, and in a floating pane in Zellij.
 
 ## Open it
 

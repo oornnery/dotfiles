@@ -39,6 +39,9 @@ unset _d _new_path
 # its shims. Interactive shells activate mise itself in tools.sh.
 PATH="$HOME/.local/share/mise/shims:$PATH"
 
+# Links open in the browser of Windows, through ~/.local/bin/browser.
+[ -x /mnt/c/Windows/explorer.exe ] && export BROWSER="$HOME/.local/bin/browser"
+
 # Editor (Arch names the helix binary `helix`)
 if _has helix; then EDITOR=helix; else EDITOR=vi; fi
 export EDITOR VISUAL="$EDITOR"

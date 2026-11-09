@@ -18,18 +18,18 @@ tools|btop|System monitor|btop|btop
 tools|yazi|File manager, with previews of images, videos, PDFs and SVGs|yazi ffmpeg poppler resvg imagemagick chafa|yazi
 tools|television|Fuzzy finder with channels, the tv command|television|television
 tools|epycell|Jupyter notebooks in the terminal|rust|
-tuis|tui-api|HTTP APIs, like Postman: posting|posting|
+tuis|tui-api|HTTP APIs, like Postman: posting|posting|posting
 tuis|tui-db|Databases, like lazygit: lazysql|lazysql-bin|
 tuis|tui-data|JSON (fx) and CSV (tabiew, tw)|fx tabiew|
 tuis|tui-git|The commit graph: serie|serie|
 tuis|tui-network|traceroute and ping with graphs (trippy, trip), packets (termshark)|trippy termshark|
 tuis|tui-system|systemd units (systemctl-tui), logs (lazyjournal), containers (oxker)|systemctl-tui lazyjournal-bin oxker-bin|
-tuis|tui-dev|Commands side by side (dekit, was mprocs), slides from Markdown (presenterm)|dekit-bin presenterm|
+tuis|tui-dev|Commands side by side (dekit, was mprocs), slides from Markdown (presenterm)|dekit-bin presenterm|presenterm
 tuis|tui-ssh|SSH hosts: lazyssh|lazyssh-bin|
 tuis|tui-news|Hacker News (circumflex, clx) and RSS feeds (eilmeldung), with a list of feeds|circumflex-bin eilmeldung-bin|eilmeldung
 tuis|tui-fun|Spotify (spotify_player), typing test (ttyper)|spotify-player ttyper|
-tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior-tui dooit-bin|
-tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar)|zk nb calcure|
+tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior-tui dooit-bin|task
+tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar)|zk nb calcure|zk
 secrets|vaultwarden|Vaultwarden and Bitwarden: rbw (with an agent, rbw config set base_url) and bw|rbw bitwarden-cli|
 secrets|env-files|.env files encrypted in git: sops with age keys, and dotenvx|sops age npm:@dotenvx/dotenvx|
 tools|cli-extras|dust, duf, procs, sd, tealdeer, jless, htmlq, xmlstarlet, 7zip, rsync, pkgfile, arch-audit, yt-dlp|dust duf procs sd tealdeer jless htmlq xmlstarlet 7zip rsync pkgfile arch-audit yt-dlp|

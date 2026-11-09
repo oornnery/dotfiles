@@ -1,0 +1,7 @@
+# zk: notes are Markdown files in ~/notes (a folder of this machine, see machines/).
+# zk edit --interactive picks a note with fzf; zk new writes one.
+[notebook]
+dir = "~/notes"
+
+[note]
+filename = "{{format-date now '%Y-%m-%d'}}-{{slug title}}"

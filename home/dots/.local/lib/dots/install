@@ -47,6 +47,8 @@ post_cli-extras() { have tldr && tldr --update; dots sudo pkgfile --update; retu
 post_ollama()    { dots sudo systemctl enable --now ollama; }
 post_tailscale() { dots sudo systemctl enable --now tailscaled; }
 post_openssh()   { dots sudo systemctl enable --now sshd; }
+post_tui-notes() { mkdir -p "$HOME/notes"; [[ -d $HOME/notes/.zk ]] || zk init --no-input "$HOME/notes"; machine_add folders notes; }
+post_tui-network() { dots sudo usermod -aG wireshark "$USER" && note "termshark can capture after you log in again"; }
 post_tui-news() { note "in eilmeldung, pick Local, then :importopml ~/.config/eilmeldung/feeds.opml"; }
 post_automount() {  # the watcher of system/wsl-automount, as a root service
     local src=$DOTFILES/system/wsl-automount
