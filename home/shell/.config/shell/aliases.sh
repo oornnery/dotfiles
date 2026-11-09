@@ -39,6 +39,7 @@ alias ip='ip -c'
 alias ping='ping -c 4'
 _has bat && alias b='bat'
 _has chafa && alias img='chafa'   # an image in the terminal: sixel in Windows Terminal
+_has lazysql && alias lazysql='lazysql --no-telemetry'   # it asks to send usage counts
 
 # Editor (Arch names the helix binary `helix`)
 alias v='${EDITOR:-vi}'

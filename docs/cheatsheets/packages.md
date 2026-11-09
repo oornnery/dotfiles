@@ -8,7 +8,7 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 
 ## TUIs
 
-`dots tui` (`Alt u`) lists the ones installed. The rest come with `dots install tuis`,
+`dots tui` (`Alt u`) lists the ones installed; `dots help tuis` has how to use each. The rest come with `dots install tuis`,
 or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desktop`.
 
 ### Editors and terminal

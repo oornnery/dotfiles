@@ -7,6 +7,7 @@ keys with `dots palette keys`. Each tool also has its own full list:
 | --- | ---------------------- |
 | `Alt ?` | Help pages, in the shell and in Zellij |
 | `Alt /` | The palette; its keys are in `dots help palette` |
+| `?` | Most TUIs; their first keys are in `dots help tuis` |
 | `Ctrl h` | tv |
 | `~` | Yazi |
 | `Space ?` | Helix, all commands |
