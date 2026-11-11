@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# dots:summary=What is broken: links, tools, scripts, PATH, Node, language servers
+# dots:group=machine
+#
+# Broken links, missing tools, scripts that do not parse, PATH, the active Node,
+# saved packages missing from packages.md and Helix language servers. Changes
+# nothing. Exits 1 on problems. What is only pending is in dots status.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+problems=0
+bad() { warn "$*"; problems=$(( problems + 1 )); }
+
+check_links() {
+    section links
+    local pkg line before=$problems
+    while IFS= read -r pkg; do
+        [[ -d $PKGS/$pkg ]] || bad "package in the list but not in the repo: $pkg"
+    done < <(linked_packages)
+    while IFS= read -r line; do
+        bad "broken link: ${line/#$HOME/\~}"
+    done < <(stale_links | sort -u)
+    (( problems == before )) && ok "every linked package exists, no broken links"
+}
+
+check_tools() {
+    section tools
+    local t missing=()
+    for t in stow git zsh bash fzf fd bat eza gum helix pet jq checkupdates; do
+        have "$t" || missing+=("$t")
+    done
+    have paru || have yay || missing+=(paru)
+    [[ -r $HOME/.antigen/antigen.zsh ]] || missing+=("antigen (~/.antigen)")
+    if (( ${#missing[@]} )); then bad "missing: ${missing[*]}"; else ok "required tools are installed"; fi
+}
+
+check_scripts() {
+    section scripts
+    local f before=$problems
+    for f in "$DOTS_LIB"/*; do
+        [[ -x $f ]] || continue
+        [[ $(head -c 2 "$f") == '#!' ]] || bad "no shebang on line 1: ${f##*/}"
+        bash -n "$f" 2>/dev/null || bad "syntax error: ${f##*/}"
+    done
+    [[ -x ${SUDO_ASKPASS:-$DOTS_LIB/askpass} ]] || bad "askpass is not executable"
+    (( problems == before )) && ok "dots commands parse, askpass is executable"
+}
+
+check_path() {
+    section PATH
+    local d before=$problems
+    while IFS= read -r d; do
+        [[ -z $d || -d $d ]] && continue
+        # Outside $HOME it comes from the system (WSL adds /usr/games), not from here.
+        if [[ $d == "$HOME"/* ]]; then bad "PATH entry does not exist: $d"; else note "from the system, does not exist: $d"; fi
+    done < <(tr ':' '\n' <<< "$PATH")
+    while IFS= read -r d; do
+        bad "PATH entry repeated: $d"
+    done < <(tr ':' '\n' <<< "$PATH" | sort | uniq -d)
+    (( problems == before )) && ok "no missing or repeated entries"
+}
+
+check_node() {
+    section node
+    local node; node=$(command -v node) || { bad "node not found"; return; }
+    case $node in
+        *mise*)       ok "mise is active: $(node --version)" ;;
+        *fnm*)        bad "fnm is still active: dots migrate moves Node to mise" ;;
+        *vite-plus*)  bad "the Node of vite-plus is active, mise is the main one (open an interactive shell)" ;;
+        *)            bad "unexpected node: $node" ;;
+    esac
+    have vp && note "vite-plus is installed, in testing: $(vp --version 2>/dev/null | head -1)"
+}
+
+check_packages() {
+    section packages
+    local before=$problems sheet="$DOTFILES/docs/cheatsheets/packages.md" p
+    if [[ -f $sheet ]]; then
+        while IFS= read -r p; do
+            grep -qF "\`$p\`" "$sheet" || bad "not in packages.md: $p"
+        done < <(cat "$DOTFILES"/packages/*.txt 2>/dev/null | grep -v '^#' | sort -u)
+    else
+        bad "cheatsheet missing: docs/cheatsheets/packages.md"
+    fi
+    (( problems == before )) && ok "every saved package is in packages.md"
+}
+
+check_helix() {
+    section helix
+    have helix || { bad "helix not found"; return; }
+    local lang before=$problems
+    for lang in python bash toml markdown yaml typescript json; do
+        # A language lists alternatives, so one working server is enough.
+        helix --health "$lang" 2>&1 | awk '
+            /Configured language servers/ { on = 1; next }
+            /Configured debug/            { on = 0 }
+            on && /✓/ { found = 1 }
+            on && /✘/ { missing = 1 }
+            END { exit !(missing && !found) }
+        ' && bad "no language server found for $lang"
+    done
+    (( problems == before )) && ok "every language has a working language server"
+}
+
+check_links
+check_tools
+check_scripts
+check_path
+check_node
+check_packages
+check_helix
+
+echo
+[[ -d $DOTFILES/.git ]] || note "${DOTFILES/#$HOME/\~} is not a git repository yet"
+if (( problems )); then
+    err "$problems problem(s) found"
+    exit 1
+fi
+ok "all good"

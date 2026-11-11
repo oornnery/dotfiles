@@ -1,0 +1,3 @@
+# posting. Its theme comes from POSTING_THEME, set to the dots theme by the shell
+# (conf.d/05-theme.sh): the Textual themes have the same names. Not ansi-dark:
+# posting cannot build its editor colors from it and stops.

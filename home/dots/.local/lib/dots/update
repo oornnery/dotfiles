@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# dots:summary=Pending updates for system and dev tools; upgrade them all
+# dots:group=packages
+# dots:args=[run] | list [--refresh] | refresh | motd
+# dots:actions=run=Upgrade everything|list=What has updates|refresh=Scan for updates now
+#
+# Managers are in _managers. Results are cached in ~/.cache/dots/updates.tsv.
+# `motd` is the shell startup line: it reads the cache and rescans in the
+# background when it is 6h old.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+# shellcheck source=/dev/null
+. "$DOTS_LIB/_managers"
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dots"
+CACHE="$CACHE_DIR/updates.tsv"     # eco<TAB>name<TAB>current<TAB>latest
+TTL="${DOTS_UPDATE_TTL:-21600}"
+
+refresh() {  # scan everything in parallel, replace the cache atomically
+    mkdir -p "$CACHE_DIR"
+    mkdir "$CACHE_DIR/lock" 2>/dev/null || { find "$CACHE_DIR/lock" -mmin +10 -exec rmdir {} \; 2>/dev/null; return 0; }
+    local m tmp; tmp=$(mktemp -d)
+    for m in "${MANAGERS[@]}"; do
+        : > "$tmp/$m"
+        available "$m" && "scan_$m" > "$tmp/$m" 2>/dev/null &
+    done
+    wait
+    cat "${MANAGERS[@]/#/$tmp/}" > "$CACHE.new" 2>/dev/null && mv "$CACHE.new" "$CACHE"
+    rm -rf "$tmp"; rmdir "$CACHE_DIR/lock" 2>/dev/null
+}
+
+count() { [[ -f $CACHE ]] && awk -F'\t' -v e="$1" '$1==e' "$CACHE" | wc -l || echo 0; }
+
+list() {
+    [[ ${1:-} == --refresh || ! -f $CACHE ]] && spin 'Scanning for updates...' "$0" refresh
+    if [[ ! -s $CACHE ]]; then ok "everything is up to date"; return; fi
+    local m
+    {
+        printf 'manager\tpackage\tinstalled\tlatest\n'
+        for m in "${MANAGERS[@]}"; do  # in the order of the managers
+            awk -F'\t' -v e="$m" '$1 == e { print $1 "\t" $2 "\t" $3 "\t" ($4 ? $4 : "-") }' "$CACHE"
+        done
+    } | table
+}
+
+motd() {
+    local age=$TTL m n parts=()
+    [[ -f $CACHE ]] && age=$(( $(date +%s) - $(stat -c %Y "$CACHE") ))
+    (( age >= TTL )) && { setsid nohup "$0" refresh >/dev/null 2>&1 & disown; } 2>/dev/null
+    [[ -s $CACHE ]] || return 0
+    for m in "${MANAGERS[@]}"; do n=$(count "$m"); (( n )) && parts+=("$m $n"); done
+    printf '\033[33m%d updates\033[0m \033[2m(%s) · dots update list\033[0m\n' "$(wc -l < "$CACHE")" "${parts[*]}"
+}
+
+upgradable() {  # one per line. Dev managers need something installed.
+    local m
+    for m in "${MANAGERS[@]}"; do
+        available "$m" || continue
+        case $m in pacman|aur) ;; *) [[ -n $(now "$m") ]] || continue ;; esac
+        [[ $m == pacman ]] && available aur && continue  # the AUR helper upgrades both
+        echo "$m"
+    done
+}
+
+pending() {  # the upgradable managers with something to upgrade, comma-separated
+    local m n list=()
+    for m in $(upgradable); do
+        n=$(count "$m")
+        [[ $m == aur ]] && n=$(( n + $(count pacman) ))
+        (( n )) && list+=("$m")
+    done
+    (IFS=,; printf '%s' "${list[*]:-}")
+}
+
+run() {
+    local m chosen
+    chosen=$(upgradable)
+    if can_prompt; then  # show what is pending, then ask
+        list --refresh
+        [[ -s $CACHE ]] || return 0
+        echo
+        chosen=$(upgradable | choose --selected="$(pending)" 'Upgrade which? (x toggles, enter upgrades)') || return 0
+    fi
+    for m in $chosen; do
+        section "$m"
+        "upgrade_$m" || err "$m upgrade failed"
+    done
+    [[ -n $chosen ]] || return 0
+    spin 'Scanning for updates...' "$0" refresh
+}
+
+case "${1:-run}" in
+    run)     run ;;
+    list)    list "${2:-}" ;;
+    refresh) refresh ;;
+    count)   if [[ -f $CACHE ]]; then wc -l < "$CACHE"; else echo 0; fi ;;  # for the bar
+    motd)    motd ;;
+    *) die "unknown action: $1" ;;
+esac

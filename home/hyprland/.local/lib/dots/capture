@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# dots:summary=Screenshots, screen recording, OCR and color picker
+# dots:group=desktop
+# dots:args=screenshot [region [--copy]|full|window|delay <sec>] | record [region|stop|status] | ocr [lang] | color
+# dots:actions=screenshot region=Pick an area and annotate it|screenshot full=The whole screen|screenshot window=The active window|record=Start or stop recording|record region=Record an area|record stop=Stop recording|ocr=Copy the text in an area|color=Pick a color from the screen
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+SHOTS="${SCREENSHOT_DIR:-$HOME/Pictures/screenshots}"
+VIDEOS="${RECORD_DIR:-$HOME/Videos/recordings}"
+PIDFILE="${XDG_RUNTIME_DIR:-/tmp}/wf-recorder.pid"
+COLORS="${XDG_STATE_HOME:-$HOME/.local/state}/dots/color-history"
+
+saved() { dots notify Screenshot "Saved ${1##*/}" -a screenshot -i "$1" -t 4000 -h "string:image-path:$1"; }
+
+screenshot() {
+    need grim
+    mkdir -p "$SHOTS"
+    local action=${1:-region} file geo
+    file="$SHOTS/$(date +%Y%m%d-%H%M%S).png"
+    case $action in
+        region)
+            need slurp
+            geo=$(slurp) || return 0
+            if [[ ${2:-} == --copy ]]; then
+                grim -g "$geo" - | wl-copy --type image/png
+                dots notify Screenshot "Region copied" -a screenshot
+            else
+                need satty
+                grim -g "$geo" - | satty --filename - --output-filename "$file" \
+                    --copy-command 'wl-copy --type image/png' --early-exit
+                [[ -f $file ]] && saved "$file"
+            fi ;;
+        full)   grim "$file" && saved "$file" ;;
+        window)
+            geo=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+            grim -g "$geo" "$file" && saved "$file" ;;
+        delay)  sleep "${2:-5}"; grim "$file" && saved "$file" ;;
+        *) err "dots capture screenshot: unknown: $action"; return 1 ;;
+    esac
+}
+
+recording() {  # prints the pid when one is running
+    local pid
+    [[ -f $PIDFILE ]] || return 1
+    pid=$(<"$PIDFILE")
+    if kill -0 "$pid" 2>/dev/null; then echo "$pid"; else rm -f "$PIDFILE"; return 1; fi
+}
+
+record_stop() {
+    local pid
+    if pid=$(recording); then
+        kill -INT "$pid"
+        rm -f "$PIDFILE"
+        dots notify Recording "Saved in $VIDEOS" -a record -i media-playback-stop -t 2500
+    else
+        dots notify Recording "Nothing was recording" -a record -t 2000
+    fi
+}
+
+record_start() {  # record_start [geometry]
+    local file geo=()
+    file="$VIDEOS/$(date +%Y%m%d-%H%M%S).mp4"
+    mkdir -p "$VIDEOS"
+    [[ -n ${1:-} ]] && geo=(-g "$1")
+    setsid -f wf-recorder "${geo[@]}" -f "$file" >/dev/null 2>&1
+    sleep 0.2
+    pgrep -nx wf-recorder > "$PIDFILE"
+    dots notify Recording "$file" -a record -i media-record -t 2500
+}
+
+record() {
+    need wf-recorder
+    local geo
+    case ${1:-toggle} in
+        toggle) if recording >/dev/null; then record_stop; else record_start; fi ;;
+        region)
+            recording >/dev/null && record_stop
+            need slurp
+            geo=$(slurp) || return 0
+            record_start "$geo" ;;
+        stop)   record_stop ;;
+        status) if recording >/dev/null; then echo recording; else echo stopped; fi ;;
+        *) err "dots capture record: unknown: $1"; return 1 ;;
+    esac
+}
+
+ocr() {
+    need tesseract grim slurp
+    local tmp text geo
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' RETURN
+    geo=$(slurp) || return 0
+    grim -g "$geo" "$tmp/shot.png" || return 0
+    tesseract "$tmp/shot.png" "$tmp/out" -l "${1:-eng+por}" 2>/dev/null
+    text=$(<"$tmp/out.txt")
+    if [[ -z ${text//[[:space:]]/} ]]; then
+        dots notify OCR "No text found" -a ocr -i dialog-warning
+        return 0
+    fi
+    printf '%s' "$text" | wl-copy
+    dots notify "OCR copied" "${text:0:200}" -a ocr -i edit-copy -t 4000
+}
+
+color() {
+    need hyprpicker
+    local hex
+    hex=$(hyprpicker -f hex -a 2>/dev/null) || return 0
+    [[ -n $hex ]] || return 0
+    mkdir -p "$(dirname "$COLORS")"
+    printf '%s  %s\n' "$(date +%H:%M:%S)" "$hex" >> "$COLORS"
+    dots notify "Color copied" "$hex" -a color -i color-picker
+}
+
+case "${1:-}" in
+    screenshot) shift; screenshot "$@" ;;
+    record)     shift; record "$@" ;;
+    ocr)        shift; ocr "$@" ;;
+    color)      color ;;
+    *) err "Usage: dots capture <screenshot|record|ocr|color>"; exit 1 ;;
+esac

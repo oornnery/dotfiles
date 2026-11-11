@@ -1,0 +1,90 @@
+# The Windows packages by group, for `dots wsl windows install [group...]`.
+#   group|winget id|name
+# Groups: core desktop dev work game ai. A 12-character upper-case id (9P..., 9N...)
+# is from the Microsoft Store. From the lists on the backup drive (win-run/pkgs),
+# plus what is installed now; windows/winget/packages.json is what is installed.
+
+# core
+core|Devolutions.UniGetUI|UniGetUI
+core|9P8LTPGCBZXD|Wintoys
+core|RamenSoftware.Windhawk|Windhawk
+core|Microsoft.VCRedist.2013.x64|Visual C++ 2013 Redistributable x64
+core|Microsoft.VCRedist.2013.x86|Visual C++ 2013 Redistributable x86
+core|Microsoft.VCRedist.2015+.x64|Visual C++ 2015+ Redistributable x64
+core|Microsoft.VCRedist.2015+.x86|Visual C++ 2015+ Redistributable x86
+core|Microsoft.DotNet.DesktopRuntime.8|.NET Desktop Runtime 8
+core|9WZDNCRFJ3PT|Media Player
+core|7zip.7zip|7-Zip
+core|ShareX.ShareX|ShareX
+
+# desktop
+desktop|Microsoft.WindowsTerminal|Windows Terminal
+desktop|Microsoft.PowerShell|PowerShell 7
+desktop|Starship.Starship|Starship prompt
+desktop|JanDeDobbeleer.OhMyPosh|Oh My Posh
+desktop|Microsoft.PowerToys|Microsoft PowerToys
+desktop|DEVCOM.JetBrainsMonoNerdFont|JetBrains Mono Nerd Font
+
+# dev
+dev|Git.Git|Git
+dev|GitHub.cli|GitHub CLI
+dev|GitHub.GitHubDesktop|GitHub Desktop
+dev|Microsoft.VisualStudioCode|Visual Studio Code
+dev|Microsoft.VisualStudioCode.CLI|Visual Studio Code CLI
+dev|ZedIndustries.Zed|Zed
+dev|Neovim.Neovim|Neovim
+dev|Notepad++.Notepad++|Notepad++
+dev|Docker.DockerDesktop|Docker Desktop
+dev|OpenJS.NodeJS.LTS|Node.js LTS
+dev|Python.Python.3.14|Python 3.14
+dev|astral-sh.uv|uv (Python toolchain)
+dev|GoLang.Go|Go
+dev|Rustlang.Rustup|Rustup (Rust toolchain)
+dev|Oven-sh.Bun|Bun
+dev|Kitware.CMake|CMake
+dev|SQLite.SQLite|SQLite
+dev|OnOff.Onlook|Onlook
+dev|Microsoft.WSL|Windows Subsystem for Linux
+dev|Helix.Helix|Helix
+
+# work
+work|Brave.Brave|Brave
+work|Ablaze.Floorp|Floorp
+work|Zen-Team.Zen-Browser|Zen Browser
+work|Perplexity.Comet|Comet (Perplexity)
+work|Notion.Notion|Notion
+work|Obsidian.Obsidian|Obsidian
+work|qBittorrent.qBittorrent|qBittorrent
+work|VideoLAN.VLC|VLC media player
+work|Spotify.Spotify|Spotify
+work|TheDocumentFoundation.LibreOffice|LibreOffice
+work|Google.GoogleDrive|Google Drive
+work|Audacity.Audacity|Audacity
+work|GIMP.GIMP.3|GIMP 3
+work|KDE.Kdenlive|Kdenlive
+work|WiresharkFoundation.Wireshark|Wireshark
+
+# game
+game|Valve.Steam|Steam
+game|EpicGames.EpicGamesLauncher|Epic Games Launcher
+game|ElectronicArts.EADesktop|EA app
+game|RockstarGames.Launcher|Rockstar Games Launcher
+game|RiotGames.LeagueOfLegends.BR|League of Legends (BR)
+game|Blitz.Blitz|Blitz (LoL companion)
+game|Mojang.MinecraftLauncher|Minecraft Launcher
+game|Modrinth.ModrinthApp|Modrinth App
+game|Overwolf.CurseForge|CurseForge
+game|Discord.Discord|Discord
+game|OBSProject.OBSStudio|OBS Studio
+game|Ryochan7.DS4Windows|DS4Windows
+game|Nefarius.HidHide|HidHide
+game|ViGEm.ViGEmBus|ViGEmBus
+
+# ai
+ai|OpenAI.Codex|Codex (CLI)
+ai|9PLM9XGG6VKS|Codex (desktop)
+ai|Google.AntigravityIDE|Antigravity IDE
+ai|rullerzhou-afk.clawd-on-desk|Clawd on Desk
+ai|ElementLabs.LMStudio|LM Studio
+ai|Ollama.Ollama|Ollama
+ai|Anthropic.Claude|Claude

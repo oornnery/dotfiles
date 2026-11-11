@@ -1,0 +1,3 @@
+# presenterm: the slides take the colors of the terminal, so they follow dots theme.
+defaults:
+  theme: terminal-dark

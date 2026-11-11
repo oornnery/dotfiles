@@ -1,7 +1,18 @@
-# aur packages, saved 2026-11-06 from DESKTOP-T8DL9CB
+# aur packages, saved 2026-11-08 from DESKTOP-T8DL9CB
+calcure
+circumflex-bin
+dekit-bin
+dooit-bin
+eilmeldung-bin
 herdr-bin
+lazyjournal-bin
+lazysql-bin
+lazyssh-bin
+nb
+oxker-bin
 pacsea-bin
 paru
 paru-debug
 pay-respects-bin
 pet-bin
+posting

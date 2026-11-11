@@ -6,18 +6,21 @@ keys with `dots palette keys`. Each tool also has its own full list:
 | Key | Where the full list is |
 | --- | ---------------------- |
 | `Alt ?` | Help pages, in the shell and in Zellij |
+| `Alt /` | The palette; its keys are in `dots help palette` |
+| `?` | Most TUIs; their first keys are in `dots help tuis` |
 | `Ctrl h` | tv |
 | `~` | Yazi |
 | `Space ?` | Helix, all commands |
 
 ## Shell
 
-Use the Alt keys on an empty line: they type the command after what is already there.
-Inside Zellij, Zellij takes them first and opens the same things floating.
+In zsh, the Alt keys set aside what you were typing, run, and give the line back. In
+bash, use them on an empty line: they type the command after what is there. Inside
+Zellij, Zellij takes them first and opens the same things floating.
 
 | Key | Action |
 | --- | ------ |
-| `Alt /` | Search everything with tv |
+| `Alt /` | Search everything with fzf |
 | `Alt ?` | Help pages |
 | `Alt u` | Pick a TUI |
 | `Alt e` | Yazi; the shell stays in the folder you were in |

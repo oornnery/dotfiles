@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The feeds for eilmeldung. In it: :importopml ~/.config/eilmeldung/feeds.opml -->
+<opml version="2.0">
+  <head><title>dots feeds</title></head>
+  <body>
+    <outline text="Security">
+      <outline type="rss" text="The Hacker News" xmlUrl="https://feeds.feedburner.com/TheHackersNews" htmlUrl="https://thehackernews.com"/>
+      <outline type="rss" text="BleepingComputer" xmlUrl="https://www.bleepingcomputer.com/feed/" htmlUrl="https://www.bleepingcomputer.com"/>
+      <outline type="rss" text="Krebs on Security" xmlUrl="https://krebsonsecurity.com/feed/" htmlUrl="https://krebsonsecurity.com"/>
+    </outline>
+    <outline text="Tech">
+      <outline type="rss" text="Hacker News" xmlUrl="https://hnrss.org/frontpage" htmlUrl="https://news.ycombinator.com"/>
+      <outline type="rss" text="Ars Technica" xmlUrl="https://feeds.arstechnica.com/arstechnica/index" htmlUrl="https://arstechnica.com"/>
+      <outline type="rss" text="LWN" xmlUrl="https://lwn.net/headlines/rss" htmlUrl="https://lwn.net"/>
+    </outline>
+    <outline text="Systems">
+      <outline type="rss" text="Arch Linux news" xmlUrl="https://archlinux.org/feeds/news/" htmlUrl="https://archlinux.org"/>
+      <outline type="rss" text="Windows Command Line (WSL)" xmlUrl="https://devblogs.microsoft.com/commandline/feed/" htmlUrl="https://devblogs.microsoft.com/commandline"/>
+    </outline>
+  </body>
+</opml>

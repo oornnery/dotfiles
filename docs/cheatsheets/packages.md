@@ -8,22 +8,117 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 
 ## TUIs
 
-| Run | Package | For |
-| --- | --- | --- |
-| `helix` / `hx` | `helix` | Editor |
-| `nvim` | `neovim` | Full editor: LSP, debug and tests for any language |
-| `tmux` | `tmux` | Terminal multiplexer; may be removed, its config stays |
-| `lazygit` / `lg` | `lazygit` | Git |
-| `lazydocker` / `ld` | `lazydocker` | Docker containers, logs, stats |
-| `btop` | `btop` | CPU, memory, processes |
-| `ncdu` | `ncdu` | Disk usage |
-| `pacsea` | `pacsea-bin` (aur) | Search and install pacman and AUR packages |
-| `glow` | `glow` | Browse and read Markdown |
-| `herdr` | `herdr-bin` (aur) | Workspaces for AI coding agents |
-| `zellij` | `zellij` | Panes and tabs |
-| `yazi` | `yazi` | File manager |
-| `tv` | `television` | Fuzzy finder with channels |
-| `epycell` | `epycell` (cargo) | Jupyter notebooks in the terminal |
+`dots tui` (`Alt u`) lists the ones installed; `dots help tuis` has how to use each. The rest come with `dots install tuis`,
+or one setup at a time (`dots install tui-git`); the desktop ones with `tui-desktop`.
+
+### Editors and terminal
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `helix` / `hx` | `helix` | Editor | [helix-editor/helix](https://github.com/helix-editor/helix) |
+| `nvim` | `neovim` | Full editor: LSP, debug and tests for any language | [neovim/neovim](https://github.com/neovim/neovim) |
+| `zellij` | `zellij` | Panes and tabs | [zellij-org/zellij](https://github.com/zellij-org/zellij) |
+| `tmux` | `tmux` | Terminal multiplexer; may be removed, its config stays | [tmux/tmux](https://github.com/tmux/tmux) |
+| `herdr` | `herdr-bin` (aur) | Workspaces for AI coding agents | [herdrdev/herdr](https://github.com/herdrdev/herdr) |
+
+### Files and search
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `yazi` | `yazi` | File manager | [sxyazi/yazi](https://github.com/sxyazi/yazi) |
+| `tv` | `television` | Fuzzy finder with channels | [alexpasmantier/television](https://github.com/alexpasmantier/television) |
+| `glow` | `glow` | Browse and read Markdown | [charmbracelet/glow](https://github.com/charmbracelet/glow) |
+| `ncdu` | `ncdu` | Disk usage | [dev.yorhel.nl/ncdu](https://dev.yorhel.nl/ncdu) |
+
+### Git
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `lazygit` / `lg` | `lazygit` | Git | [jesseduffield/lazygit](https://github.com/jesseduffield/lazygit) |
+| `serie` | `serie` | The commit graph, with images of the branches | [lusingander/serie](https://github.com/lusingander/serie) |
+
+### System and containers
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `btop` | `btop` | CPU, memory, processes | [aristocratos/btop](https://github.com/aristocratos/btop) |
+| `systemctl-tui` | `systemctl-tui` | systemd units: start, stop, their logs | [rgwood/systemctl-tui](https://github.com/rgwood/systemctl-tui) |
+| `lazyjournal` | `lazyjournal-bin` (aur) | Logs: journal, files, Docker and Podman | [Lifailon/lazyjournal](https://github.com/Lifailon/lazyjournal) |
+| `lazydocker` / `ld` | `lazydocker` | Docker containers, logs, stats | [jesseduffield/lazydocker](https://github.com/jesseduffield/lazydocker) |
+| `oxker` | `oxker-bin` (aur) | Docker containers, lighter | [mrjackwills/oxker](https://github.com/mrjackwills/oxker) |
+| `pacsea` | `pacsea-bin` (aur) | Search and install pacman and AUR packages | [Firstp1ck/Pacsea](https://github.com/Firstp1ck/Pacsea) |
+
+### Network
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `trip` | `trippy` | traceroute and ping together, with graphs | [fujiapple852/trippy](https://github.com/fujiapple852/trippy) |
+| `termshark` | `termshark` | Packets, like Wireshark | [gcla/termshark](https://github.com/gcla/termshark) |
+| `lazyssh` | `lazyssh-bin` (aur) | SSH hosts: pick, add, connect | [Adembc/lazyssh](https://github.com/Adembc/lazyssh) |
+
+### Data and APIs
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `posting` | `posting` (aur) | HTTP APIs, like Postman | [darrenburns/posting](https://github.com/darrenburns/posting) |
+| `lazysql` | `lazysql-bin` (aur) | Databases: Postgres, MySQL, SQLite... | [jorgerojas26/lazysql](https://github.com/jorgerojas26/lazysql) |
+| `fx` | `fx` | JSON, to browse and query | [antonmedv/fx](https://github.com/antonmedv/fx) |
+| `tw` | `tabiew` | CSV, Parquet and JSON tables, with SQL | [shshemi/tabiew](https://github.com/shshemi/tabiew) |
+| `epycell` | `epycell` (cargo) | Jupyter notebooks in the terminal | [crates.io/crates/epycell](https://crates.io/crates/epycell) |
+
+### Notes and tasks
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `taskwarrior-tui` | `taskwarrior-tui`, `task` | Tasks of taskwarrior (`task add ...`) | [kdheepak/taskwarrior-tui](https://github.com/kdheepak/taskwarrior-tui) |
+| `dooit` | `dooit-bin` (aur) | Todo lists, nested | [dooit-org/dooit](https://github.com/dooit-org/dooit) |
+| `calcure` | `calcure` (aur) | Calendar and tasks | [anufrievroman/calcure](https://github.com/anufrievroman/calcure) |
+| `zk` | `zk` | Notes as a Zettelkasten, searched with fzf | [zk-org/zk](https://github.com/zk-org/zk) |
+| `nb` | `nb` (aur) | Notes, bookmarks and to-dos, synced with git | [xwmx/nb](https://github.com/xwmx/nb) |
+| `basalt` | `basalt-bin` (aur) | Obsidian vaults in the terminal: browse and read notes | [erikjuhani/basalt](https://github.com/erikjuhani/basalt) |
+
+### News
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `clx` | `circumflex-bin` (aur) | Hacker News: stories, comments as a tree, reader mode | [bensadeh/circumflex](https://github.com/bensadeh/circumflex) |
+| `eilmeldung` | `eilmeldung-bin` (aur) | RSS feeds; the list is `~/.config/eilmeldung/feeds.opml` (`:importopml` it) | [christo-auer/eilmeldung](https://github.com/christo-auer/eilmeldung) |
+
+### Dev
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `dekit` | `dekit-bin` (aur) | Several commands side by side: api, worker, front (was mprocs) | [pvolok/dekit](https://github.com/pvolok/dekit) |
+| `presenterm` | `presenterm` | Slides from Markdown; `presenterm docs/slides/dots.md` | [mfontanini/presenterm](https://github.com/mfontanini/presenterm) |
+
+### Fun
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `spotify_player` | `spotify-player` | Spotify | [aome510/spotify-player](https://github.com/aome510/spotify-player) |
+| `ttyper` | `ttyper` | Typing test | [max-niederman/ttyper](https://github.com/max-niederman/ttyper) |
+
+### Desktop
+
+On Arch with Hyprland: `dots install tui-desktop`.
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `wiremix` | `wiremix` | Audio mixer for PipeWire | [tsowell/wiremix](https://github.com/tsowell/wiremix) |
+| `impala` | `impala` | Wi-Fi, through iwd | [pythops/impala](https://github.com/pythops/impala) |
+| `bluetui` | `bluetui` | Bluetooth | [pythops/bluetui](https://github.com/pythops/bluetui) |
+
+## Secrets
+
+`dots install secrets`.
+
+| Run | Package | For | Project |
+| --- | --- | --- | --- |
+| `rbw` | `rbw` | Vaultwarden and Bitwarden, with an agent that keeps the vault open | [doy/rbw](https://github.com/doy/rbw) |
+| `bw` | `bitwarden-cli` | The official Bitwarden CLI | [bitwarden/clients](https://github.com/bitwarden/clients) |
+| `sops` | `sops` | Encrypted .env, YAML and JSON files, safe in git | [getsops/sops](https://github.com/getsops/sops) |
+| `age` | `age` | The keys sops encrypts with | [FiloSottile/age](https://github.com/FiloSottile/age) |
+| `dotenvx` | `@dotenvx/dotenvx` (npm) | Load and encrypt .env files | [dotenvx/dotenvx](https://github.com/dotenvx/dotenvx) |
 
 ## Shell
 
@@ -50,7 +145,15 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 | `tree` | Folder tree |
 | `jq` | JSON |
 | `yq` | YAML, XML, TOML |
-| `zip`, `unzip` | Archives |
+| `zip`, `unzip`, `7zip` | Archives; `7z` also opens .7z and .rar |
+| `rsync` | Copy and sync folders, also over SSH |
+| `sd` | `sed` for find and replace, with plain regexes |
+| `dust` | `du` as a tree: what takes the space |
+| `duf` | `df` as a table |
+| `jless` | Long JSON, folded |
+| `htmlq` | `jq` for HTML |
+| `xmlstarlet` | Query and edit XML |
+| `tealdeer` | `tldr`: short examples of a command |
 | `wl-clipboard` | Clipboard for Helix on WSLg |
 
 ## Media
@@ -58,6 +161,9 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 | Package | For |
 | --- | --- |
 | `mpv` | Video and audio player |
+| `yt-dlp` | Download video and audio from sites |
+| `chafa` | Images in the terminal (`img photo.png`), as sixel in Windows Terminal 1.22+ |
+| `ffmpeg`, `poppler`, `resvg`, `imagemagick` | Yazi previews: video frames, PDFs, SVGs, HEIC and fonts |
 | `ttf-firacode-nerd` | Font for Linux GUI apps on WSLg; the terminal uses Windows fonts |
 
 ## Git and network
@@ -83,14 +189,13 @@ Source, when it is not pacman: `aur`, `npm`, `uv`, `cargo`.
 | Package | For |
 | --- | --- |
 | `uv` | Python projects and tools |
-| `fnm` | Node versions; the main one, active in interactive shells |
+| `mise` | Node, and the tool versions of each project (`mise.toml`) |
 | `pnpm` (npm) | Node packages |
 | `typescript` (npm) | TypeScript compiler |
 | `rust` | Rust and `cargo` |
 
 `vite-plus` (`vp`) is being tested. It comes from its own installer, outside
-these lists, and has its own Node, so `npm` outside an interactive shell is a
-different one with its own global packages.
+these lists. It brings a Node too, but the one of mise comes first in `PATH`.
 
 ## Helix language servers and formatters
 
@@ -124,7 +229,10 @@ Check them with `helix --health`.
 | `man-db`, `man-pages` | `man` |
 | `paru` (aur) | AUR helper |
 | `pacman-contrib` | `checkupdates`, used by `dots update` |
-| `stow` | Links the dotfiles, used by `dots stow` |
+| `stow` | Links the dotfiles, used by `dots link` |
+| `procs` | `ps` with colors and search |
+| `pkgfile` | Which package has a command: `pkgfile <command>` |
+| `arch-audit` | Installed packages with known security issues |
 
 ## To review
 
@@ -136,7 +244,7 @@ Installed, but not part of the setup described above.
 
 ## Dotfiles
 
-Stow packages, linked by `dots stow sync` from `~/.config/dots/packages`.
+Config packages in `home/`, linked by `dots link sync` from `machines/<host>`.
 
 | Package | Holds |
 | --- | --- |
@@ -155,14 +263,14 @@ Stow packages, linked by `dots stow sync` from `~/.config/dots/packages`.
 | `lazygit`, `lazydocker`, `btop`, `yazi` | TUI configs |
 | `bat`, `glow`, `mpv` | Tool configs |
 
-Kept but not linked. Turn one on with `dots stow <name>`.
+Kept but not linked. Turn one on with `dots link <name>`.
 
 | Package | Holds |
 | --- | --- |
 | `vim` | Small `.vimrc` without plugins, same keys as Helix |
 | `tmux` | Small `.tmux.conf`, same theme as Helix |
 | `zellij` | Theme, help, the keys for `dots palette` and the `dev` layout |
-| `television` | The modes of `dots palette`, as tv channels |
+| `television` | tv and its config; `dots palette` uses fzf |
 | `hyprland` | Hyprland, Alacritty, Waybar, Mako, Walker, Wofi and the commands `capture`, `display`, `hypr`, `notifications`, `system`, `webapp`; not used on WSL |
 
 In the repo, but not stow packages:

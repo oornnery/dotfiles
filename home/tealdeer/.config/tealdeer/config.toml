@@ -1,0 +1,8 @@
+# tealdeer (tldr): pages update on their own once a week; colors from the terminal.
+[updates]
+auto_update = true
+auto_update_interval_hours = 168
+
+[display]
+compact = false
+use_pager = false

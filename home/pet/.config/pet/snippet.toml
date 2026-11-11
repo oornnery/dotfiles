@@ -1,0 +1,432 @@
+# ~/.config/pet/snippet.toml
+# Ctrl-X Ctrl-R searches these. <name=default> is a parameter pet asks for.
+
+# ── Files and disk ──────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "tree of home without caches and toolchains"
+  command = '''tree -a -L <depth=3> --dirsfirst -I '.git|.cache|.local|.npm|.cargo|.rustup|.bun|.antigen|.atuin|.claude|go|node_modules|.venv|venv|__pycache__|site-packages|*.dist-info' '''
+  tag = ["files"]
+
+[[snippets]]
+  description = "biggest files and folders here"
+  command = "du -ahx <dir=.> 2>/dev/null | sort -rh | head -<n=20>"
+  tag = ["files", "disk"]
+
+[[snippets]]
+  description = "files changed in the last N minutes"
+  command = "find <dir=.> -type f -mmin -<minutes=30> -not -path '*/.git/*'"
+  tag = ["files"]
+
+[[snippets]]
+  description = "replace text in every file of a git repo"
+  command = "git grep -l '<from>' | xargs sed -i 's/<from>/<to>/g'"
+  tag = ["files", "git"]
+
+[[snippets]]
+  description = "compress to .tar.zst (multi-threaded)"
+  command = "tar -I 'zstd -T0 -19' -cf <path>.tar.zst <path>"
+  tag = ["files"]
+
+[[snippets]]
+  description = "write an ISO to a USB stick (wipes the device!)"
+  command = "lsblk && sudo dd if=<iso> of=<device=/dev/sdX> bs=4M status=progress oflag=sync && sync"
+  tag = ["disk", "danger"]
+
+[[snippets]]
+  description = "format a drive (wipes it!)"
+  command = "lsblk && sudo mkfs.<fs=ext4> <device=/dev/sdX1>"
+  tag = ["disk", "danger"]
+
+[[snippets]]
+  description = "find large files"
+  command = "find <dir=.> -type f -size +<size=100M> -exec du -h {} + | sort -rh"
+  tag = ["files", "disk"]
+
+[[snippets]]
+  description = "copy a folder with progress, resumable"
+  command = "rsync -avh --progress <from> <to>"
+  tag = ["files"]
+
+[[snippets]]
+  description = "checksum of a file"
+  command = "sha256sum <file>"
+  tag = ["files"]
+
+[[snippets]]
+  description = "pretty print a JSON file"
+  command = "jq . <file>"
+  tag = ["files", "json"]
+
+# ── Network ─────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "who is listening on a port"
+  command = "ss -ltnp 'sport = :<port>'"
+  tag = ["net"]
+
+[[snippets]]
+  description = "kill whatever listens on a TCP port"
+  command = "ss -ltnpH 'sport = :<port>' | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u | xargs -r kill"
+  tag = ["net"]
+
+[[snippets]]
+  description = "LAN IPv4 per interface (skips lo, docker, bridges, tunnels)"
+  command = '''ip -4 -o addr show | awk '$2 !~ /^(lo|docker|br-|vboxnet|tun|tap|veth)/ && $3 == "inet" {split($4,a,"/"); print $2, a[1]}' '''
+  tag = ["net"]
+
+[[snippets]]
+  description = "default gateway"
+  command = "ip route show default | awk '{print $3}'"
+  tag = ["net"]
+
+[[snippets]]
+  description = "IPv6 link-local addresses per interface"
+  command = '''ip -6 -o addr show scope link | awk '{split($4,a,"/"); print $2, a[1]}' '''
+  tag = ["net"]
+
+[[snippets]]
+  description = "local forward: reach a remote port on localhost"
+  command = "ssh -N -L <local=8080>:localhost:<remote=80> <host>"
+  tag = ["net", "ssh"]
+
+[[snippets]]
+  description = "remote forward: expose a local port on the remote host"
+  command = "ssh -N -R <remote=8080>:localhost:<local=8080> <host>"
+  tag = ["net", "ssh"]
+
+[[snippets]]
+  description = "SIP signalling live as text"
+  command = "sudo tcpdump -ni <iface=any> -s0 -A -l 'port 5060'"
+  tag = ["net", "sip"]
+
+[[snippets]]
+  description = "HTTP timing breakdown of a URL"
+  command = '''curl -so /dev/null -w 'dns %{time_namelookup}s  connect %{time_connect}s  tls %{time_appconnect}s  first byte %{time_starttransfer}s  total %{time_total}s  (%{http_code})\n' <url>'''
+  tag = ["net", "http"]
+
+[[snippets]]
+  description = "TLS certificate dates of a host"
+  command = "openssl s_client -connect <host>:443 -servername <host> </dev/null 2>/dev/null | openssl x509 -noout -subject -dates"
+  tag = ["net", "tls"]
+
+[[snippets]]
+  description = "DNS records of a domain"
+  command = "dig +short <domain> <type=A>"
+  tag = ["net", "dns"]
+
+[[snippets]]
+  description = "response headers of a URL"
+  command = "curl -sSI <url>"
+  tag = ["net", "http"]
+
+[[snippets]]
+  description = "active connections"
+  command = "ss -tun state established"
+  tag = ["net"]
+
+# ── Git ─────────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "undo the last commit, keep the changes staged"
+  command = "git reset --soft HEAD~<n=1>"
+  tag = ["git"]
+
+[[snippets]]
+  description = "delete local branches already merged"
+  command = "git branch --merged <base=main> | grep -vE '^\\*|<base=main>$' | xargs -r git branch -d"
+  tag = ["git"]
+
+[[snippets]]
+  description = "history of one file with diffs"
+  command = "git log --follow -p -- <file>"
+  tag = ["git"]
+
+[[snippets]]
+  description = "find the commit that added or removed a string"
+  command = "git log -S '<text>' --oneline"
+  tag = ["git"]
+
+[[snippets]]
+  description = "fixup a commit and squash it in"
+  command = "git commit --fixup <sha> && git rebase -i --autosquash <sha>~1"
+  tag = ["git"]
+
+[[snippets]]
+  description = "graph of all branches"
+  command = "git log --oneline --graph --all -<n=30>"
+  tag = ["git"]
+
+[[snippets]]
+  description = "stash with a message"
+  command = "git stash push -m '<message>'"
+  tag = ["git"]
+
+[[snippets]]
+  description = "discard changes in a file"
+  command = "git restore <file>"
+  tag = ["git"]
+
+[[snippets]]
+  description = "show what git clean would delete"
+  command = "git clean -nd"
+  tag = ["git"]
+
+# ── Docker ──────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "shell inside a running container"
+  command = "docker exec -it <container> <shell=sh>"
+  tag = ["docker"]
+
+[[snippets]]
+  description = "free docker disk space (images, cache, stopped containers)"
+  command = "docker system prune -af && docker builder prune -af"
+  tag = ["docker", "disk"]
+
+[[snippets]]
+  description = "container CPU and memory, once"
+  command = "docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}'"
+  tag = ["docker"]
+
+[[snippets]]
+  description = "follow the logs of a compose service"
+  command = "docker compose logs -f --tail=100 <service>"
+  tag = ["docker"]
+
+[[snippets]]
+  description = "rebuild and restart a compose service"
+  command = "docker compose up -d --build <service>"
+  tag = ["docker"]
+
+# ── Python / Node ───────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "one-off Python with a package, no venv"
+  command = "uv run --with <package> python"
+  tag = ["python", "uv"]
+
+[[snippets]]
+  description = "new uv project"
+  command = "uv init <name> && cd <name> && uv add <deps=ruff>"
+  tag = ["python", "uv"]
+
+[[snippets]]
+  description = "serve this folder over HTTP"
+  command = "python3 -m http.server <port=8000>"
+  tag = ["net", "python"]
+
+[[snippets]]
+  description = "lint and fix Python here"
+  command = "uvx ruff check --fix ."
+  tag = ["python", "uv"]
+
+# ── System ──────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "follow the logs of a service"
+  command = "journalctl -u <unit> -f -n 100"
+  tag = ["system"]
+
+[[snippets]]
+  description = "which package owns a command"
+  command = "pacman -Qo $(command -v <cmd>)"
+  tag = ["system", "pacman"]
+
+[[snippets]]
+  description = "random password"
+  command = "openssl rand -base64 <bytes=24>"
+  tag = ["system"]
+
+[[snippets]]
+  description = "PATH, one entry per line"
+  command = "tr ':' '\\n' <<< \"$PATH\""
+  tag = ["system"]
+
+[[snippets]]
+  description = "services that failed"
+  command = "systemctl --failed"
+  tag = ["system"]
+
+[[snippets]]
+  description = "errors since this boot"
+  command = "journalctl -p err -b --no-pager | tail -<n=50>"
+  tag = ["system"]
+
+[[snippets]]
+  description = "top processes by memory"
+  command = "ps axo pid,rss,comm --sort=-rss | head -<n=15>"
+  tag = ["system"]
+
+[[snippets]]
+  description = "top processes by CPU"
+  command = "ps axo pid,pcpu,comm --sort=-pcpu | head -<n=15>"
+  tag = ["system"]
+
+[[snippets]]
+  description = "pick processes and kill them"
+  command = "ps -eo pid,pcpu,pmem,comm --sort=-pcpu | fzf -m --header-lines=1 | awk '{print $1}' | xargs -r kill"
+  tag = ["system"]
+
+[[snippets]]
+  description = "drives, filesystems and mount points"
+  command = "lsblk -f"
+  tag = ["system", "disk"]
+
+# ── Packages ────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "install a package"
+  command = "sudo pacman -S <package>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "install a package from the AUR"
+  command = "paru -S <package>"
+  tag = ["pacman", "aur"]
+
+[[snippets]]
+  description = "remove a package, its config and unused dependencies"
+  command = "sudo pacman -Rns <package>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "search packages in the repos"
+  command = "pacman -Ss <text>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "search packages in the repos and the AUR"
+  command = "paru -Ss <text>"
+  tag = ["pacman", "aur"]
+
+[[snippets]]
+  description = "upgrade the system"
+  command = "sudo pacman -Syu"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "details of an installed package"
+  command = "pacman -Qi <package>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "files installed by a package"
+  command = "pacman -Ql <package>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "review new system configs (.pacnew) side by side"
+  command = "sudo env DIFFPROG='nvim -d' pacdiff"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "remove orphaned packages"
+  command = "pacman -Qdtq | sudo pacman -Rns -"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "biggest installed packages"
+  command = "pacman -Qi | awk '/^Name/{n=$3} /^Installed Size/{print $4 $5, n}' | sort -h | tail -<n=20>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "why a package is installed"
+  command = "pacman -Qi <package> | grep -E 'Required By|Install Reason'"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "which package has a file, installed or not"
+  command = "pacman -F <file>"
+  tag = ["pacman"]
+
+[[snippets]]
+  description = "clean the package cache, keeping 3 versions"
+  command = "sudo paccache -r"
+  tag = ["pacman"]
+
+# ── Media ───────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "download a video in the best quality (yt-dlp)"
+  command = "yt-dlp -f 'bv*+ba/b' --merge-output-format <format=mp4> '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "download only the audio (yt-dlp)"
+  command = "yt-dlp -x --audio-format <format=mp3> '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "list the formats of a video (yt-dlp)"
+  command = "yt-dlp -F '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "download a playlist, numbered (yt-dlp)"
+  command = "yt-dlp -o '%(playlist_index)03d-%(title)s.%(ext)s' '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "download only the subtitles (yt-dlp)"
+  command = "yt-dlp --skip-download --write-subs --write-auto-subs --sub-langs '<langs=pt,en>' '<url>'"
+  tag = ["media", "yt-dlp"]
+
+[[snippets]]
+  description = "convert a video or audio file (ffmpeg)"
+  command = "ffmpeg -i <input> <output=out.mp4>"
+  tag = ["media"]
+
+[[snippets]]
+  description = "extract the audio of a video (ffmpeg)"
+  command = "ffmpeg -i <input> -vn <output=audio.mp3>"
+  tag = ["media"]
+
+# ── Herdr ───────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "install herdr"
+  command = "paru -S --needed herdr-bin"
+  tag = ["herdr", "aur"]
+
+[[snippets]]
+  description = "herdr plugins: navigator, session search, window title"
+  command = "for p in thanhdat77/herdr-navigator nicosuave/memex rjyo/herdr-window-title-sync; do herdr plugin install $p --yes; done"
+  tag = ["herdr"]
+
+# ── WSL ─────────────────────────────────────────────────────────────────────
+
+[[snippets]]
+  description = "open this folder in Windows Explorer"
+  command = "explorer.exe ."
+  tag = ["wsl"]
+
+[[snippets]]
+  description = "copy command output to the Windows clipboard"
+  command = "<command> | clip.exe"
+  tag = ["wsl"]
+
+[[snippets]]
+  description = "Windows path of a Linux path (and back with -u)"
+  command = "wslpath -w <path=.>"
+  tag = ["wsl"]
+
+[[snippets]]
+  description = "restart WSL, from inside it"
+  command = "wsl.exe --shutdown"
+  tag = ["wsl"]
+
+[[snippets]]
+  description = "Windows drives connected now (C: D: ...)"
+  command = "/mnt/c/Windows/System32/cmd.exe /c 'fsutil fsinfo drives' | tr -d '\\r'"
+  tag = ["wsl", "disk"]
+
+[[snippets]]
+  description = "mount a Windows drive plugged in after WSL started (dots wsl mount does all)"
+  command = "sudo mkdir -p <dir=/mnt/d> && sudo mount -t drvfs <drive=D>: <dir=/mnt/d> -o metadata,uid=$(id -u),gid=$(id -g)"
+  tag = ["wsl", "disk"]
+
+[[snippets]]
+  description = "unmount a Windows drive before unplugging it"
+  command = "sudo umount <dir=/mnt/d>"
+  tag = ["wsl", "disk"]

@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# dots:summary=Run the one-time changes this machine has not run yet
+# dots:group=machine
+# dots:args=[run | list | new <name> | --done]
+# dots:actions=run=Run the pending migrations|list=Every migration, * = ran here|new=Write the next migration
+#
+#   dots migrate              run the pending ones, in order
+#   dots migrate list         every migration (* = ran here)
+#   dots migrate new <name>   write the next one, migrations/NNN-<name>.sh
+#   dots migrate --done       mark them all as ran: a new machine starts current
+#
+# A migration is a change a file cannot describe: rename a config, move a folder,
+# drop a tool. It runs once per machine, with bash, from the repo, with DOTFILES,
+# PKGS, LIST, MACHINE and STATE set. Each one must be safe to repeat. What ran is listed in
+# ~/.local/state/dots/migrations. dots status shows the pending ones and dots
+# apply runs them.
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+run() {
+    local m failed=0
+    mkdir -p "$STATE"
+    for m in $(pending_migrations); do
+        section "$m"
+        if (cd "$DOTFILES" && DOTFILES=$DOTFILES PKGS=$PKGS LIST=$LIST MACHINE=$MACHINE STATE=$STATE bash "$MIGRATIONS/$m.sh"); then
+            echo "$m" >> "$STATE/migrations"; ok "$m"
+        else
+            err "$m failed: fix it and run dots migrate again"; failed=1; break  # the next may need this one
+        fi
+    done
+    (( failed )) || [[ -n $m ]] || ok "no pending migrations"
+    return "$failed"
+}
+
+list() {
+    local m
+    for m in $(all_migrations); do
+        if grep -qx "$m" "$STATE/migrations" 2>/dev/null; then echo "$G* $m$N"; else echo "  $m"; fi
+    done
+}
+
+new() {  # new <name>
+    local name=${1:?Usage: dots migrate new <name>} n file
+    n=$(all_migrations | tail -1); n=$(( 10#${n%%-*} + 1 ))
+    file=$(printf '%s/%03d-%s.sh' "$MIGRATIONS" "$n" "$name")
+    mkdir -p "$MIGRATIONS"
+    printf '%s\n' '# What changed, and what this does about it. Runs once per machine, from the' \
+        '# repo, with DOTFILES, PKGS, LIST, MACHINE and STATE set. Must be safe to repeat.' 'set -euo pipefail' '' > "$file"
+    ok "wrote ${file#"$DOTFILES"/}"
+    "${EDITOR:-helix}" "$file"
+}
+
+done_() { mkdir -p "$STATE"; all_migrations > "$STATE/migrations"; ok "marked $(all_migrations | wc -l) as ran"; }
+
+case "${1:-run}" in
+    run)    run ;;
+    list)   list ;;
+    new)    shift; new "$@" ;;
+    --done) done_ ;;
+    *)      die "unknown action: $1" ;;
+esac

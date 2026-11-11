@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# dots:summary=Power menu and profiles, volume, GPU usage and hibernation
+# dots:group=desktop
+# dots:args=power | profile [cycle|set <mode>|list] | volume [raise|lower|mute|mic-mute|set <n>|get] | gpu | hibernation <status|setup|remove>
+# dots:actions=power=Lock, suspend, reboot, shut down|profile=The power profile|profile cycle=Next power profile|volume mute=Toggle mute|volume mic-mute=Toggle the microphone|hibernation status=Is hibernation ready
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+SINK=@DEFAULT_AUDIO_SINK@
+SOURCE=@DEFAULT_AUDIO_SOURCE@
+SWAPFILE=/swapfile
+
+power() {
+    local choice answer
+    choice=$(printf '%s\n' Lock Suspend Logout Reboot Shutdown | dots menu power) || return 0
+    case $choice in
+        Lock)     exec hyprlock ;;
+        Suspend)  exec systemctl suspend ;;
+        Logout)   exec hyprctl dispatch exit ;;
+        Reboot|Shutdown)
+            answer=$(printf 'Cancel\n%s\n' "$choice" | dots menu 'are you sure') || return 0
+            [[ $answer == Reboot ]] && exec systemctl reboot
+            [[ $answer == Shutdown ]] && exec systemctl poweroff ;;
+    esac
+}
+
+profile() {
+    need powerprofilesctl
+    local now next
+    now=$(powerprofilesctl get)
+    case ${1:-get} in
+        get)  echo "$now"; return ;;
+        list) powerprofilesctl list; return ;;
+        cycle)
+            case $now in
+                power-saver) next=balanced ;;
+                balanced)    next=performance ;;
+                *)           next=power-saver ;;
+            esac ;;
+        set) next=${2:?power-saver, balanced or performance} ;;
+        *) err "dots system profile: unknown: $1"; return 1 ;;
+    esac
+    powerprofilesctl set "$next" && dots notify "Power profile" "$next" -a power -t 3000
+}
+
+percent() { wpctl get-volume "$1" | awk '{printf "%d", $2 * 100}'; }
+muted()   { wpctl get-volume "$1" | grep -q MUTED; }
+
+volume_card() {
+    local pct icon=audio-volume-medium text
+    pct=$(percent "$SINK"); text="$pct%"
+    if muted "$SINK"; then icon=audio-volume-muted; text=muted; fi
+    dots notify Volume "$text" -a volume -i "$icon" -t 1500 \
+        -h string:x-canonical-private-synchronous:volume -h "int:value:$pct"
+}
+
+mic_card() {
+    local icon=microphone-sensitivity-high text=active
+    if muted "$SOURCE"; then icon=microphone-sensitivity-muted; text=muted; fi
+    dots notify Microphone "$text" -a volume -i "$icon" -t 1500 -h string:x-canonical-private-synchronous:mic
+}
+
+volume() {
+    need wpctl
+    local step=${VOLUME_STEP:-5}
+    case ${1:-get} in
+        raise)    wpctl set-volume -l 1.5 "$SINK" "$step%+"; volume_card ;;
+        lower)    wpctl set-volume "$SINK" "$step%-"; volume_card ;;
+        set)      wpctl set-volume -l 1.5 "$SINK" "${2:?a value}%"; volume_card ;;
+        mute)     wpctl set-mute "$SINK" toggle; volume_card ;;
+        mic-mute) wpctl set-mute "$SOURCE" toggle; mic_card ;;
+        get)      percent "$SINK"; echo ;;
+        *) err "dots system volume: unknown: $1"; return 1 ;;
+    esac
+}
+
+gpu() {  # AMD usage as waybar JSON
+    local file card='' busy total used class=ok tooltip='no VRAM info'
+    for file in /sys/class/drm/card*/device/gpu_busy_percent; do
+        [[ -r $file ]] && { card=${file%/*}; break; }
+    done
+    if [[ -z $card ]]; then
+        printf '{"text":"","tooltip":"no AMD GPU","class":"no-gpu"}\n'
+        return
+    fi
+    busy=$(<"$card/gpu_busy_percent")
+    total=$(cat "$card/mem_info_vram_total" 2>/dev/null || echo 0)
+    used=$(cat "$card/mem_info_vram_used" 2>/dev/null || echo 0)
+    (( total > 0 )) && tooltip="VRAM: $((used >> 20)) / $((total >> 20)) MiB ($((used * 100 / total))%)"
+    (( busy > 60 )) && class=warning
+    (( busy > 90 )) && class=critical
+    printf '{"text":"%s%%","tooltip":"GPU %s%%: %s","class":"%s"}\n' "$busy" "$busy" "$tooltip" "$class"
+}
+
+hibernation_setup() {
+    local ram fs offset uuid
+    ram=$(awk '/^MemTotal/ {print int($2 / 1024 / 1024) + 1}' /proc/meminfo)
+    fs=$(findmnt -no FSTYPE /)
+    [[ ! -e $SWAPFILE ]] || { err "$SWAPFILE already exists"; return 1; }
+    confirm "Create a ${ram} GiB swap file at $SWAPFILE?" || return 0
+    if [[ $fs == btrfs ]]; then
+        dots sudo btrfs filesystem mkswapfile --size "${ram}g" --uuid clear "$SWAPFILE" || return 1
+    else
+        dots sudo fallocate -l "${ram}G" "$SWAPFILE" || return 1
+        dots sudo chmod 600 "$SWAPFILE"
+        dots sudo mkswap "$SWAPFILE" || return 1
+    fi
+    dots sudo swapon "$SWAPFILE" || return 1
+    echo "$SWAPFILE none swap defaults 0 0" | dots sudo tee -a /etc/fstab >/dev/null
+    uuid=$(findmnt -no UUID /)
+    if [[ $fs == btrfs ]]; then
+        offset=$(dots sudo btrfs inspect-internal map-swapfile -r "$SWAPFILE")
+    else
+        offset=$(dots sudo filefrag -v "$SWAPFILE" | awk 'NR==4 {gsub(/\./,""); print $4; exit}')
+    fi
+    ok "swap ready"
+    warn "add to the bootloader: resume=UUID=$uuid resume_offset=$offset"
+}
+
+hibernation() {
+    local ram swap
+    case ${1:-status} in
+        status)
+            ram=$(awk '/^MemTotal/ {print $2}' /proc/meminfo)
+            swap=$(awk '/^SwapTotal/ {print $2}' /proc/meminfo)
+            if (( swap >= ram )); then ok "enough swap for hibernation"; else warn "swap is smaller than RAM"; fi
+            grep -q 'resume=' /proc/cmdline && ok "resume is set in the kernel line" || warn "no resume= in the kernel line" ;;
+        setup) hibernation_setup ;;
+        remove)
+            confirm "Remove $SWAPFILE?" || return 0
+            dots sudo swapoff "$SWAPFILE" 2>/dev/null
+            dots sudo rm -f "$SWAPFILE"
+            dots sudo sed -i "\|^$SWAPFILE |d" /etc/fstab
+            warn "also take resume= out of the bootloader" ;;
+        *) err "Usage: dots system hibernation <status|setup|remove>"; return 1 ;;
+    esac
+}
+
+case "${1:-power}" in
+    power)       power ;;
+    profile)     shift; profile "$@" ;;
+    volume)      shift; volume "$@" ;;
+    gpu)         gpu ;;
+    hibernation) shift; hibernation "$@" ;;
+    *) die "unknown action: $1" ;;
+esac
