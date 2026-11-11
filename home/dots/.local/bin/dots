@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# dots: dotfiles CLI.
+#   dots                  pick a command, then its action
+#   dots <cmd> [args...]  run ~/.local/lib/dots/<cmd>
+#   dots -h | --help      list commands
+#
+# Each command is one executable in ../lib/dots/. Header keys it reads:
+#   # dots:summary=...   # dots:args=...   # dots:hidden=true
+#   # dots:group=machine|config|packages|use|platform|desktop   for the list
+#   # dots:actions=list=What it does|sync -n=Dry run   for the menu and for Tab
+# Commands call each other through `dots <cmd>`, never by sourcing. A command
+# sources _lib (and _managers when it needs them), nothing else.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+self=$(realpath "${BASH_SOURCE[0]}")
+# The linked folder holds the commands of every package (dots, hyprland...).
+lib=${DOTS_LIB:-$HOME/.local/lib/dots}
+# Run from the repo, or with the links broken (a migration moved the repo): its own folder.
+[[ -r $lib/_lib ]] || lib=$(dirname "$self")/../lib/dots
+DOTS_LIB=$(cd "$lib" 2>/dev/null && pwd) || { echo "dots: no command dir: $lib" >&2; exit 1; }
+export DOTS_LIB DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+bin=$(dirname "$self")
+case ":$PATH:" in *":$bin:"*) ;; *) PATH="$bin:$PATH" ;; esac
+# shellcheck source=/dev/null
+. "$DOTS_LIB/_ui"
+
+meta() { sed -n "1,15s/^# dots:$2=//p" "$1" | head -1; }
+
+ORDER=(machine config packages use platform desktop other)
+
+rows() {  # rows [dir...]: name<TAB>args<TAB>summary<TAB>group, by group, hidden ones left out
+    local f g d
+    for d in "${@:-$DOTS_LIB}"; do for f in "$d"/*; do
+        [[ -f $f && -x $f && $(meta "$f" hidden) != true ]] || continue
+        g=$(meta "$f" group)
+        printf '%s\t%s\t%s\t%s\n' "${f##*/}" "$(meta "$f" args)" "$(meta "$f" summary)" "${g:-other}"
+    done; done | awk -F'\t' -v order="${ORDER[*]}" '
+        BEGIN { n = split(order, o, " "); for (i = 1; i <= n; i++) rank[o[i]] = i }
+        { print rank[$4] "\t" $0 }' | sort -t$'\t' -k1,1n -k2,2 | cut -f2-
+}
+
+icon() {  # the Nerd Font icon of a command, as a hex code
+    case $1 in
+        capture) echo f030 ;;
+        display|hypr) echo f108 ;;
+        doctor) echo f0f1 ;;
+        status) echo f0ae ;;
+        edit) echo f044 ;;
+        help) echo f059 ;;
+        install) echo f019 ;;
+        notifications|notify) echo f0f3 ;;
+        palette) echo f002 ;;
+        pane) echo f2d0 ;;
+        pkg) echo f187 ;;
+        setup) echo f013 ;;
+        stow) echo f0c1 ;;
+        system) echo f011 ;;
+        theme) echo f1fc ;;
+        tui) echo f26c ;;
+        update) echo f021 ;;
+        webapp) echo f0ac ;;
+        wsl) echo f17a ;;
+        *) echo f120 ;;
+    esac
+}
+
+usage() {
+    if [[ -n $N ]] && have gum; then
+        gum style --bold --foreground 212 --border rounded --border-foreground 99 --padding '0 2' 'dots · dotfiles CLI'
+        echo
+    fi
+    printf '%sUsage:%s dots [<cmd> [args...]]\n' "$H" "$N"
+    # \037 because read merges repeated tabs, which would shift an empty args.
+    local last=''
+    rows | tr '\t' '\037' | while IFS=$'\037' read -r n a s g; do
+        if [[ $g != "$last" ]]; then printf '\n%s%s%s\n' "$H" "$g" "$N"; last=$g; fi
+        printf "  %s\\u$(icon "$n") %-13s%s %s\n" "$G" "$n" "$N" "$s"
+        if [[ -n $a ]]; then printf '                  %s%s%s\n' "$D" "$a" "$N"; fi
+    done
+}
+
+markdown() {  # every command in the repo as markdown tables by group; --actions adds them
+    local n a s g act desc last='' dirs=("$DOTFILES_DIR"/home/*/.local/lib/dots)
+    rows "${dirs[@]}" | tr '\t' '\037' | while IFS=$'\037' read -r n a s g; do
+        if [[ $g != "$last" ]]; then
+            [[ -z $last ]] || echo
+            printf '**%s**\n\n| Command | What it does |\n| ------- | ------------ |\n' "$g"; last=$g
+        fi
+        printf '| `dots %s` | %s |\n' "$n" "$s"
+        [[ ${1:-} == --actions ]] || continue
+        meta "$(ls "${dirs[@]/%//$n}" 2>/dev/null | head -1)" actions | tr '|' '\n' | while IFS='=' read -r act desc; do
+            [[ -n $act ]] && printf '| `dots %s %s` | %s |\n' "$n" "$act" "$desc"
+        done
+    done
+}
+
+describe() {  # word:description for Tab completion; empty argument = commands
+    [[ -n ${1:-} ]] || { rows | awk -F'\t' '{print $1 ":" $3}'; return; }
+    [[ -x $DOTS_LIB/$1 ]] || return 0
+    case $1 in
+        help)    "$DOTS_LIB/help" --list ;;
+        install) "$DOTS_LIB/install" --describe ;;
+        *)       meta "$DOTS_LIB/$1" actions | tr '|' '\n' \
+                     | awk -F= 'NF { split($1, w, " "); if (!seen[w[1]]++) print w[1] ":" $2 }' ;;
+    esac
+}
+
+case "${1:-}" in
+    '')
+        pick=$(rows | awk -F'\t' '{printf "%-8s %s\n", $1, $3}' | dots menu dots) || exit 0
+        [[ -n $pick ]] || exit 0
+        cmd=${pick%% *}
+        list=$(meta "$DOTS_LIB/$cmd" actions)
+        [[ -n $list ]] || exec "$DOTS_LIB/$cmd"
+        act=$(tr '|' '\n' <<< "$list" | awk -F= '{printf "%-20s %s\n", $1, $2}' | dots menu "$cmd") || exit 0
+        [[ -n $act ]] || exit 0
+        read -ra args <<< "${act%%  *}"   # the action ends where the padding starts
+        exec "$DOTS_LIB/$cmd" "${args[@]}"
+        ;;
+    -h|--help) usage ;;
+    --describe) describe "${2:-}" ;;
+    --markdown) markdown "${2:-}" ;;
+    *)
+        cmd=$1; shift
+        [[ -x $DOTS_LIB/$cmd ]] || { err "dots: unknown command: $cmd (dots --help)"; exit 127; }
+        exec "$DOTS_LIB/$cmd" "$@"
+        ;;
+esac

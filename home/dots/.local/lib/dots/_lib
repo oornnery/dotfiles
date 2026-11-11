@@ -1,0 +1,117 @@
+# shellcheck shell=bash
+# shellcheck disable=SC2034  # the paths are read by the commands
+# The one file a command sources: _ui, the paths, the machine, and -h for free.
+#
+#   . "$(dirname "$(realpath "$0")")/_lib"
+#
+# A command's -h prints its header: the comment block at the top, without the
+# "# dots:" lines. So the help is written once, next to the code it describes.
+
+# shellcheck source=/dev/null
+. "$(dirname "${BASH_SOURCE[0]}")/_ui"
+
+CMD=${0##*/}
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+PKGS="$DOTFILES/home"                             # the config packages, linked into $HOME
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/dots"   # what this machine chose
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/dots" # what ran here: theme, migrations
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/dots"      # what can be rebuilt
+LIST="$CONFIG/packages"                           # before machines/; read by migration 002
+MACHINE="$DOTFILES/machines/${DOTS_MACHINE:-${HOSTNAME:-$(uname -n)}}"
+
+die() { err "dots $CMD: $*"; exit 1; }
+
+usage() {  # the header of this command, from line 2 to the first line that is not a comment
+    printf 'dots %s %s\n\n' "$CMD" "$(sed -n 's/^# dots:args=//p' "$0")"
+    sed -n 's/^# dots:summary=//p' "$0"
+    awk 'NR > 1 && !/^#/ { exit } NR > 1 && !/^# (dots:|shellcheck)/ { sub(/^# ?/, ""); print }' "$0"
+}
+case ${1:-} in -h|--help) usage; exit 0 ;; esac
+
+# --- The machine --------------------------------------------------------------
+
+packages() {  # every config package: a folder holding at least one dotfile at the top
+    local d
+    for d in "$PKGS"/*/; do
+        d=${d%/}
+        compgen -G "$d/.[!.]*" >/dev/null && echo "${d##*/}"
+    done
+}
+
+# machines/<host> says what this machine has, one "key: words" line per key:
+#   tools: the tools set up here (dots install)
+#   links: the config packages linked here (dots link)
+#   folders: the folders this machine keeps in $HOME (projects, labs...)
+# dots link and dots install write it; dots apply makes the machine match it.
+
+machine_get() {  # machine_get <key>: its words, one per line
+    sed -n "s/^$1:[[:space:]]*//p" "$MACHINE" 2>/dev/null | tr ' ' '\n' | grep -v '^$'
+}
+
+machine_set() {  # machine_set <key> <word>...: replace the line of that key
+    local key=$1; shift
+    if [[ ! -f $MACHINE ]]; then
+        mkdir -p "${MACHINE%/*}"
+        printf '%s\n' "# ${MACHINE##*/}: what dots apply sets up on this machine." \
+            "# tools: dots install <name>    links: dots link <package>    folders: in \$HOME" > "$MACHINE"
+    fi
+    if grep -q "^$key:" "$MACHINE"; then
+        sed -i "s|^$key:.*|$key: $*|" "$MACHINE"
+    else
+        echo "$key: $*" >> "$MACHINE"
+    fi
+}
+
+machine_add() {  # machine_add <key> <word>...: keep the order, no repeats
+    local key=$1; shift
+    # shellcheck disable=SC2046  # one word per package
+    machine_set "$key" $( { machine_get "$key"; printf '%s\n' "$@"; } | awk '!seen[$0]++')
+}
+
+machine_drop() {  # machine_drop <key> <word>...
+    local key=$1; shift
+    # shellcheck disable=SC2046  # one word per package
+    machine_set "$key" $(machine_get "$key" | grep -vxF -f <(printf '%s\n' "$@"))
+}
+
+linked_packages() { machine_get links; }  # the config packages this machine links
+
+missing_folders() { local d; machine_get folders | while IFS= read -r d; do [[ -d $HOME/$d ]] || echo "$d"; done; }
+
+# The tools of this machine already set up here: their post steps ran.
+tools_done() { sort -u "$STATE/tools" 2>/dev/null; }
+pending_tools() { comm -23 <(machine_get tools | sort -u) <(tools_done); }
+
+package_files() {  # package_files <pkg>: its files, relative to $HOME
+    (cd "$PKGS/$1" 2>/dev/null && find . -type f | sed 's#^\./##')
+}
+
+unlinked() {  # "<pkg> <file>" for each file of a linked package that is not linked here
+    local pkg f
+    while IFS= read -r pkg; do
+        while IFS= read -r f; do
+            [[ $HOME/$f -ef $PKGS/$pkg/$f ]] || echo "$pkg $f"
+        done < <(package_files "$pkg")
+    done < <(linked_packages)
+}
+
+stale_links() {  # links in $HOME into the repo that lead nowhere: a file renamed or moved
+    local root
+    for root in "$HOME"/.config "$HOME"/.local/bin "$HOME"/.local/lib "$HOME"/.local/share; do
+        find "$root" -xtype l 2>/dev/null
+    done
+    find "$HOME" -maxdepth 2 -xtype l 2>/dev/null
+}
+into_repo() {  # into_repo <link>: true when it points inside the repo
+    local target
+    target=$(readlink "$1") || return 1
+    [[ $target == /* ]] || target=$(dirname "$1")/$target
+    [[ $(realpath -m "$target") == "$(realpath -m "$DOTFILES")"/* ]]
+}
+stale_repo_links() { local l; stale_links | sort -u | while IFS= read -r l; do into_repo "$l" && echo "$l"; done; }
+
+# --- Migrations ----------------------------------------------------------------
+
+MIGRATIONS="$DOTFILES/migrations"
+all_migrations() { find "$MIGRATIONS" -maxdepth 1 -name '[0-9]*.sh' -printf '%f\n' 2>/dev/null | sed 's/\.sh$//' | sort; }
+pending_migrations() { comm -23 <(all_migrations) <(sort -u "$STATE/migrations" 2>/dev/null); }

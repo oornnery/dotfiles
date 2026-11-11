@@ -1,0 +1,14 @@
+# Runs tests/run on Arch, the system these dotfiles are for.
+name: check
+on:
+  push:
+    branches: [dev, master]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - run: pacman -Syu --noconfirm --needed bash zsh git stow shellcheck findutils gawk
+      - uses: actions/checkout@v4
+      - run: tests/run

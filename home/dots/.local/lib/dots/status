@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+# dots:summary=What is pending: commits, links, migrations, packages, Windows
+# dots:group=machine
+# dots:args=[-f]
+# dots:actions=-f=Also ask the remote and the repos (slower)
+#
+#   dots status       what is pending here, from what is on this machine
+#   dots status -f    also fetch the remote and count package updates
+#
+# Each part says what to run next. The count goes to ~/.cache/dots/pending, for
+# the prompt; a new shell runs this in the background when it is 30 minutes old. Nothing is changed here, besides `git fetch`
+# with -f. dots doctor is the other half: it reports what is broken.
+# shellcheck disable=SC2154  # colors come from _ui
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+# shellcheck source=/dev/null
+. "$DOTS_LIB/_managers"
+
+SAVED="$DOTFILES/packages"
+# Files apps write next to their config that are state, not config: never pending.
+STATE_FILES=(! -name '*.bak.*' ! -name '*.lock' ! -name '*.log' ! -name '*.db' ! -name '*history*')
+FETCH=0; [[ ${1:-} == -f ]] && FETCH=1
+pending=0
+
+todo() { warn "$1"; [[ -z ${2:-} ]] || note "    $2"; pending=$(( pending + 1 )); }  # todo <what> [<what to run>]
+items() { sed -n "1,${2:-8}p" <<< "$1" | sed "s/^/    /"; (( $(wc -l <<< "$1") <= ${2:-8} )) || note "    ..."; }
+
+repo() {
+    section "repo"
+    local git=(git -C "$DOTFILES") branch changes ahead behind stashes
+    branch=$("${git[@]}" branch --show-current)
+    (( FETCH )) && "${git[@]}" fetch -q 2>/dev/null
+    changes=$("${git[@]}" status --short)
+    if [[ -n $changes ]]; then
+        todo "$(wc -l <<< "$changes") file(s) not committed on $branch" "git -C ~/dotfiles add -p && git commit"
+        items "$changes"
+    fi
+    # Counted against what git last saw of the remote; -f asks it again.
+    if read -r ahead behind < <("${git[@]}" rev-list --left-right --count '@...@{u}' 2>/dev/null); then
+        (( ahead ))  && todo "$ahead commit(s) not pushed" "git -C ~/dotfiles push"
+        (( behind )) && todo "$behind commit(s) on the remote, not here" "git -C ~/dotfiles pull"
+    else
+        todo "$branch has no remote branch" "git -C ~/dotfiles push -u origin $branch"
+    fi
+    stashes=$("${git[@]}" stash list | wc -l)
+    (( stashes )) && todo "$stashes stash(es) kept aside" "git -C ~/dotfiles stash list"
+    [[ -n $changes ]] || (( ahead + behind + stashes )) || ok "$branch: committed and in sync"
+}
+
+links() {
+    section "links"
+    local pkg f rel dir before=$pending missing new stale
+    # A file of the repo that is not linked: the package changed after the last sync.
+    missing=$(unlinked | awk '{print $1 ": ~/" $2}')
+    stale=$(stale_repo_links | sed "s#^$HOME#~#")
+    # A real file next to the links: written by the app, and not in the repo yet.
+    # Only in the folders of the app itself, as ~/.config and ~/.local are shared.
+    new=$(while IFS= read -r pkg; do
+        while IFS= read -r dir; do
+            rel=${dir#"$PKGS/$pkg/"}
+            case $rel in .config|.local|.local/*|.config/shell/completions) continue ;; esac
+            while IFS= read -r f; do echo "$pkg: ${f/#$HOME/\~}"; done \
+                < <(find "$HOME/$rel" -maxdepth 1 -type f "${STATE_FILES[@]}" 2>/dev/null)
+        done < <(find "$PKGS/$pkg" -mindepth 1 -type d -path "$PKGS/$pkg/.*")
+    done < <(linked_packages))
+    if [[ -n $missing ]]; then todo "$(wc -l <<< "$missing") file(s) in the repo, not linked here" "dots link sync"; items "$missing"; fi
+    if [[ -n $stale ]]; then todo "$(wc -l <<< "$stale") link(s) into the repo that lead nowhere" "dots link sync"; items "$stale"; fi
+    if [[ -n $new ]]; then todo "$(wc -l <<< "$new") file(s) the apps wrote next to the links" "dots link add <file>, or leave them"; items "$new"; fi
+    (( pending == before )) && ok "every package is linked, nothing new beside it"
+}
+
+packages() {
+    section "packages"
+    local m a b before=$pending
+    for m in "${MANAGERS[@]}"; do
+        available "$m" || continue
+        a=$(comm -23 <(now "$m") <(grep -sv '^#' "$SAVED/$m.txt" | sort -u))
+        b=$(comm -13 <(now "$m") <(grep -sv '^#' "$SAVED/$m.txt" | sort -u))
+        [[ -n $a ]] && todo "$m: $(wc -l <<< "$a") installed, not saved: $(paste -sd' ' <<< "$a")" "dots pkg save"
+        [[ -n $b ]] && todo "$m: $(wc -l <<< "$b") saved, not installed: $(paste -sd' ' <<< "$b")" "dots pkg restore, or dots pkg save to forget them"
+    done
+    if (( FETCH )); then
+        a=$(checkupdates 2>/dev/null | wc -l)
+        (( a )) && todo "pacman: $a update(s)" "dots update"
+    fi
+    (( pending == before )) && ok "the saved lists match what is installed"
+}
+
+tools() {
+    section "tools"
+    local t; t=$(pending_tools)
+    if [[ -n $t ]]; then
+        todo "$(wc -l <<< "$t") tool(s) of this machine not set up here" "dots apply, or dots install <name>"; items "$t"
+    elif [[ ! -f $MACHINE ]]; then
+        todo "no file for this machine: ${MACHINE#"$DOTFILES"/}" "dots link sync creates it from what is linked"
+    else
+        ok "every tool of ${MACHINE##*/} is set up"
+    fi
+}
+
+folders() {
+    section "folders"
+    local f; f=$(missing_folders)
+    if [[ -n $f ]]; then todo "$(wc -l <<< "$f") folder(s) of this machine missing in \$HOME" "dots apply"; items "$f"
+    else ok "$(machine_get folders | paste -sd' ') in place"; fi
+}
+
+migrations() {
+    section "migrations"
+    local m; m=$(pending_migrations)
+    if [[ -n $m ]]; then todo "$(wc -l <<< "$m") migration(s) not run here" "dots migrate"; items "$m"; else ok "every migration ran here"; fi
+}
+
+windows() {  # only on WSL: configs that differ from the Windows side
+    [[ -d /mnt/c/Windows ]] || return 0
+    section "windows"
+    local out diff new
+    out=$(NO_COLOR=1 "$DOTS_LIB/wsl" windows -n 2>&1 | sed 's/^[^ ]* //')
+    diff=$(grep ': different$' <<< "$out" | sed 's/: different$//')
+    # A config with nothing on Windows is an app not installed there: nothing to do yet.
+    new=$(grep ': new$' <<< "$out" | sed 's/: new$//' | paste -sd' ')
+    if [[ -n $diff ]]; then
+        todo "$(wc -l <<< "$diff") config(s) differ from Windows" "dots wsl windows -n, then send (dots wsl windows) or bring (dots wsl windows pull)"
+        items "$diff"
+    else
+        ok "Windows has the same configs"
+    fi
+    [[ -z $new ]] || note "nothing on Windows yet, dots wsl windows sends them: $new"
+    local drives; drives=$("$DOTFILES/system/wsl-automount/dots-automount" -n 2>/dev/null | sed 's/^would //')
+    if [[ -n $drives ]]; then todo "drives plugged in, not mounted here" "dots wsl mount, or dots install automount to do it always"; items "$drives"; fi
+}
+
+# The parts run at the same time, each into its own file, and print in this order.
+# A part prints its count of pending things on the last line of its file.
+spin_self 'Looking for what is pending...' "$@"
+tmp=$(mktemp -d)
+parts=(repo tools folders links migrations packages windows)
+for p in "${parts[@]}"; do
+    ( "$p"; echo "$pending" ) > "$tmp/$p" 2>&1 &
+done
+wait
+for p in "${parts[@]}"; do
+    sed '$d' "$tmp/$p"
+    pending=$(( pending + $(tail -1 "$tmp/$p") ))
+done
+rm -rf "$tmp"
+mkdir -p "$CACHE" && echo "$pending" > "$CACHE/pending"   # the prompt shows it
+echo
+if (( pending )); then note "$pending pending"; else ok "nothing pending"; fi
+(( FETCH )) || note "dots status -f also asks the remote and the repos"

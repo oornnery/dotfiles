@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Mounts the Windows drives plugged in after WSL started, and unmounts the ones
+# taken out. WSL mounts drives only when it starts ([automount] in /etc/wsl.conf).
+#
+#   dots-automount          watch, every 5 seconds: what the systemd service runs
+#   dots-automount --once   one pass, then exit: dots wsl mount
+#   dots-automount -n       what one pass would do; any user can run it
+#
+# Mounting needs root. The files belong to the user with uid 1000, or DOTS_USER.
+# Installed by `dots install automount`, from ~/dotfiles/system/wsl-automount.
+set -uo pipefail
+
+CMD_EXE=/mnt/c/Windows/System32/cmd.exe
+user=${DOTS_USER:-$(id -nu 1000)}
+opts="metadata,uid=$(id -u "$user"),gid=$(id -g "$user")"
+mode=${1:-watch}
+declare -A failed   # letters that would not mount (an empty card reader): not retried while connected
+
+drives() {  # the letters Windows has now; nothing when Windows does not answer
+    (cd /mnt/c && "$CMD_EXE" /c 'fsutil fsinfo drives' 2>/dev/null) | tr -d '\r' | grep -o '[A-Z]:\\' | cut -c1
+}
+
+mounted() {  # "<letter> <folder>" of each Windows drive mounted: /proc/mounts has "D:\134 /mnt/d 9p ..."
+    awk '$1 ~ /^[A-Z]:(\\134)?$/ && $4 ~ /aname=drvfs/ { print substr($1, 1, 1), $2 }' /proc/mounts
+}
+
+say() { echo "$*"; }
+
+pass() {
+    local now letter dir
+    now=" $(drives | tr '\n' ' ') "
+    [[ $now == *[A-Z]* ]] || return 0   # Windows did not answer: change nothing
+    for letter in $now; do
+        [[ -n ${failed[$letter]:-} ]] && continue
+        mounted | grep -q "^$letter " && continue
+        dir=/mnt/${letter,,}
+        if [[ $mode == -n ]]; then say "would mount $letter: on $dir"; continue; fi
+        if mkdir -p "$dir" && mount -t drvfs "$letter:" "$dir" -o "$opts"; then
+            say "mounted $letter: on $dir"
+        else
+            failed[$letter]=1; rmdir "$dir" 2>/dev/null
+            say "could not mount $letter:, not tried again until it is plugged in again"
+        fi
+    done
+    while read -r letter dir; do  # unplugged: unmount, so nothing writes to a drive that is gone
+        [[ $now == *" $letter "* ]] && continue
+        if [[ $mode == -n ]]; then say "would unmount $dir ($letter: is gone)"; continue; fi
+        umount -l "$dir" && say "unmounted $dir ($letter: is gone)"
+    done < <(mounted)
+    for letter in "${!failed[@]}"; do [[ $now == *" $letter "* ]] || unset "failed[$letter]"; done
+}
+
+case $mode in
+    watch)       while :; do pass; sleep 5; done ;;
+    --once|-n)   pass ;;
+    -h|--help)   sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *)           echo "dots-automount: unknown option: $mode" >&2; exit 1 ;;
+esac

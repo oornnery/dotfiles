@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Checks the repo: syntax of every script, shellcheck on the dots commands, then
+# the tests in tests/*.sh. Exits non-zero when anything fails. CI runs this too.
+#
+#   tests/run           everything
+#   tests/run cli       only tests/cli.sh
+set -uo pipefail
+
+cd "$(dirname "$(realpath "$0")")/.." || exit 1
+failed=0
+fail() { printf 'FAIL %s\n' "$*"; failed=$(( failed + 1 )); }
+
+# The commands: every executable in a dots folder, and the helpers they source.
+mapfile -t commands < <(find home/*/.local -path '*/dots/*' -type f 2>/dev/null; find */.local -path '*/dots/*' -type f 2>/dev/null)
+commands+=(bootstrap docs/generate)
+mapfile -t -O "${#commands[@]}" commands < <(find system -type f -perm -u+x)   # installed as root by dots install
+
+if (( ! $# )); then
+    for f in "${commands[@]}"; do bash -n "$f" || fail "bash -n $f"; done
+    while IFS= read -r f; do
+        zsh -n "$f" || fail "zsh -n $f"
+    done < <(find . -path ./.git -prune -o -path ./ai -prune -o -type f \( -name '*.zsh' -o -name '.zsh*' \) -print)
+    if command -v shellcheck >/dev/null; then
+        shellcheck -S warning "${commands[@]}" tests/run tests/*.sh || fail shellcheck
+    else
+        echo "skip shellcheck: not installed"
+    fi
+fi
+
+only=${1:-*}
+for t in tests/$only.sh; do
+    [[ $t == tests/lib.sh ]] && continue
+    echo "── $t"
+    bash "$t" || fail "$t"
+done
+
+(( failed )) && { echo "$failed failed"; exit 1; }
+echo "all passed"

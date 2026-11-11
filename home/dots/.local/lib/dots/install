@@ -1,0 +1,299 @@
+#!/usr/bin/env bash
+# dots:summary=Set up a tool: its packages, config links, permissions and services
+# dots:group=packages
+# dots:args=[-y] [name...] | --list | --remove name...
+#
+#   dots install                 pick groups, then their setups, then their parts
+#   dots install <name>...       set those up; a group name sets up the group
+#   dots install -y <name>...    same, with every package and option
+#   dots install --remove <name> unlink its config and remove its packages
+#   dots install --list          everything, by group
+#
+# A setup runs: packages, config links, then post_<name>. When it has more than one
+# part, a checklist lets you leave some out. It always runs what is marked, so each
+# step must be safe to repeat. A failure does not stop the others.
+#
+# A tool set up here goes into machines/<host> (tools:), so dots apply sets it up
+# on a new machine too. To add one: a line in ~/dotfiles/recipes, plus post_<name>
+# here if it needs more than packages and config links.
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+# group|name|description|packages|config packages, from the recipes file.
+RECIPES=$(grep -v '^#' "$DOTFILES/recipes" | grep -v '^$')
+
+# The steps each setup needs after its packages and config links.
+post_zsh()       { dots sudo chsh -s /usr/bin/zsh "$USER"; }
+post_helix()     { uv tool install basedpyright; }
+post_nvim()      { dots theme apply; nvim --headless '+Lazy! sync' +qa; }
+post_tmux()      { dots theme apply; }
+post_zellij() {  # the theme, and zjstatus, the plugin of both bars, checked against its release
+    local file=$HOME/.local/share/zellij/plugins/zjstatus.wasm
+    dots theme apply
+    mkdir -p "${file%/*}"
+    curl -fsSL -o "$file" https://github.com/dj95/zjstatus/releases/download/v0.25.0/zjstatus.wasm &&
+        sha256sum -c --quiet <<< "282ceab219e56e1908c9fac33907241fe6c3e1ef7d85faab3e5f438cef87b8fe  $file"
+}
+post_vim()       { dots theme apply; }
+post_hyprland()  { dots theme apply; }
+post_docker()    { dots sudo systemctl enable --now docker && dots sudo usermod -aG docker "$USER"; }
+post_distrobox() { dots install -y docker; }
+post_epycell()   { cargo install --locked epycell; }
+post_node()      { mise install; }   # the Node of ~/.config/mise/config.toml
+post_python()    { uv python install; }
+post_cli-extras() { have tldr && tldr --update; dots sudo pkgfile --update; return 0; }   # tldr pages, pkgfile index
+post_ollama()    { dots sudo systemctl enable --now ollama; }
+post_tailscale() { dots sudo systemctl enable --now tailscaled; }
+post_openssh()   { dots sudo systemctl enable --now sshd; }
+post_tui-notes() { mkdir -p "$HOME/notes"; [[ -d $HOME/notes/.zk ]] || zk init --no-input "$HOME/notes"; machine_add folders notes; }
+post_tui-network() { dots sudo usermod -aG wireshark "$USER" && note "termshark can capture after you log in again"; }
+post_tui-news() { note "in eilmeldung, pick Local, then :importopml ~/.config/eilmeldung/feeds.opml"; }
+post_vaultwarden() {  # rbw needs your account and, for Vaultwarden, its address
+    local email url
+    email=$(gum input --placeholder 'Bitwarden or Vaultwarden email') || return 0
+    url=$(gum input --placeholder 'Vaultwarden address (empty for bitwarden.com)') || return 0
+    rbw config set email "$email" && { [[ -z $url ]] || rbw config set base_url "$url"; } && rbw login
+}
+post_env-files() {  # the age key sops uses; it never leaves this machine
+    local key=${XDG_CONFIG_HOME:-$HOME/.config}/sops/age/keys.txt
+    [[ -f $key ]] || { mkdir -p "${key%/*}" && age-keygen -o "$key" && chmod 600 "$key"; }
+    note "your public key, for .sops.yaml: $(age-keygen -y "$key")"
+}
+post_automount() {  # the watcher of system/wsl-automount, as a root service
+    local src=$DOTFILES/system/wsl-automount
+    dots sudo install -Dm755 "$src/dots-automount" /usr/local/bin/dots-automount &&
+        dots sudo install -Dm644 "$src/dots-automount.service" /etc/systemd/system/dots-automount.service &&
+        dots sudo systemctl daemon-reload && dots sudo systemctl enable --now dots-automount
+}
+post_voxtype()   { voxtype setup --download --no-post-install && voxtype setup systemd; }
+
+post_postgres() {
+    # initdb refuses a folder that is already initialized, so this one must look first.
+    dots sudo test -e /var/lib/postgres/data/PG_VERSION || dots sudo -u postgres initdb -D /var/lib/postgres/data
+    dots sudo systemctl enable --now postgresql
+}
+
+post_herdr() {
+    # A plugin that is already there may complain; that is not a failed setup.
+    herdr plugin install thanhdat77/herdr-navigator --yes
+    herdr plugin install nicosuave/memex --yes
+    herdr plugin install rjyo/herdr-window-title-sync --yes
+    return 0
+}
+
+field() {  # field <name> <column>: one column of a setup's line in RECIPES
+    awk -F'|' -v n="$1" -v c="$2" '$2 == n {print $c; exit}' <<< "$RECIPES"
+}
+
+list() {
+    local group last='' name desc
+    while IFS='|' read -r group name desc _; do
+        if [[ $group != "$last" ]]; then section "$group"; last=$group; fi
+        printf '  %-11s %s%s%s\n' "$name" "$D" "$desc" "$N"
+    done <<< "$RECIPES"
+}
+
+show() {  # show <name>: what a setup does, for the side panel
+    local name=$1 body
+    printf '%s%s%s\n%s\n' "$H" "$name" "$N" "$(field "$name" 3)"
+    if [[ -n $(field "$name" 4) ]]; then
+        printf '\n%sPackages%s\n' "$H" "$N"
+        # shellcheck disable=SC2046  # package names, one per word
+        origin $(field "$name" 4) | awk '{p = $1; $1 = ""; printf "%-16s%s\n", p, $0}'
+    fi
+    if [[ -n $(field "$name" 5) ]]; then
+        printf '\n%sConfig links%s\n' "$H" "$N"; field "$name" 5 | tr ' ' '\n'
+    fi
+    if declare -F "post_$name" >/dev/null; then
+        body=$(declare -f "post_$name" | sed '1,2d;$d; s/^ *//; s/;$//')
+        printf '\n%sThen runs%s\n%s\n' "$H" "$N" "$body"
+    fi
+}
+
+groups_view() {  # one line per group: its setups, and how many are set up here
+    awk -F'|' -v done=" $(tools_done | tr '\n' ' ') " '
+        !($1 in n) { order[++k] = $1 }
+        { n[$1]++; if (index(done, " " $2 " ")) d[$1]++ }
+        END { for (i = 1; i <= k; i++) { g = order[i]
+                  printf "%-12s %2d setups%s\n", g, n[g], (d[g] ? sprintf(", %d set up", d[g]) : "") } }' <<< "$RECIPES"
+}
+
+setups_view() {  # setups_view <group>...: its setups, a check on the ones set up here
+    awk -F'|' -v groups=" $* " -v done=" $(tools_done | tr '\n' ' ') " '
+        index(groups, " " $1 " ") { printf "%-13s %s%s\n", $2, $3, (index(done, " " $2 " ") ? "  ✓" : "") }' <<< "$RECIPES"
+}
+
+# pick: the groups, then their setups, marked unless set up here already; then each
+# setup asks for its parts. Prints the setups to run, one per line.
+pick() {
+    local groups rows marks i=0 line
+    groups=$(groups_view | fzf --multi --height=80% --reverse --prompt='groups> ' \
+        --header='Tab marks · Ctrl-a all · Enter goes on · Esc cancels' --bind=ctrl-a:select-all \
+        --preview "\"$0\" --setups {1}" --preview-window=right,55%,wrap) || return 0
+    # shellcheck disable=SC2046  # group names, one per word
+    rows=$(setups_view $(awk '{print $1}' <<< "$groups"))
+    # fzf marks nothing on its own: on load, go to each line not set up yet and mark it.
+    while IFS= read -r line; do
+        i=$(( i + 1 ))
+        [[ $line == *✓ ]] || marks+="pos($i)+select+"
+    done <<< "$rows"
+    DOTS_COLOR=1 fzf --multi --height=80% --reverse --prompt='setups> ' \
+        --header='Marked: not set up yet · Tab toggles · Ctrl-a all · Enter sets up · Esc cancels' \
+        --bind="load:${marks:-}first" --bind=ctrl-a:select-all \
+        --preview "\"$0\" --show {1}" --preview-window=right,45%,wrap <<< "$rows" |
+        awk '{print $1}'
+}
+
+expand() {  # names and group names in, setup names out
+    local word
+    for word in "$@"; do
+        if grep -q "^$word|" <<< "$RECIPES"; then
+            awk -F'|' -v g="$word" '$1 == g {print $2}' <<< "$RECIPES"
+        else
+            echo "$word"
+        fi
+    done
+}
+
+origin() {  # origin <package>...: "<package> <where it comes from>", installed or not
+    local p where repo=() found='' installed=''
+    for p in "$@"; do [[ $p == *:* ]] || repo+=("$p"); done
+    # One call to pacman for all of them: the repo of each, and what is installed.
+    # With no names, pacman -Si would list the whole repo: hence the test.
+    if (( ${#repo[@]} )); then
+        found=$(pacman -Si "${repo[@]}" 2>/dev/null | awk '/^Repository/ {r = $3} /^Name/ {print $3, r}')
+        installed=" $(pacman -Qq "${repo[@]}" 2>/dev/null | tr '\n' ' ') "
+    fi
+    for p in "$@"; do
+        if [[ $p == *:* ]]; then echo "$p ${p%%:*}"; continue; fi
+        where=$(awk -v p="$p" '$1 == p {print $2}' <<< "$found")
+        printf '%s %s%s\n' "$p" "${where:-aur}" "$([[ $installed == *" $p "* ]] && echo ', installed')"
+    done
+}
+
+parts_of() {  # parts_of <name>: its packages (and where from), config links and setup step
+    local part p where
+    # shellcheck disable=SC2046  # package names, one per word
+    origin $(field "$1" 4) | while read -r p where; do printf 'package  %-16s %s\n' "$p" "($where)"; done
+    for part in $(field "$1" 5); do echo "config   $part"; done
+    if declare -F "post_$1" >/dev/null; then echo "setup    $1"; fi
+}
+
+# Steps read from the terminal: questions from pacman are yours to answer, and
+# they must not eat the list of names that is still being read.
+declare -A WHY   # setup -> what failed in it, for the summary at the end
+fail() { WHY[$1]=$2; err "$1: $2"; return 1; }  # fail <setup> <what failed>
+
+setup() {  # setup <name>
+    local name=$1 parts pkgs links
+    parts=$(parts_of "$name")
+    [[ -n $parts ]] || { err "no such setup: $name (dots install --list)"; return 1; }
+    section "$name"
+    if [[ -z ${YES:-} ]] && can_prompt && (( $(wc -l <<< "$parts") > 1 )); then
+        parts=$(choose --all "$name: x toggles, enter continues, esc skips" <<< "$parts") || { note "skipped"; return 0; }
+    else
+        note "$(sed 's/^/  /' <<< "$parts")"   # what it is about to do, and where from
+    fi
+    # What is installed already is left out: pacman would only say it is up to date.
+    pkgs=$(awk '$1 == "package" && !/installed\)$/ {print $2}' <<< "$parts")
+    if grep -q '^package' <<< "$parts" && [[ -z $pkgs ]]; then note "its packages are installed"; fi
+    links=$(awk '$1 == "config" {print $2}' <<< "$parts")
+    # A package named manager:name comes from that manager; the others, pacman or the AUR.
+    local p system=()
+    for p in $pkgs; do
+        if [[ $p == *:* ]]; then
+            dots pkg add -m "${p%%:*}" "${p#*:}" </dev/tty || { fail "$name" "${p%%:*} could not install ${p#*:}"; return 1; }
+        else
+            system+=("$p")
+        fi
+    done
+    if (( ${#system[@]} )); then
+        dots pkg add "${system[@]}" </dev/tty || {
+            # Which of them is missing: that is the one that failed, its error is above.
+            local missing; missing=$(for p in "${system[@]}"; do pacman -Q "$p" >/dev/null 2>&1 || echo "$p"; done | paste -sd' ')
+            fail "$name" "not installed: ${missing:-${system[*]}} (its error is above, in the pacman or paru output)"; return 1; }
+    fi
+    # shellcheck disable=SC2086  # package names, one per word
+    if [[ -n $links ]]; then dots link $links </dev/tty || { fail "$name" "linking failed: $links"; return 1; }; fi
+    if grep -q '^setup' <<< "$parts"; then "post_$name" </dev/tty || { fail "$name" "its step failed: post_$name"; return 1; }; fi
+    machine_add tools "$name"
+    mkdir -p "$STATE"; tools_done | grep -qx "$name" || echo "$name" >> "$STATE/tools"
+}
+
+remove() {  # remove <name>
+    local name=$1 pkgs links
+    pkgs=$(field "$name" 4); links=$(field "$name" 5)
+    [[ -n $(field "$name" 2) ]] || { err "no such setup: $name"; return 1; }
+    section "$name"
+    # shellcheck disable=SC2086  # package names, one per word
+    if [[ -n $links ]]; then dots link -D $links; fi
+    # shellcheck disable=SC2046  # package names, one per word; npm:wrangler is wrangler there
+    dots pkg remove $(for p in $pkgs; do echo "${p#*:}"; done) </dev/tty
+    machine_drop tools "$name"
+    [[ -f $STATE/tools ]] && sed -i "/^$name\$/d" "$STATE/tools"
+}
+
+plan() {  # plan <setup>...: a table of what they bring and where each part comes from
+    local name
+    {
+        printf 'setup\tpart\tfrom\n'
+        for name in "$@"; do
+            parts_of "$name" | awk -v s="$name" '{
+                from = $0; sub(/^[a-z]+ +[^ ]+ */, "", from); gsub(/[()]/, "", from)
+                if ($1 == "config") from = "home/" $2
+                if ($1 == "setup")  { from = "post_" $2 " in install"; $2 = "its step" }
+                print s "\t" $2 "\t" from }'
+        done
+    } | table
+}
+
+each() {  # each <function> <name>...: run for all of them, then say what failed
+    local action=$1 name failed=()
+    shift
+    # Several setups: the whole plan first, then all of them, or a checklist each.
+    if [[ $action == setup && -z ${YES:-} ]] && (( $# > 1 )) && can_prompt; then
+        plan "$@"
+        case $(gum choose --header "Set up these $#?" 'All of them' 'Ask for the parts of each' 'Cancel') in
+            'All of them') YES=1 ;;
+            'Ask for the parts of each') ;;
+            *) return 0 ;;
+        esac
+    fi
+    for name in "$@"; do
+        "$action" "$name" || failed+=("$name")
+    done
+    if (( ${#failed[@]} )); then
+        section failed
+        for name in "${failed[@]}"; do err "$name: ${WHY[$name]:-see the errors above}"; done
+        exit 1
+    fi
+    echo; ok "finished: $*"
+}
+
+if [[ ${1:-} == -y ]]; then YES=1; shift; fi
+
+case "${1:-}" in
+    '')
+        if ! can_prompt || ! have fzf; then list; exit 0; fi
+        picked=$(pick)
+        [[ -n $picked ]] || exit 0
+        mapfile -t names <<< "$picked"
+        each setup "${names[@]}" ;;
+    --list)  list ;;
+    --show)  show "${2:-}" ;;
+    --setups) setups_view "${2:-}" ;;  # for the preview of a group
+    --describe)  # for Tab completion
+        cut -d'|' -f1 <<< "$RECIPES" | sort -u | sed 's/$/:a whole group/'
+        awk -F'|' '{print $2 ":" $3}' <<< "$RECIPES" ;;
+    --remove)
+        shift; (( $# )) || { err "Usage: dots install --remove <name>..."; exit 1; }
+        confirm "Remove: $*?" || exit 0
+        mapfile -t names < <(expand "$@")
+        each remove "${names[@]}" ;;
+    -*) die "unknown option: $1" ;;
+    *)
+        mapfile -t names < <(expand "$@")
+        each setup "${names[@]}" ;;
+esac

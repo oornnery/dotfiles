@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# The first run on a new machine: git and stow, the dots command, then dots apply.
+#
+#   git clone https://github.com/oornnery/dotfiles ~/dotfiles && ~/dotfiles/bootstrap
+#
+# Safe to run again. After this, dots apply does the same on its own.
+set -euo pipefail
+
+cd "$(dirname "$(realpath "$0")")"
+sudo pacman -S --needed git stow gum fzf
+stow --no-folding -d home -t "$HOME" dots
+export PATH="$HOME/.local/bin:$PATH"
+dots migrate --done   # a new machine starts current
+exec dots apply

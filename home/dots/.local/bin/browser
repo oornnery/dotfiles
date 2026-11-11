@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Opens a link in the default browser of Windows, from WSL. BROWSER points here
+# (env.sh), so xdg-open, gh, circumflex and the others open their links there.
+# explorer.exe always exits 1, even when it worked: hence the exit 0.
+/mnt/c/Windows/explorer.exe "$@"
+exit 0

@@ -11,9 +11,9 @@ bars, where keys do not reach it: click a bar, then press `y`.
 
 | Key | Action |
 | --- | ------ |
-| `Alt /` | Search everything with tv; `Tab` there switches modes |
+| `Alt /` | Search everything with fzf; `Tab` there switches modes |
 | `Alt u` | Pick a TUI |
-| `Alt ?` | Search the help pages with tv, this one included |
+| `Alt ?` | Search the help pages with fzf, this one included |
 | `Alt e` | Yazi |
 | `Alt g` | Lazygit |
 | `Alt 1` `2` `3` | Go to that tab |

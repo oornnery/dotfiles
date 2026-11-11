@@ -1,0 +1,8 @@
+# taskwarrior (task, taskwarrior-tui). Its data stays out of $HOME's top level.
+data.location=~/.local/share/task
+
+# The 16 colors of the terminal, so it follows dots theme.
+include dark-16.theme
+
+# No "what is new" message on every command after an upgrade.
+news.version=3.5.0

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# dots:summary=Try packages in a throwaway container, gone when you leave
+# dots:group=packages
+# dots:args=[-i distro] <package>... [-- command...]
+#
+#   dots try htop                       Arch with htop, and a shell in it
+#   dots try -i debian cowsay           another distro: arch, debian, ubuntu, fedora, alpine
+#   dots try httpie -- http --version   run one command, then leave
+#
+# A container of its own (docker or podman, --rm): nothing it installs or writes
+# reaches this system or your $HOME, and all of it is deleted on exit. The folder
+# you are in is at /work, to try a tool on real files. The first run of a distro
+# downloads its image.
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+distro=arch
+[[ ${1:-} == -i ]] && { distro=${2:?-i needs a distro}; shift 2; }
+case $distro in  # the image, and how it installs packages
+    arch)   image=docker.io/library/archlinux:latest; install='pacman -Sy --noconfirm' ;;
+    debian) image=docker.io/library/debian:stable;    install='apt-get update -q && apt-get install -yq' ;;
+    ubuntu) image=docker.io/library/ubuntu:latest;    install='apt-get update -q && apt-get install -yq' ;;
+    fedora) image=registry.fedoraproject.org/fedora:latest; install='dnf install -y' ;;
+    alpine) image=docker.io/library/alpine:latest;    install='apk add' ;;
+    *)      die "unknown distro: $distro (arch, debian, ubuntu, fedora, alpine)" ;;
+esac
+
+pkgs=()
+while (( $# )) && [[ $1 != -- ]]; do pkgs+=("$1"); shift; done
+[[ ${1:-} == -- ]] && shift
+(( ${#pkgs[@]} )) || die "which package? dots try <package>... (dots try -h)"
+engine=$(command -v podman || command -v docker) || die "needs docker or podman"
+
+# The command runs after the install; with none, a shell.
+run=$(printf '%q ' "${@:-sh}")
+tty=(-i); [[ -t 0 && -t 1 ]] && tty=(-it)
+note "${pkgs[*]} on $distro; gone when you leave"
+exec "$engine" run --rm "${tty[@]}" -v "$PWD:/work" -w /work "$image" \
+    sh -c "{ $install ${pkgs[*]}; } >/tmp/install.log 2>&1 || { cat /tmp/install.log; exit 1; }; exec $run"
