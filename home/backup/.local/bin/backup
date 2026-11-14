@@ -1,0 +1,25 @@
+#!/bin/bash
+# backup: encrypted restic snapshot of the private files listed in
+# ~/.config/restic/paths (one absolute path per line) to Cloudflare R2.
+# Credentials and the repository password stay in ~/.config/restic, never in the repo.
+set -euo pipefail
+
+# Run in a clean environment, so nothing from the calling shell reaches restic.
+exec env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin \
+  bash --noprofile --norc -c '
+    set -euo pipefail
+    set -a
+    source "$HOME/.config/restic/r2.env"
+    set +a
+
+    paths="$HOME/.config/restic/paths"
+    test -s "$paths" || { echo "Backup path list is empty: $paths" >&2; exit 1; }
+
+    # agent.* are ssh-agent sockets: not files, and not worth saving.
+    restic backup --tag wsl --exclude "agent.*" --files-from-verbatim "$paths"
+    # What the retention would drop; --dry-run removes nothing. Drop it to prune for real.
+    restic forget --tag wsl --group-by host,tags \
+      --keep-last 2 --keep-daily 7 --keep-weekly 4 --keep-monthly 3 \
+      --dry-run
+    restic snapshots --tag wsl
+  '

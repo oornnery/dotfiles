@@ -67,6 +67,12 @@ post_automount() {  # the watcher of system/wsl-automount, as a root service
         dots sudo install -Dm644 "$src/dots-automount.service" /etc/systemd/system/dots-automount.service &&
         dots sudo systemctl daemon-reload && dots sudo systemctl enable --now dots-automount
 }
+post_restic() {  # the folder of credentials, and the list of files backup saves
+    mkdir -p "$HOME/.config/restic" && chmod 700 "$HOME/.config/restic"
+    # paths holds your own additions, so it is only created, never overwritten.
+    [[ -e $HOME/.config/restic/paths ]] || echo "$HOME/.ssh" > "$HOME/.config/restic/paths"
+    note "create ~/.config/restic/r2.env (see r2.env.example there) and r2.password, chmod 600; then restic init"
+}
 post_voxtype()   { voxtype setup --download --no-post-install && voxtype setup systemd; }
 
 post_postgres() {

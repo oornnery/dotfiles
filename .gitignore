@@ -4,3 +4,7 @@ self-hosted/**/*.env
 # Backups made by dots link, and caches.
 *.bak.*
 __pycache__/
+# restic credentials and password; only r2.env.example is tracked.
+**/restic/r2.env
+**/restic/r2.password
+**/restic/paths
