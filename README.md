@@ -48,6 +48,7 @@ the header of each command (`docs/generate`).
 | Command | What it does |
 | ------- | ------------ |
 | `dots apply` | Make this machine match its file in machines/: links, tools, packages |
+| `dots backup` | Back up private files (ssh keys, .env) to Cloudflare R2, and restore them |
 | `dots doctor` | What is broken: links, tools, scripts, PATH, Node, language servers |
 | `dots migrate` | Run the one-time changes this machine has not run yet |
 | `dots status` | What is pending: commits, links, migrations, packages, Windows |

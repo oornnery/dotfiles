@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# dots:summary=Back up private files (ssh keys, .env) to Cloudflare R2, and restore them
+# dots:group=machine
+# dots:args=[save | list | restore [dir] | paths]
+# dots:actions=save=Save the files of the list, then drop old snapshots|list=List the snapshots|restore=Restore the latest snapshot into a folder, and verify it|paths=Edit the list of files to save
+#
+#   dots backup                 save the files listed in ~/.config/restic/paths, then
+#                               apply the retention: the last 2, 7 daily, 4 weekly, 3 monthly
+#   dots backup list            the snapshots
+#   dots backup restore [dir]   the latest snapshot into dir (default ~/restore), verified;
+#                               the files come back under dir at their own path,
+#                               e.g. dir/home/<you>/.ssh. Nothing is overwritten in place
+#   dots backup paths           edit the list: one absolute path per line, no quotes
+#
+# The repository address, the R2 keys and the repository password live in
+# ~/.config/restic (r2.env, r2.password), set up by dots install restic. They are never
+# in the repo, and never in the list. Keep a copy of both in your password manager:
+# without them the backup cannot be opened if the distro is lost.
+set -uo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/_lib"
+
+CONF=$HOME/.config/restic
+have restic || die "restic is not installed (dots install restic)"
+[[ -f $CONF/r2.env ]] || die "no $CONF/r2.env (see r2.env.example there)"
+
+# restic in a clean environment: nothing from this shell reaches it but the R2 settings.
+r() {
+    env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin bash --noprofile --norc -c \
+        'set -a; . "$HOME/.config/restic/r2.env"; set +a; exec restic "$@"' restic "$@"
+}
+
+case "${1:-save}" in
+    save)
+        [[ -s $CONF/paths ]] || die "the list is empty: $CONF/paths (dots backup paths)"
+        # agent.* are ssh-agent sockets: not files, and not worth saving.
+        r backup --tag wsl --exclude 'agent.*' --files-from-verbatim "$CONF/paths" || exit 1
+        r forget --tag wsl --group-by host,tags \
+            --keep-last 2 --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune || exit 1
+        r snapshots --tag wsl ;;
+    list)  r snapshots --tag wsl ;;
+    restore)
+        dir=${2:-$HOME/restore}
+        mkdir -p "$dir" && chmod 700 "$dir"
+        r restore latest --tag wsl --target "$dir" --verify || exit 1
+        ok "restored into $dir" ;;
+    paths) "${EDITOR:-hx}" "$CONF/paths" ;;
+    *)     die "unknown action: $1 (dots backup -h)" ;;
+esac

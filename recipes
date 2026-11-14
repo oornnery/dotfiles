@@ -31,7 +31,7 @@ tuis|tui-fun|Spotify (spotify_player), typing test (ttyper)|spotify-player ttype
 tuis|tui-todo|Tasks: taskwarrior (task) with its TUI, and dooit|task taskwarrior-tui dooit-bin|task
 tuis|tui-notes|Notes: zk (Zettelkasten, with fzf), nb (notes, bookmarks, git sync), calcure (calendar), basalt (Obsidian vaults)|zk nb calcure basalt-bin|zk
 secrets|vaultwarden|Vaultwarden and Bitwarden: rbw (with an agent, rbw config set base_url) and bw|rbw bitwarden-cli|
-secrets|restic|Encrypted backups of private files (ssh, .env) to Cloudflare R2: the backup command|restic|backup
+secrets|restic|Encrypted backups of private files (ssh, .env) to Cloudflare R2: dots backup|restic|restic
 secrets|env-files|.env files encrypted in git: sops with age keys, and dotenvx|sops age npm:@dotenvx/dotenvx|
 tools|cli-extras|dust, duf, procs, sd, tealdeer, jless, htmlq, xmlstarlet, 7zip, rsync, pkgfile, arch-audit, yt-dlp|dust duf procs sd tealdeer jless htmlq xmlstarlet 7zip rsync pkgfile arch-audit yt-dlp|tealdeer
 terminal|tmux|tmux with config and theme|tmux|tmux

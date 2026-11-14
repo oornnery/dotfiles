@@ -17,6 +17,11 @@ The tables below come from the header of each command (`docs/generate`). The
 | `dots apply` | Make this machine match its file in machines/: links, tools, packages |
 | `dots apply run` | Make this machine match the repo |
 | `dots apply -n` | Show what it would do |
+| `dots backup` | Back up private files (ssh keys, .env) to Cloudflare R2, and restore them |
+| `dots backup save` | Save the files of the list, then drop old snapshots |
+| `dots backup list` | List the snapshots |
+| `dots backup restore` | Restore the latest snapshot into a folder, and verify it |
+| `dots backup paths` | Edit the list of files to save |
 | `dots doctor` | What is broken: links, tools, scripts, PATH, Node, language servers |
 | `dots migrate` | Run the one-time changes this machine has not run yet |
 | `dots migrate run` | Run the pending migrations |
