@@ -17,9 +17,9 @@ exec env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin \
 
     # agent.* are ssh-agent sockets: not files, and not worth saving.
     restic backup --tag wsl --exclude "agent.*" --files-from-verbatim "$paths"
-    # What the retention would drop; --dry-run removes nothing. Drop it to prune for real.
+    # Retention: keep the last 2 and the daily, weekly and monthly ones; prune the rest.
     restic forget --tag wsl --group-by host,tags \
       --keep-last 2 --keep-daily 7 --keep-weekly 4 --keep-monthly 3 \
-      --dry-run
+      --prune
     restic snapshots --tag wsl
   '
