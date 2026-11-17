@@ -86,5 +86,11 @@ _has pet && alias snip='pet exec'
 alias ports='ss -tulpn'
 alias myip='curl -s https://ifconfig.me; echo'
 
+# Back up the private files (dots backup)
+alias backup='dots backup'
+
+# cavemem
+alias cavemem='~/.local/share/mise/installs/node/22.23.5/bin/node ~/.local/share/mise/installs/node/22.23.5/lib/node_modules/cavemem/dist/index.js'
+
 # Reload the current shell
 reload() { exec "${ZSH_VERSION:+zsh}${BASH_VERSION:+bash}"; }
