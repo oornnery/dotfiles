@@ -8,6 +8,63 @@ args = ["ruff", "server"]
 name = "python"
 language-servers = [
   { name = "ruff", except-features = ["hover"] },
-  "basedpyright"
+  "basedpyright",
+  "lsp-ai"
 ]
 auto-format = true
+
+# lsp-ai: LLMs through external APIs. Keys in ~/.config/ai/env (MISTRAL_API_KEY,
+# ANTHROPIC_API_KEY). `config` is sent as the server's initializationOptions.
+# Completion: Codestral (FIM, built for it). Space-a on a selection or a "!C" line: chat.
+# Models of every backend: dots help ai.
+[language-server.lsp-ai]
+command = "lsp-ai"
+
+[language-server.lsp-ai.config.memory.file_store]
+
+[language-server.lsp-ai.config.models.codestral]
+type = "mistral_fim"
+fim_endpoint = "https://api.mistral.ai/v1/fim/completions"
+model = "codestral-latest"
+auth_token_env_var_name = "MISTRAL_API_KEY"
+
+[language-server.lsp-ai.config.models.claude]
+type = "anthropic"
+chat_endpoint = "https://api.anthropic.com/v1/messages"
+model = "claude-haiku-5-5"
+auth_token_env_var_name = "ANTHROPIC_API_KEY"
+
+[language-server.lsp-ai.config.completion]
+model = "codestral"
+parameters = { max_tokens = 64 }
+
+[[language-server.lsp-ai.config.chat]]
+trigger = "!C"
+action_display_name = "Chat"
+model = "claude"
+parameters = { max_context = 4096, max_tokens = 1024, system = "You are a code assistant. Answer succinctly and accurately." }
+
+# Servers that follow each language's default, plus lsp-ai.
+[[language]]
+name = "rust"
+language-servers = ["rust-analyzer", "lsp-ai"]
+
+[[language]]
+name = "go"
+language-servers = ["gopls", "golangci-lint-langserver", "lsp-ai"]
+
+[[language]]
+name = "javascript"
+language-servers = ["typescript-language-server", "lsp-ai"]
+
+[[language]]
+name = "typescript"
+language-servers = ["typescript-language-server", "lsp-ai"]
+
+[[language]]
+name = "lua"
+language-servers = ["lua-language-server", "lsp-ai"]
+
+[[language]]
+name = "bash"
+language-servers = ["bash-language-server", "lsp-ai"]

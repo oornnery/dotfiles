@@ -38,6 +38,7 @@ terminal|tmux|tmux with config and theme|tmux|tmux
 terminal|zellij|Zellij with its theme, help and a palette|zellij fzf|zellij
 editors|helix|Helix with language servers and config|helix bash-language-server shfmt shellcheck taplo-cli marksman yaml-language-server ruff uv|helix
 editors|nvim|Neovim with plugins and config for any language|neovim git ripgrep fd tree-sitter-cli|nvim
+editors|lsp-ai|LLM completion and chat in Helix and Neovim through external APIs (Mistral, Anthropic...)|lsp-ai|
 editors|vim|Small Vim config|vim|vim
 editors|vscode|Visual Studio Code|visual-studio-code-bin|
 editors|zed|Zed|zed|

@@ -165,8 +165,48 @@ return {
         },
       })
 
+      -- lsp-ai: LLMs through external APIs; keys in ~/.config/ai/env (MISTRAL_API_KEY,
+      -- ANTHROPIC_API_KEY). Completion by Codestral (FIM); chat with "!C" and a code action.
+      -- Same config as Helix; models of every backend: dots help ai.
+      vim.lsp.config("lsp_ai", {
+        cmd = { "lsp-ai" },
+        filetypes = { "python", "rust", "go", "javascript", "typescript", "lua", "sh" },
+        root_markers = { ".git" },
+        init_options = {
+          memory = { file_store = vim.empty_dict() },
+          models = {
+            codestral = {
+              type = "mistral_fim",
+              fim_endpoint = "https://api.mistral.ai/v1/fim/completions",
+              model = "codestral-latest",
+              auth_token_env_var_name = "MISTRAL_API_KEY",
+            },
+            claude = {
+              type = "anthropic",
+              chat_endpoint = "https://api.anthropic.com/v1/messages",
+              model = "claude-haiku-5-5",
+              auth_token_env_var_name = "ANTHROPIC_API_KEY",
+            },
+          },
+          completion = { model = "codestral", parameters = { max_tokens = 64 } },
+          chat = {
+            {
+              trigger = "!C",
+              action_display_name = "Chat",
+              model = "claude",
+              parameters = {
+                max_context = 4096,
+                max_tokens = 1024,
+                system = "You are a code assistant. Answer succinctly and accurately.",
+              },
+            },
+          },
+        },
+      })
+
       -- Enable what is on this machine: from Mason or from the system.
       vim.lsp.enable(require("config.servers").available())
+      if vim.fn.executable("lsp-ai") == 1 then vim.lsp.enable("lsp_ai") end -- not from Mason
 
       vim.diagnostic.config({
         virtual_text = true,
