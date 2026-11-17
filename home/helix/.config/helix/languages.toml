@@ -13,36 +13,43 @@ language-servers = [
 ]
 auto-format = true
 
-# lsp-ai: LLMs through external APIs. Keys in ~/.config/ai/env (MISTRAL_API_KEY,
-# ANTHROPIC_API_KEY). `config` is sent as the server's initializationOptions.
-# Completion: Codestral (FIM, built for it). Space-a on a selection or a "!C" line: chat.
-# Models of every backend: dots help ai.
+# lsp-ai: LLMs through OpenRouter, one key (OPENROUTER_API_KEY in ~/.config/ai/env).
+# `config` is sent as the server's initializationOptions. OpenRouter has no FIM
+# endpoint, so completion asks a small chat model for the text at <CURSOR>.
+# Chat: type "!C" and your question, then Space-a. Models and prices: dots help ai.
 [language-server.lsp-ai]
 command = "lsp-ai"
 
 [language-server.lsp-ai.config.memory.file_store]
 
-[language-server.lsp-ai.config.models.codestral]
-type = "mistral_fim"
-fim_endpoint = "https://api.mistral.ai/v1/fim/completions"
-model = "codestral-latest"
-auth_token_env_var_name = "MISTRAL_API_KEY"
+[language-server.lsp-ai.config.models.fast]
+type = "open_ai"
+chat_endpoint = "https://openrouter.ai/api/v1/chat/completions"
+model = "deepseek/deepseek-v4-flash"
+auth_token_env_var_name = "OPENROUTER_API_KEY"
 
-[language-server.lsp-ai.config.models.claude]
-type = "anthropic"
-chat_endpoint = "https://api.anthropic.com/v1/messages"
-model = "claude-haiku-5-5"
-auth_token_env_var_name = "ANTHROPIC_API_KEY"
+[language-server.lsp-ai.config.models.smart]
+type = "open_ai"
+chat_endpoint = "https://openrouter.ai/api/v1/chat/completions"
+model = "anthropic/claude-haiku-5.5"
+auth_token_env_var_name = "OPENROUTER_API_KEY"
 
 [language-server.lsp-ai.config.completion]
-model = "codestral"
-parameters = { max_tokens = 64 }
+model = "fast"
+
+[language-server.lsp-ai.config.completion.parameters]
+max_context = 1024
+max_tokens = 64
+messages = [
+  { role = "system", content = "Complete the code at <CURSOR>. Reply with only the text to insert: no explanation, no code fences." },
+  { role = "user", content = "{CODE}" },
+]
 
 [[language-server.lsp-ai.config.chat]]
 trigger = "!C"
 action_display_name = "Chat"
-model = "claude"
-parameters = { max_context = 4096, max_tokens = 1024, system = "You are a code assistant. Answer succinctly and accurately." }
+model = "smart"
+parameters = { max_context = 4096, max_tokens = 1024, messages = [{ role = "system", content = "You are a code assistant. Answer succinctly and accurately." }] }
 
 # Servers that follow each language's default, plus lsp-ai.
 [[language]]

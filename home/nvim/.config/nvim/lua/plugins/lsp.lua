@@ -165,9 +165,11 @@ return {
         },
       })
 
-      -- lsp-ai: LLMs through external APIs; keys in ~/.config/ai/env (MISTRAL_API_KEY,
-      -- ANTHROPIC_API_KEY). Completion by Codestral (FIM); chat with "!C" and a code action.
-      -- Same config as Helix; models of every backend: dots help ai.
+      -- lsp-ai: LLMs through OpenRouter, one key (OPENROUTER_API_KEY in ~/.config/ai/env).
+      -- OpenRouter has no FIM endpoint, so completion asks a small chat model for the
+      -- text at <CURSOR>. Chat: type "!C" and a question, then a code action.
+      -- Same config as Helix; models and prices: dots help ai.
+      local openrouter = "https://openrouter.ai/api/v1/chat/completions"
       vim.lsp.config("lsp_ai", {
         cmd = { "lsp-ai" },
         filetypes = { "python", "rust", "go", "javascript", "typescript", "lua", "sh" },
@@ -175,29 +177,42 @@ return {
         init_options = {
           memory = { file_store = vim.empty_dict() },
           models = {
-            codestral = {
-              type = "mistral_fim",
-              fim_endpoint = "https://api.mistral.ai/v1/fim/completions",
-              model = "codestral-latest",
-              auth_token_env_var_name = "MISTRAL_API_KEY",
+            fast = {
+              type = "open_ai",
+              chat_endpoint = openrouter,
+              model = "deepseek/deepseek-v4-flash",
+              auth_token_env_var_name = "OPENROUTER_API_KEY",
             },
-            claude = {
-              type = "anthropic",
-              chat_endpoint = "https://api.anthropic.com/v1/messages",
-              model = "claude-haiku-5-5",
-              auth_token_env_var_name = "ANTHROPIC_API_KEY",
+            smart = {
+              type = "open_ai",
+              chat_endpoint = openrouter,
+              model = "anthropic/claude-haiku-5.5",
+              auth_token_env_var_name = "OPENROUTER_API_KEY",
             },
           },
-          completion = { model = "codestral", parameters = { max_tokens = 64 } },
+          completion = {
+            model = "fast",
+            parameters = {
+              max_context = 1024,
+              max_tokens = 64,
+              messages = {
+                {
+                  role = "system",
+                  content = "Complete the code at <CURSOR>. Reply with only the text to insert: no explanation, no code fences.",
+                },
+                { role = "user", content = "{CODE}" },
+              },
+            },
+          },
           chat = {
             {
               trigger = "!C",
               action_display_name = "Chat",
-              model = "claude",
+              model = "smart",
               parameters = {
                 max_context = 4096,
                 max_tokens = 1024,
-                system = "You are a code assistant. Answer succinctly and accurately.",
+                messages = { { role = "system", content = "You are a code assistant. Answer succinctly and accurately." } },
               },
             },
           },
