@@ -1,4 +1,4 @@
-# pacman packages, saved 2026-11-08 from DESKTOP-T8DL9CB
+# pacman packages, saved 2026-11-17 from DESKTOP-T8DL9CB
 7zip
 arch-audit
 atuin
@@ -6,7 +6,9 @@ base
 base-devel
 bash-language-server
 bat
+bind
 btop
+cloudflared
 direnv
 distrobox
 docker
@@ -38,11 +40,14 @@ mise
 mpv
 ncdu
 neovim
+nspr
+nss
 openssh
 pacman-contrib
 pkgfile
 presenterm
 procs
+restic
 ripgrep
 rsync
 ruff
@@ -54,6 +59,7 @@ shfmt
 spotify-player
 stow
 sudo
+swig
 systemctl-tui
 tabiew
 taplo-cli
@@ -72,6 +78,7 @@ unzip
 uv
 vim
 wget
+whois
 wl-clipboard
 xh
 xmlstarlet
